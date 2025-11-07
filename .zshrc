@@ -81,6 +81,7 @@ alias kcs="kubectl ctx stg-infra-eks-cluster-eu-west-3"
 alias kcp="kubectl ctx prd-infra-eks-cluster-eu-west-3"
 alias vi=nvim
 alias oc=opencode
+alias bubu=brew update && brew outdated && brew upgrade && brew cleanup
 
 # Shell integrations
 eval "$(fzf --zsh)"
