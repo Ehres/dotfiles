@@ -72,17 +72,6 @@ zstyle ':completion:*' menu no
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'
 zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
 
-# Aliases
-alias ls='ls --color'
-alias vim='nvim'
-alias c='clear'
-alias kci="kubectl ctx int-infra-eks-cluster-eu-west-3"
-alias kcs="kubectl ctx stg-infra-eks-cluster-eu-west-3"
-alias kcp="kubectl ctx prd-infra-eks-cluster-eu-west-3"
-alias vi=nvim
-alias oc=opencode
-alias bubu=brew update && brew outdated && brew upgrade && brew cleanup
-
 # Shell integrations
 eval "$(fzf --zsh)"
 eval "$(zoxide init --cmd cd zsh)"
@@ -134,3 +123,14 @@ export PATH=/Users/maxime.grebauval/.opencode/bin:$PATH
 
 # Mise-en-place
 eval "$(mise activate zsh)"
+
+# Aliases
+alias ls='ls --color'
+alias vim='nvim'
+alias c='clear'
+alias kci="kubectl ctx int-infra-eks-cluster-eu-west-3"
+alias kcs="kubectl ctx stg-infra-eks-cluster-eu-west-3"
+alias kcp="kubectl ctx prd-infra-eks-cluster-eu-west-3"
+alias vi=nvim
+alias oc="fnox --config ~/.config/opencode/fnox.toml exec -- opencode"
+alias bubu=brew update && brew outdated && brew upgrade && brew cleanup
