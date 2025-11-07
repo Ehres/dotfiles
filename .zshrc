@@ -130,3 +130,6 @@ export NVM_DIR="$HOME/.nvm"
 
 # opencode
 export PATH=/Users/maxime.grebauval/.opencode/bin:$PATH
+
+# Mise-en-place
+eval "$(mise activate zsh)"
