@@ -113,7 +113,6 @@ esac
 
 export EDITOR="nvim"
 
-
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
@@ -122,7 +121,13 @@ export NVM_DIR="$HOME/.nvm"
 export PATH=/Users/maxime.grebauval/.opencode/bin:$PATH
 
 # Mise-en-place
-eval "$(mise activate zsh)"
+
+zinit as="command" lucid from="gh-r" for \
+    id-as="mise" mv="mise* -> mise" \
+    atclone="./mise* completion zsh > _mise" \
+    atpull="%atclone" \
+    atload='eval "$(mise activate zsh)"' \
+    jdx/mise
 
 # Aliases
 alias ls='ls --color'

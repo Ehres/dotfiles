@@ -1,0 +1,5 @@
+[providers.""]
+type = "keychain"
+service = "Keychain Access"
+
+[secrets]

@@ -1,4 +1,5 @@
 [tools]
+fnox = "latest"
 node = "22"
 
 [settings]
