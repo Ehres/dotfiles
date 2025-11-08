@@ -1,0 +1,24 @@
+return {
+  "folke/tokyonight.nvim",
+  opts = {
+    transparent = true,
+    styles = {
+      sidebars = "transparent",
+      floats = "transparent",
+    },
+    on_highlights = function(hl, c)
+      hl.CursorLineNr = {
+        fg = c.orange,
+        bold = true,
+      }
+      hl.LineNrAbove = {
+        fg = c.grey,
+        bold = false,
+      }
+      hl.LineNrBelow = {
+        fg = c.grey,
+        bold = false,
+      }
+    end,
+  },
+}
