@@ -138,4 +138,4 @@ alias kcs="kubectl ctx stg-infra-eks-cluster-eu-west-3"
 alias kcp="kubectl ctx prd-infra-eks-cluster-eu-west-3"
 alias vi=nvim
 alias oc="fnox --config ~/.config/opencode/fnox.toml exec -- opencode"
-alias bubu=brew update && brew outdated && brew upgrade && brew cleanup
+alias bubu='brew update && brew outdated && brew upgrade && brew cleanup'
