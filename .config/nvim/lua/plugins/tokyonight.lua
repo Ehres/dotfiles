@@ -12,11 +12,11 @@ return {
         bold = true,
       }
       hl.LineNrAbove = {
-        fg = c.grey,
+        fg = c.cyan,
         bold = false,
       }
       hl.LineNrBelow = {
-        fg = c.grey,
+        fg = c.cyan,
         bold = false,
       }
     end,
