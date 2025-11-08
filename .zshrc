@@ -139,3 +139,4 @@ alias kcp="kubectl ctx prd-infra-eks-cluster-eu-west-3"
 alias vi=nvim
 alias oc="fnox --config ~/.config/opencode/fnox.toml exec -- opencode"
 alias bubu='brew update && brew outdated && brew upgrade && brew cleanup'
+alias lg='lazygit'
