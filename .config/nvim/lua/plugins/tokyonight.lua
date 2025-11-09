@@ -4,7 +4,7 @@ return {
     transparent = true,
     styles = {
       sidebars = "transparent",
-      floats = "transparent",
+      floats = "dark",
     },
     on_highlights = function(hl, c)
       hl.CursorLineNr = {
