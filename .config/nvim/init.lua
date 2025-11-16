@@ -1,4 +1,4 @@
 -- bootstrap lazy.nvim, LazyVim and your plugins
 require("config.lazy")
 
-vim.cmd([[syntax off]])
+-- vim.cmd([[syntax off]])
