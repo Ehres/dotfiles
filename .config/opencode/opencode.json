@@ -45,6 +45,7 @@
           "git show*": "allow",
           "git log*": "allow",
           "git status*": "allow",
+          "git diff*": "allow",
           "git *": "ask"
         }
       }
