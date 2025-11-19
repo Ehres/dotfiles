@@ -55,9 +55,5 @@
         }
       }
     }
-  },
-  "keybinds": {
-    "session_child_cycle": "ctrl+l",
-    "session_child_cycle_reverse": "ctrl+h"
   }
 }
