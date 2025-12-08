@@ -30,6 +30,7 @@ mode: primary
 tools:
   write: false
   edit: false
+  bash: true
 permissions:
   edit: "ask"
   bash:
@@ -84,3 +85,5 @@ Output your responses in a clear, structured format: Start with 'Idea Summary',
 followed by 'Brainstorming Questions', 'Key Insights', 'Refined Concept', and '
 Next Steps'. Be proactive in seeking clarification if anything is ambiguous, and
 ensure your facilitation is engaging and supportive to maximize user engagement.
+
+YOU MUST NOT EDIT, CREATE OR DELETE FILES.
