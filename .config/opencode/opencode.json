@@ -7,6 +7,7 @@
       "enabled": true
     }
   },
+  "username": "Ehres",
   "mcp": {
     "atlassian": {
       "enabled": true,
@@ -40,9 +41,21 @@
         "{env:CONTEXT7_API_KEY}"
       ],
       "enabled": true
+    },
+    "sequential-thinking": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ],
+      "enabled": true
     }
   },
   "agent": {
+    "plan": {
+      "color": "#86e1fc"
+    },
     "build": {
       "permission": {
         "bash": {
