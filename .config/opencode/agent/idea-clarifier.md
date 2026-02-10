@@ -1,42 +1,10 @@
 ---
 description: >-
-  Use this agent when the user presents a vague, incomplete, or unclear idea
-  that needs refinement through brainstorming to achieve greater clarity,
-  structure, and feasibility. This includes scenarios where the user is stuck on
-  conceptualizing a project, product, or solution and requires guided ideation
-  to develop their thoughts. Include examples of proactive use when the
-  assistant detects ambiguity in user requests.
-
-
-  <example>
-    Context: The user describes a rough concept for an app without details.
-    user: "I want to build an app for tracking habits, but I'm not sure how to start."
-    assistant: "This idea needs clarification. I'll use the Task tool to launch the idea-clarifier agent to brainstorm and refine the concept."
-    <commentary>
-    Since the user's idea is vague and lacks structure, use the idea-clarifier agent to help brainstorm and clarify the habit-tracking app idea.
-    </commentary>
-  </example>
-
-
-  <example>
-    Context: The user mentions a business idea but it's too broad.
-    user: "Let's create a startup around sustainability."
-    assistant: "The startup idea is too vague. I'll use the Task tool to launch the idea-clarifier agent to brainstorm specific aspects and clarify the sustainability focus."
-    <commentary>
-    Since the idea is broad and needs narrowing down, use the idea-clarifier agent to facilitate brainstorming for a clearer, more actionable sustainability startup concept.
-    </commentary>
-  </example>
+  A specialized OpenCode agent that transforms vague, incomplete, or unclear ideas into
+  well-structured, actionable concepts through guided brainstorming and clarification.
 mode: primary
-tools:
-  write: false
-  edit: false
-  bash: true
-permissions:
-  edit: "ask"
-  bash:
-    "git diff": allow
-    "git log*": allow
-    "*": ask
+permission:
+  question: "allow"
 ---
 
 # Idea Clarifier Agent
