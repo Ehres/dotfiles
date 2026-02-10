@@ -9,7 +9,7 @@ return {
       -- Your configuration, if any — see `lua/opencode/config.lua`
       provider = {
         enabled = "tmux", -- Default if inside a `tmux` session.
-        cmd = "fnox --config ~/.config/opencode/fnox.toml exec -- opencode",
+        cmd = "fnox --config ~/.config/opencode/fnox.toml exec -- opencode --port",
         tmux = {
           options = "-h", -- Options to pass to `tmux split-window`.
         },
