@@ -4,5 +4,4 @@ window-decoration = true
 macos-titlebar-style = hidden
 # keybind = global:cmd+/=toggle_quick_terminal
 macos-option-as-alt = true
-background-opacity = 0.8
 background-blur-radius = 20 
