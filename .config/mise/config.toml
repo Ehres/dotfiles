@@ -1,6 +1,6 @@
 [tools]
 fnox = "latest"
-node = "22"
+node = "24.13.0"
 
 [settings]
 idiomatic_version_file_enable_tools = ["node"]
