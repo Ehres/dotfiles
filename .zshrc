@@ -141,6 +141,7 @@ alias vi=nvim
 alias oc="fnox --config ~/.config/opencode/fnox.toml exec -- opencode"
 alias bubu='brew update && brew outdated && brew upgrade && brew cleanup'
 alias lg='lazygit'
+alias y='yazi'
 
 # Bun
 export PATH="$HOME/.local/bin:$PATH"
