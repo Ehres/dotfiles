@@ -76,6 +76,9 @@ zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
 eval "$(fzf --zsh)"
 eval "$(zoxide init --cmd cd zsh)"
 
+# XDG
+export XDG_CONFIG_HOME="$HOME/.config"
+
 # Exports
 export LANG=en_US.UTF-8
 alias python=/usr/local/bin/python3.7
