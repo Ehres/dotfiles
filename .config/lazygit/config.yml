@@ -2,6 +2,6 @@ customCommands:
   - key: "<c-g>"
     context: "files"
     description: "Generate AI commit message"
-    command: "opencode run '/gen-commit'"
+    command: "claude -p --model haiku '/gen-commit'"
     output: terminal
     loadingText: "Generating commit message..."
