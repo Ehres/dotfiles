@@ -108,7 +108,7 @@ sketchybar --add item battery right \
 # Volume - standalone item  
 sketchybar --add item volume right \
            --set volume script="$PLUGIN_DIR/volume.sh" \
-                       padding_left=5 \
+                       padding_left=10 \
                        padding_right=5 \
                        background.color=0x40ffffff \
                        background.corner_radius=5 \
@@ -133,6 +133,8 @@ sketchybar --add item headphones right \
 sketchybar --add item ip_address right \
            --set ip_address script="$PLUGIN_DIR/ip_address.sh" \
                            update_freq=30 \
+                           padding_left=0 \
+                           padding_right=0 \
                            icon.padding_left=8 \
                            icon.padding_right=2 \
                            label.padding_left=2 \
@@ -142,6 +144,8 @@ sketchybar --add item ip_address right \
            --add item network.up right \
            --set network.up script="$PLUGIN_DIR/network.sh" \
                            update_freq=20 \
+                           padding_left=0 \
+                           padding_right=0 \
                            icon.padding_left=4 \
                            icon.padding_right=2 \
                            label.padding_left=2 \
@@ -153,6 +157,8 @@ sketchybar --add item ip_address right \
            --add item network.down right \
            --set network.down script="$PLUGIN_DIR/network.sh" \
                              update_freq=20 \
+                             padding_left=0 \
+                             padding_right=0 \
                              icon.padding_left=4 \
                              icon.padding_right=2 \
                              label.padding_left=2 \
@@ -166,14 +172,16 @@ sketchybar --add item ip_address right \
                               background.border_width=0 \
                               background.corner_radius=5 \
                               background.height=25 \
-                              background.drawing=on
+                              background.drawing=on \
+                              padding_left=5 \
+                              padding_right=10
 
-##### Additional Right Items #####
+##### Slack Notifications #####
 sketchybar --add item slack right \
            --set slack update_freq=30 \
                       script="$PLUGIN_DIR/slack.sh" \
                       padding_left=5 \
-                      padding_right=5 \
+                      padding_right=10 \
                       background.color=0x40ffffff \
                       background.corner_radius=5 \
                       background.height=25 \
