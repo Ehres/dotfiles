@@ -91,8 +91,8 @@ ctrl + shift - f : yabai -m window --toggle zoom-fullscreen
 # float / unfloat window and center on screen
 # alt - t : yabai -m window --toggle float --grid 4:4:1:1:2:2
 
-# toggle sticky(+float), topmost, picture-in-picture
-# alt - p : yabai -m window --toggle sticky --toggle topmost --toggle pip
+ctrl + shift + cmd - f : yabai -m window --toggle float 
+
 # App shortcuts 
 ctrl + shift - s : open -a 'Slack'
 ctrl + shift - t : open -a 'Ghostty'
