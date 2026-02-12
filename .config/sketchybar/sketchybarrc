@@ -80,6 +80,9 @@ sketchybar --add item chevron left \
 
 ##### Right Side Items #####
 
+# Register Bluetooth event for AirPods detection
+sketchybar -m --add event bluetooth_change "com.apple.bluetooth.status"
+
 # Clock - far right position (added first)
 sketchybar --add item clock right \
            --set clock update_freq=10 \
@@ -111,6 +114,18 @@ sketchybar --add item volume right \
                        background.corner_radius=5 \
                        background.height=25 \
            --subscribe volume volume_change
+
+# AirPods Battery - between volume and battery
+sketchybar --add item headphones right \
+           --set headphones icon=" " \
+                          script="$PLUGIN_DIR/airpods_battery.sh" \
+                          update_freq=30 \
+                          padding_left=5 \
+                          padding_right=5 \
+                          background.color=0x40ffffff \
+                          background.corner_radius=5 \
+                          background.height=25 \
+           --subscribe headphones bluetooth_change
 
 ##### Network Group (IP, Upload, Download) #####
 # Network indicators grouped together with dynamic border
