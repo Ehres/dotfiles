@@ -12,7 +12,7 @@ PLUGIN_DIR="$CONFIG_DIR/plugins"
 # If you are looking for other colors, see the color picker:
 # https://felixkratz.github.io/SketchyBar/config/tricks#color-picker
 
-sketchybar --bar position=top height=40 blur_radius=30 color=0x40000000
+sketchybar --bar position=top height=40 blur_radius=0 color=0x00000000
 
 ##### Changing Defaults #####
 # We now change some default values, which are applied to all further items.
@@ -78,17 +78,91 @@ sketchybar --add item chevron left \
 # volume is registered. More info about the event system can be found here:
 # https://felixkratz.github.io/SketchyBar/config/events
 
+##### Right Side Items #####
+
+# Clock - far right position (added first)
+sketchybar --add item clock right \
+           --set clock update_freq=10 \
+                      icon=  \
+                      script="$PLUGIN_DIR/clock.sh" \
+                      padding_left=5 \
+                      padding_right=5 \
+                      background.color=0x40ffffff \
+                      background.corner_radius=5 \
+                      background.height=25
+
+# Battery - standalone item
 sketchybar --add item battery right \
-           --set battery update_freq=120 script="$PLUGIN_DIR/battery.sh" \
-           --subscribe battery system_woke power_source_change \
-           --add item clock right \
-           --set clock update_freq=10 icon=  script="$PLUGIN_DIR/clock.sh" \
-           --add item slack right \
-           --set slack update_freq=30 script="$PLUGIN_DIR/slack.sh" \
-           --subscribe slack front_app_switched \
-           --add item volume right \
+           --set battery script="$PLUGIN_DIR/battery.sh" \
+                        update_freq=120 \
+                        padding_left=5 \
+                        padding_right=5 \
+                        background.color=0x40ffffff \
+                        background.corner_radius=5 \
+                        background.height=25 \
+           --subscribe battery system_woke power_source_change
+
+# Volume - standalone item  
+sketchybar --add item volume right \
            --set volume script="$PLUGIN_DIR/volume.sh" \
+                       padding_left=5 \
+                       padding_right=5 \
+                       background.color=0x40ffffff \
+                       background.corner_radius=5 \
+                       background.height=25 \
            --subscribe volume volume_change
+
+##### Network Group (IP, Upload, Download) #####
+# Network indicators grouped together with dynamic border
+
+sketchybar --add item ip_address right \
+           --set ip_address script="$PLUGIN_DIR/ip_address.sh" \
+                           update_freq=30 \
+                           icon.padding_left=8 \
+                           icon.padding_right=2 \
+                           label.padding_left=2 \
+                           label.padding_right=4 \
+           --subscribe ip_address wifi_change \
+           \
+           --add item network.up right \
+           --set network.up script="$PLUGIN_DIR/network.sh" \
+                           update_freq=20 \
+                           icon.padding_left=4 \
+                           icon.padding_right=2 \
+                           label.padding_left=2 \
+                           label.padding_right=4 \
+                           icon=⇡ \
+                           icon.color=0xffeed49f \
+                           label.color=0xffeed49f \
+           \
+           --add item network.down right \
+           --set network.down script="$PLUGIN_DIR/network.sh" \
+                             update_freq=20 \
+                             icon.padding_left=4 \
+                             icon.padding_right=2 \
+                             label.padding_left=2 \
+                             label.padding_right=4 \
+                             icon=⇣ \
+                             icon.color=0xffa6da95 \
+                             label.color=0xffa6da95 \
+           \
+           --add bracket network_group ip_address network.up network.down \
+           --set network_group background.color=0x40ffffff \
+                              background.border_width=0 \
+                              background.corner_radius=5 \
+                              background.height=25 \
+                              background.drawing=on
+
+##### Additional Right Items #####
+sketchybar --add item slack right \
+           --set slack update_freq=30 \
+                      script="$PLUGIN_DIR/slack.sh" \
+                      padding_left=5 \
+                      padding_right=5 \
+                      background.color=0x40ffffff \
+                      background.corner_radius=5 \
+                      background.height=25 \
+           --subscribe slack front_app_switched
 
 ##### Force all scripts to run the first time (never do this in a script) #####
 sketchybar --update
