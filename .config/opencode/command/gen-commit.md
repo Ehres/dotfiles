@@ -9,6 +9,7 @@ Generate a git commit message following the Angular commit convention and write
 it to the lazygit pending commit file.
 
 NO VERBOSITY, NO EXPLANATIONS, NO MARKDOWN, NO CODE BLOCKS — JUST THE RAW COMMIT MESSAGE TEXT.
+NO GIT COMMIT, NO GIT ADD.
 
 ## Data to use for generating the commit message
 

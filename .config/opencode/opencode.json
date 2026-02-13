@@ -69,7 +69,8 @@
     "question": "allow",
     "bash": {
       "*": "allow",
-      "git commit": "deny"
+      "git commit *": "deny",
+      "git add *": "deny"
     }
   },
   "plugin": [
