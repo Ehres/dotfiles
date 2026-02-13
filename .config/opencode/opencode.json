@@ -1,38 +1,26 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "autoupdate": true,
-  "theme": "tokyonight",
-  "tui": {
-    "scroll_acceleration": {
-      "enabled": true
+  "agent": {
+    "build": {
+      "color": "#FF5733"
+    },
+    "plan": {
+      "color": "#86e1fc"
     }
   },
-  "username": "Ehres",
+  "autoupdate": true,
   "mcp": {
     "atlassian": {
+      "command": [
+        "npx",
+        "-y",
+        "mcp-remote",
+        "https://mcp.atlassian.com/v1/sse"
+      ],
       "enabled": true,
-      "type": "local",
-      "command": ["npx", "-y", "mcp-remote", "https://mcp.atlassian.com/v1/sse"]
-    },
-
-    "figma": {
-      "enabled": false,
-      "type": "remote",
-      "url": "http://127.0.0.1:3845/sse"
-    },
-    "gitlab": {
-      "enabled": true,
-      "type": "local",
-      "command": ["npx", "-y", "@zereight/mcp-gitlab"],
-      "environment": {
-        "GITLAB_PERSONAL_ACCESS_TOKEN": "{env:GITLAB_PERSONAL_ACCESS_TOKEN}",
-        "GITLAB_API_URL": "https://git.manomano.tech/api/v4",
-        "GITLAB_READ_ONLY_MODE": "false",
-        "GITLAB_PROJECT_ID": "1047"
-      }
+      "type": "local"
     },
     "context7": {
-      "type": "local",
       "command": [
         "npx",
         "-y",
@@ -40,33 +28,61 @@
         "--api-key",
         "{env:CONTEXT7_API_KEY}"
       ],
-      "enabled": true
+      "enabled": false,
+      "type": "local"
+    },
+    "figma": {
+      "enabled": false,
+      "type": "remote",
+      "url": "http://127.0.0.1:3845/sse"
+    },
+    "gitlab": {
+      "command": ["npx", "-y", "@zereight/mcp-gitlab"],
+      "enabled": false,
+      "environment": {
+        "GITLAB_API_URL": "https://git.manomano.tech/api/v4",
+        "GITLAB_PERSONAL_ACCESS_TOKEN": "{env:GITLAB_PERSONAL_ACCESS_TOKEN}",
+        "GITLAB_PROJECT_ID": "1047",
+        "GITLAB_READ_ONLY_MODE": "false"
+      },
+      "type": "local"
+    },
+    "playwright": {
+      "command": ["npx", "@playwright/mcp@latest"],
+      "enabled": false,
+      "environment": {
+        "PLAYWRIGHT_MCP_EXTENSION_TOKEN": "cacLAcAKDgi2_dxFx05ilkQ5bpHEJ3vs1HmSYVNjL_o"
+      },
+      "type": "local"
     },
     "sequential-thinking": {
-      "type": "local",
       "command": [
         "npx",
         "-y",
         "@modelcontextprotocol/server-sequential-thinking"
       ],
+      "enabled": true,
+      "type": "local"
+    }
+  },
+  "permission": {
+    "question": "allow",
+    "bash": {
+      "*": "allow",
+      "git commit": "deny"
+    }
+  },
+  "plugin": [
+    "opencode-gemini-auth",
+    "opencode-anthropic-auth",
+    "@franlol/opencode-md-table-formatter@0.0.3"
+  ],
+  "theme": "tokyonight",
+  "tui": {
+    "scroll_acceleration": {
       "enabled": true
     }
   },
-  "agent": {
-    "plan": {
-      "color": "#86e1fc"
-    },
-    "build": {
-      "permission": {
-        "bash": {
-          "*": "allow",
-          "git show*": "allow",
-          "git log*": "allow",
-          "git status*": "allow",
-          "git diff*": "allow",
-          "git *": "ask"
-        }
-      }
-    }
-  }
+  "username": "Ehres"
 }
+

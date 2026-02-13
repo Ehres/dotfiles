@@ -1,12 +1,38 @@
 ---
 description: Generate Angular commit message with JIRA ticket for lazygit
-model: anthropic/claude-haiku-4-5
+model: anthropic/claude-haiku-4-5-20251001
 ---
 
 # Commit message generator for lazygit
 
 Generate a git commit message following the Angular commit convention and write
 it to the lazygit pending commit file.
+
+NO VERBOSITY, NO EXPLANATIONS, NO MARKDOWN, NO CODE BLOCKS — JUST THE RAW COMMIT MESSAGE TEXT.
+
+## Data to use for generating the commit message
+
+### Auto mode argument
+
+The first argument: `$1`
+
+### Git diff output
+
+!`git diff --cached`
+
+### Current branch name
+
+!`git branch --show-current`
+
+### Git directory
+
+!`git rev-parse --git-dir`
+
+## Arguments
+
+- `$1`: Optional flag to control confirmation mode
+  - If provided (e.g., `--auto`, `--no-confirm`, or any non-empty value): Skip all confirmations and generate commit message automatically
+  - If empty/not provided: Use interactive mode with user confirmations
 
 ## Steps
 
@@ -55,19 +81,7 @@ it to the lazygit pending commit file.
    - File must contain ONLY the commit message — no markdown formatting, no code blocks, no backticks, no explanation, no extra text
 
 6. **Display and confirm**
-   - Show the generated commit message to the user
+   - Check if `$1` argument is provided:
+     - **If `$1` is NOT empty** (auto mode): Show the generated commit message and confirm it was saved — DO NOT ask for user confirmation
+     - **If `$1` is empty** (interactive mode): Show the generated commit message and ask the user to confirm before saving
    - Confirm the message was successfully saved to the file
-
-## Data to use for generating the commit message
-
-### Git diff output
-
-!`git diff --cached`
-
-### Current branch name
-
-!`git branch --show-current`
-
-### Git directory
-
-!`git rev-parse --git-dir`
