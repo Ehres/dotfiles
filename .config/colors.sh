@@ -12,6 +12,8 @@ export BLUE=0xff8aadf4   # Connected state
 export CYAN=0xff91d7e3   # VPN state
 export GREEN=0xffa6da95  # Download traffic
 export YELLOW=0xffeed49f # Upload traffic
+export RED=0xffed8796    # Weak/error state
+export GRAY=0xff6e738d   # Disconnected/inactive state
 
 # Background colors
 export BACKGROUND=0x40000000
