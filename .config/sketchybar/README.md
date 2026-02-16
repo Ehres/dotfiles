@@ -33,3 +33,32 @@ For example, to switch to Catppuccin Mocha, replace the hex values in `palette.s
 1. If it maps to an existing palette color, add a semantic token in `semantic.sh`
 2. If it's a new UI concern, add a component token in `components.sh`
 3. Never hardcode `0x...` values outside of `colors/`
+
+## Spacing Design System
+
+Spacing and layout values follow the same 3-layer token architecture as colors.
+Each layer sources the previous one; `sketchybarrc` sources `components.sh`.
+
+```
+spacing/
+  scale.sh         Layer 1 — Primitive tokens (normalized spacing scale)
+  semantic.sh      Layer 2 — Semantic tokens (padding, gaps, shapes, sizing)
+  components.sh    Layer 3 — Component tokens (sketchybar UI elements)
+```
+
+Scale: `0  2  4  8  12  16  24  32  40` (pixels).
+
+### How to use in sketchybarrc
+
+```bash
+source "$CONFIG_DIR/spacing/components.sh"
+
+# Use component tokens
+sketchybar --bar height=$BAR_HEIGHT
+```
+
+### How to adjust spacing
+
+Edit `spacing/scale.sh` to change the base scale values.
+All semantic and component tokens derive from the scale automatically.
+Never hardcode pixel values outside of `spacing/`.
