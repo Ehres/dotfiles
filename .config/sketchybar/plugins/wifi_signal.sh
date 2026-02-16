@@ -1,6 +1,6 @@
 #!/bin/sh
 
-source "$HOME/.config/colors.sh"
+source "$CONFIG_DIR/colors/components.sh"
 
 # --- Lire le RSSI WiFi via Swift CoreWLAN ---
 WIFI_INFO=$(swift -e '
@@ -22,16 +22,16 @@ if [ "$WIFI_POWER" = "on" ] && [ "$RSSI" != "0" ] && [ -n "$RSSI" ]; then
 	# WiFi connecté — classifier la force du signal
 	if [ "$RSSI" -ge -50 ] 2>/dev/null; then
 		ICON="󰤨" # Excellent (≥ -50 dB)
-		COLOR=$GREEN
+		COLOR=$ICON_CONNECTED
 	elif [ "$RSSI" -ge -65 ] 2>/dev/null; then
 		ICON="󰤥" # Bon (-50 à -65 dB)
-		COLOR=$GREEN
+		COLOR=$ICON_CONNECTED
 	elif [ "$RSSI" -ge -75 ] 2>/dev/null; then
 		ICON="󰤢" # Moyen (-65 à -75 dB)
-		COLOR=$YELLOW
+		COLOR=$ICON_WARNING
 	else
 		ICON="󰤟" # Faible (< -75 dB)
-		COLOR=$RED
+		COLOR=$ICON_ERROR
 	fi
 else
 	# WiFi éteint ou non associé — vérifier Ethernet
@@ -39,10 +39,10 @@ else
 
 	if [ -n "$ETHERNET_IP" ]; then
 		ICON="󰈀" # Ethernet connecté
-		COLOR=$GREEN
+		COLOR=$ICON_CONNECTED
 	else
 		ICON="󰤭" # Déconnecté
-		COLOR=$GRAY
+		COLOR=$ICON_DISCONNECTED
 	fi
 fi
 

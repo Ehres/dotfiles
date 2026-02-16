@@ -1,5 +1,7 @@
 #!/bin/sh
 
+source "$CONFIG_DIR/colors/components.sh"
+
 ICON="󰇮"
 
 # Find Mail database (V10=Sonoma/Sequoia, fallback older versions)
@@ -20,10 +22,10 @@ COUNT=$(sqlite3 -readonly "$DB" \
 [ -z "$COUNT" ] && exit 0
 
 if [ "$COUNT" -gt 0 ] 2>/dev/null; then
-	ICON_COLOR="0xffed8796"
+	ICON_COLOR="$ICON_ERROR"
 	LABEL="$COUNT"
 else
-	ICON_COLOR="0xffa6da95"
+	ICON_COLOR="$ICON_OK"
 	LABEL=""
 fi
 
