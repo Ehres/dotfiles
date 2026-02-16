@@ -22,9 +22,13 @@ COUNT=$(sqlite3 -readonly "$DB" \
 if [ "$COUNT" -gt 0 ] 2>/dev/null; then
 	ICON_COLOR="$ICON_ERROR"
 	LABEL="$COUNT"
+	DRAWING="on"
 else
 	ICON_COLOR="$ICON_OK"
 	LABEL=""
+	DRAWING="off"
 fi
 
-sketchybar --set "$NAME" icon="$ICON" label="$LABEL" icon.color="$ICON_COLOR"
+sketchybar --set "$NAME" icon="$ICON" label="$LABEL" icon.color="$ICON_COLOR" drawing="$DRAWING"
+
+source "$PLUGIN_DIR/comm_group_visibility.sh"

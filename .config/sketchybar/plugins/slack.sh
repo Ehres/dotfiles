@@ -9,10 +9,13 @@ if [[ $STATUS_LABEL =~ \"label\"=\"([^\"]*)\" ]]; then
 
     if [[ $LABEL == "" ]]; then
         ICON_COLOR="$ICON_OK"
+        DRAWING="off"
     elif [[ $LABEL == "•" ]]; then
         ICON_COLOR="$ICON_WARNING"
+        DRAWING="on"
     elif [[ $LABEL =~ ^[0-9]+$ ]]; then
         ICON_COLOR="$ICON_ERROR"
+        DRAWING="on"
     else
         exit 0
     fi
@@ -20,4 +23,6 @@ else
   exit 0
 fi
 
-sketchybar --set $NAME icon=$ICON label="${LABEL}" icon.color=${ICON_COLOR}
+sketchybar --set $NAME icon=$ICON label="${LABEL}" icon.color=${ICON_COLOR} drawing=${DRAWING}
+
+source "$PLUGIN_DIR/comm_group_visibility.sh"
