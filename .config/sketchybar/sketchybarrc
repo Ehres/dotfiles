@@ -48,8 +48,8 @@ sketchybar --bar position=top height=$BAR_HEIGHT blur_radius=0 color=$BAR_BG
 default=(
   padding_left=$DEFAULT_PADDING
   padding_right=$DEFAULT_PADDING
-  icon.font="Hack Nerd Font:Bold:17.0"
-  label.font="Hack Nerd Font:Bold:14.0"
+  icon.font="Hack Nerd Font:Regular:17.0"
+  label.font="Hack Nerd Font:Regular:14.0"
   icon.color=$ICON_DEFAULT
   label.color=$LABEL_DEFAULT
   icon.padding_left=$DEFAULT_ICON_PADDING
