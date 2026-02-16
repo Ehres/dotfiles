@@ -89,8 +89,6 @@ sketchybar --add item clock right \
            --set clock update_freq=10 \
                       icon=  \
                       script="$PLUGIN_DIR/clock.sh" \
-                      padding_left=5 \
-                      padding_right=5 \
                        background.color=$ITEM_BG \
                        background.corner_radius=5 \
                        background.height=25
@@ -99,8 +97,6 @@ sketchybar --add item clock right \
 sketchybar --add item battery right \
            --set battery script="$PLUGIN_DIR/battery.sh" \
                         update_freq=120 \
-                        padding_left=5 \
-                        padding_right=5 \
                          background.color=$ITEM_BG \
                          background.corner_radius=5 \
                          background.height=25 \
@@ -109,8 +105,6 @@ sketchybar --add item battery right \
 # Volume - standalone item  
 sketchybar --add item volume right \
            --set volume script="$PLUGIN_DIR/volume.sh" \
-                       padding_left=10 \
-                       padding_right=5 \
                         background.color=$ITEM_BG \
                         background.corner_radius=5 \
                         background.height=25 \
@@ -121,8 +115,6 @@ sketchybar --add item headphones right \
            --set headphones icon=" " \
                           script="$PLUGIN_DIR/airpods_battery.sh" \
                           update_freq=30 \
-                          padding_left=5 \
-                          padding_right=5 \
                            background.color=$ITEM_BG \
                            background.corner_radius=5 \
                            background.height=25 \
@@ -133,8 +125,6 @@ sketchybar --add item headphones right \
 sketchybar --add item wifi_signal right \
            --set wifi_signal script="$PLUGIN_DIR/wifi_signal.sh" \
                             update_freq=10 \
-                            padding_left=0 \
-                            padding_right=0 \
                             icon.padding_left=8 \
                             icon.padding_right=8 \
                             label.drawing=off \
@@ -143,8 +133,6 @@ sketchybar --add item wifi_signal right \
            --add item vpn_status right \
            --set vpn_status script="$PLUGIN_DIR/vpn_status.sh" \
                            update_freq=30 \
-                           padding_left=0 \
-                           padding_right=0 \
                            icon.padding_left=4 \
                            icon.padding_right=8 \
                            label.drawing=off \
@@ -154,9 +142,15 @@ sketchybar --add item wifi_signal right \
                               background.border_width=0 \
                               background.corner_radius=5 \
                               background.height=25 \
-                              background.drawing=on \
-                              padding_left=5 \
-                              padding_right=10
+                               background.drawing=on \
+
+sketchybar --add item spacer_network_comm right \
+           --set spacer_network_comm width=5 \
+                                     padding_left=0 \
+                                     padding_right=0 \
+                                     icon.drawing=off \
+                                     label.drawing=off \
+                                     background.drawing=off
 
 ##### Communication Group (Mail, Messages, Slack) #####
 sketchybar --add item mail right \
@@ -164,8 +158,8 @@ sketchybar --add item mail right \
                       script="$PLUGIN_DIR/mail.sh" \
                       click_script="open -a Mail" \
                       padding_left=0 \
-                      padding_right=0 \
-                      icon.padding_left=8 \
+                       padding_right=0 \
+                       icon.padding_left=8 \
                       icon.padding_right=4 \
                       label.padding_left=2 \
                       label.padding_right=4 \
@@ -193,13 +187,11 @@ sketchybar --add item mail right \
            --subscribe slack front_app_switched \
            \
            --add bracket communication_group mail messages slack \
-           --set communication_group background.color=$ITEM_BG \
-                                     background.border_width=0 \
-                                     background.corner_radius=5 \
-                                     background.height=25 \
-                                     background.drawing=on \
-                                     padding_left=10 \
-                                     padding_right=5
+              --set communication_group background.color=$ITEM_BG \
+                                        background.border_width=0 \
+                                        background.corner_radius=5 \
+                                        background.height=25 \
+                                        background.drawing=on
 
 ##### Force all scripts to run the first time (never do this in a script) #####
 sketchybar --update
