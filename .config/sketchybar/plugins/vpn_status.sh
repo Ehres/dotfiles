@@ -11,14 +11,16 @@ VPN_IP=$(ifconfig 2>/dev/null |
 	awk '{print $2}')
 
 if [ -n "$VPN_IP" ]; then
-	# VPN actif — afficher l'icône shield
+	# VPN actif — afficher l'icône shield et le séparateur
 	sketchybar --set "$NAME" \
 		icon="VPN" \
 		icon.color="$ICON_VPN" \
 		drawing=on \
-		label.drawing=off
+		label.drawing=off \
+		--set sep_wifi_vpn drawing=on
 else
-	# VPN inactif — masquer complètement
+	# VPN inactif — masquer complètement avec le séparateur
 	sketchybar --set "$NAME" \
-		drawing=off
+		drawing=off \
+		--set sep_wifi_vpn drawing=off
 fi

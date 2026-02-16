@@ -17,6 +17,9 @@ export LABEL_DEFAULT=$TEXT
 # Item background (25% white overlay — composite, not a Catppuccin primitive)
 export ITEM_BG=0x40ffffff
 
+# Separator inside brackets (12% white overlay)
+export SEPARATOR_COLOR=0x20ffffff
+
 # Space indicators
 export SPACE_BG=$ITEM_BG
 

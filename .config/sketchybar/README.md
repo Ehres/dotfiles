@@ -46,7 +46,7 @@ spacing/
   components.sh    Layer 3 — Component tokens (sketchybar UI elements)
 ```
 
-Scale: `0  2  4  8  12  16  24  32  40` (pixels).
+Scale: `0  1  2  4  8  12  16  24  32  40` (pixels).
 
 ### How to use in sketchybarrc
 
