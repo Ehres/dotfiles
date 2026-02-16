@@ -17,7 +17,7 @@ export GAP_NONE=$SPACE_NONE
 export GAP_DEFAULT=$SPACE_XS
 
 # Shapes
-export RADIUS_DEFAULT=$SPACE_XS
+export RADIUS_DEFAULT=$SPACE_SM
 
 # Sizing
 export HEIGHT_ITEM=$SPACE_XL
