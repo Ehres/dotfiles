@@ -1,4 +1,4 @@
 node_modules
 .tmux/plugins 
 network.out
-
+.opencode/plans/* 
