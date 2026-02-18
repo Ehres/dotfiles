@@ -28,6 +28,7 @@ source "$CONFIG_DIR/items/system.sh"
 source "$CONFIG_DIR/items/network.sh"
 source "$CONFIG_DIR/items/communication.sh"
 source "$CONFIG_DIR/items/updates.sh"
+source "$CONFIG_DIR/items/headphones.sh"
 source "$CONFIG_DIR/items/timer.sh"
 
 ##### Force all scripts to run the first time (never do this in a script) #####

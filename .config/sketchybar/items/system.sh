@@ -42,16 +42,6 @@ sketchybar --add item clock right \
 	--add bracket system_group clock sep_clock_battery battery sep_battery_volume volume \
 	--set system_group "${bracket_bg[@]}"
 
-# AirPods Battery - standalone (outside system_group)
-sketchybar --add item headphones right \
-	--set headphones icon=" " \
-	script="$PLUGIN_DIR/airpods_battery.sh" \
-	update_freq=30 \
-	icon.padding_left=$STANDALONE_ICON_PADDING \
-	icon.padding_right=$STANDALONE_ICON_PADDING \
-	"${item_bg[@]}" \
-	--subscribe headphones bluetooth_change
-
 sketchybar --add item spacer_system_network right \
 	--set spacer_system_network width=$SPACER_WIDTH \
 	padding_left=$SPACER_PADDING \
