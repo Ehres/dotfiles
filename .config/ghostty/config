@@ -5,3 +5,5 @@ macos-titlebar-style = hidden
 # keybind = global:cmd+/=toggle_quick_terminal
 macos-option-as-alt = true
 background = #191922
+window-padding-y = 4,0
+window-padding-color = background
