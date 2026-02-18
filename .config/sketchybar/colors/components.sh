@@ -32,3 +32,7 @@ export ICON_ERROR=$STATUS_ERROR
 export ICON_CONNECTED=$CONNECTED
 export ICON_VPN=$VPN_ACTIVE
 export ICON_DISCONNECTED=$DISCONNECTED
+
+# Timer alert (expired state)
+export TIMER_ALERT_BG=0xcced8796 # RED à 80% opacité
+export TIMER_ALERT_FG=$CRUST     # Texte sombre sur fond rouge

@@ -14,3 +14,11 @@ sketchybar --add item brew_updates right \
 	\
 	--add bracket updates_group brew_updates \
 	--set updates_group "${bracket_bg[@]}"
+
+sketchybar --add item spacer_updates_timer right \
+	--set spacer_updates_timer width=$SPACER_WIDTH \
+	padding_left=$SPACER_PADDING \
+	padding_right=$SPACER_PADDING \
+	icon.drawing=off \
+	label.drawing=off \
+	background.drawing=off
