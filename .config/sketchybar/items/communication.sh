@@ -13,9 +13,6 @@ sketchybar --add item mail right \
 	label.padding_left=$COMM_LABEL_PADDING_LEFT \
 	label.padding_right=$COMM_LABEL_PADDING_RIGHT \
 	\
-	--add item sep_mail_messages right \
-	--set sep_mail_messages "${separator[@]}" drawing=off \
-	\
 	--add item messages right \
 	--set messages update_freq=30 \
 	script="$PLUGIN_DIR/messages.sh" \
@@ -26,9 +23,6 @@ sketchybar --add item mail right \
 	icon.padding_right=$COMM_ICON_PADDING \
 	label.padding_left=$COMM_LABEL_PADDING_LEFT \
 	label.padding_right=$COMM_LABEL_PADDING_RIGHT \
-	\
-	--add item sep_messages_slack right \
-	--set sep_messages_slack "${separator[@]}" drawing=off \
 	\
 	--add item slack right \
 	--set slack update_freq=30 \
@@ -41,7 +35,7 @@ sketchybar --add item mail right \
 	label.padding_right=$COMM_LAST_LABEL_PADDING \
 	--subscribe slack front_app_switched \
 	\
-	--add bracket communication_group mail sep_mail_messages messages sep_messages_slack slack \
+	--add bracket communication_group mail messages slack \
 	--set communication_group "${bracket_bg[@]}"
 
 sketchybar --add item spacer_comm_updates right \

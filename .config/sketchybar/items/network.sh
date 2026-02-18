@@ -10,9 +10,6 @@ sketchybar --add item wifi_signal right \
 	label.drawing=off \
 	--subscribe wifi_signal wifi_change \
 	\
-	--add item sep_wifi_vpn right \
-	--set sep_wifi_vpn "${separator[@]}" \
-	\
 	--add item vpn_status right \
 	--set vpn_status script="$PLUGIN_DIR/vpn_status.sh" \
 	update_freq=30 \
@@ -20,7 +17,7 @@ sketchybar --add item wifi_signal right \
 	icon.padding_right=$NETWORK_VPN_PADDING_RIGHT \
 	label.drawing=off \
 	\
-	--add bracket network_group wifi_signal sep_wifi_vpn vpn_status \
+	--add bracket network_group wifi_signal vpn_status \
 	--set network_group "${bracket_bg[@]}"
 
 sketchybar --add item spacer_network_comm right \

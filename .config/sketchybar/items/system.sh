@@ -16,9 +16,6 @@ sketchybar --add item clock right \
 	icon.padding_right=$SYSTEM_ICON_PADDING \
 	label.padding_right=$SYSTEM_LAST_LABEL_PADDING \
 	\
-	--add item sep_clock_battery right \
-	--set sep_clock_battery "${separator[@]}" \
-	\
 	--add item battery right \
 	--set battery script="$PLUGIN_DIR/battery.sh" \
 	update_freq=120 \
@@ -28,9 +25,6 @@ sketchybar --add item clock right \
 	icon.padding_right=$SYSTEM_ICON_PADDING \
 	--subscribe battery system_woke power_source_change \
 	\
-	--add item sep_battery_volume right \
-	--set sep_battery_volume "${separator[@]}" \
-	\
 	--add item volume right \
 	--set volume script="$PLUGIN_DIR/volume.sh" \
 	padding_left=$SYSTEM_ITEM_PADDING \
@@ -39,7 +33,7 @@ sketchybar --add item clock right \
 	icon.padding_right=$SYSTEM_ICON_PADDING \
 	--subscribe volume volume_change \
 	\
-	--add bracket system_group clock sep_clock_battery battery sep_battery_volume volume \
+	--add bracket system_group clock battery volume \
 	--set system_group "${bracket_bg[@]}"
 
 sketchybar --add item spacer_system_network right \
