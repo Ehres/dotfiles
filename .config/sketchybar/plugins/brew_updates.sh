@@ -1,6 +1,7 @@
 #!/bin/sh
+# shellcheck source=../colors/components.sh
 
-source "$CONFIG_DIR/colors/components.sh"
+. "$CONFIG_DIR/colors/components.sh"
 
 # ── PATH: garantir que brew et jq sont trouvables ──
 # SketchyBar hérite d'un PATH minimal de launchd.
@@ -42,9 +43,10 @@ PAIRS=$(echo "$BREW_JSON" | jq -r '
   | "\($ni) \($nc)"
 ' 2>/dev/null)
 
-# Rien à traiter → cacher l'item et le spacer
+# Rien à traiter → cacher l'item, le bracket et le spacer de droite
 if [ -z "$PAIRS" ]; then
 	sketchybar --set "$NAME" drawing=off \
+		--set updates_group background.drawing=off \
 		--set spacer_comm_updates drawing=off
 	exit 0
 fi
@@ -94,6 +96,7 @@ LEVEL=$(echo "$RESULT" | awk '{print $2}')
 # ── Mapper le niveau au token de couleur + visibilité ──
 if [ "$COUNT" -eq 0 ] 2>/dev/null || [ "$COUNT" = "" ]; then
 	sketchybar --set "$NAME" drawing=off \
+		--set updates_group background.drawing=off \
 		--set spacer_comm_updates drawing=off
 	exit 0
 fi
@@ -109,4 +112,5 @@ sketchybar --set "$NAME" \
 	label="$COUNT" \
 	icon.color="$ICON_COLOR" \
 	drawing=on \
+	--set updates_group background.drawing=on \
 	--set spacer_comm_updates drawing=on

@@ -1,6 +1,7 @@
 #!/bin/sh
+# shellcheck source=../colors/components.sh
 
-source "$CONFIG_DIR/colors/components.sh"
+. "$CONFIG_DIR/colors/components.sh"
 
 TIMER_FILE="/tmp/sketchybar_timer"
 DONE_FILE="/tmp/sketchybar_timer_done"
@@ -13,7 +14,8 @@ if [ -f "$DONE_FILE" ]; then
 		label.color="$TIMER_ALERT_FG" \
 		drawing=on \
 		update_freq=0 \
-		--set timer_group background.color="$TIMER_ALERT_BG"
+		--set timer_group background.color="$TIMER_ALERT_BG" background.drawing=on \
+		--set spacer_headphones_timer drawing=on
 	exit 0
 fi
 
@@ -24,7 +26,8 @@ if [ ! -f "$TIMER_FILE" ]; then
 		update_freq=0 \
 		icon.color="$ICON_DEFAULT" \
 		label.color="$LABEL_DEFAULT" \
-		--set timer_group background.color="$ITEM_BG"
+		--set timer_group background.color="$ITEM_BG" background.drawing=off \
+		--set spacer_headphones_timer drawing=off
 	exit 0
 fi
 
@@ -42,7 +45,8 @@ if [ "$REMAINING" -le 0 ]; then
 		label.color="$TIMER_ALERT_FG" \
 		drawing=on \
 		update_freq=0 \
-		--set timer_group background.color="$TIMER_ALERT_BG"
+		--set timer_group background.color="$TIMER_ALERT_BG" background.drawing=on \
+		--set spacer_headphones_timer drawing=on
 	osascript -e 'display notification "Time is up!" with title "Timer"'
 
 	# Alarme en boucle (5 secondes max, arrêtable via stop)
@@ -77,4 +81,5 @@ sketchybar --set "$NAME" \
 	label.color="$LABEL_DEFAULT" \
 	drawing=on \
 	update_freq=1 \
-	--set timer_group background.color="$ITEM_BG"
+	--set timer_group background.color="$ITEM_BG" background.drawing=on \
+	--set spacer_headphones_timer drawing=on

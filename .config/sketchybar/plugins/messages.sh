@@ -1,6 +1,8 @@
 #!/bin/sh
+# shellcheck source=../colors/components.sh
+# shellcheck source=comm_group_visibility.sh
 
-source "$CONFIG_DIR/colors/components.sh"
+. "$CONFIG_DIR/colors/components.sh"
 
 ICON="󰍡"
 DB="$HOME/Library/Messages/chat.db"
@@ -31,4 +33,4 @@ fi
 
 sketchybar --set "$NAME" icon="$ICON" label="$LABEL" icon.color="$ICON_COLOR" drawing="$DRAWING"
 
-source "$PLUGIN_DIR/comm_group_visibility.sh"
+. "$PLUGIN_DIR/comm_group_visibility.sh"

@@ -1,6 +1,7 @@
 #!/bin/sh
+# shellcheck source=../colors/components.sh
 
-source "$CONFIG_DIR/colors/components.sh"
+. "$CONFIG_DIR/colors/components.sh"
 
 # Détecter VPN via interfaces utun avec IP
 VPN_IP=$(ifconfig 2>/dev/null |

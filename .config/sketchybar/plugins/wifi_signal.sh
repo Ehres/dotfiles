@@ -1,6 +1,7 @@
 #!/bin/sh
+# shellcheck source=../colors/components.sh
 
-source "$CONFIG_DIR/colors/components.sh"
+. "$CONFIG_DIR/colors/components.sh"
 
 # --- Lire le RSSI WiFi via Swift CoreWLAN ---
 WIFI_INFO=$(swift -e '
