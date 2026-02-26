@@ -5,3 +5,7 @@ customCommands:
     command: "opencode run '/gen-commit --auto'"
     output: terminal
     loadingText: "Generating commit message..."
+git:
+  pagers:
+    - colorArg: "always"
+      pager: "delta --side-by-side --line-numbers --paging=never"
