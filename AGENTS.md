@@ -91,11 +91,41 @@ Commit messages use **Angular format**: `type(scope): description`
 
 ### Shell Scripts (Bash — SketchyBar, items, plugins)
 
-- Shebang: `#!/bin/bash` for items/config, `#!/bin/sh` or `#!/usr/bin/env sh`
-  for simple plugins
+- Shebang:
+  - `#!/bin/bash` for any script using bash features: `[[`, `=~`,
+    `BASH_REMATCH`, arrays, `mapfile`, `source`
+  - `#!/bin/sh` only for strictly POSIX scripts — must then use `.` instead of
+    `source`, and `[` instead of `[[`
+  - Mixing `#!/bin/sh` with bash-only syntax is a shellcheck error
 - Variables: `UPPER_SNAKE_CASE` for exported/config values, `lower_snake` for
   locals in complex scripts
-- Always quote variables in sketchybar `--set` calls: `"$NAME"`, `"$PLUGIN_DIR/..."`
+- Quote **all** `$VAR` references in sketchybar calls — this includes spacing
+  and color tokens, not just `$NAME`/`$PLUGIN_DIR`:
+  `icon.padding_left="$SPACE_ICON_PADDING"`, `icon.color="$ICON_OK"`
+- `shellcheck source` directives: when a script uses variables or arrays
+  defined in a file sourced upstream (e.g. by `sketchybarrc`), add a directive
+  immediately after the shebang so shellcheck can resolve them:
+  - Items using `bracket_bg`/`item_bg`: `# shellcheck source=../properties.sh`
+  - Plugins sourcing tokens directly: `# shellcheck source=../colors/components.sh`
+- Array element quoting: quote each element that contains a `$VAR` expansion:
+  ```bash
+  item_bg=(
+    "background.color=$ITEM_BG"
+    "background.corner_radius=$ITEM_CORNER_RADIUS"
+  )
+  ```
+- Splitting command output into arrays: never use `arr=($(cmd))` — use
+  `mapfile` to avoid word-splitting and globbing (requires `#!/bin/bash`):
+  ```bash
+  mapfile -t INDICES < <(echo "$JSON" | jq -r '.[].index')
+  ```
+- Sourcing design-token files in plugins: use `.`/`source` matching the
+  shebang, and add the corresponding `# shellcheck source=` directive:
+  ```bash
+  #!/bin/sh
+  # shellcheck source=../colors/components.sh
+  . "$CONFIG_DIR/colors/components.sh"
+  ```
 - Use design tokens — never hardcode colors or spacing values:
   - Colors: source from `colors/components.sh` (which chains
     `semantic.sh` → `palette.sh`). Use component tokens like `$ICON_OK`,
