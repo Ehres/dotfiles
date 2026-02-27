@@ -78,12 +78,6 @@
     "opencode-anthropic-auth",
     "@franlol/opencode-md-table-formatter@0.0.3"
   ],
-  "theme": "tokyonight",
-  "tui": {
-    "scroll_acceleration": {
-      "enabled": true
-    }
-  },
   "username": "Ehres"
 }
 
