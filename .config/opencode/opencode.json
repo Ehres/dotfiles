@@ -9,6 +9,7 @@
     }
   },
   "autoupdate": true,
+  "default_agent": "plan",
   "mcp": {
     "atlassian": {
       "command": [
@@ -80,4 +81,3 @@
   ],
   "username": "Ehres"
 }
-
