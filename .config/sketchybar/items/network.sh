@@ -21,8 +21,8 @@ sketchybar --add item wifi_signal right \
 	--add bracket network_group wifi_signal vpn_status \
 	--set network_group "${bracket_bg[@]}"
 
-sketchybar --add item spacer_network_comm right \
-	--set spacer_network_comm width="$SPACER_WIDTH" \
+sketchybar --add item spacer_network_trackpad right \
+	--set spacer_network_trackpad width="$SPACER_WIDTH" \
 	padding_left="$SPACER_PADDING" \
 	padding_right="$SPACER_PADDING" \
 	icon.drawing=off \

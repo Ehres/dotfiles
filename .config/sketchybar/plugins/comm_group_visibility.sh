@@ -10,8 +10,8 @@ SLACK_DRAWING=$(sketchybar --query slack | jq -r '.geometry.drawing')
 
 if [ "$MAIL_DRAWING" = "off" ] && [ "$MESSAGES_DRAWING" = "off" ] && [ "$SLACK_DRAWING" = "off" ]; then
 	sketchybar --set communication_group background.drawing=off \
-		--set spacer_network_comm drawing=off
+		--set spacer_trackpad_comm drawing=off
 else
 	sketchybar --set communication_group background.drawing=on \
-		--set spacer_network_comm drawing=on
+		--set spacer_trackpad_comm drawing=on
 fi
