@@ -122,8 +122,7 @@ export NVM_DIR="$HOME/.nvm"
 
 # opencode
 export PATH=/Users/maxime.grebauval/.opencode/bin:$PATH
-export OPENCODE_EXPERIMENTAL_LSP_TOOL=1
-export OPENCODE_EXPERIMENTAL_PLAN_MODE=1
+export OPENCODE_EXPERIMENTAL=1
 
 # Mise-en-place
 

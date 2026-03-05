@@ -37,17 +37,6 @@
       "type": "remote",
       "url": "http://127.0.0.1:3845/sse"
     },
-    "gitlab": {
-      "command": ["npx", "-y", "@zereight/mcp-gitlab"],
-      "enabled": false,
-      "environment": {
-        "GITLAB_API_URL": "https://git.manomano.tech/api/v4",
-        "GITLAB_PERSONAL_ACCESS_TOKEN": "{env:GITLAB_PERSONAL_ACCESS_TOKEN}",
-        "GITLAB_PROJECT_ID": "1047",
-        "GITLAB_READ_ONLY_MODE": "false"
-      },
-      "type": "local"
-    },
     "playwright": {
       "command": ["npx", "@playwright/mcp@latest"],
       "enabled": false,
@@ -70,8 +59,8 @@
     "question": "allow",
     "bash": {
       "*": "allow",
-      "git commit *": "deny",
-      "git add *": "deny"
+      "git commit *": "ask",
+      "git add *": "ask"
     }
   },
   "plugin": [
