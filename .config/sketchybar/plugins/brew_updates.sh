@@ -1,5 +1,6 @@
 #!/bin/sh
 # shellcheck source=../colors/components.sh
+# shellcheck source=updates_group_visibility.sh
 
 . "$CONFIG_DIR/colors/components.sh"
 
@@ -45,9 +46,8 @@ PAIRS=$(echo "$BREW_JSON" | jq -r '
 
 # Rien à traiter → cacher l'item, le bracket et le spacer de droite
 if [ -z "$PAIRS" ]; then
-	sketchybar --set "$NAME" drawing=off \
-		--set updates_group background.drawing=off \
-		--set spacer_comm_updates drawing=off
+	sketchybar --set "$NAME" drawing=off
+	. "$PLUGIN_DIR/updates_group_visibility.sh"
 	exit 0
 fi
 
@@ -95,9 +95,8 @@ LEVEL=$(echo "$RESULT" | awk '{print $2}')
 
 # ── Mapper le niveau au token de couleur + visibilité ──
 if [ "$COUNT" -eq 0 ] 2>/dev/null || [ "$COUNT" = "" ]; then
-	sketchybar --set "$NAME" drawing=off \
-		--set updates_group background.drawing=off \
-		--set spacer_comm_updates drawing=off
+	sketchybar --set "$NAME" drawing=off
+	. "$PLUGIN_DIR/updates_group_visibility.sh"
 	exit 0
 fi
 
@@ -111,6 +110,6 @@ sketchybar --set "$NAME" \
 	icon="$ICON" \
 	label="$COUNT" \
 	icon.color="$ICON_COLOR" \
-	drawing=on \
-	--set updates_group background.drawing=on \
-	--set spacer_comm_updates drawing=on
+	drawing=on
+
+. "$PLUGIN_DIR/updates_group_visibility.sh"

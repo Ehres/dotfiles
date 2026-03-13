@@ -1,6 +1,8 @@
 #!/bin/sh
 # shellcheck source=../colors/components.sh
+# shellcheck source=battery_icons.sh
 . "$CONFIG_DIR/colors/components.sh"
+. "$CONFIG_DIR/plugins/battery_icons.sh"
 
 PERCENTAGE="$(ioreg -p IOService -n "BNBTrackpadDevice" -r 2>/dev/null |
 	grep '"BatteryPercent" =' | grep -v ExtendedFeatures | sed 's/.*= //')"
@@ -20,4 +22,6 @@ case "$PERCENTAGE" in
 *) COLOR="$ICON_ERROR" ;;
 esac
 
-sketchybar --set "$NAME" label="${PERCENTAGE}%" icon.color="$COLOR"
+BATT_ICON="$(battery_discharge_icon "$PERCENTAGE")"
+
+sketchybar --set "$NAME" icon.color="$COLOR" label="$BATT_ICON" label.drawing=on label.color="$COLOR"
