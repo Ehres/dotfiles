@@ -30,10 +30,10 @@ yabai -m config external_bar               all:40:0     \
                 layout                     bsp          \
                                                         \
                 top_padding                1            \
-                bottom_padding             4            \
-                left_padding               4            \
-                right_padding              4            \
-                window_gap                 6
+                bottom_padding             10            \
+                left_padding               10            \
+                right_padding              10            \
+                window_gap                 10
 
 echo "yabai configuration loaded.."
 
