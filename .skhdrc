@@ -55,7 +55,7 @@ shift + alt - l : yabai -m window --resize right:20:0
 ctrl + shift - f : yabai -m window --toggle zoom-fullscreen
 
 # toggle window float and sticky
-ctrl + shift + cmd - f : yabai -m window --toggle float 
+ctrl + shift + cmd - f : yabai -m window --toggle float; yabai -m window --grid 20:20:3:3:14:14
 ctrl + shift + cmd - s: yabai -m window --toggle sticky
 
 # App shortcuts 
