@@ -11,7 +11,6 @@
 | **Ghostty** | Terminal emulator | [→](.config/ghostty/README.md) |
 | **Tmux** | Terminal multiplexer | `.tmux.conf` |
 | **Zsh** | Shell + Powerlevel10k | `.zshrc` |
-| **AeroSpace** | Window manager | `.aerospace.toml` |
 | **Yazi** | File manager | [→](.config/yazi/README.md) |
 | **Mise** | Runtime manager | [→](.config/mise/README.md) |
 
@@ -109,7 +108,7 @@ git add . && git commit -m "Update" && git push
 
 ## Notes
 
-- **Prefix**: Tmux = `Ctrl+Space`, AeroSpace = `Alt`
+- **Prefix**: Tmux = `Ctrl+Space`, Skhd = `Alt`
 - **Theme**: TokyoNight everywhere
 - **Fonts**: FiraCode Nerd Font
 - **Node**: v22 via mise

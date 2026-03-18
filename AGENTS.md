@@ -6,7 +6,6 @@ application code, no test suite, no build system).
 ## Repository Layout
 
 ```
-.aerospace.toml          # AeroSpace window manager
 .config/
   ghostty/config         # Terminal emulator
   lazygit/config.yml     # Git TUI
@@ -154,10 +153,9 @@ Commit messages use **Angular format**: `type(scope): description`
 - Import from `@opencode-ai/plugin`
 - Package manager: pnpm (lockfile at `.config/opencode/`)
 
-### TOML (AeroSpace, mise, stylua, yazi)
+### TOML (mise, stylua, yazi)
 
 - Follow each tool's native config format
-- AeroSpace: use consistent `alt-` prefix for keybindings
 
 ### Tmux
 
@@ -189,7 +187,7 @@ are the raw values and should not appear in item or plugin scripts.
   `fnox` — never committed. See `fnox.toml` files
 - **Theme consistency**: TokyoNight for Neovim/Ghostty/Tmux/OpenCode;
   Catppuccin Macchiato for SketchyBar. Active accent: `#7aa2f7`
-- **Vim navigation everywhere**: `hjkl` bindings in AeroSpace, skhd, tmux,
+- **Vim navigation everywhere**: `hjkl` bindings in skhd, tmux,
   and Neovim with seamless cross-boundary pane switching
 
 ## Agent Guidelines

@@ -2,7 +2,6 @@
 # Install all dependencies with: brew bundle install
 
 # Taps
-tap "nikitabobko/tap"              # For AeroSpace window manager
 tap "FelixKratz/formulae"          # For SketchyBar and JankyBorders
 tap "koekeishiya/formulae"         # For Yabai and Skhd
 
@@ -44,7 +43,6 @@ brew "skhd"                        # System-wide hotkey daemon
 
 # GUI Applications
 cask "ghostty"                     # GPU-accelerated terminal emulator
-cask "aerospace"                   # Tiling window manager for macOS
 cask "raycast"                     # Spotlight replacement and launcher
 cask "discord"                     # Voice and text chat
 cask "notion"                      # Notes and project management
