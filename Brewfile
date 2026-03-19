@@ -29,6 +29,7 @@ brew "fd"                          # Better find
 brew "bat"                         # Better cat with syntax highlighting
 brew "eza"                         # Better ls with colors and icons
 brew "jq"                          # JSON processor
+brew "coreutils"                   # GNU core utilities
 
 # Preview Dependencies (for yazi and other tools)
 brew "ffmpegthumbnailer"           # Video thumbnails
