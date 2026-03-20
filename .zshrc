@@ -144,7 +144,15 @@ alias vi=nvim
 alias oc="fnox --config ~/.config/opencode/fnox.toml exec -- opencode"
 alias bubu='brew update && brew outdated && brew upgrade && brew cleanup'
 alias lg='lazygit'
-alias y='yazi'
+
+# Yazi 
+function y() {
+	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+	command yazi "$@" --cwd-file="$tmp"
+	IFS= read -r -d '' cwd < "$tmp"
+	[ "$cwd" != "$PWD" ] && [ -d "$cwd" ] && builtin cd -- "$cwd"
+	rm -f -- "$tmp"
+}
 
 # Bun
 export PATH="$HOME/.local/bin:$PATH"
