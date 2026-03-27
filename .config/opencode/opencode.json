@@ -11,16 +11,6 @@
   "autoupdate": true,
   "default_agent": "plan",
   "mcp": {
-    "atlassian": {
-      "command": [
-        "npx",
-        "-y",
-        "mcp-remote",
-        "https://mcp.atlassian.com/v1/sse"
-      ],
-      "enabled": false,
-      "type": "local"
-    },
     "context7": {
       "command": [
         "npx",
@@ -32,13 +22,11 @@
       "enabled": true,
       "type": "local"
     },
-    "figma": {
-      "enabled": false,
-      "type": "remote",
-      "url": "http://127.0.0.1:3845/sse"
-    },
     "playwright": {
-      "command": ["npx", "@playwright/mcp@latest"],
+      "command": [
+        "npx",
+        "@playwright/mcp@latest"
+      ],
       "enabled": false,
       "environment": {
         "PLAYWRIGHT_MCP_EXTENSION_TOKEN": "cacLAcAKDgi2_dxFx05ilkQ5bpHEJ3vs1HmSYVNjL_o"
