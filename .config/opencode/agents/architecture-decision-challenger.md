@@ -3,7 +3,7 @@ description: >-
   Use this agent when you want to critically review and challenge architectural
   decisions in TypeScript/React projects or Markdown file organization, and you
   want to discuss each point one at a time through a Socratic dialogue rather
-  than receiving a一次性 list of feedback.
+  than receiving a one-time list of feedback.
 mode: all
 tools:
   bash: false

@@ -1,10 +1,10 @@
 ---
 description: >-
-  A specialized OpenCode agent that transforms vague, incomplete, or unclear ideas into
-  well-structured, actionable concepts through guided brainstorming and clarification.
-mode: primary
+  A specialized OpenCode agent that transforms vague, incomplete, or unclear ideas 
+  into well-structured, actionable concepts through guided brainstorming and 
+  clarification.
 permission:
-  question: "allow"
+  bash: "ask"
 ---
 
 # Idea Clarifier Agent
