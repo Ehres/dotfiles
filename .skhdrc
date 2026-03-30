@@ -58,7 +58,11 @@ ctrl + shift - f : yabai -m window --toggle zoom-fullscreen
 ctrl + shift + cmd - f : yabai -m window --toggle float; yabai -m window --grid 20:20:3:3:14:14
 ctrl + shift + cmd - s: yabai -m window --toggle sticky
 
-# App shortcuts 
+# layout presets
+ctrl + shift - o : yabai -m space --balance; yabai -m window --ratio abs:0.33
+ctrl + shift + cmd - o : yabai -m space --balance; yabai -m window --ratio abs:0.66
+
+# App shortcuts
 ctrl + shift - s : open -a 'Slack'
 ctrl + shift - t : open -a 'Ghostty'
 ctrl + shift - b : open -a 'Dia'
