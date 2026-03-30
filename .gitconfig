@@ -1,0 +1,21 @@
+[user]
+	name = Maxime GREBAUVAL
+[pull]
+	rebase = true
+[rebase]
+	autostash = true
+	instructionFormat = [%an @ %ar] %s
+[gpg]
+	program = gpg
+[color]
+	ui = true
+	diff = true
+[safe]
+	directory = /usr/local/Homebrew
+[merge]
+  tool = nvim
+  conflictstyle = zdiff3
+[mergetool "nvim"]
+  cmd = nvim -c "DiffviewOpen"
+[mergetool]
+  prompt = false
