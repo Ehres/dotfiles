@@ -13,6 +13,8 @@
 source "$CONFIG_DIR/colors/components.sh"
 source "$CONFIG_DIR/spacing/components.sh"
 
+pgrep -x yabai > /dev/null 2>&1 && YABAI_RUNNING=true || YABAI_RUNNING=false
+
 MAX_POOL=9
 MAX_DISPLAY=2
 
@@ -149,6 +151,29 @@ for D in $(seq 1 $MAX_DISPLAY); do
 		args+=(--set "${P}_spacer_after" drawing=off)
 	fi
 done
+
+# ── Apply yabai state: dim spaces and show/hide badge ──────────────
+if [ "$YABAI_RUNNING" = false ]; then
+	for D in $(seq 1 $MAX_DISPLAY); do
+		P="d${D}"
+		for i in $(seq 1 $MAX_POOL); do
+			args+=(--set "${P}_before.${i}" icon.color="$STATUS_INACTIVE" label.color="$STATUS_INACTIVE")
+			args+=(--set "${P}_after.${i}" icon.color="$STATUS_INACTIVE" label.color="$STATUS_INACTIVE")
+		done
+		args+=(--set "${P}_active" icon.color="$STATUS_INACTIVE" label.color="$STATUS_INACTIVE" label.drawing=off)
+	done
+	args+=(--set yabai_status drawing=on)
+else
+	for D in $(seq 1 $MAX_DISPLAY); do
+		P="d${D}"
+		for i in $(seq 1 $MAX_POOL); do
+			args+=(--set "${P}_before.${i}" icon.color="$ICON_DEFAULT" label.color="$LABEL_DEFAULT")
+			args+=(--set "${P}_after.${i}" icon.color="$ICON_DEFAULT" label.color="$LABEL_DEFAULT")
+		done
+		args+=(--set "${P}_active" icon.color="$ICON_DEFAULT" label.color="$LABEL_DEFAULT")
+	done
+	args+=(--set yabai_status drawing=off)
+fi
 
 # ── Execute atomically (single render pass, zero glitch) ───────────
 sketchybar "${args[@]}"
