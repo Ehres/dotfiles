@@ -15,7 +15,7 @@ if [ -f "$DONE_FILE" ]; then
 		drawing=on \
 		update_freq=0 \
 		--set timer_group background.color="$TIMER_ALERT_BG" background.drawing=on \
-		--set spacer_headphones_timer drawing=on
+		--set timer_gap drawing=on
 	exit 0
 fi
 
@@ -27,7 +27,7 @@ if [ ! -f "$TIMER_FILE" ]; then
 		icon.color="$ICON_DEFAULT" \
 		label.color="$LABEL_DEFAULT" \
 		--set timer_group background.color="$ITEM_BG" background.drawing=off \
-		--set spacer_headphones_timer drawing=off
+		--set timer_gap drawing=off
 	exit 0
 fi
 
@@ -46,7 +46,7 @@ if [ "$REMAINING" -le 0 ]; then
 		drawing=on \
 		update_freq=0 \
 		--set timer_group background.color="$TIMER_ALERT_BG" background.drawing=on \
-		--set spacer_headphones_timer drawing=on
+		--set timer_gap drawing=on
 	osascript -e 'display notification "Time is up!" with title "Timer"'
 
 	# Alarme en boucle (5 secondes max, arrêtable via stop)
@@ -82,4 +82,4 @@ sketchybar --set "$NAME" \
 	drawing=on \
 	update_freq=1 \
 	--set timer_group background.color="$ITEM_BG" background.drawing=on \
-	--set spacer_headphones_timer drawing=on
+	--set timer_gap drawing=on

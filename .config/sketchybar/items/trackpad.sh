@@ -8,15 +8,9 @@ sketchybar --add item trackpad right \
 	script="$PLUGIN_DIR/trackpad_battery.sh" \
 	update_freq=120 \
 	drawing=off \
+	padding_left=0 \
+	padding_right="$GROUP_GAP_RIGHT" \
 	icon.padding_left="$STANDALONE_ICON_PADDING" \
 	icon.padding_right="$STANDALONE_ICON_PADDING" \
 	"${item_bg[@]}" \
 	--subscribe trackpad bluetooth_change
-
-sketchybar --add item spacer_trackpad_comm right \
-	--set spacer_trackpad_comm width="$SPACER_WIDTH" \
-	padding_left="$SPACER_PADDING" \
-	padding_right="$SPACER_PADDING" \
-	icon.drawing=off \
-	label.drawing=off \
-	background.drawing=off

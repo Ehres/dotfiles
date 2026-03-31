@@ -6,11 +6,9 @@
 
 DEVICES="$(system_profiler SPBluetoothDataType -json -detailLevel basic 2>/dev/null | jq -rc '.SPBluetoothDataType[0].device_connected[] | select ( .[] | .device_minorType == "Headphones")' | jq '.[]')"
 if [ "$DEVICES" = "" ]; then
-	sketchybar -m --set "$NAME" drawing=off \
-		--set spacer_updates_headphones drawing=off
+	sketchybar -m --set "$NAME" drawing=off
 else
-	sketchybar -m --set "$NAME" drawing=on \
-		--set spacer_updates_headphones drawing=on
+	sketchybar -m --set "$NAME" drawing=on
 	left="$(echo "$DEVICES" | jq -r .device_batteryLevelLeft)"
 	right="$(echo "$DEVICES" | jq -r .device_batteryLevelRight)"
 	case_lvl="$(echo "$DEVICES" | jq -r .device_batteryLevelCase)"

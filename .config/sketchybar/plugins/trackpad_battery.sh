@@ -8,13 +8,11 @@ PERCENTAGE="$(ioreg -p IOService -n "BNBTrackpadDevice" -r 2>/dev/null |
 	grep '"BatteryPercent" =' | grep -v ExtendedFeatures | sed 's/.*= //')"
 
 if [ -z "$PERCENTAGE" ]; then
-	sketchybar --set "$NAME" drawing=off \
-		--set spacer_network_trackpad drawing=off
+	sketchybar --set "$NAME" drawing=off
 	exit 0
 fi
 
-sketchybar --set "$NAME" drawing=on \
-	--set spacer_network_trackpad drawing=on
+sketchybar --set "$NAME" drawing=on
 
 case "$PERCENTAGE" in
 [6-9][0-9] | 100) COLOR="$ICON_OK" ;;

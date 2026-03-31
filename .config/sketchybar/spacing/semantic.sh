@@ -15,6 +15,7 @@ export PADDING_RELAXED=$SPACE_SM
 # Gaps (spacing between elements)
 export GAP_NONE=$SPACE_NONE
 export GAP_DEFAULT=$SPACE_XS
+export GAP_GROUP=$SPACE_XS
 
 # Shapes
 export RADIUS_DEFAULT=$SPACE_SM

@@ -37,10 +37,3 @@ sketchybar --add item clock right \
 	--add bracket system_group clock battery volume \
 	--set system_group "${bracket_bg[@]}"
 
-sketchybar --add item spacer_system_network right \
-	--set spacer_system_network width="$SPACER_WIDTH" \
-	padding_left="$SPACER_PADDING" \
-	padding_right="$SPACER_PADDING" \
-	icon.drawing=off \
-	label.drawing=off \
-	background.drawing=off

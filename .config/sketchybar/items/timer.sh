@@ -5,6 +5,9 @@
 
 sketchybar --add event timer_update
 
+sketchybar --add item timer_gap right \
+	--set timer_gap "${gap_item[@]}" drawing=off
+
 sketchybar --add item timer right \
 	--set timer icon="󰔛" \
 	script="$PLUGIN_DIR/timer.sh" \
@@ -20,6 +23,9 @@ sketchybar --add item timer right \
 	--set timer_group "${bracket_bg[@]}"
 
 # ── Yabai status badge (shown when yabai is not running) ──
+sketchybar --add item yabai_status_gap right \
+	--set yabai_status_gap "${gap_item[@]}" drawing=off
+
 sketchybar --add item yabai_status right \
 	--set yabai_status \
 	icon="󱂬" \

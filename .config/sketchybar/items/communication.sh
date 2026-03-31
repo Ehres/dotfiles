@@ -3,6 +3,9 @@
 
 ##### Communication Group (Mail, Messages, Slack) #####
 
+sketchybar --add item communication_gap right \
+	--set communication_gap "${gap_item[@]}"
+
 sketchybar --add item mail right \
 	--set mail update_freq=30 \
 	script="$PLUGIN_DIR/mail.sh" \
@@ -38,11 +41,3 @@ sketchybar --add item mail right \
 	\
 	--add bracket communication_group mail messages slack \
 	--set communication_group "${bracket_bg[@]}"
-
-sketchybar --add item spacer_comm_updates right \
-	--set spacer_comm_updates width="$SPACER_WIDTH" \
-	padding_left="$SPACER_PADDING" \
-	padding_right="$SPACER_PADDING" \
-	icon.drawing=off \
-	label.drawing=off \
-	background.drawing=off

@@ -3,6 +3,9 @@
 
 ##### Updates Group (Brew, Neovim) #####
 
+sketchybar --add item updates_gap right \
+	--set updates_gap "${gap_item[@]}"
+
 sketchybar --add item brew_updates right \
 	--set brew_updates update_freq=300 \
 	icon="󰏗" \
@@ -29,11 +32,3 @@ sketchybar --add item brew_updates right \
 	\
 	--add bracket updates_group brew_updates nvim_updates \
 	--set updates_group "${bracket_bg[@]}"
-
-sketchybar --add item spacer_updates_headphones right \
-	--set spacer_updates_headphones width="$SPACER_WIDTH" \
-	padding_left="$SPACER_PADDING" \
-	padding_right="$SPACER_PADDING" \
-	icon.drawing=off \
-	label.drawing=off \
-	background.drawing=off
