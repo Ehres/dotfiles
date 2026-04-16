@@ -55,19 +55,20 @@ shift + alt - l : yabai -m window --resize right:20:0
 ctrl + shift - f : yabai -m window --toggle zoom-fullscreen
 
 # toggle window float and sticky
-ctrl + shift + cmd - f : yabai -m window --toggle float; yabai -m window --grid 20:20:3:3:14:14
-ctrl + shift + cmd - s: yabai -m window --toggle sticky
+# ctrl + shift + cmd - f : yabai -m window --toggle float; yabai -m window --grid 20:20:3:3:14:14
+# ctrl + shift + cmd - s: yabai -m window --toggle sticky
 
 # layout presets
 ctrl + shift - o : yabai -m space --balance; yabai -m window --ratio abs:0.33
 ctrl + shift + cmd - o : yabai -m space --balance; yabai -m window --ratio abs:0.66
 
 # App shortcuts
-ctrl + shift - s : open -a 'Slack'
-ctrl + shift - t : open -a 'Ghostty'
-ctrl + shift - b : open -a 'Dia'
-ctrl + shift - e : open -a 'Mail'
-ctrl + shift - m : open -a 'Messages'
-ctrl + shift - n : open -a 'Notion'
-ctrl + shift - d : open -a 'Discord'
-ctrl + shift - a : open -a 'Arc'
+ctrl + shift + cmd - s : open -a 'Slack'
+ctrl + shift + cmd - t : open -a 'Ghostty'
+ctrl + shift + cmd - b : open -a 'Dia'
+ctrl + shift + cmd - e : open -a 'Mail'
+ctrl + shift + cmd - m : open -a 'Messages'
+ctrl + shift + cmd - n : open -a 'Notion'
+ctrl + shift + cmd - d : open -a 'Discord'
+ctrl + shift + cmd - a : open -a 'Arc'
+ctrl + shift + cmd - l : open -a 'Linear'
