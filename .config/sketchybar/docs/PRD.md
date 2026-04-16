@@ -18,12 +18,12 @@ outdated.
 
 ### États et affichage
 
-| État                   | Icône | Couleur              | Token           | Label  | Visibilité   |
-| ---------------------- | ----- | -------------------- | --------------- | ------ | ------------ |
-| 0 outdated             | —     | —                    | —               | —      | `drawing=off` |
-| Patches uniquement     | 󰏗     | Bleu (SKY)           | `$STATUS_INFO`  | `{n}`  | `drawing=on`  |
-| ≥ 1 mise à jour minor  | 󰏗     | Jaune                | `$ICON_WARNING` | `{n}`  | `drawing=on`  |
-| ≥ 1 mise à jour major  | 󰏗     | Rouge                | `$ICON_ERROR`   | `{n}`  | `drawing=on`  |
+| État                  | Icône | Couleur    | Token           | Label | Visibilité    |
+| --------------------- | ----- | ---------- | --------------- | ----- | ------------- |
+| 0 outdated            | —     | —          | —               | —     | `drawing=off` |
+| Patches uniquement    | 󰏗     | Bleu (SKY) | `$STATUS_INFO`  | `{n}` | `drawing=on`  |
+| ≥ 1 mise à jour minor | 󰏗     | Jaune      | `$ICON_WARNING` | `{n}` | `drawing=on`  |
+| ≥ 1 mise à jour major | 󰏗     | Rouge      | `$ICON_ERROR`   | `{n}` | `drawing=on`  |
 
 - La couleur est déterminée par le **pire type de bump** détecté parmi tous les
   paquets outdated.
@@ -56,14 +56,14 @@ et de la classification. Ils sont volontairement maintenus à une version fixe.
 
 ### Fichiers à créer
 
-| Fichier                    | Description                              |
-| -------------------------- | ---------------------------------------- |
-| `plugins/brew_updates.sh`  | Script principal du plugin               |
+| Fichier                   | Description                |
+| ------------------------- | -------------------------- |
+| `plugins/brew_updates.sh` | Script principal du plugin |
 
 ### Fichiers à modifier
 
-| Fichier        | Description                                              |
-| -------------- | -------------------------------------------------------- |
+| Fichier        | Description                                                |
+| -------------- | ---------------------------------------------------------- |
 | `sketchybarrc` | Ajouter l'item `brew_updates` après le communication group |
 
 ### Position dans la barre
@@ -107,13 +107,13 @@ Aucune. Pas de `click_script`.
 
 ### Gestion des erreurs
 
-| Cas                              | Comportement                    |
-| -------------------------------- | ------------------------------- |
-| `brew` absent du PATH            | `exit 0` — item inchangé       |
-| Erreur réseau / timeout          | `exit 0` — item inchangé       |
-| JSON invalide ou vide            | `exit 0` — item inchangé       |
-| python3 absent (improbable)      | `exit 0` — item inchangé       |
-| 0 paquets outdated               | `drawing=off` — item caché     |
+| Cas                         | Comportement               |
+| --------------------------- | -------------------------- |
+| `brew` absent du PATH       | `exit 0` — item inchangé   |
+| Erreur réseau / timeout     | `exit 0` — item inchangé   |
+| JSON invalide ou vide       | `exit 0` — item inchangé   |
+| python3 absent (improbable) | `exit 0` — item inchangé   |
+| 0 paquets outdated          | `drawing=off` — item caché |
 
 ### Design tokens utilisés
 
