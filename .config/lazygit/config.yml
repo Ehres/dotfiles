@@ -1,10 +1,26 @@
 customCommands:
-  - key: "<c-g>"
-    context: "files"
-    description: "Generate AI commit message"
-    command: "opencode run '/gen-commit --auto'"
+  - key: "W"
+    context: "localBranches"
+    description: "Create worktree (path pre-filled)"
+    prompts:
+      - type: "input"
+        key: "NewBranch"
+        title: "New branch name (leave empty to reuse base branch)"
+        initialValue: ""
+      - type: "input"
+        key: "Path"
+        title: "Worktree path"
+        initialValue: "../{{ runCommand \"bash -c 'basename $(git rev-parse --show-toplevel)'\" }}.worktree/{{index .PromptResponses 0}}"
+      - type: "menuFromCommand"
+        key: "Branch"
+        title: "Base branch"
+        command: "git branch -a --format='%(refname:short)'"
+        filter: "(.*)"
+        valueFormat: "{{ .group_1 }}"
+        labelFormat: "{{ .group_1 | green }}"
+    command: "git worktree add {{if .Form.NewBranch}}-b {{.Form.NewBranch | quote}} {{end}}{{.Form.Path | quote}} {{.Form.Branch | quote}}"
     output: terminal
-    loadingText: "Generating commit message..."
+    loadingText: "Creating worktree..."
 git:
   pagers:
     - colorArg: "always"
