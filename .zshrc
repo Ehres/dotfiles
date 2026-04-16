@@ -90,6 +90,11 @@ export PATH=$GEM_HOME/bin:$PATH
 export PATH="$PATH:$HOME/.rvm/bin"
 export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 export EDITOR="nvim"
+FNM_PATH="/Users/$USER/.local/share/fnm"
+if [ -d "$FNM_PATH" ]; then
+  export PATH="/Users/$USER/.local/share/fnm:$PATH"
+  eval "$(fnm env --use-on-cd --version-file-strategy=recursive)"
+fi
 
 # java
 export CPPFLAGS="-I/usr/local/opt/openjdk/include"
