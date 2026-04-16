@@ -4,15 +4,15 @@
 
 ## Tools
 
-| Tool | Purpose | Docs |
-|------|---------|------|
+| Tool         | Purpose                 | Docs                            |
+| ------------ | ----------------------- | ------------------------------- |
 | **OpenCode** | AI-powered IDE with MCP | [→](.config/opencode/README.md) |
-| **Neovim** | Editor (LazyVim) | [→](.config/nvim/README.md) |
-| **Ghostty** | Terminal emulator | [→](.config/ghostty/README.md) |
-| **Tmux** | Terminal multiplexer | `.tmux.conf` |
-| **Zsh** | Shell + Powerlevel10k | `.zshrc` |
-| **Yazi** | File manager | [→](.config/yazi/README.md) |
-| **Mise** | Runtime manager | [→](.config/mise/README.md) |
+| **Neovim**   | Editor (LazyVim)        | [→](.config/nvim/README.md)     |
+| **Ghostty**  | Terminal emulator       | [→](.config/ghostty/README.md)  |
+| **Tmux**     | Terminal multiplexer    | `.tmux.conf`                    |
+| **Zsh**      | Shell + Powerlevel10k   | `.zshrc`                        |
+| **Yazi**     | File manager            | [→](.config/yazi/README.md)     |
+| **Mise**     | Runtime manager         | [→](.config/mise/README.md)     |
 
 ## Fresh Setup
 
@@ -38,23 +38,28 @@ nvim                          # Plugins auto-install
 <summary>Detailed Installation Steps</summary>
 
 ### 1. Clone
+
 ```bash
 git clone <repo> ~/projects/dotfiles
 cd ~/projects/dotfiles
 ```
 
 ### 2. Install Dependencies
+
 ```bash
 ./scripts/install-deps.sh
 ```
+
 Installs: Homebrew, packages (via Brewfile), Zinit, TPM, mise tools
 
 ### 3. Symlink
+
 ```bash
 stow .
 ```
 
 ### 4. Secrets
+
 ```bash
 security add-generic-password -a "$USER" -s "GITLAB_PERSONAL_ACCESS_TOKEN" -w "token"
 security add-generic-password -a "$USER" -s "CONTEXT7_API_KEY" -w "key"
@@ -62,13 +67,15 @@ vim .config/opencode/opencode.json  # Update GITLAB_PROJECT_ID
 ```
 
 ### 5. Plugins
+
 ```bash
 exec zsh                    # Zsh plugins
-tmux; Ctrl+Space + I        # Tmux plugins  
+tmux; Ctrl+Space + I        # Tmux plugins
 nvim                        # Neovim plugins
 ```
 
 ### 6. Validate
+
 ```bash
 ./scripts/doctor.sh
 ```
