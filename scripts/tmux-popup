@@ -1,0 +1,31 @@
+#!/bin/bash
+# Creates a popup session that passes Escape through to the app
+# Usage: tmux-popup-helper.sh [--kill] <name> <command> [args...]
+
+KILL_ON_CLOSE=false
+if [[ "$1" == "--kill" ]]; then
+    KILL_ON_CLOSE=true
+    shift
+fi
+
+NAME="_popup_$1"
+shift
+CMD="$*"
+
+if ! tmux has -t "$NAME" 2>/dev/null; then
+    SESSION_ID=$(tmux new-session -dP -s "$NAME" -F '#{session_id}')
+
+    tmux set-option -s -t "$SESSION_ID" key-table "popup-$NAME"
+    tmux set-option -s -t "$SESSION_ID" status off
+    tmux set-option -s -t "$SESSION_ID" prefix None
+
+    if $KILL_ON_CLOSE; then
+        tmux bind-key -t "popup-$NAME" -n C-q run-shell "tmux kill-session -t $NAME"
+    else
+        tmux bind-key -t "popup-$NAME" -n C-q detach
+    fi
+
+    tmux send-keys -t "$NAME" "$CMD" Enter
+fi
+
+exec tmux attach -t "$NAME" >/dev/null 2>&1
