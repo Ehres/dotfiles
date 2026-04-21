@@ -95,6 +95,7 @@ if [ -d "$FNM_PATH" ]; then
   export PATH="/Users/$USER/.local/share/fnm:$PATH"
   eval "$(fnm env --use-on-cd --version-file-strategy=recursive)"
 fi
+export ENHANCE_THEME=tokyo_night
 
 # java
 export CPPFLAGS="-I/usr/local/opt/openjdk/include"
