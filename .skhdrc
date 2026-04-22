@@ -10,10 +10,10 @@ ctrl + shift - k : yabai -m window --focus north
 ctrl + shift - l : yabai -m window --focus east
 
 # swap managed window
-shift + ctrl + cmd - h : yabai -m window --swap west
-shift + ctrl + cmd - l : yabai -m window --swap east
-shift + ctrl + cmd - j : yabai -m window --swap south
-shift + ctrl + cmd - k : yabai -m window --swap north
+shift + ctrl + alt - h : yabai -m window --swap west
+shift + ctrl + alt - l : yabai -m window --swap east
+shift + ctrl + alt - j : yabai -m window --swap south
+shift + ctrl + alt - k : yabai -m window --swap north
 
 # move managed window
 ctrl + cmd - h : yabai -m window --warp west
