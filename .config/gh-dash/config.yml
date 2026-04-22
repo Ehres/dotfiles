@@ -83,11 +83,6 @@ keybindings:
         tmux new-window -n "Enhance - {{.HeadRefName}}" '
           gh enhance -R {{.RepoName}} {{.PrNumber}}
         '
-    - key: D
-      command: >-
-        tmux new-window -n "Diff - {{.HeadRefName}}" '
-          gh pr diff --repo "{{.RepoName}}" "{{.PrNumber}}" | diffnav
-        '
     - key: R
       name: request review
       command: >
@@ -101,7 +96,7 @@ theme:
       showSeparator: true
       compact: false
 pager:
-  diff: ""
+  diff: "diffnav"
 confirmQuit: false
 showAuthorIcons: true
 smartFilteringAtLaunch: true
