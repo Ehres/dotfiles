@@ -11,17 +11,6 @@
   "autoupdate": true,
   "default_agent": "plan",
   "mcp": {
-    "context7": {
-      "command": [
-        "npx",
-        "-y",
-        "@upstash/context7-mcp",
-        "--api-key",
-        "{env:CONTEXT7_API_KEY}"
-      ],
-      "enabled": true,
-      "type": "local"
-    },
     "playwright": {
       "command": ["npx", "@playwright/mcp@latest"],
       "enabled": false,
@@ -48,10 +37,6 @@
       "git add *": "ask"
     }
   },
-  "plugin": [
-    "opencode-gemini-auth",
-    "opencode-anthropic-auth",
-    "@franlol/opencode-md-table-formatter@0.0.3"
-  ],
+  "plugin": ["@franlol/opencode-md-table-formatter@0.0.3"],
   "username": "Ehres"
 }
