@@ -89,6 +89,7 @@ export PATH=$GEM_HOME/bin:$PATH
 # Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
 export PATH="$PATH:$HOME/.rvm/bin"
 export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+export PATH="$PATH:$HOME/.cargo/bin"
 export EDITOR="nvim"
 FNM_PATH="/Users/$USER/.local/share/fnm"
 if [ -d "$FNM_PATH" ]; then
