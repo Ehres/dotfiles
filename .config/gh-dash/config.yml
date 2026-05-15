@@ -96,7 +96,7 @@ theme:
       showSeparator: true
       compact: false
 pager:
-  diff: "diffnav"
+  diff: "hunk patch --mode split"
 confirmQuit: false
 showAuthorIcons: true
 smartFilteringAtLaunch: true
