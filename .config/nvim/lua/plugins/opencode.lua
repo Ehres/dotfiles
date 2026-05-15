@@ -25,11 +25,10 @@ return {
     },
   },
   config = function()
-    local opencode_cmd = "fnox --config ~/.config/opencode/fnox.toml exec -- opencode --port"
+    local opencode_cmd = "opencode --port"
 
     local function tmux_start()
-      local handle =
-        vim.fn.system("tmux split-window -h -d -P -F '#{pane_id}' " .. vim.fn.shellescape(opencode_cmd))
+      local handle = vim.fn.system("tmux split-window -h -d -P -F '#{pane_id}' " .. vim.fn.shellescape(opencode_cmd))
       vim.g.opencode_tmux_pane = vim.trim(handle)
     end
 
@@ -46,7 +45,8 @@ return {
       if not pane then
         return false
       end
-      local result = vim.fn.system("tmux display-message -t " .. vim.fn.shellescape(pane) .. " -p '#{pane_id}' 2>/dev/null")
+      local result =
+        vim.fn.system("tmux display-message -t " .. vim.fn.shellescape(pane) .. " -p '#{pane_id}' 2>/dev/null")
       return vim.trim(result) ~= ""
     end
 
