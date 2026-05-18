@@ -1,0 +1,12 @@
+#!/bin/bash
+# Toggle into / out of the `dash` tmux session.
+# - From any other session: switch to `dash` (creating it if needed, starting `gh dash` in it).
+# - From `dash`: switch back to the previous session via `switch-client -l`.
+
+if [ "$(tmux display-message -p '#{session_name}')" = "dash" ]; then
+  tmux switch-client -l
+else
+  tmux has-session -t dash 2>/dev/null || \
+    tmux new-session -d -s dash 'gh dash'
+  tmux switch-client -t dash
+fi
