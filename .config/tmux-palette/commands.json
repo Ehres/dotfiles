@@ -16,5 +16,11 @@
     "title": "yazi",
     "category": "Tools",
     "action": { "popup": "yazi" }
+  },
+  {
+    "icon": "🏷️",
+    "title": "Set Window Status…",
+    "category": "Window",
+    "action": { "palette": "window-status" }
   }
 ]
