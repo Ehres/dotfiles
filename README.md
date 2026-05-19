@@ -10,6 +10,7 @@
 | **Neovim**   | Editor (LazyVim)        | [→](.config/nvim/README.md)     |
 | **Ghostty**  | Terminal emulator       | [→](.config/ghostty/README.md)  |
 | **Tmux**     | Terminal multiplexer    | `.tmux.conf`                    |
+| **tmux-palette** | Command palette for tmux | [→](.config/tmux-palette/)      |
 | **Zsh**      | Shell + Powerlevel10k   | `.zshrc`                        |
 | **Yazi**     | File manager            | [→](.config/yazi/README.md)     |
 | **Mise**     | Runtime manager         | [→](.config/mise/README.md)     |
