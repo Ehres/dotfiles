@@ -1,0 +1,20 @@
+[
+  {
+    "icon": "",
+    "title": "lazygit",
+    "category": "Tools",
+    "action": { "popup": "lazygit" }
+  },
+  {
+    "icon": "",
+    "title": "btop",
+    "category": "Tools",
+    "action": { "popup": "btop" }
+  },
+  {
+    "icon": "",
+    "title": "yazi",
+    "category": "Tools",
+    "action": { "popup": "yazi" }
+  }
+]
