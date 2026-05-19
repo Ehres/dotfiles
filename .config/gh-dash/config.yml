@@ -95,6 +95,21 @@ theme:
     table:
       showSeparator: true
       compact: false
+  colors:
+    text:
+      primary: "#c0caf5"
+      secondary: "#7aa2f7"
+      inverted: "#1a1b26"
+      faint: "#565f89"
+      warning: "#e0af68"
+      success: "#9ece6a"
+      actor: "#a9b1d6"
+    background:
+      selected: "#292e42"
+    border:
+      primary: "#545c7e"
+      secondary: "#394b70"
+      faint: "#3b4261"
 pager:
   diff: "hunk patch --mode split"
 confirmQuit: false
