@@ -119,6 +119,11 @@ case "$cmd" in
     render
     ;;
   clear-suffix)
+    owner="$(get_opt @suffix-owner)"
+    current="${TMUX_PANE:-}"
+    if [[ -n "$owner" && "$owner" != "$current" ]] && pane_alive "$owner"; then
+      exit 0   # another live pane owns the suffix — refuse to release
+    fi
     unset_opt @status-suffix
     unset_opt @suffix-owner
     render

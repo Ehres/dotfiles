@@ -237,6 +237,26 @@ set_pane "%1"
 assert_eq "$(cat "$TMUX_MOCK_STATE/window_name")" "my-window ✍️" "stale owner: overridden"
 assert_eq "$(cat "$TMUX_MOCK_STATE/suffix_owner")" "%1" "stale owner: %1 claims"
 
+# --- clear-suffix from non-owner is blocked (live owner) ---
+reset_state
+set_pane "%1"
+"$SCRIPT" set-suffix 🧠
+set_pane "%2"
+"$SCRIPT" clear-suffix
+assert_eq "$(cat "$TMUX_MOCK_STATE/window_name")" "my-window 🧠" "lock: clear-suffix from non-owner is no-op"
+assert_eq "$(cat "$TMUX_MOCK_STATE/suffix_owner")" "%1" "lock: clear-suffix from non-owner does not release"
+assert_eq "$(cat "$TMUX_MOCK_STATE/status_suffix")" "🧠" "lock: clear-suffix from non-owner does not clear suffix"
+
+# --- clear-suffix when owner is stale is allowed ---
+reset_state
+printf '%%99' > "$TMUX_MOCK_STATE/suffix_owner"   # stale owner (not in panes)
+printf '%s' "🧠" > "$TMUX_MOCK_STATE/status_suffix"
+printf '%s' "my-window" > "$TMUX_MOCK_STATE/base_name"
+set_pane "%1"
+"$SCRIPT" clear-suffix
+assert_unset "$TMUX_MOCK_STATE/suffix_owner" "stale owner: clear-suffix releases the lock"
+assert_unset "$TMUX_MOCK_STATE/status_suffix" "stale owner: clear-suffix clears the suffix"
+
 # --- Ownership lock does NOT affect prefix layer ---
 reset_state
 set_pane "%1"
