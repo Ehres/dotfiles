@@ -1,140 +1,37 @@
 #!/usr/bin/env bash
-# Set or clear emoji workflow statuses on the current tmux window.
-#
-# Two independent layers:
-#   - prefix: human-set via the tmux-palette "Set Window Status…" flow
-#   - suffix: agent-set via Claude Code hooks and skill
-#
-# Rendered window name: [<prefix> ]<base>[ <suffix>]
+# Set or clear an emoji workflow status on the current tmux window.
 #
 # Usage:
-#   tmux-window-status set <emoji>          # alias of set-prefix (back-compat)
-#   tmux-window-status set-prefix <emoji>
-#   tmux-window-status set-suffix <emoji>
-#   tmux-window-status clear-prefix
-#   tmux-window-status clear-suffix
-#   tmux-window-status clear                # clears both layers and releases base
+#   tmux-window-status set <emoji>   # prefix the window name with <emoji>
+#   tmux-window-status clear         # restore the original window name
 #
-# Window-local tmux options used:
-#   @base-name       — original window name (lazy-captured on first decoration)
-#   @status-prefix   — current prefix emoji
-#   @status-suffix   — current suffix emoji
-#   @suffix-owner    — TMUX_PANE id of the Claude session that owns the suffix
-#                      lock in this window (prevents multi-Claude clobbering)
+# The original name is stashed in the window-local option @base-name on the
+# first `set` call, so subsequent `set` calls only swap the emoji and `clear`
+# restores the original.
 
 set -euo pipefail
-
-# Guard: outside tmux, no-op silently. Hooks and skill calls reach this guard
-# transparently — callers do not need to check $TMUX themselves.
-if [[ -z "${TMUX:-}" ]] || ! command -v tmux >/dev/null 2>&1; then
-  exit 0
-fi
-
-get_opt() {
-  tmux show -wv "$1" 2>/dev/null || true
-}
-
-set_opt() {
-  tmux set -w "$1" "$2"
-}
-
-unset_opt() {
-  tmux set -uw "$1" 2>/dev/null || true
-}
-
-ensure_base() {
-  local base
-  base="$(get_opt @base-name)"
-  if [[ -z "$base" ]]; then
-    base="$(tmux display-message -p '#W')"
-    set_opt @base-name "$base"
-  fi
-}
-
-render() {
-  local base prefix suffix parts=()
-  base="$(get_opt @base-name)"
-  if [[ -z "$base" ]]; then
-    return 0
-  fi
-  prefix="$(get_opt @status-prefix)"
-  suffix="$(get_opt @status-suffix)"
-
-  [[ -n "$prefix" ]] && parts+=("$prefix")
-  parts+=("$base")
-  [[ -n "$suffix" ]] && parts+=("$suffix")
-
-  tmux rename-window "${parts[*]}"
-}
-
-pane_alive() {
-  local pane="$1"
-  [[ -z "$pane" ]] && return 1
-  tmux list-panes -a -F '#{pane_id}' 2>/dev/null | grep -qx "$pane"
-}
-
-# Returns 0 if we own (or just claimed) the suffix lock for this window.
-# Returns 1 if another live pane already owns it.
-claim_suffix_owner() {
-  local owner current
-  owner="$(get_opt @suffix-owner)"
-  current="${TMUX_PANE:-}"
-
-  if [[ -n "$owner" ]]; then
-    if [[ "$owner" == "$current" ]]; then
-      return 0
-    fi
-    if pane_alive "$owner"; then
-      return 1
-    fi
-    # Stale owner — fall through to claim.
-  fi
-
-  if [[ -n "$current" ]]; then
-    set_opt @suffix-owner "$current"
-  fi
-  return 0
-}
 
 cmd="${1:-}"
 
 case "$cmd" in
-  set|set-prefix)
-    emoji="${2:?usage: tmux-window-status $cmd <emoji>}"
-    ensure_base
-    set_opt @status-prefix "$emoji"
-    render
-    ;;
-  set-suffix)
-    emoji="${2:?usage: tmux-window-status set-suffix <emoji>}"
-    if ! claim_suffix_owner; then
-      exit 0   # another Claude owns this window's suffix
+  set)
+    emoji="${2:?usage: tmux-window-status set <emoji>}"
+    base="$(tmux show -wv @base-name 2>/dev/null || true)"
+    if [[ -z "$base" ]]; then
+      base="$(tmux display-message -p '#W')"
+      tmux set -w @base-name "$base"
     fi
-    ensure_base
-    set_opt @status-suffix "$emoji"
-    render
-    ;;
-  clear-prefix)
-    unset_opt @status-prefix
-    render
-    ;;
-  clear-suffix)
-    unset_opt @status-suffix
-    unset_opt @suffix-owner
-    render
+    tmux rename-window "$emoji $base"
     ;;
   clear)
-    base="$(get_opt @base-name)"
+    base="$(tmux show -wv @base-name 2>/dev/null || true)"
     if [[ -n "$base" ]]; then
       tmux rename-window "$base"
+      tmux set -uw @base-name
     fi
-    unset_opt @status-prefix
-    unset_opt @status-suffix
-    unset_opt @suffix-owner
-    unset_opt @base-name
     ;;
   *)
-    echo "usage: tmux-window-status set|set-prefix|set-suffix <emoji> | clear-prefix|clear-suffix|clear" >&2
+    echo "usage: tmux-window-status set <emoji> | clear" >&2
     exit 2
     ;;
 esac
