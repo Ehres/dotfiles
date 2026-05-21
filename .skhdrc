@@ -1,7 +1,7 @@
 # yabai service
-ctrl + shift - y : yabai --start-service
-ctrl + shift - u : yabai --stop-service
-ctrl + shift - i : yabai --restart-service
+ctrl + shift - y : yabai --start-service; brew services start borders
+ctrl + shift - u : yabai --stop-service; brew services stop borders
+ctrl + shift - i : yabai --restart-service; brew services restart borders
 
 # focus window
 ctrl + shift - h : yabai -m window --focus west
