@@ -130,6 +130,7 @@ export NVM_DIR="$HOME/.nvm"
 # opencode
 export PATH=/Users/maxime.grebauval/.opencode/bin:$PATH
 export OPENCODE_EXPERIMENTAL=1
+export OPENCODE_EXPERIMENTAL_PLAN_MODE=0
 
 # Mise-en-place
 
@@ -148,7 +149,8 @@ alias kci="kubectl ctx int-infra-eks-cluster-eu-west-3"
 alias kcs="kubectl ctx stg-infra-eks-cluster-eu-west-3"
 alias kcp="kubectl ctx prd-infra-eks-cluster-eu-west-3"
 alias vi=nvim
-alias oc="fnox --config ~/.config/opencode/fnox.toml exec -- opencode"
+# alias oc="fnox --config ~/.config/opencode/fnox.toml exec -- opencode"
+alias oc="opencode --port"
 alias bubu='brew update && brew outdated && brew upgrade && brew cleanup'
 alias lg='lazygit'
 
