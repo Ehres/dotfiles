@@ -1,5 +1,8 @@
 [user]
-	name = Maxime GREBAUVAL
+	name = Maxime Grébauval
+	email = maxime.grebauval@icloud.com
+[core]
+	pager = hunk pager
 [pull]
 	rebase = true
 [rebase]
@@ -19,3 +22,8 @@
   cmd = nvim -c "DiffviewOpen"
 [mergetool]
   prompt = false
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
