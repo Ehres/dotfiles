@@ -17,34 +17,8 @@ return {
     },
   },
   keys = {
-    {
-      "<leader><space>",
-      function()
-        Snacks.picker.files({
-          ignored = false,
-          hidden = false,
-          ignore = {
-            ".git/",
-            "node_modules/",
-            ".DS_Store",
-            "*.log",
-            "*.tmp",
-            "*.cache",
-            "__pycache__/",
-            "*.pyc",
-            ".venv/",
-            ".env",
-            "dist/",
-            "build/",
-            "target/",
-            ".next/",
-            ".nuxt/",
-            "coverage/",
-          },
-        })
-      end,
-      desc = "Find Files (with hidden and ignore patterns)",
-    },
+    -- disable LazyVim's default snacks grep, replaced by fff live grep
+    { "<leader>/", false },
     {
       "<leader>sf",
       function()
