@@ -20,9 +20,9 @@ if ! tmux has -t "$NAME" 2>/dev/null; then
     tmux set-option -s -t "$SESSION_ID" prefix None
 
     if $KILL_ON_CLOSE; then
-        tmux bind-key -t "popup-$NAME" -n C-q run-shell "tmux kill-session -t $NAME"
+        tmux bind-key -T "popup-$NAME" C-q run-shell "tmux kill-session -t $NAME"
     else
-        tmux bind-key -t "popup-$NAME" -n C-q detach
+        tmux bind-key -T "popup-$NAME" C-q detach
     fi
 
     tmux send-keys -t "$NAME" "$CMD" Enter
