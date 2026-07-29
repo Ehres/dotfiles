@@ -1,0 +1,14 @@
+#!/bin/bash
+# Ensure the long-lived tmux sessions exist. Idempotent: safe to run any time.
+# Declared layout only — no state is restored, ad hoc windows are not tracked.
+
+ensure() { # ensure <session> <window> <cwd>
+  # "=$1" forces an exact name match; without it has-session also matches
+  # by prefix/fnmatch and could skip creation on an unrelated session.
+  # -n sets the window name and disables automatic-rename for that window.
+  tmux has-session -t "=$1" 2>/dev/null ||
+    tmux new-session -d -s "$1" -n "$2" -c "$3"
+}
+
+ensure "Work" "monorepo" "$HOME/projects/orus-monorepo"
+ensure "Perso & configs" "dotfiles" "$HOME/projects/dotfiles"

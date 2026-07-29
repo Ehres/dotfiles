@@ -1,3 +1,16 @@
+# Long-lived tmux sessions: ensure they exist, then let tmux pick the session.
+# Note: it picks the most recently *active* one, so this can land on dash or on
+# a lingering popup session — switch with prefix+s.
+# Kept above the instant prompt because this block ends in an exec.
+# NO_TMUX=1 opts out. Absolute path fallback: brew shellenv has not run yet.
+if [[ -o interactive && -z "$TMUX" && -z "$NO_TMUX" && -t 1 ]]; then
+  _tmux=${${commands[tmux]}:-/opt/homebrew/bin/tmux}
+  if [[ -x $_tmux ]]; then
+    "$HOME/scripts/tmux-sessions" && exec "$_tmux" attach
+  fi
+  unset _tmux
+fi
+
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
