@@ -52,3 +52,6 @@ cask "arc"                         # Chromium-based browser
 # Fonts
 cask "font-fira-code-nerd-font"   # Monospace font with programming ligatures and icons
 cask "font-hack-nerd-font"        # Used by SketchyBar for icons
+
+# Language Servers (used by OpenCode LSP)
+brew "lua-language-server"        # Lua LSP for Neovim config files
