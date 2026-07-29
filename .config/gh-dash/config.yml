@@ -78,6 +78,13 @@ defaults:
   refetchIntervalMinutes: 30
 keybindings:
   prs:
+    - key: d
+      name: review (tuicr)
+      command: >-
+        tmux new-window -n "Review - {{.HeadRefName}}" '
+          cd "$HOME/projects/orus-monorepo" 2>/dev/null;
+          tuicr pr {{.RepoName}}#{{.PrNumber}}
+        '
     - key: T
       command: >-
         tmux new-window -n "Enhance - {{.HeadRefName}}" '
