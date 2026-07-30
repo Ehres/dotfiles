@@ -41,9 +41,16 @@ brew bundle install                 # Install all Homebrew dependencies
 
 ### Validation
 
+There is no single health-check script; run whichever check matches what you
+touched.
+
 ```bash
-./scripts/doctor.sh                 # Health check (tools, symlinks, versions, secrets)
-./scripts/install-deps.sh           # Full dependency install from scratch
+stow -n -v .                        # Symlink drift, and conflicts before `stow .`
+brew bundle check --verbose         # Declared in Brewfile vs actually installed
+fnox --config .config/opencode/fnox.toml list   # Declared secrets resolve
+stylua --check .config/nvim/        # Lua formatting
+shellcheck .config/sketchybar/plugins/*.sh .config/sketchybar/items/*.sh
+nvim --headless "+checkhealth" +qa  # Neovim plugin health
 ```
 
 ### Reloading Services

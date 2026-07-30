@@ -21,16 +21,19 @@
 # Quick setup
 git clone <repo> ~/projects/dotfiles
 cd ~/projects/dotfiles
-./scripts/install-deps.sh    # Install everything
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+brew bundle install           # Everything in the Brewfile
 stow .                        # Create symlinks
-./scripts/doctor.sh           # Validate setup
 
-# Configure secrets
-security add-generic-password -a "$USER" -s "GITLAB_PERSONAL_ACCESS_TOKEN" -w "token"
-security add-generic-password -a "$USER" -s "CONTEXT7_API_KEY" -w "key"
+# Configure secrets. The service is literally "Keychain Access" and the account
+# is the key name -- that is what fnox.toml looks up. Swapping the two silently
+# produces entries fnox cannot read.
+security add-generic-password -s "Keychain Access" -a GITLAB_PERSONAL_ACCESS_TOKEN -w
+security add-generic-password -s "Keychain Access" -a CONTEXT7_API_KEY -w
+fnox --config .config/opencode/fnox.toml list   # Verify both resolve
 
 # Install plugins
-exec zsh                      # Zsh plugins auto-install
+exec zsh                      # Zsh + Zinit plugins auto-install
 tmux                          # Then: C-b + I
 nvim                          # Plugins auto-install
 ```
@@ -48,10 +51,15 @@ cd ~/projects/dotfiles
 ### 2. Install Dependencies
 
 ```bash
-./scripts/install-deps.sh
+# Homebrew itself, if absent
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+brew bundle install    # Taps, formulae and casks from the Brewfile
 ```
 
-Installs: Homebrew, packages (via Brewfile), Zinit, TPM, mise tools
+Zinit and TPM bootstrap themselves on first `zsh` / `tmux` launch (step 5), and
+mise installs its tools from `.config/mise/config.toml` when the shell activates
+it. There is nothing else to run.
 
 ### 3. Symlink
 
@@ -59,12 +67,21 @@ Installs: Homebrew, packages (via Brewfile), Zinit, TPM, mise tools
 stow .
 ```
 
+`.stow-local-ignore` keeps dependency trees and repo documentation out of `$HOME`.
+Dry-run first with `stow -n -v .` if you want to see the plan.
+
 ### 4. Secrets
 
+Secrets live in the macOS Keychain and are injected by `fnox` through the `oc`
+alias. The service is the literal string `Keychain Access` and the account is the
+key name; supplying them the other way round creates entries `fnox` cannot read.
+
 ```bash
-security add-generic-password -a "$USER" -s "GITLAB_PERSONAL_ACCESS_TOKEN" -w "token"
-security add-generic-password -a "$USER" -s "CONTEXT7_API_KEY" -w "key"
-vim .config/opencode/opencode.json  # Update GITLAB_PROJECT_ID
+security add-generic-password -s "Keychain Access" -a GITLAB_PERSONAL_ACCESS_TOKEN -w
+security add-generic-password -s "Keychain Access" -a CONTEXT7_API_KEY -w
+
+# Both keys should print a value, not a "not found" error
+fnox --config .config/opencode/fnox.toml get CONTEXT7_API_KEY
 ```
 
 ### 5. Plugins
@@ -78,7 +95,10 @@ nvim                        # Neovim plugins
 ### 6. Validate
 
 ```bash
-./scripts/doctor.sh
+stow -n -v .                          # No conflicts reported
+fnox --config .config/opencode/fnox.toml list   # Both secrets resolve
+brew bundle check --verbose            # Nothing missing
+nvim --headless "+checkhealth" +qa     # No real errors
 ```
 
 </details>
@@ -96,7 +116,11 @@ kci/kcs/kcp # Kubernetes contexts
 
 ```bash
 # Health check
-./scripts/doctor.sh
+stow -n -v .                           # Symlink drift
+brew bundle check --verbose             # Declared vs installed
+fnox --config .config/opencode/fnox.toml list
+stylua --check .config/nvim/
+shellcheck .config/sketchybar/plugins/*.sh .config/sketchybar/items/*.sh
 
 # Update everything
 brew upgrade && brew cleanup
@@ -111,8 +135,11 @@ git add . && git commit -m "Update" && git push
 
 ## Scripts
 
-**`./scripts/install-deps.sh`** - Install all dependencies  
-**`./scripts/doctor.sh`** - Validate setup (tools, symlinks, versions, secrets)
+**`./scripts/tmux-sessions`** - Ensure the long-lived tmux sessions exist (idempotent)  
+**`./scripts/tmux-popup`** - Back the `display-popup` bindings, passing Escape through  
+**`./scripts/tmux-dash-toggle`** - Toggle in and out of the `gh dash` session  
+**`./scripts/wifi-rssi.swift`** - Wi-Fi RSSI helper, compiled on demand by SketchyBar  
+**`./scripts/regenerate-tailles.mjs`** - Regenerate Notion pruning reminders
 
 ## Notes
 
