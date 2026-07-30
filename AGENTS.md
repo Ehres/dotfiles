@@ -6,6 +6,10 @@ application code, no test suite, no build system).
 ## Repository Layout
 
 ```
+.agents/                 # Shared by BOTH agents; stow links it to ~/.agents
+  rules/                 # context7.md, git-commit.md (~/.claude/rules → here)
+  skills/                # Skill library (~/.claude/skills → ~/.agents/skills)
+  .skill-lock.json       # Manifest making the library reinstallable
 .config/
   ghostty/config         # Terminal emulator
   lazygit/config.yml     # Git TUI
@@ -23,12 +27,22 @@ application code, no test suite, no build system).
     items/               # Bar item definitions (bash)
     plugins/             # Event-driven scripts (bash)
   yazi/                  # File manager theme
+scripts/                 # Versioned helpers; stow links to ~/scripts
 .skhdrc                  # Hotkey daemon
 .tmux.conf               # Terminal multiplexer
 .yabairc                 # Window manager
 .zshrc                   # Shell config (Zinit + Powerlevel10k)
+.stow-local-ignore       # Keeps node_modules and repo docs out of $HOME
+AGENTS.md                # This file. CLAUDE.md is a symlink to it, so both
+CLAUDE.md                #   agents read the same conventions
 Brewfile                 # Homebrew package manifest
 ```
+
+Agent instructions follow one rule: **the global surface carries tool protocols
+only** (how to fetch docs, when to ask before committing); **project surfaces
+carry domain rules**. Domain rules for another repository belong in that
+repository, not in `~/.config/opencode/AGENTS.md`, or they get injected into
+every unrelated session.
 
 ## Commands
 

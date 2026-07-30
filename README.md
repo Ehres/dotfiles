@@ -4,16 +4,20 @@
 
 ## Tools
 
-| Tool         | Purpose                 | Docs                            |
-| ------------ | ----------------------- | ------------------------------- |
-| **OpenCode** | AI-powered IDE with MCP | [→](.config/opencode/README.md) |
-| **Neovim**   | Editor (LazyVim)        | [→](.config/nvim/README.md)     |
-| **Ghostty**  | Terminal emulator       | [→](.config/ghostty/README.md)  |
-| **Tmux**     | Terminal multiplexer    | `.tmux.conf`                    |
-| **tmux-palette** | Command palette for tmux | [→](.config/tmux-palette/)      |
-| **Zsh**      | Shell + Powerlevel10k   | `.zshrc`                        |
-| **Yazi**     | File manager            | [→](.config/yazi/README.md)     |
-| **Mise**     | Runtime manager         | [→](.config/mise/README.md)     |
+| Tool           | Purpose                        | Config                             |
+| -------------- | ------------------------------ | ---------------------------------- |
+| **Ghostty**    | Terminal emulator              | `.config/ghostty/config`           |
+| **Tmux**       | Terminal multiplexer           | `.tmux.conf`                       |
+| **Zsh**        | Shell + Zinit + Powerlevel10k  | `.zshrc`                           |
+| **Neovim**     | Editor (LazyVim)               | [→](.config/nvim/README.md)        |
+| **SketchyBar** | Status bar, 3-layer tokens     | [→](.config/sketchybar/README.md)  |
+| **Yabai**      | BSP tiling WM (+ skhd, borders)| `.yabairc`, `.skhdrc`              |
+| **Yazi**       | File manager                   | `.config/yazi/theme.toml`          |
+| **Lazygit**    | Git TUI                        | `.config/lazygit/config.yml`       |
+| **Mise**       | Runtime manager                | `.config/mise/config.toml`         |
+| **OpenCode**   | AI coding agent, MCP + plugins | `.config/opencode/opencode.json`   |
+| **Claude Code**| AI coding agent                | `AGENTS.md` (via `CLAUDE.md`)      |
+| **Agent rules and skills** | Shared by both agents | [→](.agents/)                   |
 
 ## Fresh Setup
 
@@ -144,10 +148,13 @@ git add . && git commit -m "Update" && git push
 ## Notes
 
 - **Prefix**: Tmux = `C-b`, Skhd = `ctrl+shift` / `ctrl+cmd` / `shift+alt`
-- **Theme**: TokyoNight everywhere
-- **Fonts**: FiraCode Nerd Font
-- **Node**: v22 via mise
+- **Theme**: TokyoNight everywhere, except SketchyBar (Catppuccin Macchiato).
+  Shared accent `#7aa2f7`
+- **Fonts**: FiraCode Nerd Font; Hack Nerd Font for SketchyBar icons
+- **Node**: 24.13.0 via mise (`.config/mise/config.toml` is the source of truth)
+- **Secrets**: macOS Keychain, read through `fnox`; never committed
 
 ---
 
-**Detailed configuration docs**: See individual config READMEs in [.config/](.config/)
+**Conventions for agents and humans**: [AGENTS.md](AGENTS.md) — commit format,
+shell and Lua style, the SketchyBar token architecture, and the stow invariant.
