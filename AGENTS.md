@@ -161,7 +161,7 @@ Commit messages use **Angular format**: `type(scope): description`
 
 - TokyoNight theme with `#7aa2f7` (blue) active accent, `#3b4261` inactive
 - Vim-aware pane navigation via `C-hjkl`
-- Prefix: `Ctrl+Space`
+- Prefix: `C-b` (tmux default — not remapped)
 
 ## Design System (SketchyBar)
 

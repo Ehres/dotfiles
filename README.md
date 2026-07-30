@@ -31,7 +31,7 @@ security add-generic-password -a "$USER" -s "CONTEXT7_API_KEY" -w "key"
 
 # Install plugins
 exec zsh                      # Zsh plugins auto-install
-tmux                          # Then: Ctrl+Space + I
+tmux                          # Then: C-b + I
 nvim                          # Plugins auto-install
 ```
 
@@ -71,7 +71,7 @@ vim .config/opencode/opencode.json  # Update GITLAB_PROJECT_ID
 
 ```bash
 exec zsh                    # Zsh plugins
-tmux; Ctrl+Space + I        # Tmux plugins
+tmux; C-b + I               # Tmux plugins
 nvim                        # Neovim plugins
 ```
 
@@ -102,7 +102,7 @@ kci/kcs/kcp # Kubernetes contexts
 brew upgrade && brew cleanup
 zinit self-update && zinit update --all
 mise upgrade
-# Tmux: Ctrl+Space + U
+# Tmux: C-b + U
 # Nvim: :Lazy sync
 
 # Backup
@@ -116,7 +116,7 @@ git add . && git commit -m "Update" && git push
 
 ## Notes
 
-- **Prefix**: Tmux = `Ctrl+Space`, Skhd = `Alt`
+- **Prefix**: Tmux = `C-b`, Skhd = `ctrl+shift` / `ctrl+cmd` / `shift+alt`
 - **Theme**: TokyoNight everywhere
 - **Fonts**: FiraCode Nerd Font
 - **Node**: v22 via mise
