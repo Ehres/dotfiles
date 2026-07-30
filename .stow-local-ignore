@@ -1,0 +1,29 @@
+# Stow ignore list for this package.
+#
+# NOTE: providing this file REPLACES stow's built-in default ignore list, so
+# entries that stow would normally skip on its own (.git, editor backups) must
+# be repeated here.
+#
+# Unanchored entries are matched against each path segment; entries starting
+# with ^/ are matched against the path relative to the top of the package.
+
+# Dependency trees -- these are what made a bare `stow .` abort with 3415
+# conflicts, by trying to symlink every file under them into $HOME.
+node_modules
+
+# opencode's project-local state for this repo (its plans/ and a scratch
+# package.json). Untracked, and stowing it would collide with opencode's own
+# install at ~/.opencode.
+^/\.opencode$
+
+# Repo plumbing
+\.git
+\.gitignore
+.+~
+\#.*\#
+
+# Repo documentation and artefacts: these describe the repo, they are not
+# configuration that belongs in $HOME.
+^/README\.md$
+^/docs$
+^/VirtualDefy\.json$
