@@ -94,20 +94,10 @@ export XDG_CONFIG_HOME="$HOME/.config"
 
 # Exports
 export LANG=en_US.UTF-8
-alias python=/usr/local/bin/python3.7
-export PATH="/usr/local/sbin:$PATH"
-export PATH=$PATH:~/bin/
-export GEM_HOME=$HOME/.gem
-export PATH=$GEM_HOME/bin:$PATH
-# Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
-export PATH="$PATH:$HOME/.rvm/bin"
-export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+alias python=python3
 export PATH="$PATH:$HOME/.cargo/bin"
 export EDITOR="nvim"
 export ENHANCE_THEME=tokyo_night
-
-# java
-export CPPFLAGS="-I/usr/local/opt/openjdk/include"
 
 # pnpm
 export PNPM_HOME="/Users/maxime.grebauval/Library/pnpm"
@@ -116,20 +106,6 @@ case ":$PATH:" in
 *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
 # pnpm end
-
-# export MANPATH="/usr/local/man:$MANPATH"
-
-# You may need to manually set your language environment
-# export LANG=en_US.UTF-8
-
-# Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-#   export EDITOR='mvim'
-# fi
-
-export EDITOR="nvim"
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
