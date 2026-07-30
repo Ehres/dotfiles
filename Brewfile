@@ -3,7 +3,7 @@
 
 # Taps
 tap "FelixKratz/formulae"          # For SketchyBar and JankyBorders
-tap "koekeishiya/formulae"         # For Yabai and Skhd
+tap "asmvik/formulae"              # Yabai + Skhd (taken over from koekeishiya in 2025)
 
 # Core Tools
 brew "stow"                        # Symlink manager for dotfiles
@@ -40,8 +40,8 @@ brew "poppler"                     # PDF preview and rendering
 # Window Management & Desktop
 brew "sketchybar"                  # Customizable macOS status bar
 brew "borders"                     # Active window border highlight (JankyBorders)
-brew "yabai"                       # BSP tiling window manager
-brew "skhd"                        # System-wide hotkey daemon
+brew "asmvik/formulae/yabai"       # BSP tiling window manager
+brew "asmvik/formulae/skhd"        # System-wide hotkey daemon
 
 # GUI Applications
 cask "ghostty"                     # GPU-accelerated terminal emulator
