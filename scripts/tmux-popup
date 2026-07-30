@@ -13,7 +13,11 @@ shift
 CMD="$*"
 
 if ! tmux has -t "$NAME" 2>/dev/null; then
-    SESSION_ID=$(tmux new-session -dP -s "$NAME" -F '#{session_id}')
+    # Pass the command to new-session rather than send-keys: with an empty
+    # default-command, new-session would otherwise spawn a login+interactive
+    # zsh and run the whole .zshrc (~210ms) before the command even starts.
+    # No CMD (the scratch popup) still gets the full shell, on purpose.
+    SESSION_ID=$(tmux new-session -dP -s "$NAME" -F '#{session_id}' ${CMD:+"$CMD"})
 
     tmux set-option -s -t "$SESSION_ID" key-table "popup-$NAME"
     tmux set-option -s -t "$SESSION_ID" status off
@@ -25,7 +29,6 @@ if ! tmux has -t "$NAME" 2>/dev/null; then
         tmux bind-key -T "popup-$NAME" C-q detach
     fi
 
-    tmux send-keys -t "$NAME" "$CMD" Enter
 fi
 
 exec tmux attach -t "$NAME" >/dev/null 2>&1
