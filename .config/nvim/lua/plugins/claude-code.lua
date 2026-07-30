@@ -29,7 +29,7 @@ return {
             "bash",
             "-c",
             [[
-              pane_id=$(tmux split-window -d -h -P -F '#{pane_id}' "claude --ide --dangerously-skip-permissions")
+              pane_id=$(tmux split-window -d -h -P -F '#{pane_id}' "claude --ide")
               trap "tmux kill-pane -t $pane_id 2>/dev/null" EXIT
               while tmux list-panes -F '#{pane_id}' 2>/dev/null | grep -qF "$pane_id"; do
                 sleep 1
