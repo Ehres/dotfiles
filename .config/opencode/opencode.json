@@ -9,16 +9,8 @@
     }
   },
   "autoupdate": true,
-  "default_agent": "plan",
+  "lsp": true,
   "mcp": {
-    "playwright": {
-      "command": ["npx", "@playwright/mcp@latest"],
-      "enabled": false,
-      "environment": {
-        "PLAYWRIGHT_MCP_EXTENSION_TOKEN": "cacLAcAKDgi2_dxFx05ilkQ5bpHEJ3vs1HmSYVNjL_o"
-      },
-      "type": "local"
-    },
     "sequential-thinking": {
       "command": [
         "npx",
@@ -33,10 +25,20 @@
     "question": "allow",
     "bash": {
       "*": "allow",
-      "git commit *": "ask",
-      "git add *": "ask"
+      "rm -rf *": "ask",
+      "git push --force*": "ask",
+      "git reset --hard*": "ask",
+      "kubectl * delete *": "ask",
+      "*| sh": "ask",
+      "*| bash": "ask",
+      "security *": "ask",
+      "git commit *": "ask"
     }
   },
-  "plugin": ["@franlol/opencode-md-table-formatter@0.0.3"],
+  "plugin": [
+    "@franlol/opencode-md-table-formatter@0.0.3",
+    "superpowers@git+https://github.com/obra/superpowers.git",
+    "opencode-scheduler"
+  ],
   "username": "Ehres"
 }
