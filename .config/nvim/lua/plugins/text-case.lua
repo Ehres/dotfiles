@@ -17,8 +17,8 @@ return {
     "TextCaseOpenTelescopeLSPChange",
     "TextCaseStartReplacingCommand",
   },
-  -- If you want to use the interactive feature of the `Subs` command right away, text-case.nvim
-  -- has to be loaded on startup. Otherwise, the interactive feature of the `Subs` will only be
-  -- available after the first executing of it or after a keymap of text-case.nvim has been used.
-  lazy = false,
+  -- Deliberately lazy, against the upstream suggestion of `lazy = false`: eager
+  -- loading pulled telescope into every startup purely so `Subs` would be
+  -- interactive from the first invocation. The keys and cmd entries above still
+  -- load the plugin on first use; only that first `Subs` loses interactivity.
 }

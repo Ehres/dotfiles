@@ -6,11 +6,18 @@ return {
       "folke/snacks.nvim",
       optional = true,
       opts = {
-        input = {},
+        input = {
+          enabled = true,
+        },
         picker = {
           actions = {
-            opencode_send = function(...)
-              return require("opencode").snacks_picker_send(...)
+            opencode_send = function(picker)
+              local items = vim.tbl_map(function(item)
+                return item.file
+                  and require("opencode").format({ path = item.file, from = item.pos, to = item.end_pos })
+                  or item.text
+              end, picker:selected({ fallback = true }))
+              require("opencode").prompt(table.concat(items, ", ") .. " ")
             end,
           },
           win = {
@@ -52,28 +59,21 @@ return {
 
     ---@type opencode.Opts
     vim.g.opencode_opts = {
-      lsp = {
-        enabled = true,
-      },
       server = {
         start = tmux_start,
-        stop = tmux_stop,
-        toggle = function()
-          if tmux_pane_exists() then
-            tmux_stop()
-          else
-            tmux_start()
-          end
-        end,
       },
     }
 
     -- Required for `opts.events.reload`
     vim.opt.autoread = true
 
-    -- Toggle opencode
+    -- Toggle opencode (server.toggle was removed in v0.11.0; wire it manually)
     vim.keymap.set({ "n", "t" }, "<leader>ot", function()
-      require("opencode").toggle()
+      if tmux_pane_exists() then
+        tmux_stop()
+      else
+        tmux_start()
+      end
     end, { desc = "Toggle opencode" })
 
     -- Ask opencode (free-form)
@@ -100,6 +100,15 @@ return {
       require("opencode").command("session.half.page.down")
     end, { desc = "Scroll opencode down" })
 
+    -- Submit / clear current prompt
+    vim.keymap.set("n", "<leader>o<CR>", function()
+      require("opencode").command("prompt.submit")
+    end, { desc = "Submit opencode prompt" })
+
+    vim.keymap.set("n", "<leader>ox", function()
+      require("opencode").command("prompt.clear")
+    end, { desc = "Clear opencode prompt" })
+
     -- Select (picker for all opencode actions)
     vim.keymap.set({ "n", "v" }, "<leader>os", function()
       require("opencode").select()
@@ -119,15 +128,8 @@ return {
       require("opencode").prompt("Explain @this and its context")
     end, { desc = "Explain this code" })
 
-    -- Statusline
-    require("lualine").setup({
-      sections = {
-        lualine_z = {
-          {
-            require("opencode").statusline,
-          },
-        },
-      },
-    })
+    -- The statusline component lives in lua/plugins/lualine.lua: calling
+    -- require("lualine").setup() from here forced lualine to load at startup and
+    -- replaced its sections wholesale, so whichever plugin configured it last won.
   end,
 }

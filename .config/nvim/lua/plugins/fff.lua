@@ -7,10 +7,6 @@ return {
   -- for nixos:
   -- build = "nix run .#release",
   opts = {
-    debug = {
-      enabled = true,
-      show_scores = true,
-    },
     layout = {
       prompt_position = "top",
     },
