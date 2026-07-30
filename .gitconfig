@@ -2,7 +2,7 @@
 	name = Maxime Grébauval
 	email = maxime.grebauval@icloud.com
 [core]
-	pager = hunk pager
+	pager = delta --line-numbers
 [pull]
 	rebase = true
 [rebase]

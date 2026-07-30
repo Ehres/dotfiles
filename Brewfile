@@ -31,11 +31,33 @@ brew "bat"                         # Better cat with syntax highlighting
 brew "eza"                         # Better ls with colors and icons
 brew "jq"                          # JSON processor
 brew "coreutils"                   # GNU core utilities
+brew "git-delta"                   # Syntax-highlighting pager; core.pager and lazygit both use it
+brew "gum"                         # Interactive prompts for shell scripts
+brew "sevenzip"                    # 7z archives
+brew "webp"                        # WebP encode/decode
+
+# Git & Review Tooling
+brew "gh"                          # GitHub CLI; `gh dash` backs the tmux dash session
+brew "agavra/tap/tuicr"            # Code-review TUI, bound to prefix+R in tmux
+brew "dlvhdr/formulae/diffnav"      # File-tree navigator wrapping delta
+brew "kitlangton/tap/ghui"         # GitHub TUI
+brew "jnsahaj/lumen/lumen"         # AI commit messages / diff summaries
+
+# Linters & Formatters (the commands AGENTS.md documents)
+brew "stylua"                      # Lua formatter for .config/nvim
+brew "shellcheck"                  # Shell linter enforcing the AGENTS.md shell rules
+
+# Agent Tooling
+brew "rtk"                         # Token-reduction rewriter used by the opencode plugin
 
 # Preview Dependencies (for yazi and other tools)
 brew "ffmpegthumbnailer"           # Video thumbnails
 brew "unar"                        # Archive preview and extraction
 brew "poppler"                     # PDF preview and rendering
+
+# Language Runtimes
+brew "python@3.12"                 # Required by tmux-fzf-links (hardcoded in .tmux.conf)
+brew "rust"                        # Toolchain for cargo-installed binaries on PATH
 
 # Window Management & Desktop
 brew "sketchybar"                  # Customizable macOS status bar
@@ -48,7 +70,19 @@ cask "ghostty"                     # GPU-accelerated terminal emulator
 cask "raycast"                     # Spotlight replacement and launcher
 cask "discord"                     # Voice and text chat
 cask "notion"                      # Notes and project management
+cask "notion-calendar"             # Calendar client
 cask "arc"                         # Chromium-based browser
+cask "google-chrome"               # Second browser, also drives chrome-devtools MCP
+cask "slack"                       # Work chat; skhd binds it to ctrl+shift+cmd - s
+cask "linear"                      # Issue tracker; skhd binds it to ctrl+shift+cmd - l
+cask "signal"                      # Encrypted messaging
+cask "granola"                     # Meeting notes
+cask "figma"                       # Design
+cask "orbstack"                    # Containers and Linux VMs
+cask "superwhisper"                # Local dictation
+cask "1password-cli"               # `op` CLI
+cask "github@beta"                 # GitHub Desktop (beta channel)
+cask "bazecor"                     # Dygma Defy keyboard configurator (see VirtualDefy.json)
 
 # Fonts
 cask "font-fira-code-nerd-font"   # Monospace font with programming ligatures and icons
