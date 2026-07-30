@@ -1,4 +1,11 @@
 node_modules
-.tmux/plugins 
+.tmux/plugins
 network.out
-.opencode/plans/* 
+
+# opencode runtime state, not configuration. The README documents
+# `git add . && git commit` as the backup routine, which would otherwise commit
+# scheduler locks and scope paths named after work repos.
+.opencode/plans/*
+.config/opencode/logs/
+.config/opencode/jobs/
+.config/opencode/scheduler/scopes/

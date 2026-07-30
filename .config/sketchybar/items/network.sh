@@ -8,7 +8,7 @@ sketchybar --add item network_gap right \
 
 sketchybar --add item wifi_signal right \
 	--set wifi_signal script="$PLUGIN_DIR/wifi_signal.sh" \
-	update_freq=10 \
+	update_freq=30 \
 	padding_left="$NETWORK_ITEM_PADDING" \
 	padding_right="$NETWORK_ITEM_PADDING" \
 	icon.padding_left="$NETWORK_BOOKEND_ICON_PADDING" \
