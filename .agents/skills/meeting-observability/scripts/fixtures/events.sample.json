@@ -1,0 +1,5 @@
+[
+  { "summary": "A", "start": "2026-06-01T10:00:00+02:00", "end": "2026-06-01T11:00:00+02:00", "attendeeCount": 3, "isOrganizer": true, "responseStatus": "accepted", "isRecurring": false, "isAllDay": false },
+  { "summary": "B", "start": "2026-06-01T12:30:00+02:00", "end": "2026-06-01T13:00:00+02:00", "attendeeCount": 5, "isOrganizer": false, "responseStatus": "accepted", "isRecurring": true, "isAllDay": false },
+  { "summary": "C", "start": "2026-06-02T08:00:00+02:00", "end": "2026-06-02T08:30:00+02:00", "attendeeCount": 2, "isOrganizer": false, "responseStatus": "accepted", "isRecurring": false, "isAllDay": false }
+]
