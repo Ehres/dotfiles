@@ -9,6 +9,7 @@ tap "koekeishiya/formulae"         # For Yabai and Skhd
 brew "stow"                        # Symlink manager for dotfiles
 brew "git"                         # Version control
 brew "zsh"                         # Shell
+brew "bash"                        # Bash 5.x; macOS ships 3.2, tmux-powerkit needs >=5.2
 
 # Development Environment
 brew "neovim"                      # Modern Vim-based editor
