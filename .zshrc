@@ -104,11 +104,6 @@ export PATH="$PATH:$HOME/.rvm/bin"
 export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 export PATH="$PATH:$HOME/.cargo/bin"
 export EDITOR="nvim"
-FNM_PATH="/Users/$USER/.local/share/fnm"
-if [ -d "$FNM_PATH" ]; then
-  export PATH="/Users/$USER/.local/share/fnm:$PATH"
-  eval "$(fnm env --use-on-cd --version-file-strategy=recursive)"
-fi
 export ENHANCE_THEME=tokyo_night
 
 # java
@@ -162,8 +157,7 @@ alias kci="kubectl ctx int-infra-eks-cluster-eu-west-3"
 alias kcs="kubectl ctx stg-infra-eks-cluster-eu-west-3"
 alias kcp="kubectl ctx prd-infra-eks-cluster-eu-west-3"
 alias vi=nvim
-# alias oc="fnox --config ~/.config/opencode/fnox.toml exec -- opencode"
-alias oc="opencode --port"
+alias oc="fnox --config ~/.config/opencode/fnox.toml exec -- opencode"
 alias bubu='brew update && brew outdated && brew upgrade && brew cleanup'
 alias lg='lazygit'
 
