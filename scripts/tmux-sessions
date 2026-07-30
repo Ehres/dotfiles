@@ -11,4 +11,4 @@ ensure() { # ensure <session> <window> <cwd>
 }
 
 ensure "Work" "monorepo" "$HOME/projects/orus-monorepo"
-ensure "Perso & configs" "dotfiles" "$HOME/projects/dotfiles"
+ensure "Perso & Configs" "dotfiles" "$HOME/projects/dotfiles"
