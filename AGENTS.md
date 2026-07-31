@@ -55,8 +55,19 @@ brew bundle install                 # Install all Homebrew dependencies
 
 ### Validation
 
-There is no single health-check script; run whichever check matches what you
-touched.
+```bash
+./scripts/doctor.sh                 # Run this after changing any config
+./scripts/doctor.sh --quick         # Skips brew, stylua/shellcheck and nvim
+```
+
+`doctor.sh` is the check to run before claiming a config change works. Every
+check in it corresponds to something that was found broken *silently*: `stow`
+aborting on conflicts, Keychain secrets that never resolved, binaries a config
+depends on being absent, versioned Cellar paths, the tmux session-name mismatch,
+and README links pointing at files that do not exist. It exits non-zero on
+failures; warnings do not fail.
+
+Individual checks, if you want one in isolation:
 
 ```bash
 stow -n -v .                        # Symlink drift, and conflicts before `stow .`

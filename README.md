@@ -99,10 +99,7 @@ nvim                        # Neovim plugins
 ### 6. Validate
 
 ```bash
-stow -n -v .                          # No conflicts reported
-fnox --config .config/opencode/fnox.toml list   # Both secrets resolve
-brew bundle check --verbose            # Nothing missing
-nvim --headless "+checkhealth" +qa     # No real errors
+./scripts/doctor.sh
 ```
 
 </details>
@@ -120,11 +117,7 @@ kci/kcs/kcp # Kubernetes contexts
 
 ```bash
 # Health check
-stow -n -v .                           # Symlink drift
-brew bundle check --verbose             # Declared vs installed
-fnox --config .config/opencode/fnox.toml list
-stylua --check .config/nvim/
-shellcheck .config/sketchybar/plugins/*.sh .config/sketchybar/items/*.sh
+./scripts/doctor.sh
 
 # Update everything
 brew upgrade && brew cleanup
@@ -139,10 +132,13 @@ git add . && git commit -m "Update" && git push
 
 ## Scripts
 
+**`./scripts/doctor.sh`** - Health check; run it after changing config (`--quick` to skip the slow checks)  
 **`./scripts/tmux-sessions`** - Ensure the long-lived tmux sessions exist (idempotent)  
 **`./scripts/tmux-popup`** - Back the `display-popup` bindings, passing Escape through  
 **`./scripts/tmux-dash-toggle`** - Toggle in and out of the `gh dash` session  
 **`./scripts/wifi-rssi.swift`** - Wi-Fi RSSI helper, compiled on demand by SketchyBar  
+**`./scripts/claude-bash-guard.sh`** - `PreToolUse` hook blocking irreversible shell commands  
+**`./scripts/claude-notify.sh`** - `Stop` hook posting a macOS notification when a run ends  
 **`./scripts/regenerate-tailles.mjs`** - Regenerate Notion pruning reminders
 
 ## Notes
