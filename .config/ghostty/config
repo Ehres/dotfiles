@@ -7,3 +7,21 @@ macos-option-as-alt = false
 background = #1b1d2a
 window-padding-y = 4,0
 window-padding-color = background
+
+# Notify when a long command finishes in a window that is not focused. Worth
+# having with Claude Code and opencode, where a run can outlast your attention.
+# Defaults are never / 5s / bell,no-notify. Note this merges rather than
+# replaces: `notify` here resolves to `bell,notify`, so the bell is still rung
+# alongside the macOS notification -- confirmed with `ghostty +show-config`.
+notify-on-command-finish = unfocused
+notify-on-command-finish-after = 10s
+notify-on-command-finish-action = notify
+
+# Adds `sudo` to the feature set (the default is no-sudo) so terminfo survives
+# across sudo. Verified with `ghostty +show-config`: naming features merges with
+# the defaults rather than replacing them, so the ssh ones stay at their default
+# no-ssh-env,no-ssh-terminfo without needing to be listed.
+shell-integration-features = cursor,sudo,title,path
+
+# Restore windows across restarts.
+window-save-state = always
