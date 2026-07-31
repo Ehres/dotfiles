@@ -8,11 +8,18 @@ background = #1b1d2a
 window-padding-y = 4,0
 window-padding-color = background
 
-# Notify when a long command finishes in a window that is not focused. Worth
-# having with Claude Code and opencode, where a run can outlast your attention.
-# Defaults are never / 5s / bell,no-notify. Note this merges rather than
-# replaces: `notify` here resolves to `bell,notify`, so the bell is still rung
-# alongside the macOS notification -- confirmed with `ghostty +show-config`.
+# Notify when a command over 10s finishes in an unfocused window.
+#
+# DOES NOT FIRE UNDER TMUX, which is nearly always here. It needs OSC 133 to
+# know where commands begin and end, and tmux absorbs OSC 133 rather than
+# relaying it to the host terminal -- measured by capturing what tmux writes to
+# its outer pty while a program inside emitted the sequence: zero relayed.
+# Kept because it costs nothing and does work in a plain Ghostty window, i.e.
+# one started with NO_TMUX=1.
+#
+# Defaults are never / 5s / bell,no-notify. Values merge rather than replace, so
+# `notify` resolves to `bell,notify` and the bell still rings alongside the
+# notification -- use no-bell,notify to silence it.
 notify-on-command-finish = unfocused
 notify-on-command-finish-after = 10s
 notify-on-command-finish-action = notify

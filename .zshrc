@@ -144,3 +144,14 @@ function y() {
 
 # Bun
 export PATH="$HOME/.local/bin:$PATH"
+
+# Ghostty shell integration.
+# Ghostty auto-injects this only into the shell it spawns itself; the block at
+# the top of this file ends in `exec tmux attach`, so every interactive shell
+# here is created by tmux instead and the integration never ran. Without it
+# nothing emits OSC 133 (powerlevel10k does not), which is what
+# notify-on-command-finish and shell-integration-features=sudo both depend on.
+# Sourced last so its precmd/preexec hooks compose on top of p10k's.
+if [[ -n $GHOSTTY_RESOURCES_DIR ]]; then
+  source "$GHOSTTY_RESOURCES_DIR"/shell-integration/zsh/ghostty-integration
+fi
