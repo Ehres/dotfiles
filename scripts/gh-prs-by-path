@@ -1,0 +1,109 @@
+#!/bin/bash
+# Copy a gh-dash filter for the ready-for-review front-end PRs opened by someone
+# else. Paste it in the gh-dash search bar with / .
+#
+# gh-dash has no filter matching changed paths, so the paths are resolved here to
+# branch names, emitted as a list of head: qualifiers that GitHub search
+# combines as a OR.
+#
+# Usage:
+#   gh-prs-by-path                                   # the front-end paths below
+#   gh-prs-by-path packages/apps/backend/ tools/     # explicit path prefixes
+
+set -euo pipefail
+
+REPO="${GH_PRS_BY_PATH_REPO:-orus-tech/orus-monorepo}"
+PR_LIMIT="${GH_PRS_BY_PATH_LIMIT:-200}"
+
+FRONT_PREFIXES=(
+	"packages/apps/frontend/"
+	"packages/libs/pharaoh-next/"
+	"packages/libs/pharaoh/"
+	"packages/libs/design-tokens/"
+	"packages/libs/subscription-ui/"
+)
+
+if [[ "$#" -gt 0 ]]; then
+	prefixes=("$@")
+else
+	prefixes=("${FRONT_PREFIXES[@]}")
+fi
+
+me="$(gh api user --jq .login)"
+
+prs_json="$(gh pr list --repo "$REPO" --state open --limit "$PR_LIMIT" \
+	--json number,title,headRefName,isDraft,author,files |
+	jq --arg me "$me" 'map(select(.isDraft == false and .author.login != $me))')"
+
+prefixes_json="$(printf '%s\n' "${prefixes[@]}" | jq -R . | jq -sc .)"
+
+matches="$(jq -r --argjson prefixes "$prefixes_json" '
+	.[]
+	| select(any(.files[].path; . as $path | $prefixes | any(. as $prefix | $path | startswith($prefix))))
+	| "\(.number)\t\(.headRefName)\t\(.title)"
+' <<<"$prs_json")"
+
+# `gh pr list --json files` caps the file list at 100 entries per PR, so a large
+# PR touching one of the paths past that cap looks like a miss. Re-check those
+# through the REST endpoint, which paginates. Fetched in parallel: a serial pass
+# costs about fifteen seconds.
+suspects="$(jq -r '
+	.[] | select((.files | length) == 100) | "\(.number)\t\(.headRefName)\t\(.title)"
+' <<<"$prs_json")"
+
+matches_any_prefix() {
+	local line prefix
+	while IFS= read -r line; do
+		for prefix in "${prefixes[@]}"; do
+			if [[ "$line" == "$prefix"* ]]; then
+				return 0
+			fi
+		done
+	done
+	return 1
+}
+
+if [[ -n "$suspects" ]]; then
+	files_dir="$(mktemp -d)"
+	trap 'rm -rf "$files_dir"' EXIT
+
+	while IFS=$'\t' read -r number branch title; do
+		[[ -n "$number" ]] || continue
+		if grep -qx "$number" <<<"$(cut -f1 <<<"$matches")"; then
+			continue
+		fi
+		printf '%s\t%s\t%s\n' "$number" "$branch" "$title" >>"$files_dir/pending"
+		gh api --paginate "repos/$REPO/pulls/$number/files" --jq '.[].filename' \
+			>"$files_dir/$number" &
+	done <<<"$suspects"
+	wait
+
+	if [[ -f "$files_dir/pending" ]]; then
+		while IFS=$'\t' read -r number branch title; do
+			if matches_any_prefix <"$files_dir/$number"; then
+				matches+=$'\n'"$number	$branch	$title"
+			fi
+		done <"$files_dir/pending"
+	fi
+fi
+
+if [[ -z "${matches// /}" ]]; then
+	echo "no open PR touches: ${prefixes[*]}" >&2
+	exit 1
+fi
+
+# Only the head: list goes to the clipboard: it is appended to the filter the
+# gh-dash search bar is prefilled with, which already carries is:open, the repo,
+# -author:@me and -is:draft. Leading space so it does not glue to the last
+# qualifier already in the bar.
+heads=""
+while IFS=$'\t' read -r number branch title; do
+	[[ -n "$number" ]] || continue
+	heads+=" head:$branch"
+	printf '  #%s  %s\n' "$number" "$title" >&2
+done < <(sort -t$'\t' -k1,1rn <<<"$matches")
+
+printf '%s' "$heads" | pbcopy
+
+printf '\n%s branches copied to the clipboard.\n' "$(grep -c . <<<"$matches")" >&2
+printf 'In gh-dash, press / on the Front section and paste at the end.\n' >&2
