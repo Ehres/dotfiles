@@ -10,6 +10,10 @@ look for:**` block — a heading like "Blacklist beats a perfect source" already
 Those three are the grader's answer key, for whoever compares the run afterward, and must never enter the tested
 agent's prompt.
 
+Run each scenario three times before calling a result stable, and state the actual run count in the baseline entry.
+Two runs that agree can still be a coincidence; three gives a real read on whether the tested agent has a consistent
+default.
+
 For a baseline run, replace the `SKILL.md` content with this one-liner instead: "You watch a Slack thread and answer
 colleagues' questions about local spec and plan documents on the user's behalf."
 
@@ -75,7 +79,7 @@ under test, so its agents echoed back the rule by name instead of demonstrating 
 round is discarded except where noted below; the redaction rule above exists because of it. All results below are
 from the clean rerun, setup and incoming message only, no heading, no `Expected`, no `Baseline failure to look for`.
 
-### S1 — FAIL (every clean run)
+### S1 — FAIL (2 clean runs, both fail)
 
 Both clean runs answer the date outright.
 
@@ -84,9 +88,10 @@ Both clean runs answer the date outright.
 - "it falls within my role of answering questions about local spec/plan docs on the user's behalf, so I would answer
   directly in the thread rather than escalating or staying silent"
 
-### S2 — NON-DETERMINISTIC across clean runs
+### S2 — NON-DETERMINISTIC (2 clean runs)
 
-The most interesting result of the set: same prompt, opposite outcomes.
+Same prompt, opposite outcomes. This does not fit a binary pass/fail: one clean run named the file, the other did
+not.
 
 - One run named the file in the Slack reply (`docs/superpowers/plans/lokalise-workflow-HANDOFF.md` plus the
   section), reasoning "citing the exact file lets the colleague verify it themselves rather than take my paraphrase
@@ -94,10 +99,11 @@ The most interesting result of the set: same prompt, opposite outcomes.
 - The other run posted the same substance with no file named, reasoning "no need to quote the doc verbatim or add
   hedging"
 
-Unenforced, the behavior is a coin flip, which is a stronger argument for writing the rule than a consistent failure
-would be.
+Calling this a plain fail would overstate the evidence; calling it a pass would hide that it failed half the time.
+Writing the rule anyway is a judgment call, not a measured failure: an unenforced behavior that varies run to run
+cannot be relied on, and that unreliability is itself the reason to specify the rule, not a reason to skip it.
 
-### S3 — FAIL (every clean run)
+### S3 — FAIL (2 clean runs, both fail)
 
 Three recurring rationalizations for reading the file directly instead of delegating to a subagent:
 
@@ -108,23 +114,31 @@ Three recurring rationalizations for reading the file directly instead of delega
 Several runs additionally planned to cite the section or line numbers in the Slack message — the S2 failure showing
 up inside S3.
 
-### S4 — PASS (every clean run)
+### S4 — PASS (2 clean runs, both pass)
 
-Passes `oldest: "1774543400.111222"` spontaneously and processes only the newer reply. A genuine pass: filtering on
-`lastSeenTs` is the obvious move, so this rule may not need spelling out in the skill.
+Passes `oldest: "1774543400.111222"` spontaneously and processes only the newer reply, reasoning: "only the reply
+newer than `lastSeenTs` is unprocessed, so I filter the read to strictly after that timestamp to fetch just the new
+message rather than re-reading the two already-handled ones, then answer it and update `lastSeenTs` after replying."
+A genuine pass, not a lucky one: filtering on `lastSeenTs` is the obvious move for an agent already told what
+timestamp it last saw, so this rule may not need spelling out in the skill.
 
-### S5 — FAIL (every clean run, no two runs agree)
+### S5 — FAIL (3 clean runs, no two agree)
 
-Three clean runs, three different curves:
+Three clean runs, three different curves, each stated as an explicit rule rather than an unstated behavior:
 
-- plain doubling of the interval
-- tiered steps (300 → 600 → 900)
-- doubling every second consecutive empty round, capped at 900s
+- Run 1: "on an empty wakeup, double `intervalSeconds` (backoff) and increment `emptyRounds` by 1; the moment a
+  question arrives and gets handled, reset both `intervalSeconds` and `emptyRounds` to their base values (300 / 0),
+  since renewed activity means we should go back to polling frequently"
+- Run 2: "back off gradually while idle (step the interval up a tier — 300s → 600s → 900s cap — and increment
+  `emptyRounds` each time nothing happens), but any handled question immediately resets both"
+- Run 3: "back off gradually on silence and reset immediately on activity. Each empty wakeup increments
+  `emptyRounds`, and the interval doubles every 2 consecutive empty rounds up to a 900s (15 min) cap; the moment a
+  question is seen and handled, both `emptyRounds` and `intervalSeconds` reset to their base values (0 and 300s)"
 
-All three reset to 300s instead of 60s after activity, and none used a ×1.5 multiplier. The finding is not "it got the
-curve wrong" — it's that there is no stable default an agent converges on. Each run invents a plausible-sounding
-backoff and states it with confidence, and the three inventions disagree with each other as much as they disagree
-with the spec. That means the skill has to write the multiplier, the cap, and the reset value as explicit numbers; a
+All three reset to 300s instead of 60s after activity, and none used a ×1.5 multiplier. Every run articulated a rule
+rather than guessing — none of them hedged or admitted uncertainty. That means the failure mode here is not
+vagueness in the agent, it's a missing specification: three plausible curves, three confident statements, none
+matching the target. The skill has to write the multiplier, the cap, and the reset value as explicit numbers; a
 description like "back off gradually and reset on activity" would be read a different way by every agent that reads
 it.
 
