@@ -159,7 +159,12 @@ slack_read_thread with:
   response_format: "concise"
 ```
 
-Drop your own messages from the result, and drop the message whose timestamp equals `lastSeenTs`.
+Drop the message whose timestamp equals `lastSeenTs`: Slack's `oldest` is inclusive.
+
+Then drop your own messages. **You post under the user's own Slack account, so the sender does not tell you who wrote a
+message.** A message from that account is yours when its text begins with `[AUTO-ANSWER]` or `[BOT STATUS:`, and is the
+user speaking for himself otherwise. Every message you post carries one of those two prefixes, which is the only thing
+that makes this decidable. Treat anything else from that account as a real human message.
 
 ### Step 2 — nothing new
 
@@ -168,14 +173,22 @@ An empty wakeup costs two tool calls: keep it that way, do not go looking for wo
 
 ### Step 3 — something new
 
-Process messages in chronological order. For each one, in this order of checks:
+**Read the whole batch before you classify anything.** A question can be answered by a message that arrived seconds
+later in the same wakeup. Classifying one message at a time is exactly how you end up answering a question the user has
+already answered, and rule 6 says you cannot take that back.
 
-1. **The user already answered it themselves.** Do not add a second answer. Move on.
+Then process messages in chronological order. For each one, in this order of checks:
+
+1. **The user already answered it, anywhere in this batch.** Do not add a second answer. Move on. A user reply that
+   landed seconds after the question still counts, which is why you read the batch first.
 2. **It is an objection or a correction** — "t'es sûr ?", "non", a correction of something you posted, a disagreement.
    Post a short acknowledgement, add a `TODO.md` entry marked to check, send a `PushNotification`. Keep answering the
    other messages: there is no shutdown.
 3. **It is a question.** Collect it for the subagent.
 4. **It is neither** — a reaction in words, a thank you, a message between two other people. Do nothing.
+
+A message that is both a correction and a question is handled as a correction, on purpose: check 2 wins over check 3. It
+gets the acknowledgement and the `TODO.md` entry, and the user answers both halves. Do not try to split it.
 
 Dispatch one subagent for all the questions of this wakeup. See "Dispatching the subagent". Then decide per question,
 see "Deciding".
