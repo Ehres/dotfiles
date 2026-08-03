@@ -78,6 +78,8 @@ headings (e.g. "Blacklist beats a perfect source") were pasted into the tested a
 under test, so its agents echoed back the rule by name instead of demonstrating their own default behavior. That
 round is discarded except where noted below; the redaction rule above exists because of it. All results below are
 from the clean rerun, setup and incoming message only, no heading, no `Expected`, no `Baseline failure to look for`.
+This baseline was recorded before the three-run policy above existed, which is why most entries below show two runs;
+the policy governs re-runs from now on.
 
 ### S1 — FAIL (2 clean runs, both fail)
 
