@@ -58,7 +58,7 @@ State travels in the `ScheduleWakeup` prompt, never in a file on disk.
   "rootTs": "1774543365.655319",
   "bannerTs": "1774543400.111222",
   "bannerLink": "https://orus-insurance.slack.com/archives/C02GDHPF1RR/p1774543400111222",
-  "lastSeenTs": "1774543400.111222",
+  "lastSeenTs": "1774543390.000100",
   "intervalSeconds": 300,
   "emptyRounds": 0,
   "sources": ["docs/superpowers/plans/2026-07-30-lokalise-workflow-step-2.md"],
@@ -78,16 +78,19 @@ is the first.
 Pull out: the message link or the channel plus subject, the keyword, any explicit paths, and the `--dry-run` flag. If the
 keyword and the explicit paths are both missing, ask the user for a keyword and stop.
 
+If `--dry-run` is set, stop reading this section after step 3 and go to "Dry run".
+
 ### Step 2 — check the repo
 
 ```bash
-git rev-parse --show-toplevel
+repoRoot=$(git rev-parse --show-toplevel)
 ```
 
-If it fails, stop: not a git repo. Then confirm the repo holds superpowers documents:
+If it fails, stop: not a git repo. Then confirm the repo holds superpowers documents, using the captured root rather
+than the cwd:
 
 ```bash
-ls docs/superpowers
+ls "$repoRoot/docs/superpowers"
 ```
 
 If that directory does not exist, tell the user and stop. Do not guess another location.
@@ -133,7 +136,7 @@ Some things always come back to me, among them dates, costs, customer data, desi
 If it gets something wrong, say so and I will pick it up.
 ```
 
-No em dash in this text. The list is deliberately open ("among them"), because the enforced blacklist in Task 4 is
+No em dash in this text. The list is deliberately open ("among them"), because the enforced blacklist below is
 broader than these five and a closed list here would become a promise the skill breaks.
 
 ### Step 6 — create the work directory and tell the user
@@ -146,7 +149,9 @@ Create `TODO.md` and `journal.md` with a one-line header each. Print the path.
 
 ### Step 7 — schedule the first wakeup
 
-`intervalSeconds` starts at 300, `emptyRounds` at 0. Go to "Scheduling the next wakeup".
+`intervalSeconds` starts at 300, `emptyRounds` at 0. Go to "Scheduling the next wakeup". If scheduling fails,
+immediately post `[BOT STATUS: OFF]` in the thread and tell the user, because the banner is already up and nothing is
+polling.
 
 ## On each wakeup
 
@@ -163,7 +168,8 @@ slack_read_thread with:
   response_format: "concise"
 ```
 
-Drop the message whose timestamp equals `lastSeenTs`: Slack's `oldest` is inclusive.
+Drop every message whose timestamp is not strictly greater than `lastSeenTs`. Slack's `oldest` is inclusive, and the
+thread parent comes back on every read whatever `oldest` says.
 
 Then drop your own messages. **You post under the user's own Slack account, so the sender does not tell you who wrote a
 message.** A message from that account is yours when its text begins with `[AUTO-ANSWER]` or `[BOT STATUS:`, and is the
@@ -188,12 +194,24 @@ Then process messages in chronological order. For each one, in this order of che
 2. **It is an objection or a correction** — "t'es sûr ?", "non", a correction of something you posted, a disagreement.
    Post a short acknowledgement, add a `TODO.md` entry marked to check, send a `PushNotification`. Keep answering the
    other messages: there is no shutdown. **The acknowledgement carries the `[AUTO-ANSWER]` prefix too**, see "Deciding"
-   for its exact text. Every message you post carries a prefix, with no exception: an unprefixed message is
-   indistinguishable from the user's own words on the next wakeup, and there is no way to correct that afterwards.
-3. **It is a question.** Collect it for the subagent.
-4. **It is neither** — a reaction in words, a thank you, a message between two other people. Do nothing.
+   for its exact text. Every message you post carries a prefix, with no exception except the `#channel` opening
+   message in Startup step 4: that one becomes `rootTs` itself, so it is never mistaken for a later message, and it
+   is filtered out by definition, not by prefix. Anywhere else, an unprefixed message is indistinguishable from the
+   user's own words on the next wakeup, and there is no way to correct that afterwards.
+3. **It is a request for action** — an imperative, a favor, anything phrased as "do this" rather than "what is this",
+   whether or not it names the user. Post the acknowledgement, add a `TODO.md` entry, send a `PushNotification`, same
+   as check 2. The banner promises colleagues that requests for action always come back to the user; this check is
+   what keeps that promise.
+4. **It is a question.** Collect it for the subagent.
+5. **It is none of the above** — no question, no objection, no request for action, and no message addressed to the
+   user: a reaction in words, a thank you, a message between two other people that asks nothing. Do nothing.
 
-A message that is both a correction and a question is handled as a correction, on purpose: check 2 wins over check 3. It
+A question addressed by name to someone other than the user is still a question, not "a message between two other
+people": check 4 catches it and sends it to the subagent, and the blacklist marks it for an acknowledgement in
+"Deciding". Check 5 never overrides that; it only catches messages that are not a question, not an objection, and not
+a request for action.
+
+A message that is both a correction and a question is handled as a correction, on purpose: check 2 wins over check 4. It
 gets the acknowledgement and the `TODO.md` entry, and the user answers both halves. Do not try to split it.
 
 Dispatch one subagent for all the questions of this wakeup. See "Dispatching the subagent". Then decide per question,
@@ -245,7 +263,7 @@ Questions, each with its Slack timestamp:
 <one per line: ts — question text>
 
 Useful thread context:
-<the last few messages, verbatim>
+<the messages of this wakeup's batch, verbatim, and nothing else>
 
 Rules:
 - Answer only from the files listed above. Nothing else in the repo, nothing from your own knowledge.
@@ -256,6 +274,7 @@ Rules:
 - Write the answer in the language of the question.
 - The answer must not name a file, a path, a document, or a line number, and must not quote verbatim. It will be posted
   in a Slack thread where those documents are not shared.
+- No em dash in the answer text.
 
 Return one JSON object per question, and nothing else:
 {
@@ -302,6 +321,9 @@ Only once the blacklist is clear, post an answer if, and only if, all three hold
 - `sourceFile` and `sourcePassage` are both non-empty
 - `sensitiveTopics` is empty
 
+If `answer` names a file, a path, a `.md`, a document title, a section or a line number, or contains a block quote, do
+not post it. Acknowledge instead and write a `TODO.md` entry saying the draft leaked a source.
+
 The message, via `slack_send_message` with `thread_ts: rootTs`:
 
 ```
@@ -319,7 +341,8 @@ journalling it are one step, not two independent instructions: rule 2 keeps the 
 the journal is the only place the grounding of an answer exists at all. An answer with no matching journal entry is
 indistinguishable, after the fact, from a claim nobody can check.
 
-Otherwise post an acknowledgement, in the thread's language, with no content and no commitment:
+Otherwise post an acknowledgement, in the thread's language, with no content and no commitment (example below is for
+a French thread):
 
 ```
 [AUTO-ANSWER]
@@ -331,9 +354,13 @@ Then add a `TODO.md` entry and send a `PushNotification`.
 An acknowledgement carries no content, so it cannot misrepresent the user. An answer can. That asymmetry is the whole
 reason the acknowledgement exists.
 
+A send that errors is never retried. Write it to `TODO.md`, notify, move on. Journal only what the send confirmed.
+
 ## Writing the two local files
 
-Both live in the work directory, both are append-only. You never write anywhere else, and never inside the repo.
+Both live in the work directory, both are append-only. You never write anywhere else, and never inside the repo. Append
+with Bash, `cat >> <file> <<'EOF' ... EOF`, or Read-then-Write. `Write` alone truncates the file: never use it by
+itself for either of these two files.
 
 `TODO.md` — what is waiting for the user:
 

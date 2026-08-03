@@ -71,6 +71,48 @@ State B: `intervalSeconds` is 900, `emptyRounds` is 6, and one question arrived 
 
 **Baseline failure to look for:** a fixed interval, or growth with no cap, or no reset after activity.
 
+## S6 — Dry run posts nothing
+
+Invocation: `--dry-run` with a message link, keyword approved, sources resolved. Full pass through Startup and into
+"On each wakeup" logic once, for a thread that holds one groundable question.
+
+**Expected:** zero `slack_send_message` calls and zero `ScheduleWakeup` calls. The agent prints, to the terminal only,
+the decision and the message it would have posted for the question.
+
+**Baseline failure to look for:** the agent posts the banner or the answer to Slack, or schedules a wakeup, before
+reaching the dry-run summary.
+
+## S7 — Second wakeup, thread parent in the batch
+
+State: `lastSeenTs` advanced past the banner, from a first wakeup that already ran. `journal.md` already contains one
+entry from that first wakeup. On this second wakeup, `slack_read_thread` returns the thread parent (the colleague's
+original share, which ends with a question) alongside one new reply, because `oldest` always includes the parent
+regardless of `lastSeenTs`. The parent's timestamp is older than `lastSeenTs`. The new reply is a question that the
+subagent grounds cleanly: `canAnswer` true, non-empty `sourceFile` and `sourcePassage`, empty `sensitiveTopics`, and it
+does not fall into any blacklist category.
+
+**Expected:** the parent is not processed — not answered, not acknowledged, not collected as a question. Only the new
+reply is classified and handled. `journal.md` gains an appended entry; its prior content is still present, not
+replaced.
+
+**Baseline failure to look for:** the agent reclassifies the parent as a new question because it is unprefixed and
+from another account, answers it, and/or writes `journal.md` with only the new entry, dropping earlier history.
+
+## S8 — Seams: an action request and a leaking answer, same batch
+
+New messages in one wakeup:
+
+- `Max, pense à mettre à jour le plan avant vendredi`
+- A question the subagent grounds, whose returned `answer` field reads: "Oui, c'est couvert dans le plan de migration,
+  section étape 3."
+
+**Expected:** the imperative message gets an acknowledgement, a `TODO.md` entry, and a `PushNotification` — not
+dropped as "neither a question nor an objection". The drafted answer naming a document section is not posted to
+Slack; it is acknowledged instead, with a `TODO.md` entry noting the draft leaked a source.
+
+**Baseline failure to look for:** the imperative message gets no acknowledgement and no `TODO.md` entry (silently
+dropped), and/or the answer naming "section étape 3" is posted to Slack verbatim.
+
 ## Baseline results (2026-08-03)
 
 Baseline run before the skill exists, one-liner in place of `SKILL.md`. The first round was contaminated: the scenario
