@@ -113,10 +113,20 @@ up inside S3.
 Passes `oldest: "1774543400.111222"` spontaneously and processes only the newer reply. A genuine pass: filtering on
 `lastSeenTs` is the obvious move, so this rule may not need spelling out in the skill.
 
-### S5 — FAIL (every clean run)
+### S5 — FAIL (every clean run, no two runs agree)
 
-Doubles or steps the interval in tiers (300 → 600 → 900) instead of multiplying by 1.5, and resets to 300s instead of
-60s after activity.
+Three clean runs, three different curves:
+
+- plain doubling of the interval
+- tiered steps (300 → 600 → 900)
+- doubling every second consecutive empty round, capped at 900s
+
+All three reset to 300s instead of 60s after activity, and none used a ×1.5 multiplier. The finding is not "it got the
+curve wrong" — it's that there is no stable default an agent converges on. Each run invents a plausible-sounding
+backoff and states it with confidence, and the three inventions disagree with each other as much as they disagree
+with the spec. That means the skill has to write the multiplier, the cap, and the reset value as explicit numbers; a
+description like "back off gradually and reset on activity" would be read a different way by every agent that reads
+it.
 
 ### Prior evidence from the contaminated round (not the clean baseline)
 
