@@ -57,6 +57,7 @@ State travels in the `ScheduleWakeup` prompt, never in a file on disk.
   "channelId": "C02GDHPF1RR",
   "rootTs": "1774543365.655319",
   "bannerTs": "1774543400.111222",
+  "bannerLink": "https://orus-insurance.slack.com/archives/C02GDHPF1RR/p1774543400111222",
   "lastSeenTs": "1774543400.111222",
   "intervalSeconds": 300,
   "emptyRounds": 0,
@@ -119,7 +120,10 @@ started are never processed.
 ### Step 5 — post the banner
 
 `slack_send_message` with `thread_ts: rootTs`. Keep it short, in the thread's language. Store the returned timestamp as
-`bannerTs`.
+`bannerTs`, **and the message link the send returns as `bannerLink`.** Capture it now or you never can: the user has to
+hand-edit this exact message at stop time, and nothing in the state lets you rebuild a URL from a channel id and a
+timestamp. If the response carries no link, leave `bannerLink` empty and say so at stop time rather than guessing a
+workspace name.
 
 ```
 [BOT STATUS: ON]
@@ -370,13 +374,19 @@ The agent is no longer watching this thread. Ping me directly.
 ```
 
 2. Remind the user to edit the banner message by hand and change `[BOT STATUS: ON]` to `[BOT STATUS: OFF]`. Slack gives
-   you no way to edit a posted message, so this gesture is theirs. Give them the banner's link.
+   you no way to edit a posted message, so this gesture is theirs. Give them `bannerLink`. If `bannerLink` is empty,
+   **do not invent a URL**: name the channel and quote `bannerTs` so they can find the message themselves. A guessed
+   workspace name sends them to a page that does not exist.
 3. Summarize: questions answered, acknowledgements posted, entries waiting in `TODO.md`, path to both files.
 
 If the session dies without an exit sequence, the recovery gesture is the same one — edit the banner. That is why there is
 no automatic time limit.
 
 ## Dry run
+
+`--dry-run` **requires an existing thread, so it only accepts the message-link form.** Refuse
+`--dry-run` with `#channel` and say why: opening a thread means posting its first message, and a dry run that posts is
+not a dry run. Stop and ask for a message link instead.
 
 `--dry-run` is a **single pass, no loop**. Resolve the sources, read the thread from its start, dispatch the subagent,
 then print to the terminal, for each question: the decision, the message you would have posted, and the `TODO.md` or
