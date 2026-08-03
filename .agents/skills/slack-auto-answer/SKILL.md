@@ -309,6 +309,12 @@ Post the `answer` field exactly as the subagent returned it. Do not add a file n
 quote to make it more convincing or more verifiable: rule 2 already forbids naming a source, and "citing it so they can
 check for themselves" is that same rule breaking under the pressure to sound authoritative, not an exception to it.
 
+**Immediately after that send, add the `journal.md` entry** for this question, using the exact `sourceFile` and
+`sourcePassage` the subagent returned. See "Writing the two local files" for the format. Posting the answer and
+journalling it are one step, not two independent instructions: rule 2 keeps the source out of the thread, which means
+the journal is the only place the grounding of an answer exists at all. An answer with no matching journal entry is
+indistinguishable, after the fact, from a claim nobody can check.
+
 Otherwise post an acknowledgement, in the thread's language, with no content and no commitment:
 
 ```
@@ -320,3 +326,62 @@ Then add a `TODO.md` entry and send a `PushNotification`.
 
 An acknowledgement carries no content, so it cannot misrepresent the user. An answer can. That asymmetry is the whole
 reason the acknowledgement exists.
+
+## Writing the two local files
+
+Both live in the work directory, both are append-only. You never write anywhere else, and never inside the repo.
+
+`TODO.md` — what is waiting for the user:
+
+```markdown
+## <ISO date and time> — <acknowledgement | to check>
+
+**Question** (<author>, <slack message link>): <the question>
+
+**Why it did not get an answer:** <blacklist category, or no groundable passage, or an objection to check>
+```
+
+`journal.md` — the trace of every answer that went out:
+
+```markdown
+## <ISO date and time>
+
+**Question** (<author>): <the question>
+
+**Sent:** <the exact message body>
+
+**Grounded in:** `<sourceFile>`
+
+> <sourcePassage>
+```
+
+The journal is what makes rule 2 acceptable. Nothing in the thread lets a reader check an answer, so the check happens
+here, afterwards, by the user. Never skip it, and never summarize the passage.
+
+## Stopping
+
+The user stops you. Tell them to say so rather than killing the terminal, because you have an exit sequence:
+
+1. Post the closing message with `slack_send_message`:
+
+```
+[BOT STATUS: OFF]
+The agent is no longer watching this thread. Ping me directly.
+```
+
+2. Remind the user to edit the banner message by hand and change `[BOT STATUS: ON]` to `[BOT STATUS: OFF]`. Slack gives
+   you no way to edit a posted message, so this gesture is theirs. Give them the banner's link.
+3. Summarize: questions answered, acknowledgements posted, entries waiting in `TODO.md`, path to both files.
+
+If the session dies without an exit sequence, the recovery gesture is the same one — edit the banner. That is why there is
+no automatic time limit.
+
+## Dry run
+
+`--dry-run` is a **single pass, no loop**. Resolve the sources, read the thread from its start, dispatch the subagent,
+then print to the terminal, for each question: the decision, the message you would have posted, and the `TODO.md` or
+`journal.md` entry you would have written.
+
+Post nothing. Create no file. Call no `ScheduleWakeup`.
+
+Use it before the first real run, and after any change to the blacklist or to the decision rule.
