@@ -68,7 +68,9 @@ State travels in the `ScheduleWakeup` prompt, never in a file on disk.
 
 ## Startup
 
-Nothing is posted to Slack before step 5.
+Nothing is posted to Slack before the user has approved the source list in step 3. In `#channel` mode the
+thread-opening post in step 4 is the first Slack write, and it is deliberate. In message-link mode the banner in step 5
+is the first.
 
 ### Step 1 — parse the arguments
 
@@ -123,9 +125,12 @@ started are never processed.
 [BOT STATUS: ON]
 An agent is answering questions about this topic in this thread on my behalf.
 It answers what it can ground in our internal documents.
-It does not handle dates, costs, customer data, design decisions or requests for action — those come back to me.
+Some things always come back to me, among them dates, costs, customer data, design decisions and requests for action.
 If it gets something wrong, say so and I will pick it up.
 ```
+
+No em dash in this text. The list is deliberately open ("among them"), because the enforced blacklist in Task 4 is
+broader than these five and a closed list here would become a promise the skill breaks.
 
 ### Step 6 — create the work directory and tell the user
 
@@ -137,4 +142,4 @@ Create `TODO.md` and `journal.md` with a one-line header each. Print the path.
 
 ### Step 7 — schedule the first wakeup
 
-`intervalSeconds` starts at 300. Go to "Scheduling the next wakeup".
+`intervalSeconds` starts at 300, `emptyRounds` at 0. Go to "Scheduling the next wakeup".
