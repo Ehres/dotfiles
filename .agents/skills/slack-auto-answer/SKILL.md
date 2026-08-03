@@ -214,3 +214,109 @@ Then **exit the turn**. Do not sleep, do not poll, do not keep the turn alive wa
 
 The curve, for reference: after activity it goes 60 → 90 → 135 → 202 → 303 → 454 → 681 → 900, and stays at 900. Startup
 enters at 300.
+
+## Dispatching the subagent
+
+One subagent per wakeup that has questions. `subagent_type: "Explore"` because it is read-only by construction, which is
+what enforces rule 1. `model: "sonnet"`: reading markdown and drafting a reply does not need more.
+
+```
+Agent({
+  subagent_type: "Explore",
+  model: "sonnet",
+  description: "ground thread questions in sources",
+  prompt: <the template below>
+})
+```
+
+Template, filled with the state and the new messages:
+
+```
+You are answering questions asked in a Slack thread, using ONLY these files:
+<one path per line, from state.sources>
+
+Repo root: <repoRoot>
+
+Questions, each with its Slack timestamp:
+<one per line: ts — question text>
+
+Useful thread context:
+<the last few messages, verbatim>
+
+Rules:
+- Answer only from the files listed above. Nothing else in the repo, nothing from your own knowledge.
+- If a listed file has later versions (round2, round3, a more recent revision of the same subject), read those too
+  before answering. A keyword match can land on a version that has since been corrected.
+- Set canAnswer to false rather than writing a hedged answer. A cautious answer on a question you cannot ground will be
+  read as an answer.
+- Write the answer in the language of the question.
+- The answer must not name a file, a path, a document, or a line number, and must not quote verbatim. It will be posted
+  in a Slack thread where those documents are not shared.
+
+Return one JSON object per question, and nothing else:
+{
+  "ts": "<the question's timestamp>",
+  "question": "<as asked>",
+  "canAnswer": true | false,
+  "answer": "<ready to post, or empty>",
+  "sourceFile": "<the file that grounds it, or empty>",
+  "sourcePassage": "<the exact passage, for the local journal>",
+  "sensitiveTopics": ["<blacklist categories you noticed in the question>"]
+}
+```
+
+The subagent posts nothing, writes nothing, decides nothing. It reports facts. The decision is yours.
+
+## Blacklist
+
+Check this list before you check grounding, on every question, whether or not the subagent flagged it in
+`sensitiveTopics`. These always get an acknowledgement, never an answer, **even when a source states them plainly**:
+
+- dates, deadlines, planning
+- costs, estimates, effort
+- customer or personal data
+- security
+- anything that questions the design or asks for a decision
+- any request for action
+- any question addressed by name to someone other than the user
+
+A well-sourced answer to a blacklisted question is still blacklisted. The source only speaks to whether an answer would
+be accurate, never to whether posting it is allowed, and an explicit, authoritative-looking source makes a question
+feel safer to answer, not less: that is precisely the case this list exists to catch. This is the rule agents break
+first, so check it first, before "Deciding" even looks at `canAnswer`, `sourceFile` or `sourcePassage`.
+
+## Deciding
+
+For each question, check the blacklist above first, before anything else. If it matches any category, on your own
+reading of the question or via a non-empty `sensitiveTopics`, skip straight to the acknowledgement below. Do not let a
+non-empty `sourceFile` or `sourcePassage` change that: grounding a blacklisted question more thoroughly does not make it
+less blacklisted.
+
+Only once the blacklist is clear, post an answer if, and only if, all three hold:
+
+- `canAnswer` is true
+- `sourceFile` and `sourcePassage` are both non-empty
+- `sensitiveTopics` is empty
+
+The message, via `slack_send_message` with `thread_ts: rootTs`:
+
+```
+[AUTO-ANSWER]
+<the answer, in the language of the question>
+```
+
+Post the `answer` field exactly as the subagent returned it. Do not add a file name, a document title, a section, or a
+quote to make it more convincing or more verifiable: rule 2 already forbids naming a source, and "citing it so they can
+check for themselves" is that same rule breaking under the pressure to sound authoritative, not an exception to it.
+
+Otherwise post an acknowledgement, in the thread's language, with no content and no commitment:
+
+```
+[AUTO-ANSWER]
+Bien noté, je fais remonter à Maxime.
+```
+
+Then add a `TODO.md` entry and send a `PushNotification`.
+
+An acknowledgement carries no content, so it cannot misrepresent the user. An answer can. That asymmetry is the whole
+reason the acknowledgement exists.
