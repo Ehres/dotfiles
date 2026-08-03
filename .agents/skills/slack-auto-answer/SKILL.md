@@ -143,3 +143,59 @@ Create `TODO.md` and `journal.md` with a one-line header each. Print the path.
 ### Step 7 — schedule the first wakeup
 
 `intervalSeconds` starts at 300, `emptyRounds` at 0. Go to "Scheduling the next wakeup".
+
+## On each wakeup
+
+You were called with `--resume '<state JSON>'`. Parse it. **Do not trust your own context for any of these values** — it
+may have been summarized since the previous wakeup.
+
+### Step 1 — fetch only what is new
+
+```
+slack_read_thread with:
+  channel_id: <channelId>
+  message_ts: <rootTs>
+  oldest: <lastSeenTs>
+  response_format: "concise"
+```
+
+Drop your own messages from the result, and drop the message whose timestamp equals `lastSeenTs`.
+
+### Step 2 — nothing new
+
+Multiply `intervalSeconds` by 1.5, round down, cap at 900. Increment `emptyRounds`. Go to "Scheduling the next wakeup".
+An empty wakeup costs two tool calls: keep it that way, do not go looking for work.
+
+### Step 3 — something new
+
+Process messages in chronological order. For each one, in this order of checks:
+
+1. **The user already answered it themselves.** Do not add a second answer. Move on.
+2. **It is an objection or a correction** — "t'es sûr ?", "non", a correction of something you posted, a disagreement.
+   Post a short acknowledgement, add a `TODO.md` entry marked to check, send a `PushNotification`. Keep answering the
+   other messages: there is no shutdown.
+3. **It is a question.** Collect it for the subagent.
+4. **It is neither** — a reaction in words, a thank you, a message between two other people. Do nothing.
+
+Dispatch one subagent for all the questions of this wakeup. See "Dispatching the subagent". Then decide per question,
+see "Deciding".
+
+### Step 4 — close the wakeup
+
+Set `lastSeenTs` to the newest timestamp you saw, `intervalSeconds` to 60, `emptyRounds` to 0. Go to "Scheduling the next
+wakeup".
+
+## Scheduling the next wakeup
+
+```
+ScheduleWakeup({
+  delaySeconds: <intervalSeconds>,
+  prompt: "/slack-auto-answer --resume '<state JSON, single line>'",
+  reason: "polling one Slack thread, <intervalSeconds>s after <emptyRounds> empty rounds"
+})
+```
+
+Then **exit the turn**. Do not sleep, do not poll, do not keep the turn alive waiting.
+
+The curve, for reference: after activity it goes 60 → 90 → 135 → 202 → 303 → 454 → 681 → 900, and stays at 900. Startup
+enters at 300.
