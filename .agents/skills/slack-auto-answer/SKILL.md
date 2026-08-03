@@ -183,7 +183,9 @@ Then process messages in chronological order. For each one, in this order of che
    landed seconds after the question still counts, which is why you read the batch first.
 2. **It is an objection or a correction** — "t'es sûr ?", "non", a correction of something you posted, a disagreement.
    Post a short acknowledgement, add a `TODO.md` entry marked to check, send a `PushNotification`. Keep answering the
-   other messages: there is no shutdown.
+   other messages: there is no shutdown. **The acknowledgement carries the `[AUTO-ANSWER]` prefix too**, see "Deciding"
+   for its exact text. Every message you post carries a prefix, with no exception: an unprefixed message is
+   indistinguishable from the user's own words on the next wakeup, and there is no way to correct that afterwards.
 3. **It is a question.** Collect it for the subagent.
 4. **It is neither** — a reaction in words, a thank you, a message between two other people. Do nothing.
 
