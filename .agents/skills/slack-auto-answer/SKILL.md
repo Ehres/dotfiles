@@ -78,7 +78,9 @@ is the first.
 Pull out: the message link or the channel plus subject, the keyword, any explicit paths, and the `--dry-run` flag. If the
 keyword and the explicit paths are both missing, ask the user for a keyword and stop.
 
-If `--dry-run` is set, stop reading this section after step 3 and go to "Dry run".
+If `--dry-run` is set, stop reading this section after step 3 and go to "Dry run". Step 3 still runs: source resolution
+and its approval gate happen in a dry run too, and only steps 4 onward are skipped. Without a resolved source list there
+is nothing to dry-run against, and skipping it would silently test the empty case instead.
 
 ### Step 2 — check the repo
 
@@ -203,8 +205,8 @@ Then process messages in chronological order. For each one, in this order of che
    as check 2. The banner promises colleagues that requests for action always come back to the user; this check is
    what keeps that promise.
 4. **It is a question.** Collect it for the subagent.
-5. **It is none of the above** — no question, no objection, no request for action, and no message addressed to the
-   user: a reaction in words, a thank you, a message between two other people that asks nothing. Do nothing.
+5. **It is none of the above** — no question, no objection, no request for action: a reaction in words, a thank you, a
+   message between two other people that asks nothing. Do nothing.
 
 A question addressed by name to someone other than the user is still a question, not "a message between two other
 people": check 4 catches it and sends it to the subagent, and the blacklist marks it for an acknowledgement in
