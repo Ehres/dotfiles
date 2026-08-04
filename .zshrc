@@ -142,6 +142,28 @@ function y() {
 	rm -f -- "$tmp"
 }
 
+# Tmux
+# The bootstrap at the top of this file only fires when a *new* shell starts
+# outside tmux, so a `tmux` typed by hand never reaches it: bare `tmux` creates
+# tmux's own default session ("0"), and `tmux attach` fails outright when no
+# server is running. Both happened on 2026-08-03, in a shell old enough to
+# predate the bootstrap. Route the two session-entering forms through the same
+# script; every other subcommand (ls, kill-server, ...) passes straight through.
+function tmux() {
+  if [[ -n $TMUX ]]; then
+    command tmux "$@"
+    return
+  fi
+  case ${1:-} in
+    "" | attach | a | attach-session)
+      "$HOME/scripts/tmux-sessions" || return
+      (( $# )) && shift
+      command tmux attach "$@"
+      ;;
+    *) command tmux "$@" ;;
+  esac
+}
+
 # Bun
 export PATH="$HOME/.local/bin:$PATH"
 
