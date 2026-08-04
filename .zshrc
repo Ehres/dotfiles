@@ -89,6 +89,25 @@ zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
 eval "$(fzf --zsh)"
 eval "$(zoxide init --cmd cd zsh)"
 
+# Tab accepts the autosuggestion when one is shown, otherwise completes as usual.
+# Must come after `fzf --zsh`, which rebinds ^I itself; falling back to
+# fzf-completion keeps its `**` trigger and its own fallback to fzf-tab.
+# The leading underscore matters: zsh-autosuggestions skips wrapping `_*` widgets,
+# which is what keeps POSTDISPLAY readable here instead of cleared.
+_accept_suggestion_or_complete() {
+  if [[ -n "$POSTDISPLAY" ]]; then
+    zle autosuggest-accept
+  elif zle -l fzf-completion; then
+    zle fzf-completion
+  elif zle -l fzf-tab-complete; then
+    zle fzf-tab-complete
+  else
+    zle expand-or-complete
+  fi
+}
+zle -N _accept_suggestion_or_complete
+bindkey '^I' _accept_suggestion_or_complete
+
 # XDG
 export XDG_CONFIG_HOME="$HOME/.config"
 
