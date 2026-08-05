@@ -5,46 +5,51 @@ description: Launch tuicr, the local code-review TUI, in a tmux popup so the use
 
 # Open a tuicr review in a tmux popup
 
-## Quick start
-
-One Bash call, `run_in_background: true`:
+## Launch it — one Bash call, `run_in_background: true`
 
 ```bash
-tmux display-popup -d <absolute repo path> -w 95% -h 95% -E "tuicr -w"
+~/.agents/skills/open-review/open-review
 ```
 
-`-d` needs an **absolute** path: the branch often lives in a git worktree, and the shell's `cd` is
-zoxide, so a relative path can land in a different worktree.
+That is the whole thing. The script resolves the base branch, refuses to open an empty diff, builds
+the `tuicr` argv, and opens the popup. Do not run git commands first to work any of that out —
+the point of the script is that the popup is on screen after one call instead of four.
 
-## What to review
+Pass a target only when the user named one — flags below are appended to that same command:
 
-Take it from what the user said. When they say nothing, review the working tree.
-
-| They want | Command |
+| They said | Flags |
 | --- | --- |
-| Uncommitted work (default) | `tuicr -w` |
-| The branch's own commits | `tuicr -r <base>..<branch>` |
-| Both at once | `tuicr -r <base>..<branch> -w` |
-| A pull request | `tuicr pr <number>` |
-| One file or directory | add `-p <path>` |
+| nothing (default) | none |
+| just the uncommitted work | `-w` |
+| a specific range | `-r <base>..<branch>` |
+| a pull request | `pr <number>` |
+| one file or directory | `-p <path>` |
 
-`<base>` is the branch this one was **stacked on**, and that is not always `main`. Check
-`git log --oneline --decorate -15`, or the pull request's base, before falling back to
-`git merge-base HEAD origin/main`. Getting it wrong shows the parent branches' commits as if they
-were this branch's work.
+With no target the script reviews the branch's commits, the working tree, or both — whichever
+exist. It exits 2 without opening anything when there is nothing to review.
 
-Do not open an empty popup: if `git status --porcelain` is empty there is no working-tree diff, and
-`prefix + R` (which runs `tuicr -w`) would show nothing. Check
-`git rev-list --count <base>..<branch>` before offering a commit review.
+## Then report what you opened
 
-## Launching it
+Second call, foreground:
 
-- `display-popup -E` returns only when the popup closes, hence the background call.
+```bash
+~/.agents/skills/open-review/open-review --plan
+```
+
+Prints the resolved base (and how it was found), the commit count, the `tuicr` argv, the diffstat,
+and the ten files with the most churn. Relay the revset and the diff size to the user, and use the
+churn list to say which files deserve their attention most. The plan is written to disk before the
+popup launches, so this call cannot race the launch.
+
+The base matters: it is the branch this one was **stacked on**, not always `main`. The script asks
+the pull request first, then falls back to the closest branch HEAD actually descends from. If it
+reports something that looks wrong, override it with `-r` rather than arguing with it.
+
+## While the popup is open
+
+- It is modal. The user cannot reply to you until they close it with `C-q`.
 - **The background task completing is the signal that the review is finished.** Do not poll the
   session, and do not ask the user to announce when they are done.
-- The popup is modal: while it is open the user cannot reply to you. `C-q` closes it.
-- Before ending the turn, tell the user the revset you opened and the diff size
-  (`git diff --stat <base>..<branch> | tail -1`), plus which files deserve their attention most.
 
 ## Then read the comments back
 
