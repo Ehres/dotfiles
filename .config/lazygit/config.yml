@@ -10,7 +10,7 @@ customCommands:
       - type: "input"
         key: "Path"
         title: "Worktree path"
-        initialValue: "../{{ runCommand \"bash -c 'basename $(git rev-parse --show-toplevel)'\" }}.worktree/{{index .PromptResponses 0}}"
+        initialValue: "{{ runCommand \"bash -c 'dirname $(git rev-parse --path-format=absolute --git-common-dir)'\" }}.worktree/{{index .PromptResponses 0}}"
       - type: "menuFromCommand"
         key: "Branch"
         title: "Base branch"
@@ -18,7 +18,7 @@ customCommands:
         filter: "(.*)"
         valueFormat: "{{ .group_1 }}"
         labelFormat: "{{ .group_1 | green }}"
-    command: "git worktree add {{if .Form.NewBranch}}-b {{.Form.NewBranch | quote}} {{end}}{{.Form.Path | quote}} {{.Form.Branch | quote}}"
+    command: "git worktree add {{if .Form.NewBranch}}-b {{.Form.NewBranch | quote}} {{end}}{{.Form.Path | quote}} {{.Form.Branch | quote}} && ~/scripts/worktree-bootstrap {{.Form.Path | quote}}"
     output: terminal
     loadingText: "Creating worktree..."
 git:
