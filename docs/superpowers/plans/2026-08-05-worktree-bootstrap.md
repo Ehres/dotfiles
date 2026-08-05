@@ -424,19 +424,39 @@ shellcheck -S warning scripts/doctor.sh && echo "shellcheck clean"
 
 Expected: `shellcheck clean`
 
-- [ ] **Step 5: Verify the full run still exits correctly**
+- [ ] **Step 5: Verify this change adds no new failure**
+
+The repo's baseline is **not** green: `./scripts/doctor.sh` already exits 1 on
+three pre-existing failures unrelated to this work (two Keychain secrets,
+`GITLAB_PERSONAL_ACCESS_TOKEN` and `CONTEXT7_API_KEY`, plus `agavra/tap/tuicr`
+declared in the Brewfile but not installed). So the check is *no new failure*,
+not a green run.
 
 ```bash
-./scripts/doctor.sh >/dev/null 2>&1; echo "exit=$?"
+./scripts/doctor.sh 2>&1 | grep -E 'FAIL|failed'
 ```
 
-Expected: `exit=0`. The stale hook is a warning, and warnings do not fail.
+Expected: exactly those three `FAIL` lines, all in the `Secrets` and `Brewfile`
+sections. The new `Worktrees` section must contribute warnings only, never a
+`FAIL`, since warnings do not affect the exit status.
+
+Then confirm the widened shellcheck glob did not regress the count:
+
+```bash
+before=$(shellcheck -S warning .config/sketchybar/plugins/*.sh .config/sketchybar/items/*.sh \
+  scripts/*.sh scripts/tmux-* 2>/dev/null | grep -c '^In ' || true)
+after=$(shellcheck -S warning .config/sketchybar/plugins/*.sh .config/sketchybar/items/*.sh \
+  scripts/*.sh scripts/tmux-* scripts/worktree-bootstrap 2>/dev/null | grep -c '^In ' || true)
+echo "$before -> $after"
+```
+
+Expected: `13 -> 13`.
 
 - [ ] **Step 6: Ask for approval, then commit**
 
 ```bash
 git add scripts/doctor.sh
-git commit -m "feat(doctor): check worktree-bootstrap and stale per-repo git hooks"
+git commit -m "feat(scripts): check worktree-bootstrap and stale per-repo git hooks"
 ```
 
 ---
