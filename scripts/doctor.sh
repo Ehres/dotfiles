@@ -168,6 +168,29 @@ if tmux info >/dev/null 2>&1; then
 fi
 
 # --------------------------------------------------------------------------
+section "Worktrees"
+# The lazygit "W" command installs dependencies through this script. When it was
+# an unversioned .git/hooks/post-checkout running `yarn install` in a pnpm repo,
+# it failed on every worktree and nobody noticed for months.
+if [[ -x scripts/worktree-bootstrap ]]; then
+  ok "worktree-bootstrap is executable"
+else
+  fail "scripts/worktree-bootstrap is missing or not executable -- new worktrees get no dependencies"
+fi
+
+# A per-repo hook runs before the lazygit command and would silently pre-empt it.
+# The *.sample files git installs by default (14 per repo) are not hooks.
+stale=0
+for repo in "$HOME"/projects/*/; do
+  [[ -d "${repo}.git/hooks" ]] || continue
+  while read -r hook; do
+    warn "stale git hook $(basename "$hook") in ${repo}.git/hooks -- it runs before the lazygit command"
+    stale=1
+  done < <(find "${repo}.git/hooks" -maxdepth 1 -type f ! -name '*.sample')
+done
+[[ "$stale" -eq 0 ]] && ok "no per-repo git hooks shadowing worktree-bootstrap"
+
+# --------------------------------------------------------------------------
 section "Documentation matches reality"
 # README referenced two scripts that never existed, and four READMEs likewise.
 missing=0
@@ -218,7 +241,7 @@ if ! $QUICK; then
   fi
   if command -v shellcheck >/dev/null; then
     n=$(shellcheck -S warning .config/sketchybar/plugins/*.sh .config/sketchybar/items/*.sh \
-      scripts/*.sh scripts/tmux-* 2>/dev/null | grep -c '^In ' || true)
+      scripts/*.sh scripts/tmux-* scripts/worktree-bootstrap 2>/dev/null | grep -c '^In ' || true)
     if [[ "${n:-0}" -eq 0 ]]; then
       ok "shellcheck: no warnings"
     else
