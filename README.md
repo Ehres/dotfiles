@@ -138,7 +138,6 @@ git add . && git commit -m "Update" && git push
 **`./scripts/tmux-dash-toggle`** - Toggle in and out of the `gh dash` session  
 **`./scripts/wifi-rssi.swift`** - Wi-Fi RSSI helper, compiled on demand by SketchyBar  
 **`./scripts/claude-bash-guard.sh`** - `PreToolUse` hook blocking irreversible shell commands  
-**`./scripts/claude-notify.sh`** - `Stop` hook posting a macOS notification when a run ends  
 **`./scripts/regenerate-tailles.mjs`** - Regenerate Notion pruning reminders
 
 ## Notes

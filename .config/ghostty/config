@@ -17,8 +17,6 @@ window-save-state = always
 #   ends. tmux absorbs OSC 133 instead of relaying it to the host terminal
 #   (measured: zero sequences reached tmux's outer pty), and the block at the top
 #   of .zshrc execs into tmux, so no shell here ever reports command boundaries.
-#   The Stop hook in ~/.claude/settings.json covers the actual need -- knowing
-#   when a long agent run has finished -- via scripts/claude-notify.sh.
 #
 # shell-integration-features: the sudo/cursor/title features need Ghostty's
 #   integration to be running in the shell. Ghostty injects it only into the
