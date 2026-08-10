@@ -96,10 +96,11 @@ function readReflogName(cwd: string, branch: string | null): string | null {
 
 /**
  * The candidate set, in a deterministic order: what the reflog named, the
- * nearest ancestor branch, one ref sitting exactly on HEAD as a last resort,
- * then the conventional defaults. Bounded at roughly eight git-probed
- * candidates regardless of how many branches the repo has — probing every
- * ref merged into HEAD individually cost 27s on a repo with 127 of them.
+ * independent ancestor branches (those reachable from no other candidate —
+ * the nearest ancestor is always among them), one ref sitting exactly on
+ * HEAD as a last resort, then the conventional defaults. Bounded regardless
+ * of how many branches the repo has — probing every ref merged into HEAD
+ * individually cost 27s on a repo with 127 of them.
  */
 function probeRefs(cwd: string, reflogName: string | null, branch: string | null, head: string): RefInfo[] {
   const results: RefInfo[] = [];
@@ -141,16 +142,21 @@ function probeRefs(cwd: string, reflogName: string | null, branch: string | null
     if (!bySha.has(sha)) bySha.set(sha, ref);
   }
 
-  // Topological order guarantees a commit is listed before its own ancestors,
-  // so the first ref met walking back from HEAD is the closest one.
-  const walk = gitOk(["rev-list", "--topo-order", "HEAD"], cwd);
-  for (const sha of (walk ?? "").split("\n")) {
-    if (sha === head) continue;
-    const ref = bySha.get(sha);
-    if (ref === undefined) continue;
+  // If ancestor A is reachable from ancestor B, B is strictly closer to HEAD,
+  // so A cannot be the nearest — the nearest ancestor is always among the
+  // refs reachable from no other ref in the set. `merge-base --independent`
+  // computes exactly that set in one call. A topological walk was tried
+  // first and was wrong: it lists a commit before its ancestors, but breaks
+  // ties between equally-ready commits (both sides of a merge, say) by
+  // commit date, newest first, not by graph distance — so its first match
+  // need not be the nearest one.
+  const survivingShas = [...bySha.keys()].filter((sha) => sha !== head);
+  const independentSet = new Set(independentShas(cwd, survivingShas));
+  for (const sha of survivingShas) {
+    if (!independentSet.has(sha)) continue;
+    const ref = bySha.get(sha) as string;
     const count = gitOk(["rev-list", "--count", `${ref}..${head}`], cwd);
     emit({ ref, sha, mergeBase: sha, distance: count === null ? null : Number(count) });
-    break;
   }
 
   // A ref sitting exactly on HEAD, kept only as a last resort so a brand-new
@@ -161,6 +167,29 @@ function probeRefs(cwd: string, reflogName: string | null, branch: string | null
   for (const ref of DEFAULT_BRANCHES) emit(probeRef(cwd, ref, head));
 
   return results;
+}
+
+/**
+ * The shas reachable from no other sha in the set — candidates for "nearest
+ * ancestor" cannot be anything else. `merge-base --independent` takes the
+ * shas as argv, so a repo with thousands of merged refs could overflow the
+ * command line; chunk it and re-run once over the union, which is sound
+ * because reachability is transitive.
+ */
+function independentShas(cwd: string, shas: string[]): string[] {
+  if (shas.length === 0) return [];
+  const CHUNK = 200;
+  if (shas.length <= CHUNK) {
+    const out = gitOk(["merge-base", "--independent", ...shas], cwd);
+    return out ? out.split("\n").filter(Boolean) : [];
+  }
+  const reduced: string[] = [];
+  for (let i = 0; i < shas.length; i += CHUNK) {
+    const out = gitOk(["merge-base", "--independent", ...shas.slice(i, i + CHUNK)], cwd);
+    if (out) reduced.push(...out.split("\n").filter(Boolean));
+  }
+  const out = gitOk(["merge-base", "--independent", ...reduced], cwd);
+  return out ? out.split("\n").filter(Boolean) : [];
 }
 
 function probeRef(cwd: string, ref: string, head: string): RefInfo {

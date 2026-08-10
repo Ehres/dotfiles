@@ -1,8 +1,23 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { collectFacts } from "./git.ts";
 import { chooseBase } from "./base.ts";
 import { makeRepo } from "./testrepo.ts";
+import type { Repo } from "./testrepo.ts";
+
+/**
+ * repo.commit(), but with explicit author/committer dates so a topological
+ * tie-break (which git resolves by commit date, newest first) is
+ * deterministic rather than dependent on how fast the fixture runs.
+ */
+function commitAt(repo: Repo, message: string, iso: string): void {
+  execFileSync("git", ["add", "-A"], { cwd: repo.dir });
+  execFileSync("git", ["commit", "-q", "-m", message], {
+    cwd: repo.dir,
+    env: { ...process.env, GIT_AUTHOR_DATE: iso, GIT_COMMITTER_DATE: iso },
+  });
+}
 
 test("a branch off master resolves master as its base", () => {
   const repo = makeRepo();
@@ -291,6 +306,42 @@ test("origin/<branch> is never picked as the base", () => {
     assert.equal(facts.refs.reflogName, "HEAD", "the reflog rule must not be the one deciding this");
     const base = chooseBase(facts);
     assert.equal(base?.ref, "master");
+  } finally {
+    repo.cleanup();
+  }
+});
+
+// A topological walk lists a commit before its ancestors, but when several
+// commits are equally "ready" — both parents of a merge, here — it breaks the
+// tie by commit date, newest first, not by graph distance. `bar` is the true
+// nearest ancestor (distance 2) but was committed before `foo` (distance 6),
+// so a walk that stops at its first match hits `foo` first and never
+// considers `bar` at all.
+test("the nearest ancestor is found by graph distance, not by which side of a merge is newer", () => {
+  const repo = makeRepo();
+  try {
+    repo.write("a.txt", "a");
+    commitAt(repo, "c1", "2024-01-01T00:00:00Z");
+
+    repo.run("checkout", "-q", "-b", "bar", "master");
+    for (let i = 0; i < 5; i++) {
+      repo.write(`bar-${i}.txt`, String(i));
+      commitAt(repo, `bar${i}`, `2024-01-02T00:0${i}:00Z`);
+    }
+
+    repo.run("checkout", "-q", "-b", "foo", "master");
+    repo.write("foo.txt", "foo");
+    commitAt(repo, "foo1", "2024-01-05T00:00:00Z");
+
+    repo.run("checkout", "-q", "bar");
+    repo.run("checkout", "-q", "-b", "feature");
+    repo.run("merge", "--no-ff", "-q", "-m", "merge foo into feature", "foo");
+
+    const facts = collectFacts(repo.dir)!;
+    assert.equal(facts.refs.reflogName, "HEAD", "the reflog rule must not be the one deciding this");
+    const base = chooseBase(facts);
+    assert.equal(base?.ref, "bar");
+    assert.equal(base?.commits, 2);
   } finally {
     repo.cleanup();
   }
