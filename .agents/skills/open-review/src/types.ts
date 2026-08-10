@@ -98,3 +98,16 @@ export type TargetInput = {
   base: BaseChoice | null;
   lastReviewed: LastReviewed | null;
 };
+
+export type ChurnRow = { path: string; changed: number };
+export type UntrackedRow = { path: string; lines: number };
+
+export type PlanInput = {
+  target: Target;
+  facts: RepoFacts;
+  base: BaseChoice | null;
+  /** `git diff --shortstat` output, or null when there is no local stat. */
+  shortstat: string | null;
+  churn: ChurnRow[];
+  untracked: UntrackedRow[];
+};
