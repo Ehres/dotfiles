@@ -66,3 +66,35 @@ export type BaseChoice = {
   /** Commits between the merge-base and HEAD. */
   commits: number;
 };
+
+export type StatSpec =
+  /** Arguments for `git diff`, before any path filter. */
+  | { kind: "diff"; args: string[] }
+  | { kind: "file"; path: string }
+  | { kind: "none"; reason: string };
+
+export type Target = {
+  /** Human phrase for the plan's `mode:` line. */
+  description: string;
+  /** Full argv for tuicr, path filter and --no-update-check included. */
+  tuicrArgs: string[];
+  stat: StatSpec;
+  /** Fallbacks and widenings to print, never applied silently. */
+  notes: string[];
+  /** Set when there is nothing to review; no popup is opened. */
+  emptyReason: string | null;
+};
+
+export type LastReviewed = {
+  sha: string;
+  isAncestor: boolean;
+  /** Commits in `sha..HEAD`. */
+  commits: number;
+};
+
+export type TargetInput = {
+  intent: Intent;
+  facts: RepoFacts;
+  base: BaseChoice | null;
+  lastReviewed: LastReviewed | null;
+};
