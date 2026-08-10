@@ -187,3 +187,16 @@ test("--since-last with nothing new is empty", () => {
   );
   assert.match(target.emptyReason ?? "", /nothing new/i);
 });
+
+test("--since-last with no new commits but a dirty tree reviews the working tree", () => {
+  const target = buildTarget(
+    input({
+      intent: parseArgs(["--since-last"]),
+      facts: dirty(),
+      lastReviewed: { sha: "seen00", isAncestor: true, commits: 0 },
+    }),
+  );
+  assert.deepEqual(target.tuicrArgs, ["-w", "--no-update-check"]);
+  assert.deepEqual(target.stat, { kind: "diff", args: ["HEAD"] });
+  assert.equal(target.emptyReason, null);
+});

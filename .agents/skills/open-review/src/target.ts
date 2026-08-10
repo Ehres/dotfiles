@@ -125,7 +125,7 @@ function sinceLast(input: TargetInput): Target {
       stat: { kind: "diff", args: [lastReviewed.sha, "HEAD"] },
     });
   }
-  return finish(input, {
+  return finish(input.intent, {
     description: "working-tree changes since the last review",
     args: ["-w"],
     stat: { kind: "diff", args: ["HEAD"] },
