@@ -208,6 +208,90 @@ test("a path with a space survives status parsing", () => {
   }
 });
 
+// The porcelain -z stream carries an extra NUL field for a rename's old path,
+// with no "XY " prefix. Read as its own entry, it inflates both counts.
+test("a staged rename does not inflate the staged or unstaged count", () => {
+  const repo = makeRepo();
+  try {
+    repo.write("tracked.txt", "one");
+    repo.commit("c1");
+    repo.run("mv", "tracked.txt", "renamed.txt");
+
+    const work = collectFacts(repo.dir)!.work;
+    assert.equal(work.staged, 1);
+    assert.equal(work.unstaged, 0);
+    assert.deepEqual(work.untracked, []);
+  } finally {
+    repo.cleanup();
+  }
+});
+
+test("a staged rename with a further edit counts once in each category", () => {
+  const repo = makeRepo();
+  try {
+    repo.write("tracked.txt", "one");
+    repo.commit("c1");
+    repo.run("mv", "tracked.txt", "renamed.txt");
+    repo.write("renamed.txt", "two");
+
+    const work = collectFacts(repo.dir)!.work;
+    assert.equal(work.staged, 1);
+    assert.equal(work.unstaged, 1);
+  } finally {
+    repo.cleanup();
+  }
+});
+
 test("outside a repository, collectFacts returns null", () => {
   assert.equal(collectFacts("/"), null);
+});
+
+// Before the bound, probing every ref merged into HEAD individually cost 27s
+// on a repo with 127 of them. This is the test that would have caught it.
+test("the candidate set stays bounded no matter how many branches are merged", () => {
+  const repo = makeRepo();
+  try {
+    repo.write("a.txt", "a");
+    repo.commit("c1");
+    for (let i = 0; i < 30; i++) {
+      repo.run("branch", `merged-${i}`, "master");
+    }
+    repo.run("checkout", "-q", "-b", "feature", "master");
+    repo.write("b.txt", "b");
+    repo.commit("f1");
+
+    const facts = collectFacts(repo.dir)!;
+    assert.ok(facts.refs.candidates.length <= 10, `expected a bounded set, got ${facts.refs.candidates.length}`);
+
+    const base = chooseBase(facts);
+    assert.equal(base?.ref, "master");
+    assert.equal(base?.commits, 1);
+  } finally {
+    repo.cleanup();
+  }
+});
+
+// origin/<branch> can be a real ancestor at a positive distance when there are
+// unpushed commits, and closer than master — but it must never be the base.
+// A plain `checkout -b` (no start point given) discards the reflog, so this
+// only exercises the ancestor rule, not the reflog rule, if left there.
+test("origin/<branch> is never picked as the base", () => {
+  const repo = makeRepo();
+  try {
+    repo.write("a.txt", "a");
+    repo.commit("c1");
+    repo.run("checkout", "-q", "-b", "feature");
+    repo.write("b.txt", "b");
+    repo.commit("f1");
+    repo.run("update-ref", "refs/remotes/origin/feature", "feature");
+    repo.write("c.txt", "c");
+    repo.commit("f2");
+
+    const facts = collectFacts(repo.dir)!;
+    assert.equal(facts.refs.reflogName, "HEAD", "the reflog rule must not be the one deciding this");
+    const base = chooseBase(facts);
+    assert.equal(base?.ref, "master");
+  } finally {
+    repo.cleanup();
+  }
 });

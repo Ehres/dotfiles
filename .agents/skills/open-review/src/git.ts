@@ -41,20 +41,26 @@ export function collectFacts(cwd: string): RepoFacts | null {
     work: readWorkTree(cwd),
     refs: {
       reflogName,
-      candidates: head === null ? [] : probeRefs(cwd, reflogName, head),
+      candidates: head === null ? [] : probeRefs(cwd, reflogName, branch, head),
     },
   };
 }
 
-/** Porcelain v1 with NUL termination, so paths with spaces survive intact. */
+/**
+ * Porcelain v1 with NUL termination, so paths with spaces survive intact. A
+ * rename or copy carries one extra NUL-separated field for the old path, with
+ * no "XY " status prefix — it must be consumed, not parsed as its own entry.
+ */
 function readWorkTree(cwd: string): WorkTree {
   const out = git(["status", "--porcelain", "-z", "--untracked-files=all"], cwd);
+  const fields = out.split("\0");
   let staged = 0;
   let unstaged = 0;
   const untracked: string[] = [];
 
-  for (const entry of out.split("\0")) {
-    if (entry.length < 4) continue;
+  for (let i = 0; i < fields.length; i++) {
+    const entry = fields[i];
+    if (entry === undefined || entry.length < 4) continue;
     const code = entry.slice(0, 2);
     const path = entry.slice(3);
     if (code === "??") {
@@ -63,6 +69,7 @@ function readWorkTree(cwd: string): WorkTree {
     }
     if (code[0] !== " " && code[0] !== "?") staged += 1;
     if (code[1] !== " " && code[1] !== "?") unstaged += 1;
+    if (code[0] === "R" || code[0] === "C" || code[1] === "R" || code[1] === "C") i += 1;
   }
 
   return {
@@ -88,29 +95,72 @@ function readReflogName(cwd: string, branch: string | null): string | null {
 }
 
 /**
- * The candidate set, in a deterministic order: what the reflog named, every
- * ref merged into HEAD, then the conventional defaults. Probing is two git
- * calls per candidate, over a handful of candidates — the old script ran up to
- * a hundred over an arbitrary window of the fifty most recent refs.
+ * The candidate set, in a deterministic order: what the reflog named, the
+ * nearest ancestor branch, one ref sitting exactly on HEAD as a last resort,
+ * then the conventional defaults. Bounded at roughly eight git-probed
+ * candidates regardless of how many branches the repo has — probing every
+ * ref merged into HEAD individually cost 27s on a repo with 127 of them.
  */
-function probeRefs(cwd: string, reflogName: string | null, head: string): RefInfo[] {
-  const wanted: string[] = [];
-  const add = (ref: string): void => {
-    if (ref && !wanted.includes(ref)) wanted.push(ref);
+function probeRefs(cwd: string, reflogName: string | null, branch: string | null, head: string): RefInfo[] {
+  const results: RefInfo[] = [];
+  const seen = new Set<string>();
+  const emit = (info: RefInfo): void => {
+    if (seen.has(info.ref)) return;
+    seen.add(info.ref);
+    results.push(info);
   };
 
   if (reflogName && reflogName !== "HEAD") {
-    if (!reflogName.startsWith("origin/")) add(`origin/${reflogName}`);
-    add(reflogName);
+    if (!reflogName.startsWith("origin/")) emit(probeRef(cwd, `origin/${reflogName}`, head));
+    emit(probeRef(cwd, reflogName, head));
+  }
+
+  // Every ref merged into HEAD is an ancestor of HEAD by construction, so its
+  // merge-base is its own sha — no merge-base call needed, and no rev-parse,
+  // since %(objectname) already gives the sha. origin/HEAD, the branch itself
+  // and its own remote are excluded here (not just filtered downstream): left
+  // in, one of them could be the closest ancestor and consume the walk's one
+  // match below, hiding the true nearest ancestor branch behind it.
+  const excluded = new Set<string>(["origin/HEAD"]);
+  if (branch !== null) {
+    excluded.add(branch);
+    excluded.add(`origin/${branch}`);
   }
   const merged = gitOk(
-    ["for-each-ref", "--merged", "HEAD", "--format=%(refname:short)", "refs/heads", "refs/remotes"],
+    ["for-each-ref", "--merged", "HEAD", "--format=%(objectname) %(refname:short)", "refs/heads", "refs/remotes"],
     cwd,
   );
-  for (const ref of (merged ?? "").split("\n")) add(ref.trim());
-  for (const ref of DEFAULT_BRANCHES) add(ref);
+  const bySha = new Map<string, string>();
+  for (const line of (merged ?? "").split("\n")) {
+    const trimmed = line.trim();
+    const space = trimmed.indexOf(" ");
+    if (space === -1) continue;
+    const sha = trimmed.slice(0, space);
+    const ref = trimmed.slice(space + 1);
+    if (excluded.has(ref)) continue;
+    if (!bySha.has(sha)) bySha.set(sha, ref);
+  }
 
-  return wanted.map((ref) => probeRef(cwd, ref, head));
+  // Topological order guarantees a commit is listed before its own ancestors,
+  // so the first ref met walking back from HEAD is the closest one.
+  const walk = gitOk(["rev-list", "--topo-order", "HEAD"], cwd);
+  for (const sha of (walk ?? "").split("\n")) {
+    if (sha === head) continue;
+    const ref = bySha.get(sha);
+    if (ref === undefined) continue;
+    const count = gitOk(["rev-list", "--count", `${ref}..${head}`], cwd);
+    emit({ ref, sha, mergeBase: sha, distance: count === null ? null : Number(count) });
+    break;
+  }
+
+  // A ref sitting exactly on HEAD, kept only as a last resort so a brand-new
+  // branch still has a base to report.
+  const onHead = bySha.get(head);
+  if (onHead !== undefined) emit({ ref: onHead, sha: head, mergeBase: head, distance: 0 });
+
+  for (const ref of DEFAULT_BRANCHES) emit(probeRef(cwd, ref, head));
+
+  return results;
 }
 
 function probeRef(cwd: string, ref: string, head: string): RefInfo {
