@@ -79,7 +79,10 @@ BASE=
 BASE_HOW=
 COMMITS=0
 DIRTY=false
-STAT_REV=
+# An array, not a scalar: only the auto path fills it, and `${#STAT_REV[@]}` on an
+# empty *scalar* is an unbound-variable error under `set -u`, which crashed every
+# call that named its own target (-r, -w, pr).
+STAT_REV=()
 
 # The base a branch was stacked on is often not main, and getting it wrong
 # shows the parent branches' commits as if they were this branch's work.
