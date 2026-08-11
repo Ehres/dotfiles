@@ -23,6 +23,10 @@ The popup is modal — while it is open the user cannot talk to you. So:
 
 ## Step 1 — find the session
 
+This applies only when the user opened the popup themselves (`prefix + R`). If
+an agent launched it with the `open-review` skill, that script already elected
+the session and printed the comments — read those instead of listing again.
+
 ```bash
 tuicr review list --repo .
 ```
