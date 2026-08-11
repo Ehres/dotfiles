@@ -185,6 +185,28 @@ Commit messages use **Angular format**: `type(scope): description`
 - Import from `@opencode-ai/plugin`
 - Package manager: pnpm (lockfile at `.config/opencode/`)
 
+### TypeScript (skill scripts, run by Node directly)
+
+- `.agents/skills/open-review/src/*.ts` runs under Node's native type stripping:
+  no build step, and **no runtime dependencies**. Keep it that way — the only
+  things in `node_modules` are `typescript` and `@types/node`, and they are
+  devDependencies used by the typechecker, never imported by the code.
+- Stripping **erases** types, it does not check them. The syntax it cannot erase
+  is therefore forbidden: no `enum`, no `namespace`, no constructor parameter
+  properties, `import type` for type-only imports, and explicit `.ts` extensions
+  on relative imports. `tsconfig.json` sets `erasableSyntaxOnly` so the editor
+  rejects those while you write.
+- Because nothing checks types at runtime, `tsc --noEmit` is the gate:
+  `(cd .agents/skills/open-review && ./node_modules/.bin/tsc --noEmit)`.
+  It exists because two real defects — a crash in `--since-last` and a union
+  narrowing lost inside a callback — were found by it while the whole suite
+  passed. `doctor.sh` runs it, and degrades to a warning when `node_modules` is
+  missing so a fresh clone still works.
+- Tests are `node:test`. A directory path argument does not work — run
+  `node --test` from the skill directory, or pass a quoted glob.
+- Decisions are pure functions over a facts record; only one module per external
+  tool is allowed to spawn it. That is what makes the tests worth having.
+
 ### TOML (mise, stylua, yazi)
 
 - Follow each tool's native config format

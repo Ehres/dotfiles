@@ -191,6 +191,46 @@ done
 [[ "$stale" -eq 0 ]] && ok "no per-repo git hooks shadowing worktree-bootstrap"
 
 # --------------------------------------------------------------------------
+section "open-review"
+# The skill's decisions live in TypeScript so a wrong target can be pinned by a
+# test instead of being rediscovered. A silent regression here shows up only as
+# a review of the wrong diff.
+if [[ -d .agents/skills/open-review/src ]]; then
+  if ! command -v node >/dev/null; then
+    warn "node not on PATH -- cannot run the open-review tests"
+  # A directory argument does not work: `node --test <dir>` tries to run the
+  # directory as a module. Hence the subshell cd.
+  elif (cd .agents/skills/open-review && node --test >/dev/null 2>&1); then
+    ok "open-review tests pass"
+  else
+    fail "open-review tests fail -- run: (cd .agents/skills/open-review && node --test)"
+  fi
+
+  # The popup starts its command without a login shell, so mise's PATH is
+  # absent and the shim has to fall back to the mise shim path. This is the
+  # environment that broke, and it is invisible from an interactive shell.
+  if env -i HOME="$HOME" /bin/bash -c \
+    '"$HOME"/.agents/skills/open-review/open-review --help' >/dev/null 2>&1; then
+    ok "the open-review shim finds node with no PATH"
+  else
+    fail "the open-review shim cannot find node in a bare environment -- check ~/.local/share/mise/shims/node"
+  fi
+
+  # Type stripping erases types without checking them. Two real defects -- a
+  # crash in --since-last and a lost union narrowing -- were caught by tsc
+  # while the whole test suite passed, which is why this check exists.
+  if [[ -x .agents/skills/open-review/node_modules/.bin/tsc ]]; then
+    if (cd .agents/skills/open-review && ./node_modules/.bin/tsc --noEmit >/dev/null 2>&1); then
+      ok "open-review typechecks"
+    else
+      fail "open-review has type errors -- run: (cd .agents/skills/open-review && ./node_modules/.bin/tsc --noEmit)"
+    fi
+  else
+    warn "open-review typecheck skipped -- run 'pnpm install' in .agents/skills/open-review"
+  fi
+fi
+
+# --------------------------------------------------------------------------
 section "Documentation matches reality"
 # README referenced two scripts that never existed, and four READMEs likewise.
 missing=0
@@ -241,7 +281,8 @@ if ! $QUICK; then
   fi
   if command -v shellcheck >/dev/null; then
     n=$(shellcheck -S warning .config/sketchybar/plugins/*.sh .config/sketchybar/items/*.sh \
-      scripts/*.sh scripts/tmux-* scripts/worktree-bootstrap 2>/dev/null | grep -c '^In ' || true)
+      scripts/*.sh scripts/tmux-* scripts/worktree-bootstrap \
+      .agents/skills/open-review/open-review 2>/dev/null | grep -c '^In ' || true)
     if [[ "${n:-0}" -eq 0 ]]; then
       ok "shellcheck: no warnings"
     else
