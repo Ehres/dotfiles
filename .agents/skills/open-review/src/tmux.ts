@@ -1,5 +1,10 @@
 import { execFileSync, spawnSync } from "node:child_process";
+import { homedir } from "node:os";
+import { join } from "node:path";
 import { POPUP_NAME, POPUP_SESSION } from "./constants.ts";
+
+/** Resolved in code so no word needs a shell to expand a tilde for it. */
+export const TMUX_POPUP = join(homedir(), "scripts", "tmux-popup");
 
 export function insideTmux(): boolean {
   return Boolean(process.env["TMUX"]);
@@ -21,7 +26,7 @@ export function popupAlive(): boolean {
  * clean error instead of a stack trace.
  */
 export function openPopup(root: string, tuicrArgs: string[]): boolean {
-  const inner = ["~/scripts/tmux-popup", "--kill", POPUP_NAME, "tuicr", ...tuicrArgs]
+  const inner = [TMUX_POPUP, "--kill", POPUP_NAME, "tuicr", ...tuicrArgs]
     .map((word) => shellQuote(shellQuote(word)))
     .join(" ");
   try {
@@ -60,8 +65,15 @@ export async function waitForPopupGone(pollMs = 300): Promise<void> {
  * than carried as data. So each word is quoted twice — once so it survives
  * the hop `tmux-popup` re-shells through, and again so that quoting survives
  * being flattened by `CMD="$*"` on the way there.
+ *
+ * No word is exempt, deliberately. An earlier version left a leading `~/`
+ * unquoted so a shell would expand it, but that carve-out could not tell the
+ * one hardcoded helper path from a `--file`/`-p` argument the caller typed —
+ * a tilde-prefixed value with a space or a `$(…)` in it stayed exploitable
+ * through the same two hops this function otherwise closes. The helper path
+ * is resolved in code instead (`TMUX_POPUP`, via `homedir()`), so nothing
+ * here needs a shell to expand anything.
  */
 export function shellQuote(word: string): string {
-  if (word.startsWith("~/")) return word; // must stay unquoted to expand
   return /^[A-Za-z0-9_./=:-]+$/.test(word) ? word : `'${word.replaceAll("'", `'\\''`)}'`;
 }

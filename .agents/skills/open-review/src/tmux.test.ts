@@ -1,7 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { shellQuote } from "./tmux.ts";
+import { existsSync, mkdtempSync, rmSync } from "node:fs";
+import { homedir, tmpdir } from "node:os";
+import { join } from "node:path";
+import { shellQuote, TMUX_POPUP } from "./tmux.ts";
 
 /**
  * Parses a literal command-line fragment into the argv it produces — the
@@ -66,4 +69,31 @@ test("quoting once lets a command substitution execute at the second hop", () =>
   const word = "$(echo hi)";
   assert.notDeepEqual(roundTrip(["tuicr", word], onceQuote), ["tuicr", word]);
   assert.deepEqual(roundTrip(["tuicr", word], onceQuote), ["tuicr", "hi"]);
+});
+
+// The narrower door: the old carve-out left any `~/`-prefixed word unquoted
+// so the one hardcoded helper path would expand, but `--file`/`-p` are
+// ordinary entry points a caller can point at a tilde-prefixed path too —
+// the carve-out could not tell the two apart.
+test("a tilde-prefixed word is no longer expanded — it round-trips as literal data", () => {
+  const word = "~/notes/my plan.md";
+  assert.deepEqual(roundTrip(["tuicr", word], doubleQuote), ["tuicr", word]);
+});
+
+test("a tilde-prefixed word carrying a command substitution does not execute", () => {
+  const dir = mkdtempSync(join(tmpdir(), "open-review-pwn-"));
+  const marker = join(dir, "PWNED");
+  try {
+    const word = `~/x$(touch ${marker}).md`;
+    const result = roundTrip(["tuicr", word], doubleQuote);
+    assert.deepEqual(result, ["tuicr", word]);
+    assert.equal(existsSync(marker), false, "the command substitution must never run");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("the resolved helper path arrives as one argument, unchanged", () => {
+  assert.equal(TMUX_POPUP, join(homedir(), "scripts", "tmux-popup"));
+  assert.deepEqual(roundTrip(["tuicr", TMUX_POPUP], doubleQuote), ["tuicr", TMUX_POPUP]);
 });
