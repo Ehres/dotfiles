@@ -1,202 +1,24 @@
 #!/bin/bash
-# Open a tuicr review in a tmux popup, resolving what to review in-script.
+# Entry point for the open-review skill. The logic lives in src/main.ts; this
+# only finds a node to run it with.
 #
-# Exists to keep an agent from spending model round-trips on work that is
-# deterministic: finding the base branch, checking there is a diff at all, and
-# building the tuicr argv. One backgrounded call gets the popup on screen.
-#
-# Bundled with the open-review skill; see the SKILL.md next to it. Agents invoke
-# it as ~/.agents/skills/open-review/open-review.
+# `#!/usr/bin/env node` would not do: mise publishes its PATH from .zshrc, and
+# ~/scripts/tmux-popup deliberately skips the login shell, so a popup gets a
+# PATH with no node in it. The mise shim works with no activation.
 #
 # Agent contract:
-#   1. run this in the background — it blocks until the popup closes, and that
-#      is the signal the review is finished
+#   1. run this in the background — it blocks until the review is finished and
+#      prints the comments when it is
 #   2. then `--plan` to read back what was opened
-# The plan is written to disk *before* the popup launches, so step 2 never
-# races step 1.
-#
-# Usage:
-#   open-review                 auto: this branch's commits and/or working tree
-#   open-review -w              working tree only
-#   open-review -r <revset>     an explicit revset
-#   open-review pr <number>     a pull request
-#   open-review ... -p <path>   filter to a file or directory
-#   open-review --plan          print the last resolved plan, no popup
-#   open-review --dry-run       resolve and print, no popup
-
 set -uo pipefail
 
-# Range-matched rather than line-numbered so editing the header cannot break it.
-# `s/^# //` keeps the indentation; BSD sed has no `\?`, so no optional quantifier.
-usage() { sed -n '/^# Usage:/,/^$/p' "$0" | sed -e 's/^# //' -e 's/^#$//'; }
+here=$(cd -- "$(dirname -- "$0")" && pwd)
 
-REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null) || {
-	echo "open-review: not a git repository" >&2
-	exit 1
-}
-PLAN_FILE="$(git rev-parse --absolute-git-dir)/open-review.plan"
-
-# --plan waits briefly: the caller reads it right after backgrounding the
-# launch, so the file may be a few milliseconds away from existing.
-if [[ ${1:-} == --plan ]]; then
-	for _ in $(seq 30); do
-		[[ -s $PLAN_FILE ]] && {
-			cat "$PLAN_FILE"
-			exit 0
-		}
-		sleep 0.1
-	done
-	echo "open-review: no plan yet — run open-review first" >&2
-	exit 1
-fi
-
-[[ ${1:-} == -h || ${1:-} == --help ]] && {
-	usage
-	exit 0
-}
-
-DRY_RUN=false
-[[ ${1:-} == --dry-run ]] && {
-	DRY_RUN=true
-	shift
-}
-
-# Anything that names a target itself is passed straight through; only a call
-# with no target gets auto-resolved.
-ARGS=("$@")
-AUTO=true
-# bash 3.2 + `set -u`: an empty array must be expanded with the ${a[@]+...} guard.
-for arg in ${ARGS[@]+"${ARGS[@]}"}; do
-	case $arg in
-	-w | --working-tree | -r | --revisions | -A | --all-files | --file | pr | mr)
-		AUTO=false
-		break
-		;;
-	esac
-done
-
-BASE=
-BASE_HOW=
-COMMITS=0
-DIRTY=false
-# An array, not a scalar: only the auto path fills it, and `${#STAT_REV[@]}` on an
-# empty *scalar* is an unbound-variable error under `set -u`, which crashed every
-# call that named its own target (-r, -w, pr).
-STAT_REV=()
-
-# The base a branch was stacked on is often not main, and getting it wrong
-# shows the parent branches' commits as if they were this branch's work.
-detect_base() {
-	local branch head base ref best best_n n
-	branch=$(git rev-parse --abbrev-ref HEAD)
-	head=$(git rev-parse HEAD)
-
-	# A pull request states its own base. Worth the ~1s of network.
-	if command -v gh >/dev/null 2>&1; then
-		base=$(gh pr view --json baseRefName -q .baseRefName 2>/dev/null) || base=
-		if [[ -n $base ]]; then
-			for ref in "origin/$base" "$base"; do
-				if git rev-parse --verify -q "$ref" >/dev/null; then
-					BASE=$ref
-					BASE_HOW="pull request base"
-					return
-				fi
-			done
-		fi
-	fi
-
-	# Otherwise: the closest branch HEAD actually descends from. Restricted to
-	# true ancestors so sibling branches off the same parent cannot win.
-	best=
-	best_n=
-	while read -r ref; do
-		[[ $ref == "$branch" || $ref == "origin/$branch" || $ref == origin/HEAD ]] && continue
-		git merge-base --is-ancestor "$ref" HEAD 2>/dev/null || continue
-		n=$(git rev-list --count "$ref..$head" 2>/dev/null) || continue
-		((n == 0)) && continue
-		if [[ -z $best_n ]] || ((n < best_n)); then
-			best_n=$n
-			best=$ref
-		fi
-	done < <(git for-each-ref --format='%(refname:short)' --sort=-committerdate --count=50 refs/heads refs/remotes/origin)
-	if [[ -n $best ]]; then
-		BASE=$best
-		BASE_HOW="nearest ancestor branch"
-		return
-	fi
-
-	for ref in origin/main origin/master main master; do
-		if git rev-parse --verify -q "$ref" >/dev/null; then
-			BASE=$ref
-			BASE_HOW="fallback default branch"
-			return
-		fi
-	done
-}
-
-TARGET=
-if $AUTO; then
-	detect_base
-	[[ -n $(git status --porcelain) ]] && DIRTY=true
-	if [[ -n $BASE ]]; then
-		COMMITS=$(git rev-list --count "$BASE..HEAD" 2>/dev/null) || COMMITS=0
-	fi
-
-	if ((COMMITS > 0)) && $DIRTY; then
-		ARGS=(-r "$BASE..HEAD" -w)
-		TARGET="$BASE..HEAD plus the working tree"
-		STAT_REV=("$BASE")
-	elif ((COMMITS > 0)); then
-		ARGS=(-r "$BASE..HEAD")
-		TARGET="$BASE..HEAD"
-		STAT_REV=("$BASE..HEAD")
-	elif $DIRTY; then
-		ARGS=(-w)
-		TARGET="the working tree"
-		STAT_REV=(HEAD)
-	else
-		echo "open-review: nothing to review — working tree is clean and no commits since ${BASE:-the default branch}" >&2
-		exit 2
-	fi
-else
-	TARGET="${ARGS[*]:-}"
-fi
-
-# Carry a -p filter through into the diffstat so the numbers match the popup.
-PATH_FILTER=()
-for i in "${!ARGS[@]}"; do
-	if [[ ${ARGS[i]} == -p || ${ARGS[i]} == --path ]]; then
-		PATH_FILTER=(-- "${ARGS[i + 1]}")
+for node in node "$HOME/.local/share/mise/shims/node" /opt/homebrew/bin/node; do
+	if command -v "$node" >/dev/null 2>&1; then
+		exec "$node" "$here/src/main.ts" "$@"
 	fi
 done
 
-{
-	echo "target: $TARGET"
-	[[ -n $BASE ]] && echo "base: $BASE ($BASE_HOW)"
-	$AUTO && echo "commits: $COMMITS    working tree: $($DIRTY && echo dirty || echo clean)"
-	echo "tuicr: ${ARGS[*]}"
-	if ((${#STAT_REV[@]})); then
-		echo "stat:$(git diff --shortstat "${STAT_REV[@]}" ${PATH_FILTER[@]+"${PATH_FILTER[@]}"} 2>/dev/null)"
-		# git diff cannot see untracked files, but git status called the tree
-		# dirty because of them — say so rather than under-report the diff.
-		untracked=$(git ls-files --others --exclude-standard | wc -l | tr -d ' ')
-		((untracked > 0)) && echo "untracked: $untracked path(s), not in the stat above"
-		echo "churn (added+deleted, top 10):"
-		git diff --numstat "${STAT_REV[@]}" ${PATH_FILTER[@]+"${PATH_FILTER[@]}"} 2>/dev/null |
-			awk '$1 != "-" { printf "  %6d  %s\n", $1 + $2, $3 }' |
-			sort -rn | head -10
-	fi
-} >"$PLAN_FILE"
-
-cat "$PLAN_FILE"
-$DRY_RUN && exit 0
-
-[[ -n ${TMUX:-} ]] || {
-	echo "open-review: not inside tmux — run 'tuicr ${ARGS[*]}' directly" >&2
-	exit 1
-}
-
-# -d needs an absolute path: the branch may live in a worktree, and the shell's
-# cd is zoxide, so a relative path can land in a different one.
-exec tmux display-popup -d "$REPO_ROOT" -T " tuicr (C-q close)" -w 95% -h 95% \
-	-E "$(printf '%q ' tuicr "${ARGS[@]}")"
+echo "open-review: no node found (tried PATH, mise shims, /opt/homebrew/bin)" >&2
+exit 1
