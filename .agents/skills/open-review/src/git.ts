@@ -130,17 +130,30 @@ function probeRefs(cwd: string, reflogName: string | null, branch: string | null
     excluded.add(`origin/${branch}`);
   }
   const merged = gitOk(
-    ["for-each-ref", "--merged", "HEAD", "--format=%(objectname) %(refname:short)", "refs/heads", "refs/remotes"],
+    [
+      "for-each-ref",
+      "--merged",
+      "HEAD",
+      "--format=%(objectname) %(refname:short) %(refname)",
+      "refs/heads",
+      "refs/remotes",
+    ],
     cwd,
   );
   const bySha = new Map<string, string>();
   for (const line of (merged ?? "").split("\n")) {
     const trimmed = line.trim();
-    const space = trimmed.indexOf(" ");
-    if (space === -1) continue;
-    const sha = trimmed.slice(0, space);
-    const ref = trimmed.slice(space + 1);
+    if (!trimmed) continue;
+    const [sha, ref, fullRef] = trimmed.split(" ");
+    if (!sha || !ref || !fullRef) continue;
     if (excluded.has(ref)) continue;
+    // A remote's symbolic HEAD short-names to just "origin", not "origin/HEAD"
+    // — the literal string above never matches it. Caught here by the full
+    // refname instead: left in, it can win the sha race ahead of the real
+    // origin/<branch> ref and get reported as a base that is not a branch,
+    // and a stale one (only `git remote set-head` refreshes it) could then be
+    // silently preferred over the real default branch.
+    if (/^refs\/remotes\/[^/]+\/HEAD$/.test(fullRef)) continue;
     if (!bySha.has(sha)) bySha.set(sha, ref);
   }
 

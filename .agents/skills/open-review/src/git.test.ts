@@ -311,6 +311,40 @@ test("origin/<branch> is never picked as the base", () => {
   }
 });
 
+// origin/HEAD's %(refname:short) is just "origin" — the "/HEAD" suffix is
+// stripped — not "origin/HEAD". The candidate-collection exclusion list was
+// built from that literal string and so never matched it, letting it slip
+// through under the bare name "origin". With the real origin/master ref
+// excluded elsewhere (deleting local master here isolates that: nothing else
+// can then win the sha race ahead of origin/HEAD), "origin" was the only
+// survivor and became the reported base — a base that is not a branch, and a
+// stale cached symref (only `git remote set-head` refreshes it) that could
+// silently be preferred over the real default branch.
+test("origin/HEAD is never offered as a candidate under its short name", () => {
+  const repo = makeRepo();
+  try {
+    repo.write("a.txt", "a");
+    repo.commit("c1");
+    const fork = repo.run("rev-parse", "HEAD");
+    repo.run("checkout", "-q", "-b", "feature");
+    repo.write("b.txt", "b");
+    repo.commit("f1");
+    repo.run("branch", "-D", "master");
+    repo.run("update-ref", "refs/remotes/origin/master", fork);
+    repo.run("symbolic-ref", "refs/remotes/origin/HEAD", "refs/remotes/origin/master");
+
+    const facts = collectFacts(repo.dir)!;
+    assert.ok(
+      facts.refs.candidates.every((candidate) => candidate.ref !== "origin"),
+      `origin/HEAD must not surface as a candidate named "origin", got: ${JSON.stringify(facts.refs.candidates)}`,
+    );
+    const base = chooseBase(facts);
+    assert.equal(base?.ref, "origin/master");
+  } finally {
+    repo.cleanup();
+  }
+});
+
 // A topological walk lists a commit before its ancestors, but when several
 // commits are equally "ready" — both parents of a merge, here — it breaks the
 // tie by commit date, newest first, not by graph distance. `bar` is the true

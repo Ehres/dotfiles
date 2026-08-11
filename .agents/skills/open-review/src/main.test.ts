@@ -1,8 +1,30 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
+import { existsSync, mkdtempSync, readdirSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { resolve } from "./main.ts";
-import { writeLastReviewed } from "./state.ts";
+import { planPath, writeLastReviewed } from "./state.ts";
+import { EXIT } from "./constants.ts";
 import { makeRepo } from "./testrepo.ts";
+
+// main() writes its plan to stdout, and node:test's own reporter writes to
+// that same stdout between subtests. Capturing main()'s output by swapping
+// process.stdout.write in-process was tried first and rejected: it collides
+// with the reporter's writable-stream bookkeeping and silently drops every
+// subtest that reports while the swap is active, with no failure raised —
+// the suite reports fewer tests than were declared and looks green. A real
+// child process keeps the two streams apart with no such hazard, and doubles
+// as coverage for the file's actual CLI entry point, which the in-process
+// resolve() tests above never exercise.
+const mainScript = fileURLToPath(new URL("./main.ts", import.meta.url));
+
+function runMain(argv: string[], cwd: string): { exitCode: number | null; stdout: string; stderr: string } {
+  const result = spawnSync(process.execPath, [mainScript, ...argv], { cwd, encoding: "utf8" });
+  return { exitCode: result.status, stdout: result.stdout, stderr: result.stderr };
+}
 
 test("a dirty branch resolves a plan naming both halves", () => {
   const repo = makeRepo();
@@ -131,6 +153,83 @@ test("--since-last targets only what arrived after the recorded head", () => {
     assert.ok(target.tuicrArgs.includes(`${reviewed}..HEAD`));
     assert.match(plan, /^stat: 1 file changed, 1 insertion\(\+\)$/m);
     assert.doesNotMatch(plan, /first\.txt/);
+  } finally {
+    repo.cleanup();
+  }
+});
+
+// main()'s branch dispatch, covering only branches that return before ever
+// reaching launch(): Task 9 gives launch a real body, and a test that reached
+// it would try to drive tmux.
+
+test("--help prints usage and exits ok, without touching a repository", () => {
+  const { exitCode, stdout } = runMain(["--help"], "/");
+  assert.equal(exitCode, EXIT.ok);
+  assert.match(stdout, /open-review — open a tuicr review in a tmux popup/);
+});
+
+test("outside a repository, main errors out", () => {
+  const dir = mkdtempSync(join(tmpdir(), "open-review-non-repo-"));
+  try {
+    const { exitCode } = runMain([], dir);
+    assert.equal(exitCode, EXIT.error);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+// Regression for the pr path skipping the dry-run short-circuit the
+// with-facts path already had: --dry-run must resolve and print, never reach
+// launch. Today launch is still a stub, so this passes either way; the
+// meaningful guard is that a dry run leaves no trace in a directory outside
+// any repository, since there is no gitDir to compute a plan path from at
+// all — a real launch would have to do more than print to be observable
+// here, and once Task 9 fills launch in this stays the right assertion.
+test("--dry-run on the pr path never reaches launch", () => {
+  const dir = mkdtempSync(join(tmpdir(), "open-review-non-repo-"));
+  try {
+    const { exitCode, stdout } = runMain(["--dry-run", "pr", "https://github.com/o/r/pull/1"], dir);
+    assert.equal(exitCode, EXIT.ok);
+    assert.match(stdout, /^mode: /m);
+    assert.deepEqual(readdirSync(dir), [], "a dry run must leave no trace outside any repository");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("a clean tree with no commits to review exits with EXIT.nothing", () => {
+  const repo = makeRepo();
+  try {
+    repo.write("a.txt", "a\n");
+    repo.commit("c1");
+    const { exitCode } = runMain([], repo.dir);
+    assert.equal(exitCode, EXIT.nothing);
+  } finally {
+    repo.cleanup();
+  }
+});
+
+test("--dry-run writes the plan then clears it, rather than leaving it for --plan to find", () => {
+  const repo = makeRepo();
+  try {
+    repo.write("a.txt", "a\n");
+    repo.commit("c1");
+    repo.write("a.txt", "a\nb\n");
+    const { exitCode } = runMain(["--dry-run"], repo.dir);
+    assert.equal(exitCode, EXIT.ok);
+    assert.equal(existsSync(planPath(join(repo.dir, ".git"))), false);
+  } finally {
+    repo.cleanup();
+  }
+});
+
+test("--plan with no launch in flight errors out rather than hanging forever", () => {
+  const repo = makeRepo();
+  try {
+    repo.write("a.txt", "a\n");
+    repo.commit("c1");
+    const { exitCode } = runMain(["--plan"], repo.dir);
+    assert.equal(exitCode, EXIT.error);
   } finally {
     repo.cleanup();
   }

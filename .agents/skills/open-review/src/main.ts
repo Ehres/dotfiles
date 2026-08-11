@@ -133,6 +133,10 @@ export async function main(argv: string[], cwd: string): Promise<number> {
     process.stdout.write(
       `mode: ${target.description}\ntuicr: ${target.tuicrArgs.join(" ")}\nstat: pass-through, no local stat\n`,
     );
+    // Same short-circuit as the with-facts path below: --dry-run resolves and
+    // prints, and must never reach the popup. `launch` only special-cases
+    // "exec", so without this a dry run outside a repository would open one.
+    if (intent.action === "dry-run") return EXIT.ok;
     return await launch(cwd, target, null, intent.action);
   }
 
