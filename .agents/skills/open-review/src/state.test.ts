@@ -58,6 +58,17 @@ test("a null branch has no state to read or write", () => {
   }
 });
 
+test("an empty branch name is refused on both sides", () => {
+  const common = dir();
+  try {
+    writeLastReviewed(common, "", "abc123");
+    assert.equal(readLastReviewed(common, ""), null);
+    assert.equal(existsSync(join(common, "open-review.state")), false);
+  } finally {
+    rmSync(common, { recursive: true, force: true });
+  }
+});
+
 // Defect 4: `exit 2` used to leave the previous run's plan on disk, and --plan
 // printed it as if it described the review that never opened.
 test("clearPlan removes a previous plan so it cannot be inherited", () => {

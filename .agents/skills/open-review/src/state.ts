@@ -57,6 +57,8 @@ export function parseState(text: string): Map<string, string> {
  * rewriting one branch restamped them all, so the column meant "last written"
  * rather than "last reviewed". Nothing reads it, so it is gone; parsing stays
  * tolerant of files that still have it.
+ *
+ * Branch names must not contain tabs; this is enforced by git's ref naming rules.
  */
 export function serializeState(state: Map<string, string>): string {
   return [...state].map(([branch, sha]) => `${branch}\t${sha}`).join("\n");
@@ -70,7 +72,7 @@ export function readLastReviewed(commonDir: string, branch: string | null): stri
 }
 
 export function writeLastReviewed(commonDir: string, branch: string | null, head: string): void {
-  if (branch === null) return;
+  if (!branch) return;
   const path = statePath(commonDir);
   const state = existsSync(path) ? parseState(readFileSync(path, "utf8")) : new Map<string, string>();
   state.set(branch, head);
