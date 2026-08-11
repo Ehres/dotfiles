@@ -150,17 +150,17 @@ test("sub-millisecond difference: same millisecond, different microseconds", () 
   const before = [
     row({
       path: "/sessions/a.json",
-      updated_at: "2026-08-05T14:02:21.603027+00:00",
+      updated_at: "2026-08-05T14:02:20.000000+00:00",
     }),
     row({
       path: "/sessions/b.json",
-      updated_at: "2026-08-05T14:02:21.600000+00:00",
+      updated_at: "2026-08-05T14:02:20.000000+00:00",
     }),
   ];
   const after = [
     row({
       path: "/sessions/a.json",
-      updated_at: "2026-08-05T14:02:21.603027+00:00",
+      updated_at: "2026-08-05T14:02:21.603100+00:00",
     }),
     row({
       path: "/sessions/b.json",
