@@ -220,12 +220,19 @@ function diffArgs(spec: Extract<StatSpec, { kind: "diff" }>, pathFilter: string 
   return pathFilter === null ? [...spec.args] : [...spec.args, "--", pathFilter];
 }
 
+/**
+ * null distinguishes a diff that failed (an unresolvable revset, most often)
+ * from one that genuinely produced no output — `""`, on a clean exit. The two
+ * must not collapse into each other: a failed diff reported as "no textual
+ * changes" tells the agent nothing changed when in fact nothing could be
+ * compared.
+ */
 export function shortstat(
   cwd: string,
   spec: Extract<StatSpec, { kind: "diff" }>,
   pathFilter: string | null,
-): string {
-  return gitOk(["diff", "--shortstat", ...diffArgs(spec, pathFilter)], cwd) ?? "";
+): string | null {
+  return gitOk(["diff", "--shortstat", ...diffArgs(spec, pathFilter)], cwd);
 }
 
 export function numstat(

@@ -1,9 +1,8 @@
+import { LIST_LIMIT } from "./constants.ts";
 import type { PlanInput } from "./types.ts";
 
-const CHURN_LIMIT = 10;
-
 export function renderPlan(input: PlanInput): string {
-  const { target, facts, base, shortstat, churn, untracked } = input;
+  const { target, facts, base, shortstat, churn, untracked, untrackedTotal } = input;
   const lines: string[] = [`mode: ${target.description}`];
 
   if (base !== null) {
@@ -31,15 +30,20 @@ export function renderPlan(input: PlanInput): string {
   }
 
   // git diff cannot see untracked files, but the review will — so list them
-  // rather than reporting a count that says they are missing.
-  if (target.stat.kind === "diff" && untracked.length > 0) {
+  // rather than reporting a count that says they are missing. Capped like
+  // churn below: an untracked build/ directory with `--untracked-files=all`
+  // in scope would otherwise turn the plan into thousands of lines.
+  if (target.stat.kind === "diff" && untrackedTotal > 0) {
     lines.push("untracked (not in the stat above):");
     for (const row of untracked) lines.push(`  ${String(row.lines).padStart(6)}  ${row.path}`);
+    if (untrackedTotal > untracked.length) {
+      lines.push(`  … and ${untrackedTotal - untracked.length} more`);
+    }
   }
 
   if (churn.length > 0) {
-    lines.push(`churn (added+deleted, top ${CHURN_LIMIT}):`);
-    for (const row of churn.slice(0, CHURN_LIMIT)) {
+    lines.push(`churn (added+deleted, top ${LIST_LIMIT}):`);
+    for (const row of churn.slice(0, LIST_LIMIT)) {
       lines.push(`  ${String(row.changed).padStart(6)}  ${row.path}`);
     }
   }

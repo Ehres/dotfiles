@@ -14,8 +14,8 @@ import { awaitPlan, clearPlan, readLastReviewed, writeLastReviewed, writePlan } 
 import { insideTmux, openPopup, popupAlive, waitForPopupGone } from "./tmux.ts";
 import { execInPlace, listSessions, readComments } from "./tuicr.ts";
 import { buildPrTarget, buildTarget } from "./target.ts";
-import { EXIT } from "./constants.ts";
-import type { Action, BaseChoice, LastReviewed, RepoFacts, Target } from "./types.ts";
+import { EXIT, LIST_LIMIT } from "./constants.ts";
+import type { Action, BaseChoice, ChurnRow, LastReviewed, RepoFacts, Target, UntrackedRow } from "./types.ts";
 
 export type Resolution = {
   facts: RepoFacts;
@@ -37,29 +37,77 @@ export function resolve(cwd: string, argv: string[], known?: RepoFacts): Resolut
   const facts = known ?? collectFacts(cwd);
   if (facts === null) throw new Error("not a git repository");
 
-  const base = facts.head === null ? null : chooseBase(facts);
-  const target = buildTarget({
+  // An explicit -r, pr or --file names its own target; detecting a base for
+  // them is wasted work, and reporting one it never used would be a lie the
+  // plan tells about a review the agent relays verbatim.
+  const detectsBase = intent.mode.kind === "auto" || intent.mode.kind === "since-last" || intent.mode.kind === "working-tree";
+  const base = detectsBase && facts.head !== null ? chooseBase(facts) : null;
+  let target = buildTarget({
     intent,
     facts,
     base,
-    lastReviewed: readLastReviewedState(cwd, facts),
+    lastReviewed: detectsBase ? readLastReviewedState(cwd, facts) : null,
   });
 
   const { pathFilter } = intent;
-  const spec = target.stat;
+  let shortstatResult: string | null = null;
+  let churn: ChurnRow[] = [];
+  let untrackedPaths: string[] = [];
+
+  if (target.stat.kind === "diff") {
+    const spec = target.stat;
+    shortstatResult = shortstat(cwd, spec, pathFilter);
+    untrackedPaths = facts.work.untracked.filter((path) => inScope(path, pathFilter));
+
+    if (shortstatResult === null) {
+      // The diff itself failed — an unresolvable revset, most often — which is
+      // not "no textual changes": that phrasing tells the agent the review was
+      // empty when in fact nothing could be compared at all.
+      const reason = `could not diff ${spec.args.join(" ")} — check the revset`;
+      target = { ...target, stat: { kind: "none", reason }, emptyReason: reason };
+    } else if (shortstatResult.trim() === "" && untrackedPaths.length === 0) {
+      // A real diff, genuinely empty, with nothing untracked in scope either
+      // (a working tree dirty only with untracked files is still a real
+      // review — that case never reaches here, since untrackedPaths is
+      // nonempty for it). Caught here rather than left to open an empty
+      // popup: the session then dies at once and gets reported as "closed
+      // with no comments", which reads as the human's own choice.
+      const reason = "no changes in scope";
+      target = { ...target, stat: { kind: "none", reason }, emptyReason: reason };
+    } else {
+      churn = numstat(cwd, spec, pathFilter);
+    }
+  } else if (target.stat.kind === "file") {
+    untrackedPaths = [target.stat.path];
+  }
+
+  let untracked: UntrackedRow[] = [];
+  if (target.stat.kind === "file") {
+    untracked = untrackedPaths.map((path) => countLines(cwd, path));
+  } else if (target.stat.kind === "diff") {
+    // Capped before reading, not just before printing: an untracked build/ of
+    // hundreds of files must not turn every launch into hundreds of reads.
+    untracked = untrackedPaths.slice(0, LIST_LIMIT).map((path) => countLines(cwd, path));
+  }
+
   const plan = renderPlan({
     target,
     facts,
     base,
-    shortstat: spec.kind === "diff" ? shortstat(cwd, spec, pathFilter) : null,
-    churn: spec.kind === "diff" ? numstat(cwd, spec, pathFilter) : [],
-    untracked:
-      spec.kind === "file"
-        ? [countLines(cwd, spec.path)]
-        : facts.work.untracked.map((path) => countLines(cwd, path)),
+    shortstat: target.stat.kind === "diff" ? shortstatResult : null,
+    churn: target.stat.kind === "diff" ? churn : [],
+    untracked,
+    untrackedTotal: untrackedPaths.length,
   });
 
   return { facts, base, target, plan };
+}
+
+/** A path counts toward a path-filtered review the same way `git diff -- <pathFilter>` does. */
+export function inScope(path: string, pathFilter: string | null): boolean {
+  if (pathFilter === null) return true;
+  const normalized = pathFilter.replace(/\/+$/, "");
+  return path === normalized || path.startsWith(`${normalized}/`);
 }
 
 function readLastReviewedState(cwd: string, facts: RepoFacts): LastReviewed | null {
@@ -162,15 +210,47 @@ export async function main(argv: string[], cwd: string): Promise<number> {
 }
 
 /**
+ * The four functions launch performs a side effect through, plus popupAlive
+ * (checked twice: once before opening, once as the fallback when opening
+ * itself reports failure). Every field is optional, defaulting to the real
+ * implementation, so no existing caller needs to change — only a test that
+ * wants to drive an exit-code decision without tmux or tuicr.
+ */
+export type LaunchDeps = {
+  popupAlive?: typeof popupAlive;
+  openPopup?: typeof openPopup;
+  waitForPopupGone?: typeof waitForPopupGone;
+  listSessions?: typeof listSessions;
+  readComments?: typeof readComments;
+  writeLastReviewed?: typeof writeLastReviewed;
+};
+
+/**
  * The popup and the read-back. `facts` is null only on the repository-less pr
  * path, which has no state to record.
  */
-async function launch(
+export async function launch(
   root: string,
   target: Target,
   facts: RepoFacts | null,
   action: Action,
+  deps: LaunchDeps = {},
 ): Promise<number> {
+  const doPopupAlive = deps.popupAlive ?? popupAlive;
+  const doOpenPopup = deps.openPopup ?? openPopup;
+  const doWait = deps.waitForPopupGone ?? waitForPopupGone;
+  const doListSessions = deps.listSessions ?? listSessions;
+  const doReadComments = deps.readComments ?? readComments;
+  const doWriteLastReviewed = deps.writeLastReviewed ?? writeLastReviewed;
+
+  // Every exit below that does not open a popup must not leave the plan on
+  // disk for --plan to find: the agent's next call would print a plan for a
+  // review that never happened. Exits that did open a popup leave it alone —
+  // --plan has already served its purpose by the time one of those is reached.
+  const clearPlanIfLive = (): void => {
+    if (facts !== null) clearPlan(facts.gitDir);
+  };
+
   if (action === "exec") {
     // The tmux binding's path: the human owns the popup, so there is nothing
     // to wait for and nothing to read back.
@@ -179,6 +259,7 @@ async function launch(
   }
 
   if (!insideTmux()) {
+    clearPlanIfLive();
     process.stderr.write(
       `open-review: not inside tmux — run 'tuicr ${target.tuicrArgs.join(" ")}' directly\n`,
     );
@@ -187,33 +268,57 @@ async function launch(
 
   // tmux-popup attaches an existing session and ignores the command it was
   // given, so a live review would silently stand in for the requested one.
-  if (popupAlive()) {
+  if (doPopupAlive()) {
+    clearPlanIfLive();
     process.stderr.write(
       "open-review: a review is already open — close it with C-q, or reattach with prefix + R\n",
     );
     return EXIT.busy;
   }
 
-  const before = listSessions();
-  if (!openPopup(root, target.tuicrArgs)) {
+  const before = doListSessions();
+  const opened = doOpenPopup(root, target.tuicrArgs);
+  // display-popup can report failure (Escape dismissing it, for instance)
+  // while tuicr keeps running in its own session. Abandoning the review here
+  // on that basis alone would tell the agent it never started while a human
+  // is still looking at it — so a live session is treated as success.
+  if (!opened && !doPopupAlive()) {
+    clearPlanIfLive();
     process.stderr.write(
       `open-review: could not open the popup — run 'tuicr ${target.tuicrArgs.join(" ")}' directly\n`,
     );
     return EXIT.error;
   }
-  await waitForPopupGone();
+  await doWait();
 
-  const elected = electSession(before, listSessions());
+  const after = doListSessions();
+  const elected = electSession(before, after);
   if (facts !== null && facts.head !== null) {
-    writeLastReviewed(facts.commonDir, facts.branch, facts.head);
+    doWriteLastReviewed(facts.commonDir, facts.branch, facts.head);
   }
 
-  if (elected === null || elected.comment_count === 0) {
+  if (elected === null) {
     process.stdout.write("open-review: review closed with no comments\n");
     return EXIT.noComments;
   }
 
-  const comments = readComments(elected.path);
+  // A local session is keyed on branch + HEAD sha, so re-reviewing at the
+  // same HEAD reuses it, and its comment_count already includes whatever the
+  // previous review produced. Comparing against the count this session had
+  // before this launch is what stops those from being served as this
+  // review's own output — including the case where nothing new was written
+  // at all but tuicr still touched the session at startup.
+  const previousCount = before.find((row) => row.path === elected.path)?.comment_count ?? 0;
+  if (elected.comment_count <= previousCount) {
+    process.stdout.write(
+      elected.comment_count === 0
+        ? "open-review: review closed with no comments\n"
+        : `open-review: review closed with no new comments (${elected.comment_count} carried over from a previous review)\n`,
+    );
+    return EXIT.noComments;
+  }
+
+  const comments = doReadComments(elected.path);
   if (comments === null) {
     process.stderr.write(
       `open-review: could not read back comments — run 'tuicr review comments --session ${elected.path}' to see them\n`,
@@ -221,7 +326,19 @@ async function launch(
     return EXIT.error;
   }
   process.stdout.write(`session: ${elected.slug}\n`);
-  process.stdout.write(`${renderCommentIndex(comments)}\n\n`);
+  // There is no CLI to resolve or delete a tuicr comment, so a session's
+  // comments are append-only — the first `previousCount` are exactly the ones
+  // that predate this review. The index shows only the new ones; the JSON
+  // stays complete, since the agent may still need the older comments for
+  // context, and only the index and the summary line must not misrepresent
+  // which comments this review produced.
+  const newComments = comments.slice(Math.min(previousCount, comments.length));
+  if (previousCount > 0) {
+    process.stdout.write(
+      `${newComments.length} new comment${newComments.length === 1 ? "" : "s"} (${previousCount} carried over from a previous review):\n`,
+    );
+  }
+  process.stdout.write(`${renderCommentIndex(newComments)}\n\n`);
   process.stdout.write(`comments (json):\n${JSON.stringify(comments, null, 2)}\n`);
   return EXIT.ok;
 }

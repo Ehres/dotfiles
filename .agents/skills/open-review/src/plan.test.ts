@@ -28,6 +28,7 @@ function input(over: Partial<PlanInput> = {}): PlanInput {
       { path: "src/base.ts", changed: 64 },
     ],
     untracked: [{ path: "new.ts", lines: 41 }],
+    untrackedTotal: 1,
     ...over,
   };
 }
@@ -57,6 +58,7 @@ test("a clean tree says so and lists nothing", () => {
     ...base,
     facts: { ...base.facts, work: { staged: 0, unstaged: 0, untracked: [], dirty: false } },
     untracked: [],
+    untrackedTotal: 0,
   });
   assert.match(text, /working tree: clean/);
   assert.doesNotMatch(text, /untracked/);
@@ -92,6 +94,7 @@ test("a pass-through target says why there is no stat", () => {
     shortstat: null,
     churn: [],
     untracked: [],
+    untrackedTotal: 0,
   });
   assert.match(text, /stat: pass-through, no local stat/);
   assert.doesNotMatch(text, /churn/);
@@ -111,6 +114,7 @@ test("a file target reports the file and its length", () => {
     shortstat: null,
     churn: [],
     untracked: [{ path: "docs/plan.md", lines: 212 }],
+    untrackedTotal: 1,
   });
   assert.match(text, /file: docs\/plan\.md \(212 lines\)/);
 });
@@ -125,4 +129,21 @@ test("churn is capped at ten rows", () => {
   const text = renderPlan(input({ churn: many }));
   const rows = text.split("\n").filter((line) => /^\s+\d+\s+f\d+\.ts$/.test(line));
   assert.equal(rows.length, 10);
+});
+
+// Important 1: an untracked build/ of hundreds of files must not turn the
+// plan into hundreds of lines. The cap is on rows shown here; main.ts is
+// responsible for not reading past it (covered in main.test.ts, since that
+// needs real files on disk).
+test("the untracked block is capped at ten rows, with a tail for the rest", () => {
+  const rows = Array.from({ length: 10 }, (_, i) => ({ path: `u${i}.ts`, lines: i }));
+  const text = renderPlan(input({ untracked: rows, untrackedTotal: 13 }));
+  const shown = text.split("\n").filter((line) => /^\s+\d+\s+u\d+\.ts$/.test(line));
+  assert.equal(shown.length, 10);
+  assert.match(text, /… and 3 more$/m);
+});
+
+test("an untracked block with nothing past the cap has no tail", () => {
+  const text = renderPlan(input());
+  assert.doesNotMatch(text, /and \d+ more/);
 });

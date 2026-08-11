@@ -109,7 +109,9 @@ export type PlanInput = {
   /** `git diff --shortstat` output, or null when there is no local stat. */
   shortstat: string | null;
   churn: ChurnRow[];
+  /** Capped to LIST_LIMIT rows; the actual count in scope, for the "… and N more" tail. */
   untracked: UntrackedRow[];
+  untrackedTotal: number;
 };
 
 export type SessionRow = {
