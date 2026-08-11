@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { parseArgs, UsageError } from "./args.ts";
 import { chooseBase } from "./base.ts";
 import {
@@ -9,7 +10,10 @@ import {
   shortstat,
 } from "./git.ts";
 import { renderPlan } from "./plan.ts";
-import { awaitPlan, clearPlan, readLastReviewed, writePlan } from "./state.ts";
+import { electSession, renderCommentIndex } from "./session.ts";
+import { awaitPlan, clearPlan, readLastReviewed, writeLastReviewed, writePlan } from "./state.ts";
+import { insideTmux, openPopup, popupAlive, waitForPopupGone } from "./tmux.ts";
+import { listSessions, readComments } from "./tuicr.ts";
 import { buildPrTarget, buildTarget } from "./target.ts";
 import { EXIT } from "./constants.ts";
 import type { Action, BaseChoice, LastReviewed, RepoFacts, Target } from "./types.ts";
@@ -159,8 +163,8 @@ export async function main(argv: string[], cwd: string): Promise<number> {
 }
 
 /**
- * The popup and the read-back. A stub until Task 9 — `facts` is null only on
- * the repository-less pr path, which has no state to record.
+ * The popup and the read-back. `facts` is null only on the repository-less pr
+ * path, which has no state to record.
  */
 async function launch(
   root: string,
@@ -168,6 +172,47 @@ async function launch(
   facts: RepoFacts | null,
   action: Action,
 ): Promise<number> {
+  if (action === "exec") {
+    // The tmux binding's path: the human owns the popup, so there is nothing
+    // to wait for and nothing to read back.
+    execFileSync("tuicr", target.tuicrArgs, { stdio: "inherit" });
+    return EXIT.ok;
+  }
+
+  if (!insideTmux()) {
+    process.stderr.write(
+      `open-review: not inside tmux — run 'tuicr ${target.tuicrArgs.join(" ")}' directly\n`,
+    );
+    return EXIT.error;
+  }
+
+  // tmux-popup attaches an existing session and ignores the command it was
+  // given, so a live review would silently stand in for the requested one.
+  if (popupAlive()) {
+    process.stderr.write(
+      "open-review: a review is already open — close it with C-q, or reattach with prefix + R\n",
+    );
+    return EXIT.busy;
+  }
+
+  const before = listSessions();
+  openPopup(root, target.tuicrArgs);
+  await waitForPopupGone();
+
+  const elected = electSession(before, listSessions());
+  if (facts !== null && facts.head !== null) {
+    writeLastReviewed(facts.commonDir, facts.branch, facts.head);
+  }
+
+  if (elected === null || elected.comment_count === 0) {
+    process.stdout.write("open-review: review closed with no comments\n");
+    return EXIT.noComments;
+  }
+
+  const comments = readComments(elected.path);
+  process.stdout.write(`session: ${elected.slug}\n`);
+  process.stdout.write(`${renderCommentIndex(comments)}\n\n`);
+  process.stdout.write(`comments (json):\n${JSON.stringify(comments, null, 2)}\n`);
   return EXIT.ok;
 }
 
