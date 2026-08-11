@@ -136,7 +136,7 @@ test("the real format: tuicr's microsecond precision with numeric offset", () =>
   const after = [
     row({
       path: "/sessions/a.json",
-      updated_at: "2026-08-05T14:02:21.603027+00:00",
+      updated_at: "2026-08-05T14:02:22.000000+00:00",
     }),
     row({
       path: "/sessions/b.json",
