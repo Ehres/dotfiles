@@ -122,6 +122,9 @@ test("no comments renders an explicit line", () => {
   assert.equal(renderCommentIndex([]), "(no comments)");
 });
 
+// Validates tuicr's actual format parses and compares correctly. Tier 2 alone
+// handles this case (string order matches instant order), so it does not prove
+// tier 1 is necessary; mixed-offset test below does that.
 test("the real format: tuicr's microsecond precision with numeric offset", () => {
   const before = [
     row({
@@ -205,4 +208,19 @@ test("identical timestamps: elected row is independent of array order", () => {
   const elected1 = electSession(before, after1)?.path;
   const elected2 = electSession(before, after2)?.path;
   assert.equal(elected1, elected2);
+});
+
+// Tier 1 exists for format variation, and only a pair whose string order
+// contradicts its temporal order can prove it is doing anything. Here the
+// +02:00 row reads later as a string but is 58 minutes earlier as an instant.
+test("a mixed-offset pair is ordered by instant, not by how it reads", () => {
+  const before = [
+    row({ path: "/sessions/a.json", updated_at: "2026-08-05T10:00:00.000000+00:00" }),
+    row({ path: "/sessions/b.json", updated_at: "2026-08-05T10:00:00.000000+00:00" }),
+  ];
+  const after = [
+    row({ path: "/sessions/a.json", updated_at: "2026-08-05T16:02:00.000000+02:00" }),
+    row({ path: "/sessions/b.json", updated_at: "2026-08-05T15:00:00.000000+00:00" }),
+  ];
+  assert.equal(electSession(before, after)?.path, "/sessions/b.json");
 });
