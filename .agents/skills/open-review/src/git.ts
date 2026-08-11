@@ -1,5 +1,7 @@
 import { execFileSync } from "node:child_process";
-import type { RefInfo, RepoFacts, WorkTree } from "./types.ts";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import type { ChurnRow, RefInfo, RepoFacts, StatSpec, UntrackedRow, WorkTree } from "./types.ts";
 
 const DEFAULT_BRANCHES = ["origin/main", "origin/master", "main", "master"];
 
@@ -199,4 +201,52 @@ function probeRef(cwd: string, ref: string, head: string): RefInfo {
   if (mergeBase === null) return { ref, sha, mergeBase: null, distance: null };
   const count = gitOk(["rev-list", "--count", `${ref}..${head}`], cwd);
   return { ref, sha, mergeBase, distance: count === null ? null : Number(count) };
+}
+
+/** The path filter is appended here so the stat and the popup always agree. */
+function diffArgs(spec: Extract<StatSpec, { kind: "diff" }>, pathFilter: string | null): string[] {
+  return pathFilter === null ? [...spec.args] : [...spec.args, "--", pathFilter];
+}
+
+export function shortstat(
+  cwd: string,
+  spec: Extract<StatSpec, { kind: "diff" }>,
+  pathFilter: string | null,
+): string {
+  return gitOk(["diff", "--shortstat", ...diffArgs(spec, pathFilter)], cwd) ?? "";
+}
+
+export function numstat(
+  cwd: string,
+  spec: Extract<StatSpec, { kind: "diff" }>,
+  pathFilter: string | null,
+): ChurnRow[] {
+  const out = gitOk(["diff", "--numstat", ...diffArgs(spec, pathFilter)], cwd) ?? "";
+  const rows: ChurnRow[] = [];
+  for (const line of out.split("\n")) {
+    const [added, deleted, path] = line.split("\t");
+    // "-" marks a binary file: no line counts to add up.
+    if (!path || added === "-" || deleted === "-") continue;
+    rows.push({ path, changed: Number(added) + Number(deleted) });
+  }
+  return rows.sort((left, right) => right.changed - left.changed || left.path.localeCompare(right.path));
+}
+
+export function countLines(cwd: string, path: string): UntrackedRow {
+  try {
+    const text = readFileSync(join(cwd, path), "utf8");
+    const lines = text.length === 0 ? 0 : text.split("\n").length - (text.endsWith("\n") ? 1 : 0);
+    return { path, lines };
+  } catch {
+    return { path, lines: 0 };
+  }
+}
+
+export function isAncestor(cwd: string, maybeAncestor: string, descendant: string): boolean {
+  return gitOk(["merge-base", "--is-ancestor", maybeAncestor, descendant], cwd) !== null;
+}
+
+export function commitsBetween(cwd: string, from: string, to: string): number {
+  const count = gitOk(["rev-list", "--count", `${from}..${to}`], cwd);
+  return count === null ? 0 : Number(count);
 }
