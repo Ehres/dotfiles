@@ -1,4 +1,3 @@
-import { execFileSync } from "node:child_process";
 import { parseArgs, UsageError } from "./args.ts";
 import { chooseBase } from "./base.ts";
 import {
@@ -13,7 +12,7 @@ import { renderPlan } from "./plan.ts";
 import { electSession, renderCommentIndex } from "./session.ts";
 import { awaitPlan, clearPlan, readLastReviewed, writeLastReviewed, writePlan } from "./state.ts";
 import { insideTmux, openPopup, popupAlive, waitForPopupGone } from "./tmux.ts";
-import { listSessions, readComments } from "./tuicr.ts";
+import { execInPlace, listSessions, readComments } from "./tuicr.ts";
 import { buildPrTarget, buildTarget } from "./target.ts";
 import { EXIT } from "./constants.ts";
 import type { Action, BaseChoice, LastReviewed, RepoFacts, Target } from "./types.ts";
@@ -175,7 +174,7 @@ async function launch(
   if (action === "exec") {
     // The tmux binding's path: the human owns the popup, so there is nothing
     // to wait for and nothing to read back.
-    execFileSync("tuicr", target.tuicrArgs, { stdio: "inherit" });
+    execInPlace(target.tuicrArgs);
     return EXIT.ok;
   }
 
@@ -196,7 +195,12 @@ async function launch(
   }
 
   const before = listSessions();
-  openPopup(root, target.tuicrArgs);
+  if (!openPopup(root, target.tuicrArgs)) {
+    process.stderr.write(
+      `open-review: could not open the popup — run 'tuicr ${target.tuicrArgs.join(" ")}' directly\n`,
+    );
+    return EXIT.error;
+  }
   await waitForPopupGone();
 
   const elected = electSession(before, listSessions());
@@ -210,6 +214,12 @@ async function launch(
   }
 
   const comments = readComments(elected.path);
+  if (comments === null) {
+    process.stderr.write(
+      `open-review: could not read back comments — run 'tuicr review comments --session ${elected.path}' to see them\n`,
+    );
+    return EXIT.error;
+  }
   process.stdout.write(`session: ${elected.slug}\n`);
   process.stdout.write(`${renderCommentIndex(comments)}\n\n`);
   process.stdout.write(`comments (json):\n${JSON.stringify(comments, null, 2)}\n`);

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { parseSessionList } from "./tuicr.ts";
+import { parseSessionList, readComments } from "./tuicr.ts";
 
 // Verbatim shape of `tuicr review list --all`, trimmed to the fields used.
 const SAMPLE = `[
@@ -28,4 +28,12 @@ test("unparseable output yields no rows rather than throwing", () => {
   assert.deepEqual(parseSessionList(""), []);
   assert.deepEqual(parseSessionList("tuicr: something went wrong"), []);
   assert.deepEqual(parseSessionList("{}"), []);
+});
+
+// Defect: a failed read-back must not read as "no comments" — that silently
+// discards a review the human actually wrote. A nonexistent session path
+// makes the real tuicr binary exit non-zero, which is a safe, read-only way
+// to exercise this without touching tmux or a TUI.
+test("a session that fails to read back reports failure, not emptiness", () => {
+  assert.equal(readComments("/nonexistent/session-does-not-exist.json"), null);
 });
