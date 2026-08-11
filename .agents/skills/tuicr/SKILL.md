@@ -12,14 +12,22 @@ you read them back.
 **Direction is one-way: the user comments, you read.** Do not write comments into a session
 (`tuicr review add`) unless the user explicitly asks you to review a diff in tuicr.
 
-## Never launch tuicr yourself
+## Never launch tuicr yourself, unprompted
 
-The user opens it from a tmux popup (`prefix + R` → `tuicr -w`, closed with `C-q`).
-The popup is modal — while it is open the user cannot talk to you. So:
+This means: do not decide on your own initiative to run `tuicr`, `tuicr tui`, or any
+wrapper script, and do not poll for comments — wait until the user says the review is
+done, then read once. If the user asks to review and no popup is open, that is a request
+to launch one: use the `open-review` skill, which is the sanctioned way for an agent to do
+that. It launches tuicr in its own tmux session in the background, waits for the review to
+finish, and reads the comments back for you — this skill's Step 1 and Step 2 below are
+then already done, so read what it printed instead of listing again.
 
-- Do not run `tuicr`, `tuicr tui`, or any wrapper script.
-- Do not poll for comments. Wait until the user says the review is done, then read once.
-- If the user asks to review and tuicr isn't open, just tell them to hit `prefix + R`.
+The user can also open the popup themselves (`prefix + R` → `tuicr -w`, closed with
+`C-q`). The popup is modal either way — while it is open the user cannot talk to you.
+
+If the user says they are done but the popup was only dismissed (Escape) rather than
+closed, the session is still alive: reattach it with `prefix + R` and tell the user to
+press `C-q` there to actually end the review.
 
 ## Step 1 — find the session
 
