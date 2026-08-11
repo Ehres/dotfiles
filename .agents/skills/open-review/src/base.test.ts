@@ -101,7 +101,9 @@ test("the nearest true ancestor wins over a further one", () => {
   });
 });
 
-test("the branch itself, its remote and origin/HEAD are excluded", () => {
+// The branch itself and origin/HEAD are hard-excluded; its own remote is
+// merely demoted to a last resort, so a real ancestor still wins over it here.
+test("the branch itself and origin/HEAD are excluded; its own remote is demoted", () => {
   const chosen = chooseBase(
     facts({
       branch: "feature",
@@ -111,6 +113,37 @@ test("the branch itself, its remote and origin/HEAD are excluded", () => {
         ref("origin/HEAD", { distance: 1 }),
         ref("master", { distance: 7 }),
       ],
+    }),
+  );
+  assert.equal(chosen?.ref, "master");
+});
+
+// The trunk regression: on a branch with no feature/base split (working
+// directly on master), origin/<branch> is not a stale copy of yourself — it
+// is the only real base there is. Demoting it to last-resort must not mean
+// discarding it when nothing else is left.
+test("on trunk, origin/<branch> is the base when it is the only candidate", () => {
+  const chosen = chooseBase(
+    facts({
+      branch: "master",
+      candidates: [ref("origin/master", { distance: 15 }), ref("master", { distance: 0 })],
+    }),
+  );
+  assert.deepEqual(chosen, {
+    ref: "origin/master",
+    how: "nearest ancestor branch",
+    mergeBase: "sha-origin/master",
+    commits: 15,
+  });
+});
+
+// Proves demotion is a rank change, not a no-op: without it, the nearest-
+// ancestor rule would pick origin/feature outright since 2 < 9.
+test("origin/<branch> loses to a farther real ancestor once demoted", () => {
+  const chosen = chooseBase(
+    facts({
+      branch: "feature",
+      candidates: [ref("origin/feature", { distance: 2 }), ref("master", { distance: 9 })],
     }),
   );
   assert.equal(chosen?.ref, "master");

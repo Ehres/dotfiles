@@ -345,6 +345,37 @@ test("origin/HEAD is never offered as a candidate under its short name", () => {
   }
 });
 
+// The trunk regression, end to end: on a repo worked on directly on master
+// (no feature branches), origin/master is not a stale copy of yourself, it
+// is the only real base there is. Before demotion replaced the old hard
+// exclusion, this fell through both the ancestor rule (origin/master
+// excluded as "your own remote") and the default-branch fallback (same
+// exclusion), leaving no base at all — the working tree only.
+test("chooseBase resolves origin/master as the base on a trunk-only workflow", () => {
+  const repo = makeRepo();
+  try {
+    repo.write("a.txt", "a");
+    repo.commit("c1");
+    repo.run("update-ref", "refs/remotes/origin/master", "master");
+    repo.run("symbolic-ref", "refs/remotes/origin/HEAD", "refs/remotes/origin/master");
+    repo.write("b.txt", "b");
+    repo.commit("c2");
+    repo.write("c.txt", "c");
+    repo.commit("c3");
+
+    const facts = collectFacts(repo.dir)!;
+    assert.ok(
+      facts.refs.candidates.every((candidate) => candidate.ref !== "origin"),
+      `origin/HEAD must not surface as a candidate named "origin", got: ${JSON.stringify(facts.refs.candidates)}`,
+    );
+    const base = chooseBase(facts);
+    assert.equal(base?.ref, "origin/master");
+    assert.equal(base?.commits, 2);
+  } finally {
+    repo.cleanup();
+  }
+});
+
 // A topological walk lists a commit before its ancestors, but when several
 // commits are equally "ready" — both parents of a merge, here — it breaks the
 // tie by commit date, newest first, not by graph distance. `bar` is the true

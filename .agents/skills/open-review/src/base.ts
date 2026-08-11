@@ -20,7 +20,7 @@ export function chooseBase(facts: RepoFacts): BaseChoice | null {
   const seeded = fromReflog(facts.refs.reflogName, byRef);
   if (seeded) return choice(seeded, "created-from reflog");
 
-  const nearest = nearestAncestor(usable);
+  const nearest = nearestAncestor(usable, facts.branch);
   if (nearest) return choice(nearest, "nearest ancestor branch");
 
   for (const name of DEFAULT_BRANCHES) {
@@ -30,8 +30,12 @@ export function chooseBase(facts: RepoFacts): BaseChoice | null {
   return null;
 }
 
+// origin/<branch> is left out of the hard exclusion here: on a feature
+// branch it is a stale copy of yourself, but on trunk it is the only real
+// base there is. nearestAncestor demotes it instead of removing it, so a
+// feature branch still prefers a real parent while trunk still gets a base.
 function isSelf(ref: string, branch: string | null): boolean {
-  return ref === "origin/HEAD" || (branch !== null && (ref === branch || ref === `origin/${branch}`));
+  return ref === "origin/HEAD" || (branch !== null && ref === branch);
 }
 
 /**
@@ -51,15 +55,20 @@ function fromReflog(name: string | null, byRef: Map<string, RefInfo>): RefInfo |
 }
 
 /**
- * A true ancestor is a ref whose own tip is the merge-base with HEAD. Refs
- * sitting exactly on HEAD are kept only as a last resort — they give a
- * brand-new branch a base to report without ever beating a real one.
+ * A true ancestor is a ref whose own tip is the merge-base with HEAD. Two
+ * kinds of ref are kept only as a last resort, ranked behind every real
+ * ancestor rather than dropped outright: one sitting exactly on HEAD (it
+ * gives a brand-new branch a base to report without ever beating a real
+ * one), and origin/<branch> (a feature branch's own stale remote should
+ * never win over an actual parent — but on trunk, where nothing else is
+ * left, it is the only real base there is).
  */
-function nearestAncestor(candidates: RefInfo[]): RefInfo | null {
+function nearestAncestor(candidates: RefInfo[], branch: string | null): RefInfo | null {
+  const ownRemote = branch === null ? null : `origin/${branch}`;
   const ancestors = candidates.filter((candidate) => candidate.mergeBase === candidate.sha);
   const sorted = [...ancestors].sort((left, right) => {
     const rank = (candidate: RefInfo) =>
-      candidate.distance === 0 ? Number.MAX_SAFE_INTEGER : (candidate.distance as number);
+      candidate.distance === 0 || candidate.ref === ownRemote ? Number.MAX_SAFE_INTEGER : (candidate.distance as number);
     return rank(left) - rank(right) || left.ref.localeCompare(right.ref);
   });
   return sorted[0] ?? null;
