@@ -111,3 +111,21 @@ export type PlanInput = {
   churn: ChurnRow[];
   untracked: UntrackedRow[];
 };
+
+export type SessionRow = {
+  slug: string;
+  kind: string;
+  path: string;
+  updated_at: string;
+  comment_count: number;
+};
+
+export type Comment = {
+  location: string;
+  path: string | null;
+  start_line: number | null;
+  end_line: number | null;
+  side: string;
+  comment_type: string;
+  content: string;
+};
