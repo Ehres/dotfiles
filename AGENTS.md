@@ -191,11 +191,14 @@ Commit messages use **Angular format**: `type(scope): description`
   no build step, and **no runtime dependencies**. Keep it that way — the only
   things in `node_modules` are `typescript` and `@types/node`, and they are
   devDependencies used by the typechecker, never imported by the code.
-- Stripping **erases** types, it does not check them. The syntax it cannot erase
-  is therefore forbidden: no `enum`, no `namespace`, no constructor parameter
-  properties, `import type` for type-only imports, and explicit `.ts` extensions
-  on relative imports. `tsconfig.json` sets `erasableSyntaxOnly` so the editor
-  rejects those while you write.
+- Stripping **erases** types, it does not check them, so the syntax it cannot
+  erase is **forbidden**: no `enum`, no `namespace`, no constructor parameter
+  properties. `tsconfig.json` sets `erasableSyntaxOnly` so the editor rejects
+  those while you write.
+- Two things are **required**, not forbidden — do not "clean them up":
+  `import type` for every type-only import, and an explicit `.ts` extension on
+  every relative import. `verbatimModuleSyntax` and `allowImportingTsExtensions`
+  enforce them, and Node needs the extension to resolve the file at all.
 - Because nothing checks types at runtime, `tsc --noEmit` is the gate:
   `(cd .agents/skills/open-review && ./node_modules/.bin/tsc --noEmit)`.
   It exists because two real defects — a crash in `--since-last` and a union

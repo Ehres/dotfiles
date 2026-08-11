@@ -209,6 +209,9 @@ if [[ -d .agents/skills/open-review/src ]]; then
   # The popup starts its command without a login shell, so mise's PATH is
   # absent and the shim has to fall back to the mise shim path. This is the
   # environment that broke, and it is invisible from an interactive shell.
+  # The single quotes are load-bearing: they keep $HOME from expanding in this
+  # outer shell so the inner, PATH-less bash resolves it instead (shellcheck
+  # SC2016 is a false positive here).
   if env -i HOME="$HOME" /bin/bash -c \
     '"$HOME"/.agents/skills/open-review/open-review --help' >/dev/null 2>&1; then
     ok "the open-review shim finds node with no PATH"
