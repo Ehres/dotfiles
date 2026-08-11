@@ -121,3 +121,88 @@ test("the index truncates long comments and flattens newlines", () => {
 test("no comments renders an explicit line", () => {
   assert.equal(renderCommentIndex([]), "(no comments)");
 });
+
+test("the real format: tuicr's microsecond precision with numeric offset", () => {
+  const before = [
+    row({
+      path: "/sessions/a.json",
+      updated_at: "2026-08-05T14:02:21.603027+00:00",
+    }),
+    row({
+      path: "/sessions/b.json",
+      updated_at: "2026-08-05T14:02:21.000000+00:00",
+    }),
+  ];
+  const after = [
+    row({
+      path: "/sessions/a.json",
+      updated_at: "2026-08-05T14:02:21.603027+00:00",
+    }),
+    row({
+      path: "/sessions/b.json",
+      updated_at: "2026-08-05T14:02:22.100000+00:00",
+    }),
+  ];
+  assert.equal(electSession(before, after)?.path, "/sessions/b.json");
+});
+
+test("sub-millisecond difference: same millisecond, different microseconds", () => {
+  const before = [
+    row({
+      path: "/sessions/a.json",
+      updated_at: "2026-08-05T14:02:21.603027+00:00",
+    }),
+    row({
+      path: "/sessions/b.json",
+      updated_at: "2026-08-05T14:02:21.600000+00:00",
+    }),
+  ];
+  const after = [
+    row({
+      path: "/sessions/a.json",
+      updated_at: "2026-08-05T14:02:21.603027+00:00",
+    }),
+    row({
+      path: "/sessions/b.json",
+      updated_at: "2026-08-05T14:02:21.603999+00:00",
+    }),
+  ];
+  assert.equal(electSession(before, after)?.path, "/sessions/b.json");
+});
+
+test("identical timestamps: elected row is independent of array order", () => {
+  const before = [
+    row({
+      path: "/sessions/a.json",
+      updated_at: "2026-08-05T14:02:21.603027+00:00",
+    }),
+    row({
+      path: "/sessions/b.json",
+      updated_at: "2026-08-05T14:02:21.000000+00:00",
+    }),
+  ];
+  const after1 = [
+    row({
+      path: "/sessions/a.json",
+      updated_at: "2026-08-05T14:02:22.100000+00:00",
+    }),
+    row({
+      path: "/sessions/b.json",
+      updated_at: "2026-08-05T14:02:22.100000+00:00",
+    }),
+  ];
+  const after2 = [
+    row({
+      path: "/sessions/b.json",
+      updated_at: "2026-08-05T14:02:22.100000+00:00",
+    }),
+    row({
+      path: "/sessions/a.json",
+      updated_at: "2026-08-05T14:02:22.100000+00:00",
+    }),
+  ];
+
+  const elected1 = electSession(before, after1)?.path;
+  const elected2 = electSession(before, after2)?.path;
+  assert.equal(elected1, elected2);
+});
