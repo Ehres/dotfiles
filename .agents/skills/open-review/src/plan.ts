@@ -20,8 +20,9 @@ export function renderPlan(input: PlanInput): string {
       lines.push(`stat: ${target.stat.reason}`);
       break;
     case "file": {
-      const row = untracked.find((entry) => entry.path === target.stat.path);
-      lines.push(`file: ${target.stat.path}${row ? ` (${row.lines} lines)` : ""}`);
+      const stat = target.stat;
+      const row = untracked.find((entry) => entry.path === stat.path);
+      lines.push(`file: ${stat.path}${row ? ` (${row.lines} lines)` : ""}`);
       break;
     }
     case "diff":
