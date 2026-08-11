@@ -1,9 +1,8 @@
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { DEFAULT_BRANCHES } from "./constants.ts";
 import type { ChurnRow, RefInfo, RepoFacts, StatSpec, UntrackedRow, WorkTree } from "./types.ts";
-
-const DEFAULT_BRANCHES = ["origin/main", "origin/master", "main", "master"];
 
 export function git(args: string[], cwd: string): string {
   return execFileSync("git", args, {

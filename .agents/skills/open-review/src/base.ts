@@ -1,6 +1,5 @@
+import { DEFAULT_BRANCHES } from "./constants.ts";
 import type { BaseChoice, RefInfo, RepoFacts } from "./types.ts";
-
-const DEFAULT_BRANCHES = ["origin/main", "origin/master", "main", "master"];
 
 /**
  * The base a branch was stacked on, resolved without a single network call.
