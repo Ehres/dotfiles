@@ -38,7 +38,7 @@ brew "webp"                        # WebP encode/decode
 
 # Git & Review Tooling
 brew "gh"                          # GitHub CLI; `gh dash` backs the tmux dash session
-brew "agavra/tap/tuicr"            # Code-review TUI, bound to prefix+R in tmux
+brew "tuicr"                       # Code-review TUI, bound to prefix+R in tmux (moved to core from agavra/tap)
 brew "dlvhdr/formulae/diffnav"      # File-tree navigator wrapping delta
 brew "kitlangton/tap/ghui"         # GitHub TUI
 brew "jnsahaj/lumen/lumen"         # AI commit messages / diff summaries
