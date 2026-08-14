@@ -83,6 +83,64 @@ test("an unborn HEAD reviews the working tree", () => {
   assert.deepEqual(target.tuicrArgs, ["-w", "--no-update-check"]);
 });
 
+// Defect 9: a detached HEAD parked on an upstream commit has no commits of its
+// own, but base resolution still found a real ancestor branch far behind it and
+// put every commit since into the review.
+function containedInMain(over: Partial<RepoFacts> = {}): RepoFacts {
+  return facts({
+    branch: null,
+    refs: {
+      reflogName: null,
+      candidates: [
+        // origin/main holds HEAD plus 108 commits more, so it is no ancestor of it.
+        { ref: "origin/main", sha: "main99", mergeBase: "head00", distance: 0 },
+        { ref: "origin/stale", sha: "fork00", mergeBase: "fork00", distance: 76 },
+      ],
+    },
+    ...over,
+  });
+}
+
+const STALE_BASE: BaseChoice = {
+  ref: "origin/stale",
+  how: "nearest ancestor branch",
+  mergeBase: "fork00",
+  commits: 76,
+};
+
+test("HEAD already contained in a branch reviews the working tree alone, with a note", () => {
+  const target = buildTarget(
+    input({
+      facts: containedInMain({ work: { staged: 0, unstaged: 4, untracked: [], dirty: true } }),
+      base: STALE_BASE,
+    }),
+  );
+  assert.deepEqual(target.tuicrArgs, ["-w", "--no-update-check"]);
+  assert.deepEqual(target.stat, { kind: "diff", args: ["HEAD"] });
+  assert.match(target.notes.join(" "), /origin\/main/);
+});
+
+test("HEAD already contained in a branch, with a clean tree, is empty rather than the whole branch", () => {
+  const target = buildTarget(input({ facts: containedInMain(), base: STALE_BASE }));
+  assert.match(target.emptyReason ?? "", /origin\/main/);
+});
+
+// The branch's own remote copy does not count as containment: someone else
+// pushing on top of your branch must not empty out your review.
+test("a feature branch whose remote copy is ahead still reviews its own commits", () => {
+  const target = buildTarget(
+    input({
+      facts: facts({
+        refs: {
+          reflogName: null,
+          candidates: [{ ref: "origin/feature", sha: "remote9", mergeBase: "head00", distance: 0 }],
+        },
+      }),
+    }),
+  );
+  assert.deepEqual(target.tuicrArgs, ["-r", "fork00..HEAD", "--no-update-check"]);
+});
+
 // Defect 1's other half: the filter must reach both tuicr and the diffstat, so
 // the plan's numbers describe what the popup shows.
 test("a path filter reaches tuicr and is carried in the target", () => {

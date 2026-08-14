@@ -1,4 +1,4 @@
-import type { Intent, StatSpec, Target, TargetInput } from "./types.ts";
+import type { Intent, RepoFacts, StatSpec, Target, TargetInput } from "./types.ts";
 
 export function buildTarget(input: TargetInput): Target {
   const { intent } = input;
@@ -55,6 +55,19 @@ function auto(input: TargetInput, notes: string[]): Target {
   const { facts, base } = input;
   const dirty = facts.work.dirty;
 
+  const container = containedIn(facts);
+  if (container !== null) {
+    if (!dirty) {
+      return empty(input, `HEAD is already contained in ${container} and the working tree is clean`);
+    }
+    return finish(input.intent, {
+      description: "the working tree",
+      args: ["-w"],
+      stat: { kind: "diff", args: ["HEAD"] },
+      notes: [...notes, `HEAD is already contained in ${container}, so it has no commits of its own to review`],
+    });
+  }
+
   if (base === null) {
     if (!dirty) return empty(input, "no base branch found and the working tree is clean");
     return finish(input.intent, {
@@ -94,6 +107,26 @@ function auto(input: TargetInput, notes: string[]): Target {
     input,
     `the working tree is clean and there are no commits since ${base.ref}`,
   );
+}
+
+/**
+ * The branch or remote that already holds HEAD plus more commits, if there is
+ * one. HEAD sitting inside another branch has no commits of its own to review:
+ * a detached checkout of an upstream commit, or a branch whose work has landed.
+ * Base resolution can still name a real ancestor far behind such a HEAD, and
+ * every commit since would land in the review.
+ *
+ * The branch's own remote copy is not containment: a colleague pushing on top
+ * of your branch must not empty out your review.
+ */
+function containedIn(facts: RepoFacts): string | null {
+  const { head, branch } = facts;
+  if (head === null) return null;
+  const own = branch === null ? [] : [branch, `origin/${branch}`];
+  const container = facts.refs.candidates.find(
+    (candidate) => !own.includes(candidate.ref) && candidate.mergeBase === head && candidate.sha !== head,
+  );
+  return container?.ref ?? null;
 }
 
 function sinceLast(input: TargetInput): Target {

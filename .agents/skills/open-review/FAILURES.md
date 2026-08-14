@@ -46,3 +46,30 @@ buried here where nothing reads it.
 - **Test:** `src/base.test.ts` — "on trunk, origin/<branch> is the base when it
   is the only candidate", plus a real-repo case in `src/git.test.ts`.
 - **Status:** fixed
+
+### 2026-08-14 — a detached HEAD on main pulled in 76 commits of upstream history
+
+- **Invoked:** `open-review` with no argument, in the orus monorepo, on a
+  detached HEAD parked on a merge commit of `main` with four modified files.
+- **Plan printed:**
+  ```
+  mode: the branch's commits plus the working tree
+  base: origin/maxbp-nao (nearest ancestor branch) frozen at 6f60afeb2
+  commits: 76    working tree: dirty (0 staged, 4 unstaged, 38 untracked)
+  stat: 277 files changed, 4610 insertions(+), 1135 deletions(-)
+  ```
+- **Expected instead:** the four modified files, 59 insertions.
+- **Cause:** HEAD was 108 commits behind `origin/main` and contained in it, so
+  it had no commits of its own. `origin/main` is not an *ancestor* of such a
+  HEAD, so base resolution skipped it and kept walking back to
+  `origin/maxbp-nao`, a real ancestor 76 commits behind. Nothing then checked
+  whether those 76 commits were the user's, and the whole span of upstream
+  history since that old branch point entered the review. Fix: `auto` now looks
+  for a ref that holds HEAD plus more commits and, when it finds one, reviews
+  the working tree alone and says which ref made the commits redundant. The
+  branch's own remote copy is excluded, so a colleague pushing on top of a
+  feature branch does not empty out its review.
+- **Test:** `src/target.test.ts` — "HEAD already contained in a branch reviews
+  the working tree alone, with a note", its clean-tree counterpart, and the
+  own-remote guard.
+- **Status:** fixed
