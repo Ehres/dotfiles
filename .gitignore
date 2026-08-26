@@ -1,6 +1,7 @@
 node_modules
 .tmux/plugins
 network.out
+.worktrees/
 
 # opencode runtime state, not configuration. The README documents
 # `git add . && git commit` as the backup routine, which would otherwise commit
