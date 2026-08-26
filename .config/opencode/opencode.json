@@ -19,6 +19,11 @@
       ],
       "enabled": true,
       "type": "local"
+    },
+    "figma": {
+      "type": "remote",
+      "url": "https://mcp.figma.com/mcp",
+      "enabled": true
     }
   },
   "permission": {
