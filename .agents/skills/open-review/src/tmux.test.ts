@@ -4,11 +4,16 @@ import { spawnSync } from "node:child_process";
 import { existsSync, mkdtempSync, rmSync } from "node:fs";
 import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
-import { shellQuote, TMUX_POPUP } from "./tmux.ts";
+import {
+  buildReviewPaneArgs,
+  shellQuote,
+  TMUX_POPUP,
+  waitForReviewStarted,
+} from "./tmux.ts";
 
 /**
  * Parses a literal command-line fragment into the argv it produces — the
- * same job `$SHELL -c` does for `display-popup -E`'s command, and again for
+ * same job `$SHELL -c` does for `split-window`'s command, and again for
  * the shell `tmux new-session` spawns once `tmux-popup` has flattened its
  * arguments with `CMD="$*"`. Shelling out to `/bin/sh` is more faithful than
  * hand-rolling a parser, and it never touches tmux or tuicr.
@@ -19,7 +24,7 @@ function shellSplit(line: string): string[] {
   return stdout.length === 0 ? [] : stdout.replace(/\n$/, "").split("\n");
 }
 
-/** Hop 1 (display-popup's shell), then hop 2 (tmux-popup's re-shelled CMD). */
+/** Hop 1 (split-window's shell), then hop 2 (tmux-popup's re-shelled CMD). */
 function roundTrip(words: string[], quote: (word: string) => string): string[] {
   const inner = words.map(quote).join(" ");
   const afterHop1 = shellSplit(inner);
@@ -96,4 +101,64 @@ test("a tilde-prefixed word carrying a command substitution does not execute", (
 test("the resolved helper path arrives as one argument, unchanged", () => {
   assert.equal(TMUX_POPUP, join(homedir(), "scripts", "tmux-popup"));
   assert.deepEqual(roundTrip(["tuicr", TMUX_POPUP], doubleQuote), ["tuicr", TMUX_POPUP]);
+});
+
+test("the review pane targets the caller, takes 60% on the right, and receives focus", () => {
+  const args = buildReviewPaneArgs("/repo with space", "%7", ["--file", "docs/my plan.md"]);
+
+  assert.deepEqual(args.slice(0, -1), [
+    "split-window",
+    "-t", "%7",
+    "-c", "/repo with space",
+    "-h",
+    "-l", "60%",
+    "-P",
+    "-F", "#{pane_id}",
+  ]);
+  assert.equal(args.includes("-d"), false, "the review pane must receive focus");
+
+  const command = args.at(-1);
+  assert.ok(command);
+  const afterHop1 = shellSplit(command);
+  assert.deepEqual(shellSplit(afterHop1.join(" ")), [
+    TMUX_POPUP,
+    "--kill",
+    "tuicr",
+    "tuicr",
+    "--file",
+    "docs/my plan.md",
+  ]);
+});
+
+test("review startup observes the session before declaring a vanished pane", async () => {
+  let sessionChecks = 0;
+  let paneChecks = 0;
+  const result = await waitForReviewStarted("%9", 100, 0, {
+    reviewSessionAlive: () => ++sessionChecks === 2,
+    reviewPaneAlive: () => {
+      paneChecks += 1;
+      return true;
+    },
+  });
+
+  assert.equal(result, "started");
+  assert.equal(paneChecks, 1, "the pane is not checked after the session appears");
+});
+
+test("review startup reports a pane that disappears before the session exists", async () => {
+  const result = await waitForReviewStarted("%9", 100, 0, {
+    reviewSessionAlive: () => false,
+    reviewPaneAlive: () => false,
+  });
+
+  assert.equal(result, "pane-gone");
+});
+
+test("review startup times out while the pane is still present", async () => {
+  const result = await waitForReviewStarted("%9", 0, 0, {
+    reviewSessionAlive: () => false,
+    reviewPaneAlive: () => true,
+  });
+
+  assert.equal(result, "timeout");
 });
