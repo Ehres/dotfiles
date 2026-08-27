@@ -19,4 +19,6 @@ If a command fails with a quota error, inform the user and suggest `npx ctx7@lat
 
 When work is associated with a Linear issue, move it to `In Progress` before starting implementation.
 
+When creating Git worktrees, always place them beside the main repository using `<repo>.worktree/<branch>`. For example, worktrees for `/Users/maxime.grebauval/projects/orus-monorepo` belong under `/Users/maxime.grebauval/projects/orus-monorepo.worktree/`.
+
 Never commit specifications or implementation plans created by Superpowers skills unless the user explicitly requests it.
