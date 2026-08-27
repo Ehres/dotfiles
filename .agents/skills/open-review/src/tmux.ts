@@ -58,6 +58,7 @@ export function buildReviewPaneArgs(root: string, sourcePane: string, tuicrArgs:
     "-t", sourcePane,
     "-c", root,
     "-h",
+    "-f",
     "-l", "60%",
     "-P",
     "-F", "#{pane_id}",

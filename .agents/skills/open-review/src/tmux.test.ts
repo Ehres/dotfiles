@@ -112,6 +112,7 @@ test("the review pane targets the caller, takes 60% on the right, and receives f
     "-t", "%7",
     "-c", "/repo with space",
     "-h",
+    "-f",
     "-l", "60%",
     "-P",
     "-F", "#{pane_id}",
@@ -129,6 +130,40 @@ test("the review pane targets the caller, takes 60% on the right, and receives f
     "--file",
     "docs/my plan.md",
   ]);
+});
+
+test("the review pane uses 60% of a multi-pane window and reaches its right edge", () => {
+  const socket = `/tmp/open-review-geometry-${process.pid}.sock`;
+  const tmux = (...args: string[]): string => {
+    const result = spawnSync("tmux", ["-S", socket, ...args], { encoding: "utf8" });
+    assert.equal(result.status, 0, result.stderr);
+    return result.stdout.trim();
+  };
+
+  try {
+    const sourcePane = tmux(
+      "-f", "/dev/null",
+      "new-session", "-dP", "-F", "#{pane_id}",
+      "-x", "100", "-y", "30", "-s", "geometry",
+      "sleep 30",
+    );
+    tmux("split-window", "-d", "-t", sourcePane, "-h", "-l", "50%", "sleep 30");
+    assert.equal(tmux("list-panes", "-t", "geometry", "-F", "#{pane_id}").split("\n").length, 2);
+
+    const args = buildReviewPaneArgs("/repo", sourcePane, ["-w"]);
+    args[args.length - 1] = "sleep 30";
+    const reviewPane = tmux(...args);
+    const [windowWidth, paneLeft, paneWidth] = tmux(
+      "display-message", "-p", "-t", reviewPane,
+      "#{window_width} #{pane_left} #{pane_width}",
+    ).split(" ").map(Number);
+
+    assert.ok(windowWidth !== undefined && paneLeft !== undefined && paneWidth !== undefined);
+    assert.equal(paneWidth, windowWidth * 0.6);
+    assert.equal(paneLeft + paneWidth, windowWidth);
+  } finally {
+    spawnSync("tmux", ["-S", socket, "kill-server"], { stdio: "ignore" });
+  }
 });
 
 test("openReviewPane explicitly selects the pane returned by split-window", () => {

@@ -12,7 +12,9 @@
 
 - Implement the approved spec at `docs/superpowers/specs/2026-08-26-open-review-side-pane-design.md`.
 - Only skill-launched reviews change surface; `.tmux.conf` and the manual `prefix + R` popup stay unchanged.
-- Create a focused right pane with `split-window -h -l 60%`; do not pass `-d`.
+- Create a focused right pane with `split-window -h -f -l 60%`; `-f` makes the
+  percentage relative to the full window instead of the target pane. Do not
+  pass `-d`.
 - Target the invoking OpenCode pane explicitly through `$TMUX_PANE`.
 - Keep `scripts/tmux-popup --kill tuicr`, `_popup_tuicr`, `C-q`, Escape handling, and popup-based recovery.
 - Poll startup every 50 ms for at most 5 seconds; check the review session before checking whether the side pane survived.
@@ -25,7 +27,8 @@
 ## File Map
 
 - Modify `.agents/skills/open-review/src/tmux.ts`: own tmux pane creation and review lifecycle probes.
-- Modify `.agents/skills/open-review/src/tmux.test.ts`: test pane argv, two-shell quoting, and startup state transitions without a live tmux server.
+- Modify `.agents/skills/open-review/src/tmux.test.ts`: test pane argv, isolated
+  multi-pane geometry, two-shell quoting, and startup state transitions.
 - Modify `.agents/skills/open-review/src/main.ts`: orchestrate pane startup, persistent-session completion, errors, and comment read-back.
 - Modify `.agents/skills/open-review/src/main.test.ts`: test launch decisions through injected terminal and tuicr dependencies.
 - Modify `.agents/skills/open-review/SKILL.md`: document the non-modal agent workflow while preserving current caveats.
@@ -74,6 +77,7 @@ test("the review pane targets the caller, takes 60% on the right, and receives f
     "-t", "%7",
     "-c", "/repo with space",
     "-h",
+    "-f",
     "-l", "60%",
     "-P",
     "-F", "#{pane_id}",
@@ -185,6 +189,7 @@ export function buildReviewPaneArgs(root: string, sourcePane: string, tuicrArgs:
     "-t", sourcePane,
     "-c", root,
     "-h",
+    "-f",
     "-l", "60%",
     "-P",
     "-F", "#{pane_id}",
@@ -793,7 +798,8 @@ REVIEW_PANE=$(tmux display-message -p '#{pane_id}')
 
 Verify in order:
 
-1. A focused pane appears on the right and takes 60% of the window.
+1. A focused pane appears at the right edge and takes 60% of the full window,
+   including when the invoking pane already shares that window.
 2. Tuicr receives Escape without closing the pane.
 3. The original OpenCode pane can be focused while tuicr remains visible.
 4. `tmux kill-pane -t "$REVIEW_PANE"` removes only the side pane, and `tmux has-session -t _popup_tuicr` still exits 0.

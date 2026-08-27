@@ -57,17 +57,20 @@ tmux split-window \
   -t "$TMUX_PANE" \
   -c <repository root> \
   -h \
+  -f \
   -l 60% \
   -P \
   -F '#{pane_id}' \
   <escaped command>
 ```
 
-`-h` creates a left-right split and `-l 60%` assigns 60% of the window to the
-new right pane. The command deliberately omits `-d`, so tuicr receives focus at
-launch. `-t "$TMUX_PANE"` makes the OpenCode pane the explicit split target
-instead of relying on whichever pane tmux considers active. `-P -F
-'#{pane_id}'` gives the launcher a stable identifier for startup checks.
+`-h` creates a left-right split. `-f` makes that split span the full window, so
+`-l 60%` measures 60% of the window rather than 60% of the target pane and puts
+the new pane at the right edge even when the window already has multiple panes.
+`-t "$TMUX_PANE"` still identifies the invoking OpenCode pane instead of relying
+on whichever pane tmux considers active. The command deliberately omits `-d`,
+and the adapter explicitly selects the pane returned by `-P -F '#{pane_id}'` so
+tuicr receives focus; that pane ID also drives startup checks.
 
 The command still crosses two shells: the shell used for the `split-window`
 command and the shell reached after `scripts/tmux-popup` flattens its arguments.
@@ -169,7 +172,9 @@ agent launch path. Historical design documents are not rewritten.
 Unit tests cover:
 
 - exact `split-window` arguments: explicit source pane, repository root,
-  horizontal split, 60% size, focus behavior, and pane-ID output;
+  full-window horizontal split, 60% size, focus behavior, and pane-ID output;
+- actual 60% full-window width and right-edge placement when the invoking pane
+  already shares its window;
 - the existing two-shell round trip for spaces, quotes, command substitutions,
   semicolons, and tilde-prefixed paths;
 - rejection when `$TMUX_PANE` is unavailable;
