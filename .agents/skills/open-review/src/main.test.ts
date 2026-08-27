@@ -306,7 +306,7 @@ test("pr inside a repository never reports a detected base", () => {
 test("--help prints usage and exits ok, without touching a repository", () => {
   const { exitCode, stdout } = runMain(["--help"], "/");
   assert.equal(exitCode, EXIT.ok);
-  assert.match(stdout, /open-review — open a tuicr review in a tmux popup/);
+  assert.match(stdout, /open-review — open a tuicr review in a tmux side pane/);
 });
 
 test("outside a repository, main errors out", () => {

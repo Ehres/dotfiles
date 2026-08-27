@@ -129,7 +129,7 @@ function readLastReviewedState(cwd: string, facts: RepoFacts): LastReviewed | nu
   };
 }
 
-const USAGE = `open-review — open a tuicr review in a tmux popup
+const USAGE = `open-review — open a tuicr review in a tmux side pane
 
   open-review                 auto: this branch's commits and/or working tree
   open-review --since-last    only what changed since the last review
@@ -140,7 +140,7 @@ const USAGE = `open-review — open a tuicr review in a tmux popup
   open-review ... -p <path>   filter to a file or directory
 
   open-review --plan          print the plan of the launch in flight
-  open-review --dry-run       resolve and print, no popup
+  open-review --dry-run       resolve and print, no pane
   open-review --exec          resolve, then exec tuicr in place (tmux binding)`;
 
 export async function main(argv: string[], cwd: string): Promise<number> {
