@@ -1,6 +1,6 @@
 ---
 name: open-review
-description: Launch tuicr, the local code-review TUI, in a focused tmux side pane so the user can review a diff and keep talking to the agent. Use when the user asks to open or start a review, to review a branch, a diff or a pull request, or says things like "lance une review", "je veux relire", "ouvre tuicr", "review en pane", or "review en popup".
+description: Launch tuicr, the local code-review TUI, in a focused, non-modal, 60%-width right-side tmux pane so the user can review a diff and keep talking to the agent. Use when the user asks to open or start a review, to review a branch, a diff or a pull request, or says things like "lance une review", "je veux relire", "ouvre tuicr", "review en pane", or "review en popup".
 ---
 
 # Open a tuicr review in a tmux side pane

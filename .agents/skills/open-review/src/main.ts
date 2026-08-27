@@ -129,7 +129,7 @@ function readLastReviewedState(cwd: string, facts: RepoFacts): LastReviewed | nu
   };
 }
 
-const USAGE = `open-review — open a tuicr review in a tmux side pane
+const USAGE = `open-review — open a tuicr review in a focused, non-modal, 60%-width right-side tmux pane
 
   open-review                 auto: this branch's commits and/or working tree
   open-review --since-last    only what changed since the last review
