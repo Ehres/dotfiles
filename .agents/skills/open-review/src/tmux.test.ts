@@ -130,6 +130,33 @@ test("the review pane targets the caller, takes 60% on the right, and receives f
   ]);
 });
 
+test("the review pane retries nested attach on the current custom socket", () => {
+  const original = process.env["TMUX"];
+  const socket = "/tmp/custom tmux.sock";
+  try {
+    delete process.env["TMUX"];
+    const command = buildReviewPaneArgs("/repo", "%7", ["-w"]).at(-1);
+    assert.ok(command);
+    const fallback = command.split(" || ")[1];
+    assert.ok(fallback, "the pane command must recover from the helper's nested attach failure");
+    process.env["TMUX"] = `${socket},123,0`;
+    assert.deepEqual(shellSplit(fallback), [
+      "env",
+      "-u",
+      "TMUX",
+      "tmux",
+      "-S",
+      socket,
+      "attach-session",
+      "-t",
+      "_popup_tuicr",
+    ]);
+  } finally {
+    if (original === undefined) delete process.env["TMUX"];
+    else process.env["TMUX"] = original;
+  }
+});
+
 test("review startup observes the session before declaring a vanished pane", async () => {
   let sessionChecks = 0;
   let paneChecks = 0;

@@ -32,9 +32,11 @@ export function reviewPaneAlive(paneId: string): boolean {
 }
 
 export function buildReviewPaneArgs(root: string, sourcePane: string, tuicrArgs: string[]): string[] {
-  const command = [TMUX_POPUP, "--kill", POPUP_NAME, "tuicr", ...tuicrArgs]
+  const launch = [TMUX_POPUP, "--kill", POPUP_NAME, "tuicr", ...tuicrArgs]
     .map((word) => shellQuote(shellQuote(word)))
     .join(" ");
+  const attach = `env -u TMUX tmux -S "\${TMUX%%,*}" attach-session -t ${shellQuote(POPUP_SESSION)}`;
+  const command = `${launch} || ${attach}`;
 
   return [
     "split-window",
