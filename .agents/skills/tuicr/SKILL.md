@@ -16,18 +16,22 @@ you read them back.
 
 This means: do not decide on your own initiative to run `tuicr`, `tuicr tui`, or any
 wrapper script, and do not poll for comments — wait until the user says the review is
-done, then read once. If the user asks to review and no popup is open, that is a request
-to launch one: use the `open-review` skill, which is the sanctioned way for an agent to do
-that. It launches tuicr in its own tmux session in the background, waits for the review to
-finish, and reads the comments back for you — this skill's Step 1 and Step 2 below are
-then already done, so read what it printed instead of listing again.
+done, then read once. If the user asks to review and no review surface is open,
+that is a request to launch one: use the `open-review` skill, which is the
+sanctioned way for an agent to do that. It launches tuicr in its own tmux
+session, attaches it in a focused, non-modal, 60%-width right-side pane, waits
+for the review to finish, and reads the comments back for you — this skill's
+Step 1 and Step 2 below are then already done, so read what it printed instead
+of listing again.
 
-The user can also open the popup themselves (`prefix + R` → `tuicr -w`, closed with
-`C-q`). The popup is modal either way — while it is open the user cannot talk to you.
+The user can return to OpenCode while tuicr remains visible. They can also open
+the popup themselves (`prefix + R`
+→ `tuicr -w`, closed with `C-q`). That manual popup remains modal.
 
-If the user says they are done but the popup was only dismissed (Escape) rather than
-closed, the session is still alive: reattach it with `prefix + R` and tell the user to
-press `C-q` there to actually end the review.
+If the user says they are done but the side pane was closed without `C-q`, the
+session is still alive: reattach it with `prefix + R` and tell the user to press
+`C-q` there to actually end the review. Escape only dismisses the manual popup;
+it does not end the session.
 
 ## Step 1 — find the session
 

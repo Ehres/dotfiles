@@ -6,73 +6,118 @@ import { POPUP_NAME, POPUP_SESSION } from "./constants.ts";
 /** Resolved in code so no word needs a shell to expand a tilde for it. */
 export const TMUX_POPUP = join(homedir(), "scripts", "tmux-popup");
 
+export type ReviewStart = "started" | "pane-gone" | "timeout";
+
+export type ReviewStartupDeps = {
+  reviewSessionAlive: () => boolean;
+  reviewPaneAlive: (paneId: string) => boolean;
+};
+
+type OpenReviewPaneDeps = {
+  splitWindow: (args: string[]) => string;
+  selectPane: (paneId: string) => void;
+};
+
+const openReviewPaneDeps: OpenReviewPaneDeps = {
+  splitWindow: (args) => execFileSync("tmux", args, {
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "inherit"],
+  }),
+  selectPane: (paneId) => {
+    execFileSync("tmux", ["select-pane", "-t", paneId], { stdio: "ignore" });
+  },
+};
+
 export function insideTmux(): boolean {
   return Boolean(process.env["TMUX"]);
 }
 
-export function popupAlive(): boolean {
+export function currentPane(): string | null {
+  return process.env["TMUX_PANE"] || null;
+}
+
+export function reviewSessionAlive(): boolean {
   return spawnSync("tmux", ["has-session", "-t", POPUP_SESSION], { stdio: "ignore" }).status === 0;
 }
 
-/**
- * Two layers, and both matter. display-popup dismisses on Escape — the key a
- * vim-mode TUI uses constantly — so tuicr must not be the popup's own process:
- * ~/scripts/tmux-popup runs it in a separate session and only attaches a
- * client. Dismissing then costs the client, not the review, and `prefix + R`
- * reattaches to the same session.
- *
- * Returns false, rather than throwing, when tmux could not open the popup at
- * all (no client to attach to, for instance) — the caller reports that as a
- * clean error instead of a stack trace.
- */
-export function openPopup(root: string, tuicrArgs: string[]): boolean {
-  const inner = [TMUX_POPUP, "--kill", POPUP_NAME, "tuicr", ...tuicrArgs]
+export function reviewPaneAlive(paneId: string): boolean {
+  return spawnSync("tmux", ["display-message", "-p", "-t", paneId, "#{pane_id}"], {
+    stdio: "ignore",
+  }).status === 0;
+}
+
+export function buildReviewPaneArgs(root: string, sourcePane: string, tuicrArgs: string[]): string[] {
+  const launch = [TMUX_POPUP, "--kill", POPUP_NAME, "tuicr", ...tuicrArgs]
     .map((word) => shellQuote(shellQuote(word)))
     .join(" ");
+  const attach = `env -u TMUX tmux -S "\${TMUX%%,*}" attach-session -t ${shellQuote(POPUP_SESSION)}`;
+  const command = `${launch} || ${attach}`;
+
+  return [
+    "split-window",
+    "-t", sourcePane,
+    "-c", root,
+    "-h",
+    "-f",
+    "-l", "60%",
+    "-P",
+    "-F", "#{pane_id}",
+    command,
+  ];
+}
+
+/** Creates the client pane; `_popup_tuicr` remains the review process owner. */
+export function openReviewPane(
+  root: string,
+  sourcePane: string,
+  tuicrArgs: string[],
+  deps: OpenReviewPaneDeps = openReviewPaneDeps,
+): string | null {
+  let paneId: string;
   try {
-    execFileSync(
-      "tmux",
-      [
-        "display-popup",
-        "-d", root,
-        "-T", " tuicr (C-q close)",
-        "-w", "95%",
-        "-h", "95%",
-        "-E", inner,
-      ],
-      { stdio: "inherit" },
-    );
-    return true;
+    paneId = deps.splitWindow(buildReviewPaneArgs(root, sourcePane, tuicrArgs)).trim();
   } catch {
-    return false;
+    return null;
+  }
+  if (paneId === "") return null;
+  try {
+    deps.selectPane(paneId);
+  } catch {
+    // Startup checks decide whether the pane vanished or its session survived.
+  }
+  return paneId;
+}
+
+export async function waitForReviewStarted(
+  paneId: string,
+  timeoutMs = 5_000,
+  pollMs = 50,
+  deps: ReviewStartupDeps = { reviewSessionAlive, reviewPaneAlive },
+): Promise<ReviewStart> {
+  const deadline = Date.now() + timeoutMs;
+  while (true) {
+    if (deps.reviewSessionAlive()) return "started";
+    if (!deps.reviewPaneAlive(paneId)) return "pane-gone";
+    if (Date.now() >= deadline) return "timeout";
+    await new Promise((resolve) => setTimeout(resolve, pollMs));
   }
 }
 
-/** The honest end of a review: the session is gone, which means C-q. */
-export async function waitForPopupGone(pollMs = 300): Promise<void> {
-  while (popupAlive()) {
+/** The honest end of a review: the persistent session is gone, which means C-q. */
+export async function waitForReviewSessionGone(pollMs = 300): Promise<void> {
+  while (reviewSessionAlive()) {
     await new Promise((resolve) => setTimeout(resolve, pollMs));
   }
 }
 
 /**
- * Quoted for two shell hops, not one. `display-popup -E` hands `inner` to a
+ * Quoted for two shell hops, not one. `split-window` hands its command to a
  * shell; inside that, `~/scripts/tmux-popup` does `CMD="$*"`, which strips
  * the quotes that protected the first hop and hands the bare result to a
- * second shell via `tmux new-session`. Flattening is exactly why quoting once
- * is not enough: by the second hop, a space inside the word has already split
- * it into separate arguments, and a `$(…)` inside it gets executed rather
- * than carried as data. So each word is quoted twice — once so it survives
- * the hop `tmux-popup` re-shells through, and again so that quoting survives
- * being flattened by `CMD="$*"` on the way there.
+ * second shell via `tmux new-session`. Each word is therefore quoted twice.
  *
- * No word is exempt, deliberately. An earlier version left a leading `~/`
- * unquoted so a shell would expand it, but that carve-out could not tell the
- * one hardcoded helper path from a `--file`/`-p` argument the caller typed —
- * a tilde-prefixed value with a space or a `$(…)` in it stayed exploitable
- * through the same two hops this function otherwise closes. The helper path
- * is resolved in code instead (`TMUX_POPUP`, via `homedir()`), so nothing
- * here needs a shell to expand anything.
+ * No word is exempt. The helper path is resolved through `homedir()`, so a
+ * caller-provided tilde-prefixed path stays literal data at both hops.
  */
 export function shellQuote(word: string): string {
   return /^[A-Za-z0-9_./=:-]+$/.test(word) ? word : `'${word.replaceAll("'", `'\\''`)}'`;

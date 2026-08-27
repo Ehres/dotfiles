@@ -11,7 +11,14 @@ import {
 import { renderPlan } from "./plan.ts";
 import { electSession, renderCommentIndex } from "./session.ts";
 import { awaitPlan, clearPlan, readLastReviewed, writeLastReviewed, writePlan } from "./state.ts";
-import { insideTmux, openPopup, popupAlive, waitForPopupGone } from "./tmux.ts";
+import {
+  currentPane,
+  insideTmux,
+  openReviewPane,
+  reviewSessionAlive,
+  waitForReviewSessionGone,
+  waitForReviewStarted,
+} from "./tmux.ts";
 import { execInPlace, listSessions, readComments } from "./tuicr.ts";
 import { buildPrTarget, buildTarget } from "./target.ts";
 import { EXIT, LIST_LIMIT } from "./constants.ts";
@@ -122,7 +129,7 @@ function readLastReviewedState(cwd: string, facts: RepoFacts): LastReviewed | nu
   };
 }
 
-const USAGE = `open-review — open a tuicr review in a tmux popup
+const USAGE = `open-review — open a tuicr review in a focused, non-modal, 60%-width right-side tmux pane
 
   open-review                 auto: this branch's commits and/or working tree
   open-review --since-last    only what changed since the last review
@@ -133,7 +140,7 @@ const USAGE = `open-review — open a tuicr review in a tmux popup
   open-review ... -p <path>   filter to a file or directory
 
   open-review --plan          print the plan of the launch in flight
-  open-review --dry-run       resolve and print, no popup
+  open-review --dry-run       resolve and print, no pane
   open-review --exec          resolve, then exec tuicr in place (tmux binding)`;
 
 export async function main(argv: string[], cwd: string): Promise<number> {
@@ -210,24 +217,23 @@ export async function main(argv: string[], cwd: string): Promise<number> {
 }
 
 /**
- * The four functions launch performs a side effect through, plus popupAlive
- * (checked twice: once before opening, once as the fallback when opening
- * itself reports failure). Every field is optional, defaulting to the real
- * implementation, so no existing caller needs to change — only a test that
- * wants to drive an exit-code decision without tmux or tuicr.
+ * Terminal and tuicr side effects used by launch(). Every field is optional so
+ * tests can drive one lifecycle decision without touching tmux or tuicr.
  */
 export type LaunchDeps = {
-  popupAlive?: typeof popupAlive;
-  openPopup?: typeof openPopup;
-  waitForPopupGone?: typeof waitForPopupGone;
+  currentPane?: typeof currentPane;
+  reviewSessionAlive?: typeof reviewSessionAlive;
+  openReviewPane?: typeof openReviewPane;
+  waitForReviewStarted?: typeof waitForReviewStarted;
+  waitForReviewSessionGone?: typeof waitForReviewSessionGone;
   listSessions?: typeof listSessions;
   readComments?: typeof readComments;
   writeLastReviewed?: typeof writeLastReviewed;
 };
 
 /**
- * The popup and the read-back. `facts` is null only on the repository-less pr
- * path, which has no state to record.
+ * Opens the review side pane, waits for the persistent session to end, and
+ * reads its comments back. `facts` is null only on the repository-less pr path.
  */
 export async function launch(
   root: string,
@@ -236,17 +242,17 @@ export async function launch(
   action: Action,
   deps: LaunchDeps = {},
 ): Promise<number> {
-  const doPopupAlive = deps.popupAlive ?? popupAlive;
-  const doOpenPopup = deps.openPopup ?? openPopup;
-  const doWait = deps.waitForPopupGone ?? waitForPopupGone;
+  const doCurrentPane = deps.currentPane ?? currentPane;
+  const doReviewSessionAlive = deps.reviewSessionAlive ?? reviewSessionAlive;
+  const doOpenReviewPane = deps.openReviewPane ?? openReviewPane;
+  const doWaitForReviewStarted = deps.waitForReviewStarted ?? waitForReviewStarted;
+  const doWaitForReviewSessionGone = deps.waitForReviewSessionGone ?? waitForReviewSessionGone;
   const doListSessions = deps.listSessions ?? listSessions;
   const doReadComments = deps.readComments ?? readComments;
   const doWriteLastReviewed = deps.writeLastReviewed ?? writeLastReviewed;
 
-  // Every exit below that does not open a popup must not leave the plan on
-  // disk for --plan to find: the agent's next call would print a plan for a
-  // review that never happened. Exits that did open a popup leave it alone —
-  // --plan has already served its purpose by the time one of those is reached.
+  // Every exit below that does not start a review must clear the plan: the
+  // agent's next --plan call must never describe a launch that did not happen.
   const clearPlanIfLive = (): void => {
     if (facts !== null) clearPlan(facts.gitDir);
   };
@@ -268,7 +274,7 @@ export async function launch(
 
   // tmux-popup attaches an existing session and ignores the command it was
   // given, so a live review would silently stand in for the requested one.
-  if (doPopupAlive()) {
+  if (doReviewSessionAlive()) {
     clearPlanIfLive();
     process.stderr.write(
       "open-review: a review is already open — close it with C-q, or reattach with prefix + R\n",
@@ -277,19 +283,38 @@ export async function launch(
   }
 
   const before = doListSessions();
-  const opened = doOpenPopup(root, target.tuicrArgs);
-  // display-popup can report failure (Escape dismissing it, for instance)
-  // while tuicr keeps running in its own session. Abandoning the review here
-  // on that basis alone would tell the agent it never started while a human
-  // is still looking at it — so a live session is treated as success.
-  if (!opened && !doPopupAlive()) {
+  const sourcePane = doCurrentPane();
+  if (sourcePane === null) {
     clearPlanIfLive();
     process.stderr.write(
-      `open-review: could not open the popup — run 'tuicr ${target.tuicrArgs.join(" ")}' directly\n`,
+      `open-review: no tmux pane target — run 'tuicr ${target.tuicrArgs.join(" ")}' directly\n`,
     );
     return EXIT.error;
   }
-  await doWait();
+
+  const paneId = doOpenReviewPane(root, sourcePane, target.tuicrArgs);
+  if (paneId === null) {
+    clearPlanIfLive();
+    process.stderr.write(
+      `open-review: could not open the review pane — run 'tuicr ${target.tuicrArgs.join(" ")}' directly\n`,
+    );
+    return EXIT.error;
+  }
+
+  const start = await doWaitForReviewStarted(paneId);
+  // The session is checked once more after a reported startup failure. It may
+  // have appeared between the startup poll's final check and this branch.
+  if (start !== "started" && !doReviewSessionAlive()) {
+    clearPlanIfLive();
+    process.stderr.write(
+      start === "pane-gone"
+        ? "open-review: review pane closed before tuicr started\n"
+        : "open-review: timed out waiting for the tuicr session\n",
+    );
+    return EXIT.error;
+  }
+
+  await doWaitForReviewSessionGone();
 
   const after = doListSessions();
   const elected = electSession(before, after);

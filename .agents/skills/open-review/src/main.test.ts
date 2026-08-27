@@ -9,6 +9,7 @@ import { inScope, launch, resolve } from "./main.ts";
 import { planPath, writeLastReviewed, writePlan } from "./state.ts";
 import { EXIT } from "./constants.ts";
 import { makeRepo } from "./testrepo.ts";
+import type { LaunchDeps } from "./main.ts";
 import type { RepoFacts, SessionRow, Target } from "./types.ts";
 
 // main() writes its plan to stdout, and node:test's own reporter writes to
@@ -305,7 +306,7 @@ test("pr inside a repository never reports a detected base", () => {
 test("--help prints usage and exits ok, without touching a repository", () => {
   const { exitCode, stdout } = runMain(["--help"], "/");
   assert.equal(exitCode, EXIT.ok);
-  assert.match(stdout, /open-review — open a tuicr review in a tmux popup/);
+  assert.match(stdout, /open-review — open a tuicr review in a focused, non-modal, 60%-width right-side tmux pane/);
 });
 
 test("outside a repository, main errors out", () => {
@@ -505,6 +506,20 @@ function launchDir(): string {
   return mkdtempSync(join(tmpdir(), "open-review-launch-"));
 }
 
+function readyLaunchDeps(overrides: Partial<LaunchDeps> = {}): LaunchDeps {
+  return {
+    currentPane: () => "%1",
+    reviewSessionAlive: () => false,
+    openReviewPane: () => "%2",
+    waitForReviewStarted: async () => "started",
+    waitForReviewSessionGone: async () => {},
+    listSessions: () => [],
+    readComments: () => [],
+    writeLastReviewed: () => {},
+    ...overrides,
+  };
+}
+
 // Important 2, exit 1 of 3: not inside tmux.
 test("launch: not inside tmux clears the plan before erroring", async () => {
   const gitDir = launchDir();
@@ -520,13 +535,36 @@ test("launch: not inside tmux clears the plan before erroring", async () => {
   }
 });
 
-// Important 2, exit 2 of 3: a review is already open.
+test("launch: no invoking tmux pane clears the plan before erroring", async () => {
+  const gitDir = launchDir();
+  let opened = false;
+  try {
+    writePlan(gitDir, "mode: test");
+    const exitCode = await withTmuxEnv("fake-tmux-socket", () =>
+      launch(gitDir, fakeTarget(), fakeFacts(gitDir), "launch", readyLaunchDeps({
+        currentPane: () => null,
+        openReviewPane: () => {
+          opened = true;
+          return "%2";
+        },
+      })),
+    );
+    assert.equal(exitCode, EXIT.error);
+    assert.equal(existsSync(planPath(gitDir)), false);
+    assert.equal(opened, false);
+  } finally {
+    rmSync(gitDir, { recursive: true, force: true });
+  }
+});
+
 test("launch: a review already open clears the plan before reporting busy", async () => {
   const gitDir = launchDir();
   try {
     writePlan(gitDir, "mode: test");
     const exitCode = await withTmuxEnv("fake-tmux-socket", () =>
-      launch(gitDir, fakeTarget(), fakeFacts(gitDir), "launch", { popupAlive: () => true }),
+      launch(gitDir, fakeTarget(), fakeFacts(gitDir), "launch", readyLaunchDeps({
+        reviewSessionAlive: () => true,
+      })),
     );
     assert.equal(exitCode, EXIT.busy);
     assert.equal(existsSync(planPath(gitDir)), false);
@@ -535,76 +573,84 @@ test("launch: a review already open clears the plan before reporting busy", asyn
   }
 });
 
-// Important 2, exit 3 of 3, and Important 3's negative case: the popup never
-// opened at all (no live session either), so this is a real failure — clear
-// the plan, error out, and never wait on a popup that does not exist.
-test("launch: a popup that fails with no live session errors out without waiting", async () => {
+test("launch: pane creation failure clears the plan and never waits for startup", async () => {
   const gitDir = launchDir();
-  let waited = false;
+  let waitedForStart = false;
   try {
     writePlan(gitDir, "mode: test");
     const exitCode = await withTmuxEnv("fake-tmux-socket", () =>
-      launch(gitDir, fakeTarget(), fakeFacts(gitDir), "launch", {
-        popupAlive: () => false,
-        openPopup: () => false,
-        waitForPopupGone: async () => {
-          waited = true;
+      launch(gitDir, fakeTarget(), fakeFacts(gitDir), "launch", readyLaunchDeps({
+        openReviewPane: () => null,
+        waitForReviewStarted: async () => {
+          waitedForStart = true;
+          return "started";
         },
-      }),
+      })),
     );
     assert.equal(exitCode, EXIT.error);
     assert.equal(existsSync(planPath(gitDir)), false);
-    assert.equal(waited, false, "a popup that never opened must not be waited on");
+    assert.equal(waitedForStart, false);
   } finally {
     rmSync(gitDir, { recursive: true, force: true });
   }
 });
 
-// Important 3's positive case: display-popup reports failure (Escape making
-// it exit non-zero, say) but tuicr is still alive in its own session — the
-// guard must fall through to the wait and the read-back exactly as if the
-// popup had reported success, rather than abandoning a live review.
-test("launch: a popup that fails but leaves a live session still waits and reads back", async () => {
+for (const start of ["pane-gone", "timeout"] as const) {
+  test(`launch: ${start} before a live session clears the plan and never waits for completion`, async () => {
+    const gitDir = launchDir();
+    let waitedForCompletion = false;
+    try {
+      writePlan(gitDir, "mode: test");
+      const exitCode = await withTmuxEnv("fake-tmux-socket", () =>
+        launch(gitDir, fakeTarget(), fakeFacts(gitDir), "launch", readyLaunchDeps({
+          waitForReviewStarted: async () => start,
+          waitForReviewSessionGone: async () => {
+            waitedForCompletion = true;
+          },
+        })),
+      );
+      assert.equal(exitCode, EXIT.error);
+      assert.equal(existsSync(planPath(gitDir)), false);
+      assert.equal(waitedForCompletion, false);
+    } finally {
+      rmSync(gitDir, { recursive: true, force: true });
+    }
+  });
+}
+
+test("launch: a session that appears as its pane closes still waits and reads back", async () => {
   const gitDir = launchDir();
-  let popupAliveCalls = 0;
+  let sessionAliveCalls = 0;
   let waited = false;
   let readCommentsCalled = false;
   const session = fakeSession({ path: "/sessions/survived.json", comment_count: 1 });
   try {
     let listCall = 0;
     const exitCode = await withTmuxEnv("fake-tmux-socket", () =>
-      launch(gitDir, fakeTarget(), fakeFacts(gitDir), "launch", {
-        // false on the busy check ahead of the launch, true only when
-        // consulted again after openPopup itself reports failure.
-        popupAlive: () => {
-          popupAliveCalls += 1;
-          return popupAliveCalls > 1;
-        },
-        openPopup: () => false,
-        waitForPopupGone: async () => {
+      launch(gitDir, fakeTarget(), fakeFacts(gitDir), "launch", readyLaunchDeps({
+        reviewSessionAlive: () => ++sessionAliveCalls > 1,
+        waitForReviewStarted: async () => "pane-gone",
+        waitForReviewSessionGone: async () => {
           waited = true;
         },
         listSessions: () => (listCall++ === 0 ? [] : [session]),
         readComments: (path) => {
           readCommentsCalled = true;
           assert.equal(path, session.path);
-          return [
-            {
-              location: "review",
-              path: null,
-              start_line: null,
-              end_line: null,
-              side: "new",
-              comment_type: "none",
-              content: "hi",
-            },
-          ];
+          return [{
+            location: "review",
+            path: null,
+            start_line: null,
+            end_line: null,
+            side: "new",
+            comment_type: "none",
+            content: "hi",
+          }];
         },
-        writeLastReviewed: () => {},
-      }),
+      })),
     );
-    assert.equal(waited, true, "the wait must still happen when a live session survives a reported failure");
-    assert.equal(readCommentsCalled, true, "the read-back must still happen too");
+    assert.equal(waited, true);
+    assert.equal(readCommentsCalled, true);
     assert.equal(exitCode, EXIT.ok);
   } finally {
     rmSync(gitDir, { recursive: true, force: true });
@@ -623,17 +669,13 @@ test("launch: a reused session with an unchanged comment count is not presented 
     const after = [fakeSession({ path: "/sessions/reused.json", updated_at: "t2", comment_count: 3 })];
     let listCall = 0;
     const exitCode = await withTmuxEnv("fake-tmux-socket", () =>
-      launch(gitDir, fakeTarget(), fakeFacts(gitDir), "launch", {
-        popupAlive: () => false,
-        openPopup: () => true,
-        waitForPopupGone: async () => {},
+      launch(gitDir, fakeTarget(), fakeFacts(gitDir), "launch", readyLaunchDeps({
         listSessions: () => (listCall++ === 0 ? before : after),
         readComments: () => {
           readCommentsCalled = true;
           return [];
         },
-        writeLastReviewed: () => {},
-      }),
+      })),
     );
     // Before the fix, only `elected.comment_count === 0` was checked, so this
     // returned EXIT.ok and presented all 3 comments as this review's output.
