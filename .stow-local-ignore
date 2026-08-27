@@ -26,4 +26,5 @@ node_modules
 # configuration that belongs in $HOME.
 ^/README\.md$
 ^/docs$
+^/tests$
 ^/VirtualDefy\.json$
