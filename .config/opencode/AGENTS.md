@@ -16,3 +16,5 @@ For version-specific docs, use `/org/project/version` from the `library` output 
 
 If a command fails with a quota error, inform the user and suggest `npx ctx7@latest login` or setting `CONTEXT7_API_KEY` env var for higher limits. Do not silently fall back to training data.
 <!-- context7 -->
+
+When work is associated with a Linear issue, move it to `In Progress` before starting implementation.
