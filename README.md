@@ -15,7 +15,7 @@
 | **Yazi**       | File manager                   | `.config/yazi/theme.toml`          |
 | **Lazygit**    | Git TUI                        | `.config/lazygit/config.yml`       |
 | **Mise**       | Runtime manager                | `.config/mise/config.toml`         |
-| **OpenCode**   | AI coding agent, MCP + plugins | `.config/opencode/opencode.json`   |
+| **OpenCode**   | AI coding agent, MCP + plugins | `.config/opencode/opencode.jsonc` |
 | **Claude Code**| AI coding agent                | `AGENTS.md` (via `CLAUDE.md`)      |
 | **Agent rules and skills** | Shared by both agents | [→](.agents/)                   |
 

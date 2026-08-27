@@ -11,15 +11,6 @@
   "autoupdate": true,
   "lsp": true,
   "mcp": {
-    "sequential-thinking": {
-      "command": [
-        "npx",
-        "-y",
-        "@modelcontextprotocol/server-sequential-thinking"
-      ],
-      "enabled": true,
-      "type": "local"
-    },
     "figma": {
       "type": "remote",
       "url": "https://mcp.figma.com/mcp",
@@ -31,19 +22,18 @@
     "bash": {
       "*": "allow",
       "rm -rf *": "ask",
-      "git push --force*": "ask",
-      "git reset --hard*": "ask",
       "kubectl * delete *": "ask",
-      "*| sh": "ask",
-      "*| bash": "ask",
-      "security *": "ask",
-      "git commit *": "ask"
+      "security *": "ask"
     }
   },
+  // OpenCode Quota: tuiCommandDisplay chooses whether native TUI command output appears in the session transcript or a local popup dialog.
+  // OpenCode Quota: loads the server plugin for slash commands and quota checks.
   "plugin": [
     "@franlol/opencode-md-table-formatter@0.0.3",
     "superpowers@git+https://github.com/obra/superpowers.git",
-    "opencode-scheduler"
+    "opencode-scheduler",
+    "@mohak34/opencode-notifier@latest",
+    "@slkiser/opencode-quota@latest"
   ],
   "username": "Ehres"
 }

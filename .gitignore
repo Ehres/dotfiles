@@ -10,3 +10,4 @@ network.out
 .config/opencode/logs/
 .config/opencode/jobs/
 .config/opencode/scheduler/scopes/
+.config/opencode/opencode-notifier-state.json
