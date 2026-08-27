@@ -105,7 +105,7 @@ keybindings:
     - key: R
       name: request review
       command: >
-        gh pr edit {{.PrNumber}} --repo {{.RepoName}} --add-reviewer "$(gh api repos/{{.RepoName}}/collaborators --jq '.[].login' | gum choose --no-limit)"
+        "$HOME/scripts/gh-dash-reviewers" request {{.RepoName}} {{.PrNumber}}
 
 repoPaths: {}
 theme:
