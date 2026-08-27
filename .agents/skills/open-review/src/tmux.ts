@@ -13,6 +13,21 @@ export type ReviewStartupDeps = {
   reviewPaneAlive: (paneId: string) => boolean;
 };
 
+type OpenReviewPaneDeps = {
+  splitWindow: (args: string[]) => string;
+  selectPane: (paneId: string) => void;
+};
+
+const openReviewPaneDeps: OpenReviewPaneDeps = {
+  splitWindow: (args) => execFileSync("tmux", args, {
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "inherit"],
+  }),
+  selectPane: (paneId) => {
+    execFileSync("tmux", ["select-pane", "-t", paneId], { stdio: "ignore" });
+  },
+};
+
 export function insideTmux(): boolean {
   return Boolean(process.env["TMUX"]);
 }
@@ -51,16 +66,25 @@ export function buildReviewPaneArgs(root: string, sourcePane: string, tuicrArgs:
 }
 
 /** Creates the client pane; `_popup_tuicr` remains the review process owner. */
-export function openReviewPane(root: string, sourcePane: string, tuicrArgs: string[]): string | null {
+export function openReviewPane(
+  root: string,
+  sourcePane: string,
+  tuicrArgs: string[],
+  deps: OpenReviewPaneDeps = openReviewPaneDeps,
+): string | null {
+  let paneId: string;
   try {
-    const paneId = execFileSync("tmux", buildReviewPaneArgs(root, sourcePane, tuicrArgs), {
-      encoding: "utf8",
-      stdio: ["ignore", "pipe", "inherit"],
-    }).trim();
-    return paneId === "" ? null : paneId;
+    paneId = deps.splitWindow(buildReviewPaneArgs(root, sourcePane, tuicrArgs)).trim();
   } catch {
     return null;
   }
+  if (paneId === "") return null;
+  try {
+    deps.selectPane(paneId);
+  } catch {
+    // Startup checks decide whether the pane vanished or its session survived.
+  }
+  return paneId;
 }
 
 export async function waitForReviewStarted(

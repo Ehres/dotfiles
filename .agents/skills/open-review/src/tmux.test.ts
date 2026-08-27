@@ -6,6 +6,7 @@ import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 import {
   buildReviewPaneArgs,
+  openReviewPane,
   shellQuote,
   TMUX_POPUP,
   waitForReviewStarted,
@@ -128,6 +129,17 @@ test("the review pane targets the caller, takes 60% on the right, and receives f
     "--file",
     "docs/my plan.md",
   ]);
+});
+
+test("openReviewPane explicitly selects the pane returned by split-window", () => {
+  const selected: string[] = [];
+  const paneId = openReviewPane("/repo", "%7", ["-w"], {
+    splitWindow: () => "%9\n",
+    selectPane: (pane) => selected.push(pane),
+  });
+
+  assert.equal(paneId, "%9");
+  assert.deepEqual(selected, ["%9"]);
 });
 
 test("the review pane retries nested attach on the current custom socket", () => {
