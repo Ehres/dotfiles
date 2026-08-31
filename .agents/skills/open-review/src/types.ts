@@ -65,6 +65,14 @@ export type BaseChoice = {
   mergeBase: string;
   /** Commits between the merge-base and HEAD. */
   commits: number;
+  /**
+   * Merge commits in `mergeBase..HEAD` whose second parent is base-side
+   * history. tuicr walks a range as a list of commits, so each of these
+   * replays every upstream change the branch merged in — thousands of files
+   * the reviewer never touched. The aggregate diffstat cannot show this, which
+   * is why the plan looks innocent while the review is unreadable.
+   */
+  mergesFromBase?: number;
 };
 
 export type StatSpec =

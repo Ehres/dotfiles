@@ -258,3 +258,22 @@ test("--since-last with no new commits but a dirty tree reviews the working tree
   assert.deepEqual(target.stat, { kind: "diff", args: ["HEAD"] });
   assert.equal(target.emptyReason, null);
 });
+
+/**
+ * OMN-1895, second occurrence. A branch that merged its base in hands tuicr a
+ * range containing that merge; tuicr diffs it against its first parent and
+ * shows every upstream change since the branch started. Observed: 1034 files,
+ * +29528/-9197, against a plan that reported a reassuring 47 files.
+ *
+ * Marked todo, not skipped: the defect is real and this assertion is the one
+ * that must go green, but the fix shape (synthesize the net-result commit vs.
+ * warn and drop the merge) is the tool owner's design call. See FAILURES.md.
+ */
+test("auto must not hand tuicr a range that replays a merged-in base", { todo: "fix shape undecided" }, () => {
+  const target = buildTarget(input({ base: { ...BASE, mergesFromBase: 1 } }));
+  assert.notDeepEqual(
+    target.tuicrArgs,
+    ["-r", "fork00..HEAD", "--no-update-check"],
+    "the bare merge-base range makes the merge commit's 1000-file diff part of the review",
+  );
+});
