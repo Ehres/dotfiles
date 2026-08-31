@@ -1,13 +1,5 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "agent": {
-    "build": {
-      "color": "#FF5733"
-    },
-    "plan": {
-      "color": "#86e1fc"
-    }
-  },
   "autoupdate": true,
   "lsp": true,
   "mcp": {
@@ -26,14 +18,30 @@
       "security *": "ask"
     }
   },
-  // OpenCode Quota: tuiCommandDisplay chooses whether native TUI command output appears in the session transcript or a local popup dialog.
-  // OpenCode Quota: loads the server plugin for slash commands and quota checks.
   "plugin": [
     "@franlol/opencode-md-table-formatter@0.0.3",
     "superpowers@git+https://github.com/obra/superpowers.git",
     "opencode-scheduler",
     "@mohak34/opencode-notifier@latest",
-    "@slkiser/opencode-quota@latest"
+    "@slkiser/opencode-quota@latest",
+    "oh-my-opencode-slim"
   ],
-  "username": "Ehres"
+  "username": "Ehres",
+  "provider": {
+    "headroom": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Headroom Proxy",
+      "options": {
+        "baseURL": "http://127.0.0.1:8787/v1"
+      }
+    }
+  },
+  "agent": {
+    "explore": {
+      "disable": true
+    },
+    "general": {
+      "disable": true
+    }
+  }
 }
