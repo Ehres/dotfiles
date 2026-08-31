@@ -49,6 +49,7 @@ brew "shellcheck"                  # Shell linter enforcing the AGENTS.md shell 
 
 # Agent Tooling
 brew "rtk"                         # Token-reduction rewriter used by the opencode plugin
+brew "uv"                          # Python package and tool manager; installs Headroom CLI
 
 # Preview Dependencies (for yazi and other tools)
 brew "ffmpegthumbnailer"           # Video thumbnails
