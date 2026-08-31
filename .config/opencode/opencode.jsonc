@@ -11,6 +11,9 @@
   },
   "permission": {
     "question": "allow",
+    "external_directory": {
+      "~/Library/Application Support/rtk/tee/**": "allow"
+    },
     "bash": {
       "*": "allow",
       "rm -rf *": "ask",
