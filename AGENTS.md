@@ -250,6 +250,13 @@ are the raw values and should not appear in item or plugin scripts.
 ## Agent Guidelines
 
 - **Use skills when relevant** — load specialized skills before substantial work
+- After validated implementation work, proactively propose a logical commit with
+  an Angular-format message. Do not commit without explicit user approval.
+- When a change is ready to share, proactively offer to prepare a pull request:
+  confirm the branch is ready, draft a concise title and description, and
+  summarize validation. Create the pull request only on explicit request.
+- For an open pull request, proactively monitor CI and review feedback, report
+  blockers promptly, and propose or implement approved follow-up changes.
 - Before creating a worktree, check whether OpenCode is already running from a
   linked Git worktree. Reuse it when it is; do not create another worktree.
 - **Use @explore subagent** to search the codebase when unsure where to find
