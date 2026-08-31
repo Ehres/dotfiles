@@ -250,6 +250,8 @@ are the raw values and should not appear in item or plugin scripts.
 ## Agent Guidelines
 
 - **Use skills when relevant** — load specialized skills before substantial work
+- Before creating a worktree, check whether OpenCode is already running from a
+  linked Git worktree. Reuse it when it is; do not create another worktree.
 - **Use @explore subagent** to search the codebase when unsure where to find
   relevant information
 - **Use context7** for up-to-date tool documentation
