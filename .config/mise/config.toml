@@ -1,5 +1,4 @@
 [tools]
-fnox = "latest"
 node = "24.13.0"
 
 [settings]

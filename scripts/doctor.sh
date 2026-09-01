@@ -60,22 +60,7 @@ else
 fi
 
 # --------------------------------------------------------------------------
-section "Secrets"
-# The README documented the Keychain entries with service and account swapped,
-# so fnox could never read them and secrets were inlined into config instead.
-if ! command -v fnox >/dev/null; then
-  warn "fnox is not installed -- secrets cannot be injected"
-else
-  while read -r key; do
-    [[ -z "$key" ]] && continue
-    if fnox --config .config/opencode/fnox.toml get "$key" >/dev/null 2>&1; then
-      ok "$key resolves from the Keychain"
-    else
-      fail "$key does not resolve. Add it with: security add-generic-password -s \"Keychain Access\" -a $key -w"
-    fi
-  done < <(grep -oE '^[A-Z0-9_]+' .config/opencode/fnox.toml 2>/dev/null)
-fi
-
+section "Plaintext credentials"
 # A plaintext token sat in a tracked file, on a public remote, for 5 months.
 if leaked=$(git grep -nIE '"(client_?[Ss]ecret|[A-Z0-9_]*(TOKEN|API_KEY|PASSWORD|SECRET))"[[:space:]]*:[[:space:]]*"[A-Za-z0-9_\-]{16,}"' -- \
   ':!*.lock' ':!*lock.json' ':!*.yaml' 2>/dev/null); [[ -n "$leaked" ]]; then
@@ -100,7 +85,7 @@ deps=(
   "stylua:the Lua formatting command in AGENTS.md"
   "shellcheck:the shell linting rules in AGENTS.md"
   "rtk:the opencode rtk plugin"
-  "mise:node and fnox provisioning"
+  "mise:node provisioning"
   "nvim:EDITOR"
 )
 for entry in "${deps[@]}"; do
