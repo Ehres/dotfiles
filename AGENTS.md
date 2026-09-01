@@ -62,17 +62,15 @@ brew bundle install                 # Install all Homebrew dependencies
 
 `doctor.sh` is the check to run before claiming a config change works. Every
 check in it corresponds to something that was found broken *silently*: `stow`
-aborting on conflicts, Keychain secrets that never resolved, binaries a config
-depends on being absent, versioned Cellar paths, the tmux session-name mismatch,
-and README links pointing at files that do not exist. It exits non-zero on
-failures; warnings do not fail.
+aborting on conflicts, binaries a config depends on being absent, versioned
+Cellar paths, the tmux session-name mismatch, and README links pointing at
+files that do not exist. It exits non-zero on failures; warnings do not fail.
 
 Individual checks, if you want one in isolation:
 
 ```bash
 stow -n -v .                        # Symlink drift, and conflicts before `stow .`
 brew bundle check --verbose         # Declared in Brewfile vs actually installed
-fnox --config .config/opencode/fnox.toml list   # Declared secrets resolve
 stylua --check .config/nvim/        # Lua formatting
 shellcheck .config/sketchybar/plugins/*.sh .config/sketchybar/items/*.sh
 nvim --headless "+checkhealth" +qa  # Neovim plugin health
@@ -240,8 +238,6 @@ are the raw values and should not appear in item or plugin scripts.
 
 - **Stow-based**: entire repo mirrors `$HOME` structure; `stow .` creates
   symlinks. New config files must be placed where they'd live under `$HOME`
-- **Secrets via fnox**: secrets stored in macOS Keychain, accessed through
-  `fnox` — never committed. See `fnox.toml` files
 - **Theme consistency**: TokyoNight for Neovim/Ghostty/Tmux/OpenCode;
   Catppuccin Macchiato for SketchyBar. Active accent: `#7aa2f7`
 - **Vim navigation everywhere**: `hjkl` bindings in skhd, tmux,
