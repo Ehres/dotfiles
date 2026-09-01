@@ -33,3 +33,4 @@ Never commit specifications or implementation plans created by Superpowers skill
 - Verify plans, assumptions, and external information against the current source of truth before presenting them as fact.
 - Surface nearby inconsistencies, risks, and suspicious behavior discovered during work.
 - Avoid em dashes in generated prose.
+- When speaking French, retain established English technical terms (for example, use `Chip` rather than `puce`) unless a French translation is clearly the industry standard.
