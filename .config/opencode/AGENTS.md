@@ -34,3 +34,5 @@ Never commit specifications or implementation plans created by Superpowers skill
 - Surface nearby inconsistencies, risks, and suspicious behavior discovered during work.
 - Avoid em dashes in generated prose.
 - When speaking French, retain established English technical terms (for example, use `Chip` rather than `puce`) unless a French translation is clearly the industry standard.
+When creating a Linear issue, assign it to `Ehres` in the `OMN` team with the `frontend` label and `Improvement` type by default, unless the user explicitly specifies otherwise.
+
