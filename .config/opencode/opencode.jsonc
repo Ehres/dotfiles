@@ -49,6 +49,24 @@
     }
   },
   "agent": {
+    "plan": {
+      "permission": {
+        "skill": {
+          "*": "allow",
+          "brainstorming": "deny",
+          "writing-plans": "deny"
+        }
+      }
+    },
+    "build": {
+      "permission": {
+        "skill": {
+          "*": "allow",
+          "brainstorming": "deny",
+          "writing-plans": "deny"
+        }
+      }
+    },
     "explore": {
       "disable": true
     },
