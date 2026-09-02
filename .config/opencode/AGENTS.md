@@ -19,6 +19,8 @@ If a command fails with a quota error, inform the user and suggest `npx ctx7@lat
 
 My GitHub username is `Ehres`.
 
+Until further notice, do not write release notes in PR descriptions. Where a release message field is required, set it to `> N/A`.
+
 When designing changes or reviewing code, check and apply the project's documented coding rules, guidelines, and standards.
 
 When work is associated with a Linear issue, move it to `In Progress` before starting implementation.
