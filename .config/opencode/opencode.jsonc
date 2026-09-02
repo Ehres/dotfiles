@@ -7,6 +7,15 @@
       "type": "remote",
       "url": "https://mcp.figma.com/mcp",
       "enabled": true
+    },
+    "google-drive": {
+      "type": "local",
+      "command": ["npx", "-y", "@piotr-agier/google-drive-mcp@2.6.0"],
+      "environment": {
+        "GOOGLE_DRIVE_OAUTH_CREDENTIALS": "/Users/maxime.grebauval/client_secret_1067784221910-7ckhspsri5f4qoda23v2hc857c69d2ih.apps.googleusercontent.com.json",
+        "GOOGLE_DRIVE_MCP_SCOPES": "drive.file,presentations"
+      },
+      "enabled": true
     }
   },
   "permission": {
