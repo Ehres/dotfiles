@@ -14,7 +14,7 @@ COUNT=$(sqlite3 -readonly "$DB" \
 	"SELECT COUNT(*) FROM message
    WHERE is_from_me = 0
      AND is_read = 0
-     AND date > 0
+     AND date > (strftime('%s', 'now', '-30 days') - 978307200) * 1000000000
      AND item_type = 0
      AND associated_message_type = 0
      AND is_service_message = 0;" 2>/dev/null)
