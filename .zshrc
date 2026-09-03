@@ -1,12 +1,16 @@
-# Long-lived tmux sessions: ensure they exist, then let tmux pick the session.
-# Note: it picks the most recently *active* one, so this can land on dash or on
-# a lingering popup session — switch with prefix+s.
+# Attach to tmux if a server is already running; never create sessions here.
+# The long-lived sessions (Work, Perso & Configs) are declared in
+# scripts/tmux-sessions and created by hand — see the tmux-sessions function.
+# Note: attach picks the most recently *active* session, so this can land on
+# dash or on a lingering popup session — switch with prefix+s.
 # Kept above the instant prompt because this block ends in an exec.
 # NO_TMUX=1 opts out. Absolute path fallback: brew shellenv has not run yet.
 if [[ -o interactive && -z "$TMUX" && -z "$NO_TMUX" && -t 1 ]]; then
   _tmux=${${commands[tmux]}:-/opt/homebrew/bin/tmux}
   if [[ -x $_tmux ]]; then
-    "$HOME/scripts/tmux-sessions" && exec "$_tmux" attach
+    # has-session without -t only succeeds when the server has a session, so a
+    # failing `exec attach` can never close the terminal.
+    "$_tmux" has-session 2>/dev/null && exec "$_tmux" attach
   fi
   unset _tmux
 fi
@@ -162,25 +166,14 @@ function y() {
 }
 
 # Tmux
-# The bootstrap at the top of this file only fires when a *new* shell starts
-# outside tmux, so a `tmux` typed by hand never reaches it: bare `tmux` creates
-# tmux's own default session ("0"), and `tmux attach` fails outright when no
-# server is running. Both happened on 2026-08-03, in a shell old enough to
-# predate the bootstrap. Route the two session-entering forms through the same
-# script; every other subcommand (ls, kill-server, ...) passes straight through.
-function tmux() {
-  if [[ -n $TMUX ]]; then
-    command tmux "$@"
-    return
-  fi
-  case ${1:-} in
-    "" | attach | a | attach-session)
-      "$HOME/scripts/tmux-sessions" || return
-      (( $# )) && shift
-      command tmux attach "$@"
-      ;;
-    *) command tmux "$@" ;;
-  esac
+# Nothing creates the long-lived sessions behind your back: neither the
+# bootstrap at the top of this file nor `tmux` itself. Run this by hand —
+# typically once after a reboot. Outside tmux it also attaches, so a single
+# command takes you from a bare shell to the declared layout. `~/scripts` is
+# not on PATH, hence the wrapper rather than a plain call to the script.
+function tmux-sessions() {
+  "$HOME/scripts/tmux-sessions" || return
+  [[ -n $TMUX ]] || command tmux attach
 }
 
 # Bun
