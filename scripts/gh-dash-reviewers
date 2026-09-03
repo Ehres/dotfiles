@@ -3,7 +3,7 @@
 set -uo pipefail
 
 CACHE_ROOT="${XDG_CACHE_HOME:-$HOME/.cache}/gh-dash/reviewers"
-FAVORITES_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/gh-dash/reviewer-favorites"
+SCORES_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/gh-dash/reviewer-scores"
 
 usage() {
   printf 'usage: %s request <owner/repo> <pr-number>\n' "$0" >&2
@@ -38,7 +38,7 @@ refresh_cache() {
 }
 
 print_candidates() {
-  local repo=$1 refresh=${2:-false} file favorites_source
+  local repo=$1 refresh=${2:-false} file scores_source
   validate_repo "$repo" || return 1
   file=$(cache_file "$repo")
 
@@ -46,28 +46,51 @@ print_candidates() {
     refresh_cache "$repo" || return 1
   fi
 
-  favorites_source=$FAVORITES_FILE
-  [ -f "$favorites_source" ] || favorites_source=/dev/null
+  scores_source=$SCORES_FILE
+  [ -f "$scores_source" ] || scores_source=/dev/null
 
-  awk -v OFS='\t' '
+  awk -v FS='\t' -v OFS='\t' '
     FILENAME == ARGV[1] {
-      if ($0 != "" && !favorite_seen[$0]++) favorites[++favorite_count] = $0
+      if ($1 != "" && $2 ~ /^[0-9]+$/) score[$1] = $2
       next
     }
     $0 != "" && !collaborator_seen[$0]++ {
       collaborators[++collaborator_count] = $0
     }
     END {
-      for (i = 1; i <= favorite_count; i++) {
-        login = favorites[i]
-        if (collaborator_seen[login]) print login, "[favorite] " login
-      }
       for (i = 1; i <= collaborator_count; i++) {
         login = collaborators[i]
-        if (!favorite_seen[login]) print login, login
+        print (login in score ? score[login] : 0), login, login
       }
     }
-  ' "$favorites_source" "$file"
+  ' "$scores_source" "$file" \
+    | LC_ALL=C sort -t $'\t' -k1,1nr -k2,2f \
+    | awk -v FS='\t' -v OFS='\t' '{ print $2, $3 }'
+}
+
+increment_scores() {
+  local selection=$1 scores_source temp_file
+  mkdir -p "$(dirname "$SCORES_FILE")" || return 1
+  temp_file=$(mktemp "${SCORES_FILE}.tmp.XXXXXX") || return 1
+
+  scores_source=$SCORES_FILE
+  [ -f "$scores_source" ] || scores_source=/dev/null
+
+  if ! awk -v FS='\t' -v OFS='\t' '
+    FILENAME == ARGV[1] {
+      if ($1 != "" && $2 ~ /^[0-9]+$/) score[$1] = $2
+      next
+    }
+    $0 != "" { score[$0]++ }
+    END {
+      for (login in score) print login, score[login]
+    }
+  ' "$scores_source" <(printf '%s\n' "$selection") | LC_ALL=C sort -fu > "$temp_file"; then
+    rm -f "$temp_file"
+    return 1
+  fi
+
+  mv "$temp_file" "$SCORES_FILE"
 }
 
 request_review() {
@@ -106,6 +129,7 @@ request_review() {
   done <<< "$selection"
 
   [ -n "$reviewers" ] || return 0
+  increment_scores "$selection" || return 1
   gh pr edit "$pr" --repo "$repo" --add-reviewer "$reviewers"
 }
 

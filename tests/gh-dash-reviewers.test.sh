@@ -17,7 +17,7 @@ export FZF_INPUT="$TEST_ROOT/fzf-input"
 FAKE_BIN="$TEST_ROOT/bin"
 
 mkdir -p "$HOME" "$XDG_CACHE_HOME" "$XDG_CONFIG_HOME/gh-dash" "$FAKE_BIN"
-: > "$XDG_CONFIG_HOME/gh-dash/reviewer-favorites"
+: > "$XDG_CONFIG_HOME/gh-dash/reviewer-scores"
 
 cat > "$FAKE_BIN/gh" <<'FAKE_GH'
 #!/bin/bash
@@ -28,6 +28,9 @@ if [ "$1" = api ]; then
   exit 0
 fi
 printf '%s\n' "$*" >> "$GH_CALLS"
+if [ "${GH_PR_EDIT_FAIL:-0}" = 1 ]; then
+  exit 1
+fi
 FAKE_GH
 
 cat > "$FAKE_BIN/fzf" <<'FAKE_FZF'
@@ -56,8 +59,8 @@ reset_state() {
   : > "$GH_API_CALL"
   : > "$FZF_ARGS"
   : > "$FZF_INPUT"
-  : > "$XDG_CONFIG_HOME/gh-dash/reviewer-favorites"
-  unset GH_API_FAIL FZF_EXIT
+  : > "$XDG_CONFIG_HOME/gh-dash/reviewer-scores"
+  unset GH_API_FAIL GH_PR_EDIT_FAIL FZF_EXIT
   export GH_API_OUTPUT=""
   export FZF_SELECTION=""
 }
@@ -76,16 +79,42 @@ test_multiple_reviewers_and_pagination() {
   grep -F 'ctrl-r:reload(' "$FZF_ARGS" >/dev/null || fail "fzf has no in-picker refresh binding"
 }
 
-test_favorites_are_first_and_not_preselected() {
+test_highest_scored_reviewers_are_first() {
   reset_state
   mkdir -p "$XDG_CACHE_HOME/gh-dash/reviewers/acme"
   printf 'alice\nbob\ncarol\n' > "$XDG_CACHE_HOME/gh-dash/reviewers/acme/app"
-  printf 'carol\nmissing\n' > "$XDG_CONFIG_HOME/gh-dash/reviewer-favorites"
+  printf 'alice\t1\ncarol\t3\nmissing\t9\n' > "$XDG_CONFIG_HOME/gh-dash/reviewer-scores"
 
   actual=$("$SUBJECT" candidates acme/app)
-  expected=$'carol\t[favorite] carol\nalice\talice\nbob\tbob'
+  expected=$'carol\tcarol\nalice\talice\nbob\tbob'
 
   assert_eq "$actual" "$expected"
+}
+
+test_selection_increments_scores() {
+  reset_state
+  mkdir -p "$XDG_CACHE_HOME/gh-dash/reviewers/acme"
+  printf 'alice\nbob\n' > "$XDG_CACHE_HOME/gh-dash/reviewers/acme/app"
+  export FZF_SELECTION="bob"
+
+  "$SUBJECT" request acme/app 7
+
+  assert_eq "$(cat "$XDG_CONFIG_HOME/gh-dash/reviewer-scores")" $'bob\t1'
+  assert_eq "$("$SUBJECT" candidates acme/app)" $'bob\tbob\nalice\talice'
+}
+
+test_selection_increments_scores_when_request_fails() {
+  reset_state
+  mkdir -p "$XDG_CACHE_HOME/gh-dash/reviewers/acme"
+  printf 'alice\n' > "$XDG_CACHE_HOME/gh-dash/reviewers/acme/app"
+  export FZF_SELECTION="alice"
+  export GH_PR_EDIT_FAIL=1
+
+  if "$SUBJECT" request acme/app 7 >/dev/null 2>&1; then
+    fail "failed review request returned success"
+  fi
+
+  assert_eq "$(cat "$XDG_CONFIG_HOME/gh-dash/reviewer-scores")" $'alice\t1'
 }
 
 test_cancel_is_a_no_op() {
@@ -123,7 +152,9 @@ test_failed_initial_refresh_does_not_open_picker() {
 }
 
 test_multiple_reviewers_and_pagination
-test_favorites_are_first_and_not_preselected
+test_highest_scored_reviewers_are_first
+test_selection_increments_scores
+test_selection_increments_scores_when_request_fails
 test_cancel_is_a_no_op
 test_failed_refresh_preserves_cache
 test_failed_initial_refresh_does_not_open_picker

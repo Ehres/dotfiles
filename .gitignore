@@ -11,3 +11,6 @@ network.out
 .config/opencode/jobs/
 .config/opencode/scheduler/scopes/
 .config/opencode/opencode-notifier-state.json
+
+# gh-dash reviewer ranking state, updated after every selection.
+.config/gh-dash/reviewer-scores
