@@ -87,6 +87,7 @@ cask "bazecor"                     # Dygma Defy keyboard configurator (see Virtu
 
 # Fonts
 cask "font-fira-code-nerd-font"   # Monospace font with programming ligatures and icons
+cask "font-maple-mono-nf"       # Maple Mono with Nerd Font glyphs for Ghostty, tmux, and Neovim
 cask "font-hack-nerd-font"        # Used by SketchyBar for icons
 
 # Language Servers (used by OpenCode LSP)
