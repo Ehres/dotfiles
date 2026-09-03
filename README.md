@@ -29,13 +29,6 @@ cd ~/projects/dotfiles
 brew bundle install           # Everything in the Brewfile
 stow .                        # Create symlinks
 
-# Configure secrets. The service is literally "Keychain Access" and the account
-# is the key name -- that is what fnox.toml looks up. Swapping the two silently
-# produces entries fnox cannot read.
-security add-generic-password -s "Keychain Access" -a GITLAB_PERSONAL_ACCESS_TOKEN -w
-security add-generic-password -s "Keychain Access" -a CONTEXT7_API_KEY -w
-fnox --config .config/opencode/fnox.toml list   # Verify both resolve
-
 # Install plugins
 exec zsh                      # Zsh + Zinit plugins auto-install
 tmux                          # Then: C-b + I
@@ -61,7 +54,7 @@ cd ~/projects/dotfiles
 brew bundle install    # Taps, formulae and casks from the Brewfile
 ```
 
-Zinit and TPM bootstrap themselves on first `zsh` / `tmux` launch (step 5), and
+Zinit and TPM bootstrap themselves on first `zsh` / `tmux` launch (step 4), and
 mise installs its tools from `.config/mise/config.toml` when the shell activates
 it. There is nothing else to run.
 
@@ -74,21 +67,7 @@ stow .
 `.stow-local-ignore` keeps dependency trees and repo documentation out of `$HOME`.
 Dry-run first with `stow -n -v .` if you want to see the plan.
 
-### 4. Secrets
-
-Secrets live in the macOS Keychain and are injected by `fnox` through the `oc`
-alias. The service is the literal string `Keychain Access` and the account is the
-key name; supplying them the other way round creates entries `fnox` cannot read.
-
-```bash
-security add-generic-password -s "Keychain Access" -a GITLAB_PERSONAL_ACCESS_TOKEN -w
-security add-generic-password -s "Keychain Access" -a CONTEXT7_API_KEY -w
-
-# Both keys should print a value, not a "not found" error
-fnox --config .config/opencode/fnox.toml get CONTEXT7_API_KEY
-```
-
-### 5. Plugins
+### 4. Plugins
 
 ```bash
 exec zsh                    # Zsh plugins
@@ -96,7 +75,7 @@ tmux; C-b + I               # Tmux plugins
 nvim                        # Neovim plugins
 ```
 
-### 6. Validate
+### 5. Validate
 
 ```bash
 ./scripts/doctor.sh
@@ -107,7 +86,7 @@ nvim                        # Neovim plugins
 ## Aliases
 
 ```bash
-oc          # OpenCode with fnox secrets
+oc          # OpenCode
 lg          # LazyGit
 bubu        # Brew update & upgrade & cleanup
 kci/kcs/kcp # Kubernetes contexts
@@ -147,7 +126,6 @@ git add . && git commit -m "Update" && git push
   Shared accent `#7aa2f7`
 - **Fonts**: FiraCode Nerd Font; Hack Nerd Font for SketchyBar icons
 - **Node**: 24.13.0 via mise (`.config/mise/config.toml` is the source of truth)
-- **Secrets**: macOS Keychain, read through `fnox`; never committed
 
 ---
 
