@@ -33,10 +33,11 @@ return {
           new_config.settings = vim.tbl_deep_extend("keep", new_config.settings, {
             editor = { tabSize = vim.lsp.util.get_effective_tabstop() },
           })
+          new_config.settings.tailwindCSS = new_config.settings.tailwindCSS or {}
+          new_config.settings.tailwindCSS.classFunctions = { "cva" }
 
           local workspace_root = find_frontend_checkout(new_config.root_dir)
           if workspace_root then
-            new_config.settings.tailwindCSS = new_config.settings.tailwindCSS or {}
             new_config.settings.tailwindCSS.experimental = new_config.settings.tailwindCSS.experimental or {}
             new_config.settings.tailwindCSS.experimental.configFile = {
               [workspace_root .. "/packages/libs/pharaoh-next/src/styles/theme.scoped.css"] = workspace_root
