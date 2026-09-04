@@ -1,0 +1,29 @@
+#!/bin/sh
+set -eu
+
+YABAI_BIN=${YABAI_BIN:-yabai}
+JQ_BIN=${JQ_BIN:-jq}
+OPEN_BIN=${OPEN_BIN:-open}
+APP_NAME=${1:?usage: yabai-focus-app <application-name>}
+
+# shellcheck disable=SC2016
+WINDOW_JSON=$("$YABAI_BIN" -m query --windows | "$JQ_BIN" -c --arg app "$APP_NAME" '
+	map(select(
+		.app == $app and
+		."is-minimized" == false and
+		."is-hidden" == false
+	)) | first
+')
+
+if [ -z "$WINDOW_JSON" ] || [ "$WINDOW_JSON" = "null" ]; then
+	exec "$OPEN_BIN" -a "$APP_NAME"
+fi
+
+SPACE_ID=$(printf '%s\n' "$WINDOW_JSON" | "$JQ_BIN" -r '.space')
+WINDOW_ID=$(printf '%s\n' "$WINDOW_JSON" | "$JQ_BIN" -r '.id')
+FOCUSED_SPACE=$("$YABAI_BIN" -m query --spaces --space | "$JQ_BIN" -r '.index')
+
+if [ "$FOCUSED_SPACE" != "$SPACE_ID" ]; then
+	"$YABAI_BIN" -m space --focus "$SPACE_ID"
+fi
+"$YABAI_BIN" -m window --focus "$WINDOW_ID"
