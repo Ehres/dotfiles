@@ -18,3 +18,11 @@ export STATUS_INACTIVE=$OVERLAY0
 export CONNECTED=$GREEN
 export VPN_ACTIVE=$SKY
 export DISCONNECTED=$OVERLAY0
+
+# Yabai modes — categorical accents, not severity states
+export MODE_RESIZE=$SAPPHIRE
+export MODE_ARRANGE=$MAUVE
+export MODE_MOVE=$PEACH
+export MODE_APP=$LAVENDER
+export MODE_LAYOUT=$TEAL
+export MODE_OFF=$SUBTEXT1

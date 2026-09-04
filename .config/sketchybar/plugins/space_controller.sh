@@ -9,8 +9,11 @@
 # │  Triggers: space_change, front_app_switched,     │
 # │            display_change                        │
 # └─────────────────────────────────────────────────┘
-
+# shellcheck disable=SC1091
+# shellcheck source=../colors/components.sh
 source "$CONFIG_DIR/colors/components.sh"
+# shellcheck disable=SC1091
+# shellcheck source=../spacing/components.sh
 source "$CONFIG_DIR/spacing/components.sh"
 
 pgrep -x yabai > /dev/null 2>&1 && YABAI_RUNNING=true || YABAI_RUNNING=false
@@ -54,7 +57,10 @@ for D in $(seq 1 $MAX_DISPLAY); do
 		SPACES_JSON='[{"index":1,"has-focus":true,"is-visible":true}]'
 	fi
 
-	SPACE_INDICES=($(echo "$SPACES_JSON" | jq -r '.[].index'))
+	SPACE_INDICES=()
+	while IFS= read -r SPACE_INDEX; do
+		SPACE_INDICES+=("$SPACE_INDEX")
+	done < <(printf '%s\n' "$SPACES_JSON" | jq -r '.[].index')
 	TOTAL=${#SPACE_INDICES[@]}
 
 	# Visible space on this display (one per display, always exists)
@@ -97,15 +103,19 @@ for D in $(seq 1 $MAX_DISPLAY); do
 	# ── Before pool ────────────────────────────────────────────
 	BEFORE_COUNT=$ACTIVE_POS
 	slot=1
-	for i in $(seq 0 $((BEFORE_COUNT - 1))); do
-		sid="${SPACE_INDICES[$i]}"
-		args+=(--set "${P}_before.${slot}" icon="$sid" drawing=on
-			"click_script=yabai -m space --focus $sid")
-		slot=$((slot + 1))
-	done
-	for slot in $(seq $((BEFORE_COUNT + 1)) $MAX_POOL); do
-		args+=(--set "${P}_before.${slot}" drawing=off)
-	done
+	if [ "$BEFORE_COUNT" -gt 0 ]; then
+		for ((i = 0; i < BEFORE_COUNT; i++)); do
+			sid="${SPACE_INDICES[$i]}"
+			args+=(--set "${P}_before.${slot}" icon="$sid" drawing=on
+				"click_script=yabai -m space --focus $sid")
+			slot=$((slot + 1))
+		done
+	fi
+	if [ "$BEFORE_COUNT" -lt "$MAX_POOL" ]; then
+		for ((slot = BEFORE_COUNT + 1; slot <= MAX_POOL; slot++)); do
+			args+=(--set "${P}_before.${slot}" drawing=off)
+		done
+	fi
 
 	# Before bracket + spacer visibility
 	if [ "$BEFORE_COUNT" -gt 0 ]; then
@@ -132,15 +142,19 @@ for D in $(seq 1 $MAX_DISPLAY); do
 	AFTER_START=$((ACTIVE_POS + 1))
 	AFTER_COUNT=$((TOTAL - AFTER_START))
 	slot=1
-	for i in $(seq $AFTER_START $((TOTAL - 1))); do
-		sid="${SPACE_INDICES[$i]}"
-		args+=(--set "${P}_after.${slot}" icon="$sid" drawing=on
-			"click_script=yabai -m space --focus $sid")
-		slot=$((slot + 1))
-	done
-	for slot in $(seq $((AFTER_COUNT + 1)) $MAX_POOL); do
-		args+=(--set "${P}_after.${slot}" drawing=off)
-	done
+	if [ "$AFTER_COUNT" -gt 0 ]; then
+		for ((i = AFTER_START; i < TOTAL; i++)); do
+			sid="${SPACE_INDICES[$i]}"
+			args+=(--set "${P}_after.${slot}" icon="$sid" drawing=on
+				"click_script=yabai -m space --focus $sid")
+			slot=$((slot + 1))
+		done
+	fi
+	if [ "$AFTER_COUNT" -lt "$MAX_POOL" ]; then
+		for ((slot = AFTER_COUNT + 1; slot <= MAX_POOL; slot++)); do
+			args+=(--set "${P}_after.${slot}" drawing=off)
+		done
+	fi
 
 	# After bracket + spacer visibility
 	if [ "$AFTER_COUNT" -gt 0 ]; then
@@ -152,7 +166,7 @@ for D in $(seq 1 $MAX_DISPLAY); do
 	fi
 done
 
-# ── Apply yabai state: dim spaces and show/hide badge ──────────────
+# ── Apply yabai state: dim spaces ───────────────────────────────────
 if [ "$YABAI_RUNNING" = false ]; then
 	for D in $(seq 1 $MAX_DISPLAY); do
 		P="d${D}"
@@ -162,7 +176,6 @@ if [ "$YABAI_RUNNING" = false ]; then
 		done
 		args+=(--set "${P}_active" icon.color="$STATUS_INACTIVE" label.color="$STATUS_INACTIVE" label.drawing=off)
 	done
-	args+=(--set yabai_status drawing=on)
 else
 	for D in $(seq 1 $MAX_DISPLAY); do
 		P="d${D}"
@@ -172,7 +185,6 @@ else
 		done
 		args+=(--set "${P}_active" icon.color="$ICON_DEFAULT" label.color="$LABEL_DEFAULT")
 	done
-	args+=(--set yabai_status drawing=off)
 fi
 
 # ── Execute atomically (single render pass, zero glitch) ───────────

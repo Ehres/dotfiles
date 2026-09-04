@@ -136,13 +136,25 @@ git add . && git commit -m "Update" && git push
 **`./scripts/tmux-sessions`** - Ensure the long-lived tmux sessions exist (idempotent)  
 **`./scripts/tmux-popup`** - Back the `display-popup` bindings, passing Escape through  
 **`./scripts/tmux-dash-toggle`** - Toggle in and out of the `gh dash` session  
+**`./scripts/yabai-focus-app`** - focuses the most recently used visible window of a named app, or launches it.<br>
 **`./scripts/wifi-rssi.swift`** - Wi-Fi RSSI helper, compiled on demand by SketchyBar  
 **`./scripts/claude-bash-guard.sh`** - `PreToolUse` hook blocking irreversible shell commands  
 **`./scripts/regenerate-tailles.mjs`** - Regenerate Notion pruning reminders
 
 ## Notes
 
-- **Prefix**: Tmux = `C-b`, Skhd = `ctrl+shift` / `ctrl+cmd` / `shift+alt`
+### Window management modes
+
+| Entry | Mode | Keys |
+| --- | --- | --- |
+| `ctrl+shift+r` | Resize | `hjkl` grow, `shift+hjkl` shrink, `Escape` exits |
+| `ctrl+shift+s` | Arrange | `hjkl` swap, `shift+hjkl` warp |
+| `ctrl+shift+m` | Move | `1…0` to spaces, `hjkl` to displays; `Shift` also follows |
+| `ctrl+shift+a` | App | app mnemonic focuses its MRU window or launches it |
+| `ctrl+shift+o` | Layout | `f` fullscreen, `t` float, `1`/`2` ratios, `b` balance |
+
+Temporary modes exit after one action. Resize is the only persistent mode and is visibly marked `RESIZE` in SketchyBar.
+
 - **Theme**: TokyoNight everywhere, except SketchyBar (Catppuccin Macchiato).
   Shared accent `#7aa2f7`
 - **Fonts**: FiraCode Nerd Font; Hack Nerd Font for SketchyBar icons

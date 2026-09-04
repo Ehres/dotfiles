@@ -176,6 +176,24 @@ done
 [[ "$stale" -eq 0 ]] && ok "no per-repo git hooks shadowing worktree-bootstrap"
 
 # --------------------------------------------------------------------------
+section "yabai"
+if [[ -x scripts/yabai-focus-app ]]; then
+  ok "yabai-focus-app is executable"
+else
+  fail "yabai-focus-app is missing or not executable"
+fi
+
+if command -v jq >/dev/null; then
+  if sh scripts/tests/yabai-focus-app.test.sh >/dev/null 2>&1; then
+    ok "yabai-focus-app tests pass"
+  else
+    fail "yabai-focus-app tests fail -- run: sh scripts/tests/yabai-focus-app.test.sh"
+  fi
+else
+  warn "jq not on PATH -- cannot run yabai-focus-app tests"
+fi
+
+# --------------------------------------------------------------------------
 section "open-review"
 # The skill's decisions live in TypeScript so a wrong target can be pinned by a
 # test instead of being rediscovered. A silent regression here shows up only as
@@ -269,7 +287,7 @@ if ! $QUICK; then
   fi
   if command -v shellcheck >/dev/null; then
     n=$(shellcheck -S warning .config/sketchybar/plugins/*.sh .config/sketchybar/items/*.sh \
-      scripts/*.sh scripts/tmux-* scripts/worktree-bootstrap \
+      scripts/*.sh scripts/tmux-* scripts/worktree-bootstrap scripts/yabai-focus-app scripts/tests/*.sh \
       .agents/skills/open-review/open-review 2>/dev/null | grep -c '^In ' || true)
     if [[ "${n:-0}" -eq 0 ]]; then
       ok "shellcheck: no warnings"
