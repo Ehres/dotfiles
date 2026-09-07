@@ -1,6 +1,4 @@
 # Attach to tmux if a server is already running; never create sessions here.
-# The long-lived sessions (Work, Perso & Configs) are declared in
-# scripts/tmux-sessions and created by hand — see the tmux-sessions function.
 # Note: attach picks the most recently *active* session, so this can land on
 # dash or on a lingering popup session — switch with prefix+s.
 # Kept above the instant prompt because this block ends in an exec.
@@ -163,17 +161,6 @@ function y() {
 	IFS= read -r -d '' cwd < "$tmp"
 	[ "$cwd" != "$PWD" ] && [ -d "$cwd" ] && builtin cd -- "$cwd"
 	rm -f -- "$tmp"
-}
-
-# Tmux
-# Nothing creates the long-lived sessions behind your back: neither the
-# bootstrap at the top of this file nor `tmux` itself. Run this by hand —
-# typically once after a reboot. Outside tmux it also attaches, so a single
-# command takes you from a bare shell to the declared layout. `~/scripts` is
-# not on PATH, hence the wrapper rather than a plain call to the script.
-function tmux-sessions() {
-  "$HOME/scripts/tmux-sessions" || return
-  [[ -n $TMUX ]] || command tmux attach
 }
 
 # Bun

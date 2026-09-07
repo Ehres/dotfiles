@@ -126,21 +126,6 @@ fi
 
 # --------------------------------------------------------------------------
 section "tmux"
-# tmux-sessions looked for "Perso & configs" while the session is "Perso & Configs",
-# so the exact-match lookup always failed and a duplicate was created on each run.
-if [[ -x scripts/tmux-sessions ]]; then
-  bad=0
-  while read -r want; do
-    [[ -z "$want" ]] && continue
-    if tmux has-session -t "=$want" 2>/dev/null; then
-      ok "session '$want' matches exactly"
-    elif tmux info >/dev/null 2>&1; then
-      fail "tmux-sessions declares '$want' but no session matches exactly -- running the script would create a duplicate"
-      bad=1
-    fi
-  done < <(grep -oE '^ensure "[^"]+"' scripts/tmux-sessions | sed 's/ensure "//;s/"//')
-  [[ "$bad" -eq 0 ]] || true
-fi
 
 # The popup fix depends on default-command staying empty.
 if tmux info >/dev/null 2>&1; then

@@ -112,7 +112,6 @@ git add . && git commit -m "Update" && git push
 ## Scripts
 
 **`./scripts/doctor.sh`** - Health check; run it after changing config (`--quick` to skip the slow checks)  
-**`./scripts/tmux-sessions`** - Ensure the long-lived tmux sessions exist (idempotent)  
 **`./scripts/tmux-popup`** - Back the `display-popup` bindings, passing Escape through  
 **`./scripts/tmux-dash-toggle`** - Toggle in and out of the `gh dash` session  
 **`./scripts/yabai-focus-app`** - focuses the most recently used visible window of a named app, or launches it.<br>
