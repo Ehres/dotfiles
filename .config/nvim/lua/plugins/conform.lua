@@ -82,6 +82,8 @@ local function tailwind_formatters_for(bufnr)
   return context and context.sequence or {}
 end
 
+local tailwind_format_state = {}
+
 local function notification_id(bufnr)
   return "orus-tailwind-format-" .. bufnr
 end
@@ -96,7 +98,7 @@ end
 
 local function notify_format_result(bufnr, err)
   if err then
-    vim.notify("Tailwind formatting failed", vim.log.levels.ERROR, {
+    vim.notify("Tailwind formatting failed: " .. err, vim.log.levels.ERROR, {
       id = notification_id(bufnr),
       title = "Format on save",
       timeout = 5000,
@@ -109,6 +111,142 @@ local function notify_format_result(bufnr, err)
     title = "Format on save",
     timeout = 1500,
   })
+end
+
+local function absolute_filename(filename)
+  return vim.fs.normalize(vim.fn.fnamemodify(filename, ":p"))
+end
+
+local function formatter_error(name, result)
+  local output = vim.trim(result.stderr or "")
+  if output == "" then
+    output = vim.trim(result.stdout or "")
+  end
+
+  if output ~= "" then
+    return name .. ": " .. output
+  end
+
+  if result.signal and result.signal ~= 0 then
+    return ("%s terminated by signal %d"):format(name, result.signal)
+  end
+
+  return ("%s exited with code %s"):format(name, tostring(result.code))
+end
+
+local function start_tailwind_job(bufnr, request)
+  local state = tailwind_format_state[bufnr]
+  if not state then
+    return
+  end
+
+  state.running = true
+  state.running_id = request.id
+  notify_format_started(bufnr)
+
+  local function finish(err)
+    vim.schedule(function()
+      if tailwind_format_state[bufnr] ~= state or state.running_id ~= request.id then
+        return
+      end
+
+      state.running = false
+      state.running_id = nil
+      local pending = state.pending
+      state.pending = nil
+
+      if err then
+        notify_format_result(bufnr, err)
+      elseif not pending and state.latest_id == request.id and vim.api.nvim_buf_is_valid(bufnr) then
+        local current_filename = absolute_filename(vim.api.nvim_buf_get_name(bufnr))
+        if current_filename == request.filename then
+          local ok, reload_err = pcall(vim.api.nvim_buf_call, bufnr, function()
+            vim.cmd("edit!")
+          end)
+          if not ok then
+            notify_format_result(bufnr, tostring(reload_err))
+          else
+            notify_format_result(bufnr)
+          end
+        else
+          notify_format_result(bufnr)
+        end
+      end
+
+      if pending then
+        start_tailwind_job(bufnr, pending)
+      end
+    end)
+  end
+
+  local function run_oxlint()
+    local ok, process_or_err = pcall(vim.system, {
+      "pnpm",
+      "exec",
+      "tooling",
+      "run",
+      "oxlint",
+      "--config",
+      "oxlint.config.ts",
+      "--fix",
+      request.filename,
+    }, { cwd = request.root, text = true }, function(result)
+      if result.code ~= 0 or (result.signal and result.signal ~= 0) then
+        finish(formatter_error("Oxlint", result))
+      else
+        finish()
+      end
+    end)
+
+    if not ok then
+      finish("Oxlint: " .. tostring(process_or_err))
+    end
+  end
+
+  local ok, process_or_err = pcall(vim.system, {
+    "pnpm",
+    "exec",
+    "oxfmt",
+    "--write",
+    request.filename,
+  }, { cwd = request.root, text = true }, function(result)
+    if result.code ~= 0 or (result.signal and result.signal ~= 0) then
+      finish(formatter_error("Oxfmt", result))
+    else
+      run_oxlint()
+    end
+  end)
+
+  if not ok then
+    finish("Oxfmt: " .. tostring(process_or_err))
+  end
+end
+
+local function queue_tailwind_job(bufnr, filename)
+  local context = tailwind_context(filename)
+  if not context then
+    return
+  end
+
+  local state = tailwind_format_state[bufnr]
+  if not state then
+    state = { next_id = 0 }
+    tailwind_format_state[bufnr] = state
+  end
+
+  state.next_id = state.next_id + 1
+  local request = {
+    id = state.next_id,
+    filename = filename,
+    root = context.root,
+  }
+  state.latest_id = request.id
+
+  if state.running then
+    state.pending = request
+  else
+    start_tailwind_job(bufnr, request)
+  end
 end
 
 local function oxlint_formatter()
@@ -137,30 +275,9 @@ local function eslint_formatter()
 end
 
 local function format_tailwind(bufnr)
-  local context = tailwind_context(vim.api.nvim_buf_get_name(bufnr))
-  if not context then
+  if tailwind_context(vim.api.nvim_buf_get_name(bufnr)) then
     return
   end
-
-  notify_format_started(bufnr)
-  local conform = require("conform")
-  for _, formatter_name in ipairs(context.sequence) do
-    local formatter_info = conform.get_formatter_info(formatter_name, bufnr)
-    if not formatter_info.available then
-      notify_format_result(bufnr, formatter_info.available_msg or "Formatter unavailable")
-      return
-    end
-  end
-
-  conform.format({
-    bufnr = bufnr,
-    formatters = context.sequence,
-    timeout_ms = 15000,
-    async = false,
-    quiet = true,
-  }, function(err)
-    notify_format_result(bufnr, err)
-  end)
 end
 
 local function fix_eslint(bufnr)
@@ -201,6 +318,21 @@ LazyVim.on_very_lazy(function()
     fix_eslint(vim.api.nvim_get_current_buf())
   end, {
     desc = "Fix the current Orus buffer with ESLint",
+  })
+
+  local group = vim.api.nvim_create_augroup("OrusTailwindFormat", { clear = true })
+  vim.api.nvim_create_autocmd("BufWipeout", {
+    group = group,
+    callback = function(args)
+      tailwind_format_state[args.buf] = nil
+    end,
+  })
+  vim.api.nvim_create_autocmd("BufWritePost", {
+    group = group,
+    callback = function(args)
+      local filename = absolute_filename(args.file ~= "" and args.file or vim.api.nvim_buf_get_name(args.buf))
+      queue_tailwind_job(args.buf, filename)
+    end,
   })
 end)
 
