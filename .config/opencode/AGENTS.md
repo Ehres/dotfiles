@@ -19,6 +19,8 @@ If a command fails with a quota error, inform the user and suggest `npx ctx7@lat
 
 My GitHub username is `Ehres`.
 
+Use the GitHub CLI (`gh`) for GitHub-related tasks whenever possible.
+
 Until further notice, do not write release notes in PR descriptions. Where a release message field is required, set it to `> N/A`.
 
 When designing changes or reviewing code, check and apply the project's documented coding rules, guidelines, and standards.
