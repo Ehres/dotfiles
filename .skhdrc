@@ -96,6 +96,7 @@ app < n : "$HOME/scripts/yabai-focus-app" Notion; skhd -k escape
 app < d : "$HOME/scripts/yabai-focus-app" Discord; skhd -k escape
 app < a : "$HOME/scripts/yabai-focus-app" Arc; skhd -k escape
 app < l : "$HOME/scripts/yabai-focus-app" Linear; skhd -k escape
+app < f : "$HOME/scripts/yabai-focus-app" Figma; skhd -k escape
 app < escape ; default
 
 # Layout: one action then exit
