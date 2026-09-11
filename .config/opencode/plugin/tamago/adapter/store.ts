@@ -10,14 +10,23 @@ export const LOCK_DIR = "career.lock";
 export const LOCK_OWNER_FILE = "owner";
 
 export type Loaded = { career: Career; corrupt: boolean };
+
+/**
+ * written: the delta is on disk, `career` is the merged result.
+ * busy: another instance holds the lock; keep the delta and retry later.
+ * corrupt: the file was unreadable JSON; it was set aside and nothing was
+ *   written. The next flush starts from a fresh egg.
+ * Any other failure throws.
+ */
+export type FlushResult = { outcome: "written"; career: Career } | { outcome: "busy" } | { outcome: "corrupt"; career: Career };
+
 export type Store = {
   load(): Loaded;
-  /** Returns the merged career, or undefined when another instance holds the lock. */
-  flush(delta: Delta): Career | undefined;
+  flush(delta: Delta): FlushResult;
 };
 
-function isNotFound(err: unknown): boolean {
-  return typeof err === "object" && err !== null && (err as { code?: string }).code === "ENOENT";
+function code(err: unknown): string | undefined {
+  return typeof err === "object" && err !== null ? (err as { code?: string }).code : undefined;
 }
 
 export function createStore(dir: string, now: () => number = Date.now): Store {
@@ -31,7 +40,7 @@ export function createStore(dir: string, now: () => number = Date.now): Store {
     try {
       return hydrate(JSON.parse(readFileSync(file, "utf8")), now());
     } catch (err) {
-      if (isNotFound(err)) return { career: freshCareer(now()), corrupt: false };
+      if (code(err) === "ENOENT") return { career: freshCareer(now()), corrupt: false };
       if (err instanceof SyntaxError) return { career: freshCareer(now()), corrupt: true };
       throw err;
     }
@@ -46,29 +55,44 @@ export function createStore(dir: string, now: () => number = Date.now): Store {
     }
   }
 
+  /** Creates the lock directory. True when we got it, false when it already exists; other failures throw. */
+  function tryMkdir(): boolean {
+    try {
+      mkdirSync(lock);
+      return true;
+    } catch (err) {
+      if (code(err) === "EEXIST") return false;
+      throw err;
+    }
+  }
+
   function claim(): void {
     token = `${process.pid}:${randomUUID()}`;
-    writeFileSync(ownerFile, token);
+    try {
+      writeFileSync(ownerFile, token);
+    } catch (err) {
+      rmSync(lock, { recursive: true, force: true });
+      throw err;
+    }
+  }
+
+  function heldSince(): number | undefined {
+    try {
+      return statSync(lock).mtimeMs;
+    } catch {
+      return undefined;
+    }
   }
 
   function acquire(): boolean {
     mkdirSync(dir, { recursive: true });
     for (let attempt = 0; attempt < 2; attempt++) {
-      try {
-        mkdirSync(lock);
+      if (tryMkdir()) {
         claim();
         return true;
-      } catch {
-        let heldSinceMs: number | undefined;
-        try {
-          heldSinceMs = statSync(lock).mtimeMs;
-        } catch {
-          heldSinceMs = undefined;
-        }
-        const decision = decideLock({ held: true, heldSinceMs, now: now() });
-        if (decision !== "steal") return false;
-        rmSync(lock, { recursive: true, force: true });
       }
+      if (decideLock({ held: true, heldSinceMs: heldSince(), now: now() }) !== "steal") return false;
+      rmSync(lock, { recursive: true, force: true });
     }
     return false;
   }
@@ -81,17 +105,22 @@ export function createStore(dir: string, now: () => number = Date.now): Store {
   return {
     load: read,
     flush(delta) {
-      if (!acquire()) return undefined;
+      if (!acquire()) return { outcome: "busy" };
       try {
-        const merged = merge(read().career, delta);
+        const loaded = read();
+        if (loaded.corrupt) {
+          renameSync(file, `${file}.corrupt-${now()}`);
+          return { outcome: "corrupt", career: loaded.career };
+        }
+        const merged = merge(loaded.career, delta);
         const tmp = `${file}.${process.pid}.tmp`;
         writeFileSync(tmp, JSON.stringify(merged, null, 2));
         if (!owns()) {
           rmSync(tmp, { force: true });
-          return undefined;
+          return { outcome: "busy" };
         }
         renameSync(tmp, file);
-        return merged;
+        return { outcome: "written", career: merged };
       } finally {
         release();
       }

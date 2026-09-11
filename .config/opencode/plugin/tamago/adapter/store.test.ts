@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, utimesSync, existsSync, readdirSync, statSync } from "node:fs";
+import { chmodSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync, utimesSync, existsSync, readdirSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { LOCK_STALE_MS } from "../core/lock.ts";
@@ -23,13 +23,13 @@ test("flush merges deltas into the file and returns the merged career", () => {
   const dir = scratch();
   const store = createStore(dir, () => 7);
   const first = store.flush(d({ prompts: 2 }));
-  assert.ok(first);
-  assert.equal(first.prompts, 2);
+  assert.equal(first.outcome, "written");
+  assert.equal(first.career?.prompts, 2);
   const second = store.flush(d({ prompts: 1, filesEdited: 3 }));
-  assert.ok(second);
-  assert.equal(second.prompts, 3);
-  assert.equal(second.filesEdited, 3);
-  assert.equal(second.hatchedAt, 7);
+  assert.equal(second.outcome, "written");
+  assert.equal(second.career?.prompts, 3);
+  assert.equal(second.career?.filesEdited, 3);
+  assert.equal(second.career?.hatchedAt, 7);
   const onDisk = JSON.parse(readFileSync(join(dir, CAREER_FILE), "utf8"));
   assert.equal(onDisk.prompts, 3);
   assert.ok(!existsSync(join(dir, LOCK_DIR)), "lock released");
@@ -74,7 +74,7 @@ test("flush waits while a fresh lock is held", () => {
   mkdirSync(lock);
   writeFileSync(join(lock, LOCK_OWNER_FILE), "999999:foreign");
   const store = createStore(dir);
-  assert.equal(store.flush(d({ prompts: 1 })), undefined);
+  assert.deepEqual(store.flush(d({ prompts: 1 })), { outcome: "busy" });
   assert.ok(existsSync(lock), "foreign lock left alone");
   assert.equal(readFileSync(join(lock, LOCK_OWNER_FILE), "utf8"), "999999:foreign", "foreign owner token untouched");
 });
@@ -86,8 +86,8 @@ test("flush steals a stale lock", () => {
   const old = (Date.now() - LOCK_STALE_MS - 1000) / 1000;
   utimesSync(lock, old, old);
   const merged = createStore(dir).flush(d({ prompts: 1 }));
-  assert.ok(merged);
-  assert.equal(merged.prompts, 1);
+  assert.equal(merged.outcome, "written");
+  assert.equal(merged.career?.prompts, 1);
   assert.ok(!existsSync(lock), "lock released after steal");
 });
 
@@ -99,8 +99,8 @@ test("a stale lock left by another owner is stolen and released", () => {
   const old = (Date.now() - LOCK_STALE_MS - 1000) / 1000;
   utimesSync(lock, old, old);
   const merged = createStore(dir).flush(d({ prompts: 1 }));
-  assert.ok(merged);
-  assert.equal(merged.prompts, 1);
+  assert.equal(merged.outcome, "written");
+  assert.equal(merged.career?.prompts, 1);
   const onDisk = JSON.parse(readFileSync(join(dir, CAREER_FILE), "utf8"));
   assert.equal(onDisk.prompts, 1);
   assert.ok(!existsSync(lock), "lock released after steal");
@@ -121,7 +121,7 @@ test("a flush that loses the lock mid-way drops its write and does not release t
     return Date.now();
   };
   const result = createStore(dir, now).flush(d({ prompts: 1 }));
-  assert.equal(result, undefined);
+  assert.deepEqual(result, { outcome: "busy" });
   assert.ok(!existsSync(join(dir, CAREER_FILE)), "no career file written");
   assert.deepEqual(
     readdirSync(dir).filter((name) => name.endsWith(".tmp")),
@@ -136,4 +136,32 @@ test("flush leaves no temporary files behind", () => {
   const dir = scratch();
   createStore(dir).flush(d({ errors: 1 }));
   assert.deepEqual(readdirSync(dir).sort(), [CAREER_FILE]);
+});
+
+test("a data directory that cannot be written makes flush throw instead of pretending the lock is busy", () => {
+  const dir = scratch();
+  chmodSync(dir, 0o555);
+  try {
+    const store = createStore(dir);
+    assert.throws(() => store.flush(d({ prompts: 1 })), /EACCES|EPERM/);
+  } finally {
+    chmodSync(dir, 0o755);
+  }
+});
+
+test("a corrupt file is set aside, not overwritten, and the next flush starts fresh", () => {
+  const dir = scratch();
+  writeFileSync(join(dir, CAREER_FILE), "{not json");
+  const store = createStore(dir, () => 5);
+  const first = store.flush(d({ prompts: 1 }));
+  assert.equal(first.outcome, "corrupt");
+  const kept = readdirSync(dir).filter((name) => name.startsWith(`${CAREER_FILE}.corrupt-`));
+  assert.equal(kept.length, 1, "corrupt file kept aside once");
+  assert.equal(readFileSync(join(dir, kept[0] ?? ""), "utf8"), "{not json");
+  assert.ok(!existsSync(join(dir, CAREER_FILE)), "nothing written over the corrupt file");
+  assert.ok(!existsSync(join(dir, LOCK_DIR)), "lock released");
+  const second = store.flush(d({ prompts: 1 }));
+  assert.equal(second.outcome, "written");
+  assert.equal(second.career?.prompts, 1);
+  assert.equal(second.career?.hatchedAt, 5);
 });

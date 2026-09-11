@@ -85,9 +85,12 @@ merges them into `career.json` every 2 s under the lock, so progress made in
 one window shows up in the others within a couple of seconds and nothing is
 lost. A lock older than 10 s is treated as orphaned and taken over.
 
-To start over, quit OpenCode and delete `career.json`. If the file becomes
-unreadable, the plugin starts a fresh egg and says so in a single warning
-toast.
+To start over, quit OpenCode and delete `career.json`. If the file is not
+valid JSON, the plugin sets it aside as `career.json.corrupt-<timestamp>`,
+says so in a single warning toast, and starts a fresh egg. If the disk itself
+fails, the plugin keeps your gains in memory, retries with a growing pause up
+to a minute, logs the error once per distinct message, and after three
+consecutive failures shows a single error toast pointing at `error.log`.
 
 ## Development
 

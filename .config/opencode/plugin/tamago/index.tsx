@@ -4,12 +4,13 @@ import type { Event } from "@opencode-ai/sdk/v2";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { createSignal } from "solid-js";
-import { logError } from "./adapter/log.ts";
+import { createErrorLog } from "./adapter/log.ts";
 import { createStore, type Loaded } from "./adapter/store.ts";
 import { SUBSCRIBED, createTranslator } from "./adapter/translate.ts";
 import { count } from "./core/count.ts";
 import type { Addressed, TamagoEvent } from "./core/events.ts";
 import { merge } from "./core/merge.ts";
+import { WARN_AFTER, backoff } from "./core/retry.ts";
 import { stage, stageIndex, type StageId } from "./core/stage.ts";
 import { transition } from "./core/transition.ts";
 import {
@@ -29,6 +30,8 @@ const id = "opencode-tamago";
 const DATA_DIR = join(homedir(), ".local", "share", "opencode-tamago");
 const TICK_MS = 500;
 const FLUSH_MS = 2_000;
+/** Longest pause between two flush attempts while the disk keeps failing. */
+const FLUSH_MAX_MS = 60_000;
 /** Below the built-in footer's order (100) so we win the single_winner slot. */
 const FOOTER_ORDER = 50;
 /** home_bottom is additive: below 100 renders above the built-in tips, keeping the OpenCode logo intact. */
@@ -37,14 +40,15 @@ const HOME_BOTTOM_ORDER = 50;
 const tui: TuiPlugin = async (api, options) => {
   const name = typeof options?.name === "string" && options.name.trim() ? options.name.trim() : "Tamago";
   const store = createStore(DATA_DIR);
+  const logError = createErrorLog(DATA_DIR);
   const translate = createTranslator({ isChild: (id) => typeof api.state.session.get(id)?.parentID === "string" });
 
   let loaded: Loaded;
   try {
     loaded = store.load();
   } catch (err) {
-    logError(DATA_DIR, err);
-    loaded = { career: freshCareer(Date.now()), corrupt: true };
+    logError(err);
+    loaded = { career: freshCareer(Date.now()), corrupt: false };
   }
 
   try {
@@ -55,9 +59,17 @@ const tui: TuiPlugin = async (api, options) => {
     let pending: Delta = EMPTY_DELTA;
     let known: StageId = stage(loaded.career);
 
-    if (loaded.corrupt) {
-      api.ui.toast({ variant: "warning", title: name, message: "Saved progress was unreadable. Starting from a fresh egg." });
-    }
+    let warnedCorrupt = false;
+    const warnCorrupt = () => {
+      if (warnedCorrupt) return;
+      warnedCorrupt = true;
+      api.ui.toast({
+        variant: "warning",
+        title: name,
+        message: "Saved progress was unreadable. It is kept aside as career.json.corrupt-*; starting from a fresh egg.",
+      });
+    };
+    if (loaded.corrupt) warnCorrupt();
 
     const guard =
       <A extends unknown[]>(fn: (...args: A) => void) =>
@@ -65,7 +77,7 @@ const tui: TuiPlugin = async (api, options) => {
         try {
           fn(...args);
         } catch (err) {
-          logError(DATA_DIR, err);
+          logError(err);
         }
       };
 
@@ -119,25 +131,52 @@ const tui: TuiPlugin = async (api, options) => {
       TICK_MS,
     );
 
-    const flush = guard(() => {
+    /** Returns true when this window's delta reached the disk. Throws on disk errors. */
+    const persist = (): boolean => {
       if (isEmpty(pending)) {
         // Nothing of ours to write, but other instances may have progressed.
         const fresh = store.load();
-        if (!fresh.corrupt) show(fresh.career);
-        return;
+        if (fresh.corrupt) warnCorrupt();
+        else show(fresh.career);
+        return true;
       }
-      const merged = store.flush(pending);
-      if (!merged) return; // lock held elsewhere: keep the delta, retry next time
+      const result = store.flush(pending);
+      if (result.outcome === "busy") return false; // lock held elsewhere: keep the delta, retry next time
+      if (result.outcome === "corrupt") {
+        warnCorrupt();
+        return false; // the file was set aside; the next flush writes over a fresh egg
+      }
       pending = EMPTY_DELTA;
-      show(merged);
-    });
-    const flusher = setInterval(flush, FLUSH_MS);
+      show(result.career);
+      return true;
+    };
+
+    /** Consecutive disk failures. Drives the backoff and the single "cannot save" toast. */
+    let failures = 0;
+    let flusher: ReturnType<typeof setTimeout> | undefined;
+    const schedule = () => {
+      flusher = setTimeout(flush, backoff(failures, FLUSH_MS, FLUSH_MAX_MS));
+    };
+    const flush = () => {
+      try {
+        persist();
+        failures = 0;
+      } catch (err) {
+        logError(err);
+        failures += 1;
+        if (failures === WARN_AFTER) {
+          api.ui.toast({ variant: "error", title: name, message: `${name} cannot save its progress. See ${DATA_DIR}/error.log.` });
+        }
+      }
+      schedule();
+    };
+    schedule();
 
     api.lifecycle.onDispose(
       guard(() => {
         clearInterval(tick);
-        clearInterval(flusher);
-        if (!isEmpty(pending) && store.flush(pending)) pending = EMPTY_DELTA;
+        if (flusher !== undefined) clearTimeout(flusher);
+        if (!isEmpty(pending) && store.flush(pending).outcome === "written") pending = EMPTY_DELTA;
       }),
     );
 
@@ -180,7 +219,7 @@ const tui: TuiPlugin = async (api, options) => {
       },
     });
   } catch (err) {
-    logError(DATA_DIR, err);
+    logError(err);
     return;
   }
 };
