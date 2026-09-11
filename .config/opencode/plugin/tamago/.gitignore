@@ -1,0 +1,5 @@
+# The parent .config/opencode/.gitignore ignores package.json and .gitignore at
+# any depth. This plugin's manifest must be versioned, so re-include them here.
+node_modules
+!package.json
+!.gitignore
