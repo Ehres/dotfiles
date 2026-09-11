@@ -65,8 +65,8 @@ const tui: TuiPlugin = async (api, options) => {
     const current = stage(next);
     if (stageIndex(current) > stageIndex(known)) {
       api.ui.toast({ variant: "success", title: name, message: `${name} evolved: ${current}!` });
+      known = current;
     }
-    known = current;
   };
 
   const show = (next: Career) => {
@@ -109,11 +109,13 @@ const tui: TuiPlugin = async (api, options) => {
   });
   const flusher = setInterval(flush, FLUSH_MS);
 
-  api.lifecycle.onDispose(() => {
-    clearInterval(tick);
-    clearInterval(flusher);
-    if (!isEmpty(pending) && store.flush(pending)) pending = EMPTY_DELTA;
-  });
+  api.lifecycle.onDispose(
+    guard(() => {
+      clearInterval(tick);
+      clearInterval(flusher);
+      if (!isEmpty(pending) && store.flush(pending)) pending = EMPTY_DELTA;
+    }),
+  );
 
   const frame = () => {
     const activity = session().activity;
