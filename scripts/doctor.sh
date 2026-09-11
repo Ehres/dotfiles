@@ -222,6 +222,32 @@ if [[ -d .agents/skills/open-review/src ]]; then
 fi
 
 # --------------------------------------------------------------------------
+section "opencode-tamago"
+# The TUI plugin is raw .tsx that Bun compiles when OpenCode starts; nothing
+# checks its types before then, so tsc is the only gate. Same shape as the
+# open-review check: warn, not fail, when node_modules is missing so a fresh
+# clone still passes.
+if [[ -d .config/opencode/plugin/tamago/core ]]; then
+  if ! command -v node >/dev/null; then
+    warn "node not on PATH -- cannot run the opencode-tamago tests"
+  elif (cd .config/opencode/plugin/tamago && node --test "core/*.test.ts" "adapter/*.test.ts" >/dev/null 2>&1); then
+    ok "opencode-tamago tests pass"
+  else
+    fail "opencode-tamago tests fail -- run: (cd .config/opencode/plugin/tamago && node --test \"core/*.test.ts\" \"adapter/*.test.ts\")"
+  fi
+
+  if [[ -x .config/opencode/plugin/tamago/node_modules/.bin/tsc ]]; then
+    if (cd .config/opencode/plugin/tamago && ./node_modules/.bin/tsc --noEmit >/dev/null 2>&1); then
+      ok "opencode-tamago typechecks"
+    else
+      fail "opencode-tamago has type errors -- run: (cd .config/opencode/plugin/tamago && ./node_modules/.bin/tsc --noEmit)"
+    fi
+  else
+    warn "opencode-tamago typecheck skipped -- run 'pnpm install --ignore-workspace' in .config/opencode/plugin/tamago"
+  fi
+fi
+
+# --------------------------------------------------------------------------
 section "Documentation matches reality"
 # README referenced two scripts that never existed, and four READMEs likewise.
 missing=0
