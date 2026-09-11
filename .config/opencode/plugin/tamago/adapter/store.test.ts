@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { LOCK_STALE_MS } from "../core/lock.ts";
 import { EMPTY_DELTA, freshCareer, type Delta } from "../core/state.ts";
-import { CAREER_FILE, LOCK_DIR, createStore } from "./store.ts";
+import { CAREER_FILE, LOCK_DIR, LOCK_OWNER_FILE, createStore } from "./store.ts";
 
 const scratch = () => mkdtempSync(join(tmpdir(), "tamago-store-"));
 const d = (patch: Partial<Delta>): Delta => ({ ...EMPTY_DELTA, tools: { ...EMPTY_DELTA.tools }, ...patch });
@@ -54,10 +54,13 @@ test("a corrupt file loads as a fresh egg flagged corrupt", () => {
 
 test("flush waits while a fresh lock is held", () => {
   const dir = scratch();
-  mkdirSync(join(dir, LOCK_DIR));
+  const lock = join(dir, LOCK_DIR);
+  mkdirSync(lock);
+  writeFileSync(join(lock, LOCK_OWNER_FILE), "999999:foreign");
   const store = createStore(dir);
   assert.equal(store.flush(d({ prompts: 1 })), undefined);
-  assert.ok(existsSync(join(dir, LOCK_DIR)), "foreign lock left alone");
+  assert.ok(existsSync(lock), "foreign lock left alone");
+  assert.equal(readFileSync(join(lock, LOCK_OWNER_FILE), "utf8"), "999999:foreign", "foreign owner token untouched");
 });
 
 test("flush steals a stale lock", () => {
@@ -70,6 +73,47 @@ test("flush steals a stale lock", () => {
   assert.ok(merged);
   assert.equal(merged.prompts, 1);
   assert.ok(!existsSync(lock), "lock released after steal");
+});
+
+test("a stale lock left by another owner is stolen and released", () => {
+  const dir = scratch();
+  const lock = join(dir, LOCK_DIR);
+  mkdirSync(lock);
+  writeFileSync(join(lock, LOCK_OWNER_FILE), "999999:foreign");
+  const old = (Date.now() - LOCK_STALE_MS - 1000) / 1000;
+  utimesSync(lock, old, old);
+  const merged = createStore(dir).flush(d({ prompts: 1 }));
+  assert.ok(merged);
+  assert.equal(merged.prompts, 1);
+  const onDisk = JSON.parse(readFileSync(join(dir, CAREER_FILE), "utf8"));
+  assert.equal(onDisk.prompts, 1);
+  assert.ok(!existsSync(lock), "lock released after steal");
+});
+
+test("a flush that loses the lock mid-way drops its write and does not release the thief's lock", () => {
+  const dir = scratch();
+  const lock = join(dir, LOCK_DIR);
+  // now() is called exactly once between acquiring the lock and the rename: inside
+  // read(), via hydrate(..., now()) or freshCareer(now()). We use that single call
+  // as the hook to simulate another instance stealing the lock mid-flush: it
+  // overwrites the owner file with a foreign token, so the owns() check right
+  // before rename fails and the write is abandoned.
+  let calls = 0;
+  const now = () => {
+    calls += 1;
+    if (calls === 1) writeFileSync(join(lock, LOCK_OWNER_FILE), "1:thief");
+    return Date.now();
+  };
+  const result = createStore(dir, now).flush(d({ prompts: 1 }));
+  assert.equal(result, undefined);
+  assert.ok(!existsSync(join(dir, CAREER_FILE)), "no career file written");
+  assert.deepEqual(
+    readdirSync(dir).filter((name) => name.endsWith(".tmp")),
+    [],
+    "no leftover tmp file",
+  );
+  assert.ok(existsSync(lock), "thief's lock left alone");
+  assert.equal(readFileSync(join(lock, LOCK_OWNER_FILE), "utf8"), "1:thief", "thief's owner token untouched");
 });
 
 test("flush leaves no temporary files behind", () => {
