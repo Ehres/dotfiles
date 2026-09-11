@@ -226,6 +226,15 @@
       "skillFolderHash": "0bdb821a21e793a4f6f82a7078c052154447e5cc",
       "installedAt": "2026-09-03T15:48:49.797Z",
       "updatedAt": "2026-09-03T15:48:49.797Z"
+    },
+    "figma": {
+      "source": "openai/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/openai/skills.git",
+      "skillPath": "skills/.curated/figma/SKILL.md",
+      "skillFolderHash": "b61e723c00a0757daf549ac6d8835ef1c3a7ed10",
+      "installedAt": "2026-09-04T13:56:45.353Z",
+      "updatedAt": "2026-09-04T13:56:45.353Z"
     }
   },
   "dismissed": {
