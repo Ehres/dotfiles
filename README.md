@@ -129,7 +129,7 @@ git add . && git commit -m "Update" && git push
 | `ctrl+shift+s` | Arrange | `hjkl` swap, `shift+hjkl` warp |
 | `ctrl+shift+m` | Move | `1…0` to spaces, `hjkl` to displays; `Shift` also follows |
 | `ctrl+shift+a` | App | app mnemonic focuses its MRU window or launches it |
-| `ctrl+shift+o` | Layout | `f` fullscreen, `t` float, `1`/`2` ratios, `b` balance |
+| `ctrl+shift+o` | Layout | `f` fullscreen, `t` float, `h`/`l` ratios, `b` balance |
 
 Temporary modes exit after one action. Resize is the only persistent mode and is visibly marked `RESIZE` in SketchyBar.
 

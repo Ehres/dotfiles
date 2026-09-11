@@ -103,7 +103,7 @@ app < escape ; default
 default < ctrl + shift - o ; layout
 layout < f : yabai -m window --toggle zoom-fullscreen; skhd -k escape
 layout < t : yabai -m window --toggle float; yabai -m window --grid 20:20:3:3:14:14; skhd -k escape
-layout < 1 : yabai -m space --balance; yabai -m window --ratio abs:0.33; skhd -k escape
-layout < 2 : yabai -m space --balance; yabai -m window --ratio abs:0.66; skhd -k escape
+layout < h : yabai -m space --balance; yabai -m window --ratio abs:0.33; skhd -k escape
+layout < l : yabai -m space --balance; yabai -m window --ratio abs:0.66; skhd -k escape
 layout < b : yabai -m space --balance; skhd -k escape
 layout < escape ; default
