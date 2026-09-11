@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, utimesSync, existsSync, readdirSync } from "node:fs";
+import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, utimesSync, existsSync, readdirSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { LOCK_STALE_MS } from "../core/lock.ts";
@@ -50,6 +50,22 @@ test("a corrupt file loads as a fresh egg flagged corrupt", () => {
   const loaded = createStore(dir, () => 3).load();
   assert.equal(loaded.corrupt, true);
   assert.deepEqual(loaded.career, freshCareer(3));
+});
+
+test("a non-corruption read error (EISDIR) is not treated as corruption and is not overwritten", () => {
+  const dir = scratch();
+  const file = join(dir, CAREER_FILE);
+  mkdirSync(file); // career.json is a directory: readFileSync throws EISDIR, not SyntaxError
+  const store = createStore(dir);
+  assert.throws(() => store.load());
+  assert.throws(() => store.flush(d({ prompts: 1 })));
+  assert.ok(existsSync(file) && statSync(file).isDirectory(), "career path is still a directory");
+  assert.deepEqual(
+    readdirSync(dir).filter((name) => name.endsWith(".tmp")),
+    [],
+    "no tmp file written",
+  );
+  assert.ok(!existsSync(join(dir, LOCK_DIR)), "lock released");
 });
 
 test("flush waits while a fresh lock is held", () => {

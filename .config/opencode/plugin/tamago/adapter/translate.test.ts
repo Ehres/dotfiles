@@ -62,6 +62,14 @@ test("simple events map one to one", () => {
   assert.deepEqual(t(ev({ type: "session.error", properties: {} })), [{ type: "session_error" }]);
 });
 
+test("a user abort is not an error", () => {
+  const t = createTranslator();
+  assert.deepEqual(t(ev({ type: "session.error", properties: { error: { name: "MessageAbortedError" } } })), []);
+  assert.deepEqual(t(ev({ type: "session.error", properties: { error: { name: "UnknownError" } } })), [
+    { type: "session_error" },
+  ]);
+});
+
 test("session.created counts only top-level sessions", () => {
   const t = createTranslator();
   assert.deepEqual(t(ev({ type: "session.created", properties: { info: { id: "a" } } })), [{ type: "session_started" }]);

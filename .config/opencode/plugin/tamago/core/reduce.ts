@@ -49,7 +49,10 @@ export function reduce(session: Session, event: TamagoEvent, now: number): Reduc
     case "session_idle":
       return { session: at({ ...session, runningTools: 0 }, "idle", now), delta: EMPTY_DELTA };
     case "session_started":
-      return { session, delta: counted({ sessions: 1 }) };
+      return {
+        session: session.activity === "sleeping" ? at(session, "idle", now) : session,
+        delta: counted({ sessions: 1 }),
+      };
     case "tick": {
       if (session.activity === "hurt" && now - session.since >= HURT_MS) {
         return { session: at(session, session.runningTools > 0 ? "working" : "idle", now), delta: EMPTY_DELTA };

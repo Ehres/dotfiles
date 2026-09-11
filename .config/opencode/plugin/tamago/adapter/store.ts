@@ -32,7 +32,8 @@ export function createStore(dir: string, now: () => number = Date.now): Store {
       return hydrate(JSON.parse(readFileSync(file, "utf8")), now());
     } catch (err) {
       if (isNotFound(err)) return { career: freshCareer(now()), corrupt: false };
-      return { career: freshCareer(now()), corrupt: true };
+      if (err instanceof SyntaxError) return { career: freshCareer(now()), corrupt: true };
+      throw err;
     }
   }
 

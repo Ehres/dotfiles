@@ -115,6 +115,17 @@ test("session_started counts a session and leaves activity alone", () => {
   assert.equal(delta.sessions, 1);
 });
 
+test("session_started wakes a sleeping creature", () => {
+  const asleep = replay([
+    [{ type: "session_idle" }, 0],
+    [{ type: "tick" }, SLEEP_MS],
+  ]);
+  assert.equal(asleep.session.activity, "sleeping");
+  const woken = replay([[{ type: "session_started" }, SLEEP_MS + 1]], asleep.session);
+  assert.equal(woken.session.activity, "idle");
+  assert.equal(woken.delta.sessions, 1);
+});
+
 test("session_idle clears running tools", () => {
   const { session } = replay([
     [{ type: "tool_started" }, 0],

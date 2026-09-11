@@ -75,8 +75,11 @@ export function createTranslator(): (event: Event) => TamagoEvent[] {
         return [{ type: "permission_replied" }];
       case "session.idle":
         return [{ type: "session_idle" }];
-      case "session.error":
+      case "session.error": {
+        const error = isRecord(props) ? props.error : undefined;
+        if (isRecord(error) && error.name === "MessageAbortedError") return [];
         return [{ type: "session_error" }];
+      }
       case "session.created": {
         const info = isRecord(props) ? props.info : undefined;
         if (isRecord(info) && typeof info.parentID === "string") return [];
