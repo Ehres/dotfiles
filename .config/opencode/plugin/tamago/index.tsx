@@ -32,6 +32,8 @@ const FLUSH_MS = 2_000;
 const SLOW_FRAME_TICKS = 4;
 /** Below the built-in footer's order (100) so we win the single_winner slot. */
 const FOOTER_ORDER = 50;
+/** home_bottom is additive: below 100 renders above the built-in tips, keeping the OpenCode logo intact. */
+const HOME_BOTTOM_ORDER = 50;
 
 const SUBSCRIBED = [
   "message.part.updated",
@@ -170,8 +172,9 @@ const tui: TuiPlugin = async (api, options) => {
     });
 
     api.slots.register({
+      order: HOME_BOTTOM_ORDER,
       slots: {
-        home_logo(ctx) {
+        home_bottom(ctx) {
           return <HomeView name={name} theme={() => ctx.theme.current} career={career} frame={frame} />;
         },
       },
