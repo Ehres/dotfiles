@@ -78,9 +78,17 @@ const FACES: Record<Activity, readonly Face[]> = {
   sleeping: [{ eyes: "- -", mark: "z" }],
 };
 
+/** One entry per stage × activity pair; frames never change, so callers can rely on identity. */
+const CACHE = new Map<string, readonly Frame[]>();
+
 export function frames(stage: StageId, activity: Activity): readonly Frame[] {
+  const key = `${stage}/${activity}`;
+  const hit = CACHE.get(key);
+  if (hit) return hit;
   const body = BODIES[stage];
-  return FACES[activity].map((face) => fit(body(face.eyes, face.mark)));
+  const built = FACES[activity].map((face) => fit(body(face.eyes, face.mark)));
+  CACHE.set(key, built);
+  return built;
 }
 
 export function frameAt(stage: StageId, activity: Activity, index: number): Frame {

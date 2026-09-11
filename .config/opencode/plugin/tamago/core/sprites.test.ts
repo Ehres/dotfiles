@@ -45,3 +45,10 @@ test("frames only contain printable ASCII", () => {
     }
   }
 });
+
+test("frames and frameAt return the same objects for the same inputs, so memos stay stable", () => {
+  assert.equal(frames("young", "idle"), frames("young", "idle"));
+  assert.equal(frameAt("young", "idle", 0), frameAt("young", "idle", 0));
+  assert.equal(frameAt("young", "idle", 0), frameAt("young", "idle", 2), "index wraps onto the same frame object");
+  assert.notEqual(frameAt("young", "idle", 0), frameAt("young", "idle", 1));
+});

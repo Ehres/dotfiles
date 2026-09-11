@@ -60,6 +60,18 @@ export function addDelta(a: Delta, b: Delta): Delta {
   };
 }
 
+/** Structural equality, so a re-read of unchanged disk state does not notify anyone. */
+export function sameCareer(a: Career, b: Career): boolean {
+  return (
+    a.hatchedAt === b.hatchedAt &&
+    a.sessions === b.sessions &&
+    a.prompts === b.prompts &&
+    a.filesEdited === b.filesEdited &&
+    a.errors === b.errors &&
+    TOOL_KINDS.every((kind) => a.tools[kind] === b.tools[kind])
+  );
+}
+
 function num(value: unknown, fallback: number): number {
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;
 }

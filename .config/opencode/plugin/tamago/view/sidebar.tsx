@@ -2,11 +2,13 @@
 import type { TuiThemeCurrent } from "@opencode-ai/plugin/tui";
 import type { RGBA } from "@opentui/core";
 import type { JSX } from "@opentui/solid";
+import { createMemo } from "solid-js";
 import { frameIndex } from "../core/cadence.ts";
 import { fmt } from "../core/format.ts";
 import { frameAt } from "../core/sprites.ts";
 import { stage, xp } from "../core/stage.ts";
 import type { Activity, Career, Session } from "../core/state.ts";
+import { Portrait } from "./portrait.tsx";
 
 export const MOOD: Record<Activity, string> = {
   idle: "chilling",
@@ -40,30 +42,23 @@ export function SidebarView(props: {
   ticks: () => number;
   footer: () => FooterInfo;
 }): JSX.Element {
-  const lines = () => {
-    const activity = props.session().activity;
-    return frameAt(stage(props.career()), activity, frameIndex(activity, props.ticks()));
-  };
-  const color = () => spriteColor(props.theme(), props.session().activity);
+  const activity = createMemo(() => props.session().activity);
+  const current = createMemo(() => stage(props.career()));
+  const total = createMemo(() => xp(props.career()));
+  const lines = () => frameAt(current(), activity(), frameIndex(activity(), props.ticks()));
+  const color = () => spriteColor(props.theme(), activity());
 
   return (
     <box flexDirection="column" gap={1}>
-      <box flexDirection="row" gap={2}>
-        <box flexDirection="column" flexShrink={0}>
-          {lines().map((line) => (
-            <text fg={color()}>{line}</text>
-          ))}
-        </box>
-        <box flexDirection="column" justifyContent="center">
-          <text fg={props.theme().text}>
-            <b>{props.name}</b>
-          </text>
-          <text fg={props.theme().textMuted}>
-            {stage(props.career())} · {fmt(xp(props.career()))} xp
-          </text>
-          <text fg={props.theme().textMuted}>{MOOD[props.session().activity]}</text>
-        </box>
-      </box>
+      <Portrait lines={lines} color={color}>
+        <text fg={props.theme().text}>
+          <b>{props.name}</b>
+        </text>
+        <text fg={props.theme().textMuted}>
+          {current()} · {fmt(total())} xp
+        </text>
+        <text fg={props.theme().textMuted}>{MOOD[activity()]}</text>
+      </Portrait>
       <text>
         <span style={{ fg: props.theme().textMuted }}>{props.footer().parent}/</span>
         <span style={{ fg: props.theme().text }}>{props.footer().name}</span>

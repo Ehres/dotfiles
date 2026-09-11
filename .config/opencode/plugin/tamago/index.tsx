@@ -20,6 +20,7 @@ import {
   freshCareer,
   initialSession,
   isEmpty,
+  sameCareer,
   type Career,
   type Delta,
   type Session,
@@ -53,7 +54,7 @@ const tui: TuiPlugin = async (api, options) => {
   }
 
   try {
-    const [career, setCareer] = createSignal<Career>(loaded.career);
+    const [career, setCareer] = createSignal<Career>(loaded.career, { equals: sameCareer });
     /** One mood per root OpenCode session, keyed by session id. Never persisted. */
     const [sessions, setSessions] = createSignal<Record<string, Session>>({});
     const [ticks, setTicks] = createSignal(0);
@@ -98,9 +99,15 @@ const tui: TuiPlugin = async (api, options) => {
     const move = (ids: readonly string[], event: TamagoEvent, now: number) => {
       if (ids.length === 0) return;
       setSessions((all) => {
+        let changed = false;
         const next = { ...all };
-        for (const id of ids) next[id] = transition(all[id] ?? initialSession(now), event, now);
-        return next;
+        for (const id of ids) {
+          const before = all[id] ?? initialSession(now);
+          const after = transition(before, event, now);
+          next[id] = after;
+          if (after !== before) changed = true;
+        }
+        return changed ? next : all; // same object: nobody re-renders on a quiet tick
       });
     };
 

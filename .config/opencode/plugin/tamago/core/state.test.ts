@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { EMPTY_DELTA, addDelta, freshCareer, hydrate, initialSession, isEmpty } from "./state.ts";
+import { EMPTY_DELTA, addDelta, freshCareer, hydrate, initialSession, isEmpty, sameCareer } from "./state.ts";
 
 test("initialSession starts idle and not busy", () => {
   assert.deepEqual(initialSession(42), { activity: "idle", since: 42, busy: false });
@@ -64,4 +64,12 @@ test("hydrate ignores non-finite numbers", () => {
   assert.equal(career.prompts, 0);
   assert.equal(career.errors, 0);
   assert.equal(career.tools.bash, 0);
+});
+
+test("sameCareer compares every counter and the hatch date", () => {
+  const a = { ...freshCareer(1), prompts: 3, tools: { read: 1, edit: 2, bash: 0, other: 0 } };
+  assert.equal(sameCareer(a, { ...a, tools: { ...a.tools } }), true, "structurally equal copies are the same");
+  assert.equal(sameCareer(a, { ...a, prompts: 4 }), false);
+  assert.equal(sameCareer(a, { ...a, tools: { ...a.tools, bash: 1 } }), false);
+  assert.equal(sameCareer(a, { ...a, hatchedAt: 2 }), false);
 });
