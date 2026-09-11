@@ -9,6 +9,7 @@ import { createStore, type Loaded } from "./adapter/store.ts";
 import { SUBSCRIBED, createTranslator } from "./adapter/translate.ts";
 import { count } from "./core/count.ts";
 import type { Addressed, TamagoEvent } from "./core/events.ts";
+import { footerPath } from "./core/footer.ts";
 import { merge } from "./core/merge.ts";
 import { WARN_AFTER, backoff } from "./core/retry.ts";
 import { stage, stageIndex, type StageId } from "./core/stage.ts";
@@ -185,11 +186,8 @@ const tui: TuiPlugin = async (api, options) => {
     const footer = (sessionID: string) => (): FooterInfo => {
       const info = api.state.session.get(sessionID);
       const dir = info?.directory || api.state.path.directory;
-      const home = homedir();
-      const short = dir.startsWith(home) ? `~${dir.slice(home.length)}` : dir;
       const branch = info?.directory === api.state.path.directory ? api.state.vcs?.branch : undefined;
-      const parts = (branch ? `${short}:${branch}` : short).split("/");
-      return { parent: parts.slice(0, -1).join("/"), name: parts.at(-1) ?? "", version: api.app.version };
+      return { ...footerPath(dir, homedir(), branch), version: api.app.version };
     };
 
     api.slots.register({
