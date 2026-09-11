@@ -31,14 +31,16 @@ toasts.
 ## How it reacts
 
 The sprite appears in the sidebar footer of a session and under the prompt on
-the home screen. Its activity follows the OpenCode session:
+the home screen. Each OpenCode session has its own mood, and the sidebar shows
+the mood of the session on screen. Subagent sessions never drive the mood: their
+tools still earn XP, their prompts do not count. Activity follows the session:
 
 | Activity   | Triggered by                                   | Ends                                  |
 | ---------- | ---------------------------------------------- | ------------------------------------- |
 | `thinking` | you send a prompt                              | a tool starts, or the session idles   |
 | `working`  | a tool starts running                          | the session idles                     |
 | `waiting`  | OpenCode asks for a permission                 | you reply                             |
-| `hurt`     | a tool fails, or the session errors            | after 3 s, back to working or idle    |
+| `hurt`     | a tool fails, or the session errors            | after 3 s, working if busy, else idle |
 | `idle`     | the session goes idle                          | after 120 s, falls asleep             |
 | `sleeping` | 120 s of idle                                  | any activity                          |
 
@@ -105,10 +107,10 @@ run some tools in one, and watch the other's XP follow.
 Layout:
 
 ```
-index.tsx      the only module that touches api.*, timers and the filesystem
+index.tsx      the only module that touches api.* and timers; wires the layers
 core/          pure data and strings; knows nothing about OpenCode or Solid
-adapter/       SDK events → internal events, disk store, error log
-view/          Solid components fed with state, returning JSX
+adapter/       the only layer touching SDK event shapes and the disk
+view/          Solid components fed with accessors, returning JSX
 ```
 
 `AGENTS.md` holds the rules for changing the plugin, `CONTEXT.md` the

@@ -2,6 +2,7 @@
 import type { TuiThemeCurrent } from "@opencode-ai/plugin/tui";
 import type { RGBA } from "@opentui/core";
 import type { JSX } from "@opentui/solid";
+import { frameIndex } from "../core/cadence.ts";
 import { fmt } from "../core/format.ts";
 import { frameAt } from "../core/sprites.ts";
 import { stage, xp } from "../core/stage.ts";
@@ -36,10 +37,13 @@ export function SidebarView(props: {
   theme: () => TuiThemeCurrent;
   session: () => Session;
   career: () => Career;
-  frame: () => number;
+  ticks: () => number;
   footer: () => FooterInfo;
 }): JSX.Element {
-  const lines = () => frameAt(stage(props.career()), props.session().activity, props.frame());
+  const lines = () => {
+    const activity = props.session().activity;
+    return frameAt(stage(props.career()), activity, frameIndex(activity, props.ticks()));
+  };
   const color = () => spriteColor(props.theme(), props.session().activity);
 
   return (

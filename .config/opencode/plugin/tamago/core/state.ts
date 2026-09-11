@@ -4,7 +4,8 @@ export type ToolKind = "read" | "edit" | "bash" | "other";
 export type Session = {
   activity: Activity;
   since: number;
-  runningTools: number;
+  /** Whether the OpenCode session is busy, per its own status. */
+  busy: boolean;
 };
 
 export type Counters = {
@@ -30,7 +31,7 @@ export const EMPTY_DELTA: Delta = {
 };
 
 export function initialSession(now: number): Session {
-  return { activity: "idle", since: now, runningTools: 0 };
+  return { activity: "idle", since: now, busy: false };
 }
 
 export function freshCareer(now: number): Career {

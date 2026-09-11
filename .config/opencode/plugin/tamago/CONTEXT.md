@@ -33,8 +33,9 @@ The short phrase shown next to the sprite for an Activity ("chilling",
 _Avoid_: caption, label
 
 **Session**:
-The Tamago's momentary condition in one OpenCode window: its Activity, when
-it started, and how many tools are running. Forgotten when the window closes.
+The Tamago's momentary condition for one OpenCode session: its Activity, when
+it started, and whether that OpenCode session is busy. Forgotten when the
+window closes.
 _Avoid_: using "session" alone for the OpenCode session; say **OpenCode
 session** for that one
 
@@ -95,7 +96,10 @@ the body stays the same for a Stage.
 
 - A **Career** has exactly one **Stage** at any time, and exactly one **XP**
 - A **Career** belongs to one machine; every OpenCode window shares it
-- Each OpenCode window has its own **Session** and its own **Delta**
+- Each root OpenCode session has its own **Session**; each window has one
+  **Delta**
+- A child (subagent) OpenCode session has no **Session** of its own; its work
+  still reaches the **Career**
 - Many **Deltas** merge into one **Career**; the order does not matter
 - A **Stage** and an **Activity** together select one **Sprite**
 - A **Sprite** has one or more **Frames**; every Frame of a Stage has the same
@@ -114,9 +118,9 @@ the body stays the same for a Stage.
 > can never change the **Stage**."
 >
 > **Dev:** "And if I have two OpenCode windows open?"
-> **Owner:** "Each has its own **Session** and its own **Delta**. On
-> **Flush**, both **Deltas** end up in the one **Career**, and both windows
-> show the same **Stage**."
+> **Owner:** "Each has its own **Delta**, and each session on screen its own
+> **Session**. On **Flush**, both **Deltas** end up in the one **Career**,
+> and both windows show the same **Stage**."
 >
 > **Dev:** "Is reaching 1,500 XP an **Evolution**?"
 > **Owner:** "Only if it crosses into a new **Stage**. Going from 1,400 to

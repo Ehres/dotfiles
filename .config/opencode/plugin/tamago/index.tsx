@@ -6,11 +6,12 @@ import { join } from "node:path";
 import { createSignal } from "solid-js";
 import { logError } from "./adapter/log.ts";
 import { createStore, type Loaded } from "./adapter/store.ts";
-import { createTranslator } from "./adapter/translate.ts";
-import type { TamagoEvent } from "./core/events.ts";
+import { SUBSCRIBED, createTranslator } from "./adapter/translate.ts";
+import { count } from "./core/count.ts";
+import type { Addressed, TamagoEvent } from "./core/events.ts";
 import { merge } from "./core/merge.ts";
-import { reduce } from "./core/reduce.ts";
 import { stage, stageIndex, type StageId } from "./core/stage.ts";
+import { transition } from "./core/transition.ts";
 import {
   EMPTY_DELTA,
   addDelta,
@@ -28,28 +29,15 @@ const id = "opencode-tamago";
 const DATA_DIR = join(homedir(), ".local", "share", "opencode-tamago");
 const TICK_MS = 500;
 const FLUSH_MS = 2_000;
-/** Slow animations advance once every this many ticks (2 s). */
-const SLOW_FRAME_TICKS = 4;
 /** Below the built-in footer's order (100) so we win the single_winner slot. */
 const FOOTER_ORDER = 50;
 /** home_bottom is additive: below 100 renders above the built-in tips, keeping the OpenCode logo intact. */
 const HOME_BOTTOM_ORDER = 50;
 
-const SUBSCRIBED = [
-  "message.part.updated",
-  "message.updated",
-  "file.edited",
-  "permission.asked",
-  "permission.replied",
-  "session.idle",
-  "session.error",
-  "session.created",
-] as const;
-
 const tui: TuiPlugin = async (api, options) => {
   const name = typeof options?.name === "string" && options.name.trim() ? options.name.trim() : "Tamago";
   const store = createStore(DATA_DIR);
-  const translate = createTranslator();
+  const translate = createTranslator({ isChild: (id) => typeof api.state.session.get(id)?.parentID === "string" });
 
   let loaded: Loaded;
   try {
@@ -61,7 +49,8 @@ const tui: TuiPlugin = async (api, options) => {
 
   try {
     const [career, setCareer] = createSignal<Career>(loaded.career);
-    const [session, setSession] = createSignal<Session>(initialSession(Date.now()));
+    /** One mood per root OpenCode session, keyed by session id. Never persisted. */
+    const [sessions, setSessions] = createSignal<Record<string, Session>>({});
     const [ticks, setTicks] = createSignal(0);
     let pending: Delta = EMPTY_DELTA;
     let known: StageId = stage(loaded.career);
@@ -93,22 +82,38 @@ const tui: TuiPlugin = async (api, options) => {
       announce(next);
     };
 
-    const apply = (event: TamagoEvent) => {
-      const out = reduce(session(), event, Date.now());
-      setSession(out.session);
-      if (isEmpty(out.delta)) return;
-      pending = addDelta(pending, out.delta);
-      show(merge(career(), out.delta));
+    const move = (ids: readonly string[], event: TamagoEvent, now: number) => {
+      if (ids.length === 0) return;
+      setSessions((all) => {
+        const next = { ...all };
+        for (const id of ids) next[id] = transition(all[id] ?? initialSession(now), event, now);
+        return next;
+      });
+    };
+
+    const apply = ({ target, event }: Addressed) => {
+      const now = Date.now();
+      if (event.type === "session_gone") {
+        if (target.type === "session") setSessions(({ [target.id]: _gone, ...rest }) => rest);
+      } else if (target.type === "session") {
+        move([target.id], event, now);
+      } else if (target.type === "every") {
+        move(Object.keys(sessions()), event, now);
+      }
+      const delta = count(event);
+      if (isEmpty(delta)) return;
+      pending = addDelta(pending, delta);
+      show(merge(career(), delta));
     };
 
     const onEvent = guard((event: Event) => {
-      for (const internal of translate(event)) apply(internal);
+      for (const addressed of translate(event)) apply(addressed);
     });
     for (const type of SUBSCRIBED) api.lifecycle.onDispose(api.event.on(type, onEvent));
 
     const tick = setInterval(
       guard(() => {
-        apply({ type: "tick" });
+        move(Object.keys(sessions()), { type: "tick" }, Date.now());
         setTicks((t) => t + 1);
       }),
       TICK_MS,
@@ -136,12 +141,7 @@ const tui: TuiPlugin = async (api, options) => {
       }),
     );
 
-    const frame = () => {
-      const activity = session().activity;
-      if (activity === "working" || activity === "thinking") return ticks();
-      if (activity === "sleeping") return 0;
-      return Math.floor(ticks() / SLOW_FRAME_TICKS);
-    };
+    const sessionOf = (id: string) => () => sessions()[id] ?? initialSession(0);
 
     const footer = (sessionID: string) => (): FooterInfo => {
       const info = api.state.session.get(sessionID);
@@ -161,9 +161,9 @@ const tui: TuiPlugin = async (api, options) => {
             <SidebarView
               name={name}
               theme={() => ctx.theme.current}
-              session={session}
+              session={sessionOf(props.session_id)}
               career={career}
-              frame={frame}
+              ticks={ticks}
               footer={footer(props.session_id)}
             />
           );
@@ -175,7 +175,7 @@ const tui: TuiPlugin = async (api, options) => {
       order: HOME_BOTTOM_ORDER,
       slots: {
         home_bottom(ctx) {
-          return <HomeView name={name} theme={() => ctx.theme.current} career={career} frame={frame} />;
+          return <HomeView name={name} theme={() => ctx.theme.current} career={career} ticks={ticks} />;
         },
       },
     });

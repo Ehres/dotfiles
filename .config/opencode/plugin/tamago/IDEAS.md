@@ -12,7 +12,7 @@ Ce que Tamago fait aujourd'hui :
   cumulé (`core/stage.ts`) : egg → hatchling → young → adult → elder.
 - 6 activités de session (`core/state.ts`) : idle, thinking, working, waiting,
   hurt, sleeping. Animation des yeux et d'une "marque" à côté de la tête.
-- Reducer pur (`core/reduce.ts`), translator SDK → événements internes
+- Transitions et comptage purs (`core/transition.ts`, `core/count.ts`), translator SDK → événements internes ciblés par session
   (`adapter/translate.ts`), persistance multi-instances avec lock et rename
   atomique (`adapter/store.ts`, `core/merge.ts`).
 - Deux vues Solid : sidebar (`view/sidebar.tsx`, slot `sidebar_footer`) et

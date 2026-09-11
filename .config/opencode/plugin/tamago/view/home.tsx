@@ -1,6 +1,7 @@
 /** @jsxImportSource @opentui/solid */
 import type { TuiThemeCurrent } from "@opencode-ai/plugin/tui";
 import type { JSX } from "@opentui/solid";
+import { frameIndex } from "../core/cadence.ts";
 import { bar, fmt } from "../core/format.ts";
 import { frameAt } from "../core/sprites.ts";
 import { next, stage, xp } from "../core/stage.ts";
@@ -13,9 +14,9 @@ export function HomeView(props: {
   name: string;
   theme: () => TuiThemeCurrent;
   career: () => Career;
-  frame: () => number;
+  ticks: () => number;
 }): JSX.Element {
-  const lines = () => frameAt(stage(props.career()), "idle", props.frame());
+  const lines = () => frameAt(stage(props.career()), "idle", frameIndex("idle", props.ticks()));
   const progress = () => {
     const coming = next(props.career());
     if (!coming) return `${bar(1, BAR_WIDTH)} ${fmt(xp(props.career()))} xp · final form`;

@@ -5,9 +5,14 @@ AGENTS.md. Vocabulary lives in `CONTEXT.md`; use those terms.
 
 ## Rules
 
-- `core/` is pure data and strings, tested with `node:test`. `index.tsx` is the
-  only module that touches `api.*`, timers and the filesystem. Views take
-  accessors and return JSX.
+- `core/` is pure data and strings, tested with `node:test`. `adapter/` is the
+  only layer that reads SDK event shapes or touches the disk. `index.tsx` is
+  the only module that touches `api.*` and timers. Views take accessors and
+  return JSX.
+- Moving a Session (`transition`) and counting XP (`count`) are separate pure
+  functions; an event may move several Sessions but is counted once.
+- Child (subagent) sessions never move a Session. Their work counts, their
+  prompts do not.
 - Stage, and anything else derived from counters, is computed, never stored.
 - Errors never change XP.
 - Every Frame of a Stage has the same size; colors come from the theme.
