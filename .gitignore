@@ -14,3 +14,8 @@ network.out
 
 # gh-dash reviewer ranking state, updated after every selection.
 .config/gh-dash/reviewer-scores
+
+# Superpowers specs and plans are working documents for the agent session,
+# not configuration. They stay on disk but are never versioned.
+docs/superpowers/
+.superpowers/
