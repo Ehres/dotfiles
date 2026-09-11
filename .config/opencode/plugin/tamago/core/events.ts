@@ -5,6 +5,8 @@ export type TamagoEvent =
   | { type: "tool_started" }
   | { type: "tool_finished"; kind: ToolKind }
   | { type: "tool_failed" }
+  /** The user stopped or refused the tool: no hurt, nothing counted. */
+  | { type: "tool_cancelled" }
   | { type: "file_edited" }
   | { type: "permission_asked" }
   | { type: "permission_replied" }

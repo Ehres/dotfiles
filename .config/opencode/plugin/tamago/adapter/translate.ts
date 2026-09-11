@@ -48,6 +48,19 @@ function str(value: unknown): string | undefined {
   return typeof value === "string" ? value : undefined;
 }
 
+/** Exact texts OpenCode 1.18 puts in ToolStateError.error when the user, not the tool, stopped the call. */
+const USER_DECISION_EXACT = new Set(["Tool execution aborted", "Cancelled"]);
+const USER_DECISION_PREFIX = ["The user rejected permission", "The user dismissed this question"];
+
+/** True when an errored tool part reflects the user's own decision (abort, refusal, dismissed question). */
+export function isUserDecision(state: Record<string, unknown>): boolean {
+  const metadata = isRecord(state.metadata) ? state.metadata : undefined;
+  if (metadata?.interrupted === true) return true;
+  const error = str(state.error);
+  if (error === undefined) return false;
+  return USER_DECISION_EXACT.has(error) || USER_DECISION_PREFIX.some((prefix) => error.startsWith(prefix));
+}
+
 export type TranslatorOptions = {
   /** Tells whether a session id belongs to a child (subagent) session the translator never saw being created. */
   isChild?: (sessionID: string) => boolean;
@@ -98,7 +111,8 @@ export function createTranslator(options: TranslatorOptions = {}): (event: Event
           remember(done, callID);
           const started = running.delete(callID);
           const out: TamagoEvent[] = started ? [] : [{ type: "tool_started" }];
-          out.push(status === "completed" ? { type: "tool_finished", kind: toolKind(tool) } : { type: "tool_failed" });
+          if (status === "completed") out.push({ type: "tool_finished", kind: toolKind(tool) });
+          else out.push(state && isUserDecision(state) ? { type: "tool_cancelled" } : { type: "tool_failed" });
           return work(sessionID, out);
         }
         return [];

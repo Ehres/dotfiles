@@ -29,6 +29,7 @@ export function transition(start: Session, event: TamagoEvent, now: number): Ses
     case "session_idle":
       return busy(at(session, "idle", now), false);
     case "tool_finished":
+    case "tool_cancelled":
     case "file_edited":
     case "session_started":
     case "session_gone":

@@ -2,13 +2,13 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { Event } from "@opencode-ai/sdk/v2";
 import type { Addressed, TamagoEvent } from "../core/events.ts";
-import { SUBSCRIBED, createTranslator, toolKind } from "./translate.ts";
+import { SUBSCRIBED, createTranslator, isUserDecision, toolKind } from "./translate.ts";
 
 // Minimal event shapes. Only the fields the translator reads are present.
 const ev = (value: unknown): Event => value as Event;
 
-const toolPart = (callID: string, tool: string, status: string, sessionID = "s") =>
-  ev({ type: "message.part.updated", properties: { sessionID, time: 0, part: { type: "tool", callID, tool, state: { status } } } });
+const toolPart = (callID: string, tool: string, status: string, sessionID = "s", state: Record<string, unknown> = {}) =>
+  ev({ type: "message.part.updated", properties: { sessionID, time: 0, part: { type: "tool", callID, tool, state: { status, ...state } } } });
 
 const on = (id: string, event: TamagoEvent): Addressed => ({ target: { type: "session", id }, event });
 const every = (event: TamagoEvent): Addressed => ({ target: { type: "every" }, event });
@@ -54,7 +54,37 @@ test("a tool part going running then completed yields started then finished, onc
 test("an error state yields tool_failed", () => {
   const t = createTranslator();
   t(toolPart("c2", "bash", "running"));
-  assert.deepEqual(t(toolPart("c2", "bash", "error")), [on("s", { type: "tool_failed" })]);
+  assert.deepEqual(t(toolPart("c2", "bash", "error", "s", { error: "Tool execution failed: exit 1" })), [on("s", { type: "tool_failed" })]);
+});
+
+test("a tool stopped by the user's own decision is cancelled, not failed", () => {
+  const decisions: Record<string, unknown>[] = [
+    { error: "Tool execution aborted", metadata: { interrupted: true } },
+    { error: "Tool execution aborted" },
+    { error: "Cancelled" },
+    { error: "The user rejected permission to use this specific tool call." },
+    { error: "The user rejected permission to use this specific tool call with the following feedback: use rg" },
+    { error: "The user dismissed this question" },
+    { error: "anything at all", metadata: { interrupted: true } },
+  ];
+  decisions.forEach((state, i) => {
+    const t = createTranslator();
+    t(toolPart(`d${i}`, "bash", "running"));
+    assert.deepEqual(t(toolPart(`d${i}`, "bash", "error", "s", state)), [on("s", { type: "tool_cancelled" })], JSON.stringify(state));
+  });
+});
+
+test("isUserDecision only matches the exact abort and rejection texts", () => {
+  assert.equal(isUserDecision({ error: "Tool execution aborted" }), true);
+  assert.equal(isUserDecision({ error: "Tool execution aborted by a bug" }), false);
+  assert.equal(isUserDecision({ error: "Cancelled" }), true);
+  assert.equal(isUserDecision({ error: "Operation Cancelled" }), false);
+  assert.equal(isUserDecision({ error: "The user rejected permission to use this specific tool call." }), true);
+  assert.equal(isUserDecision({ error: "The user dismissed this question" }), true);
+  assert.equal(isUserDecision({ error: "ENOENT: no such file" }), false);
+  assert.equal(isUserDecision({ metadata: { interrupted: true } }), true);
+  assert.equal(isUserDecision({ metadata: { interrupted: false }, error: "boom" }), false);
+  assert.equal(isUserDecision({}), false);
 });
 
 test("a completion whose start was never seen yields the start too", () => {
@@ -121,6 +151,7 @@ test("a child session seen at creation never moves anyone: its work counts, its 
   assert.deepEqual(t(toolPart("k1", "bash", "running", "child")), [none({ type: "tool_started" })]);
   assert.deepEqual(t(toolPart("k1", "bash", "completed", "child")), [none({ type: "tool_finished", kind: "bash" })]);
   assert.deepEqual(t(toolPart("k2", "read", "error", "child")), [none({ type: "tool_started" }), none({ type: "tool_failed" })]);
+  assert.deepEqual(t(toolPart("k3", "read", "error", "child", { error: "Cancelled" })), [none({ type: "tool_started" }), none({ type: "tool_cancelled" })]);
   assert.deepEqual(t(ev({ type: "message.updated", properties: { sessionID: "child", info: { id: "m9", role: "user" } } })), []);
   assert.deepEqual(t(ev({ type: "session.idle", properties: { sessionID: "child" } })), []);
   assert.deepEqual(t(ev({ type: "session.status", properties: { sessionID: "child", status: { type: "busy" } } })), []);

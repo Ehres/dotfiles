@@ -26,6 +26,7 @@ test("activity-only events count nothing", () => {
     { type: "session_busy" },
     { type: "session_idle" },
     { type: "session_gone" },
+    { type: "tool_cancelled" },
     { type: "tick" },
   ];
   for (const event of silent) assert.ok(isEmpty(count(event)), `${event.type} should not count`);

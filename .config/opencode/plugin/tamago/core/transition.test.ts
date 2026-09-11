@@ -94,7 +94,12 @@ test("every non-tick event wakes a sleeping creature, ticks never do", () => {
   ]);
   assert.equal(asleep.activity, "sleeping");
   assert.equal(replay([[{ type: "tick" }, SLEEP_MS + 1]], asleep).activity, "sleeping");
-  const quiet: TamagoEvent[] = [{ type: "file_edited" }, { type: "session_started" }, { type: "tool_finished", kind: "bash" }];
+  const quiet: TamagoEvent[] = [
+    { type: "file_edited" },
+    { type: "session_started" },
+    { type: "tool_finished", kind: "bash" },
+    { type: "tool_cancelled" },
+  ];
   for (const event of quiet) {
     const woken = replay([[event, SLEEP_MS + 1]], asleep);
     assert.equal(woken.activity, "idle", `${event.type} should wake to idle`);
@@ -104,9 +109,14 @@ test("every non-tick event wakes a sleeping creature, ticks never do", () => {
   assert.equal(replay([[{ type: "tool_started" }, SLEEP_MS + 1]], asleep).activity, "working");
 });
 
-test("file edits, tool completions and session_started leave an active state alone", () => {
+test("file edits, tool completions, cancellations and session_started leave an active state alone", () => {
   const working = replay([[{ type: "tool_started" }, 0]]);
-  for (const event of [{ type: "file_edited" }, { type: "tool_finished", kind: "edit" }, { type: "session_started" }] as TamagoEvent[]) {
+  for (const event of [
+    { type: "file_edited" },
+    { type: "tool_finished", kind: "edit" },
+    { type: "tool_cancelled" },
+    { type: "session_started" },
+  ] as TamagoEvent[]) {
     assert.equal(replay([[event, 1]], working).activity, "working");
   }
 });
