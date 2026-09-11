@@ -50,3 +50,9 @@ export function next(counters: Counters): { stage: StageId; threshold: number; p
   const span = coming.xp - current.xp;
   return { stage: coming.id, threshold: coming.xp, progress: span > 0 ? (total - current.xp) / span : 1 };
 }
+
+/** The Stage reached when `after` sits strictly above `before`; undefined otherwise, including after a reset. */
+export function evolution(before: Counters, after: Counters): StageId | undefined {
+  const reached = stage(after);
+  return stageIndex(reached) > stageIndex(stage(before)) ? reached : undefined;
+}

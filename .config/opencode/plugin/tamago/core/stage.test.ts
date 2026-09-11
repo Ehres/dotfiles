@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { STAGES, WEIGHTS, next, stage, stageIndex, xp } from "./stage.ts";
+import { STAGES, WEIGHTS, next, stage, stageIndex, xp, evolution } from "./stage.ts";
+import { freshCareer } from "./state.ts";
 import { EMPTY_DELTA, type Counters } from "./state.ts";
 
 const counters = (patch: Partial<Counters>): Counters => ({ ...EMPTY_DELTA, ...patch });
@@ -65,4 +66,20 @@ test("next reports the coming stage and progress inside the current band", () =>
 test("next is undefined at the final stage", () => {
   const last = STAGES[STAGES.length - 1]!;
   assert.equal(next(counters({ prompts: last.xp / WEIGHTS.prompts })), undefined);
+});
+
+test("evolution names the stage reached when the career crosses a threshold upward", () => {
+  const egg = freshCareer(0);
+  const hatched = { ...egg, sessions: 20 }; // 200 xp
+  const young = { ...egg, sessions: 150 }; // 1,500 xp
+  assert.equal(evolution(egg, hatched), "hatchling");
+  assert.equal(evolution(egg, young), "young", "skipping a stage still names the one reached");
+});
+
+test("evolution is silent when the stage is unchanged or goes down, as after a reset", () => {
+  const egg = freshCareer(0);
+  const young = { ...egg, sessions: 150 };
+  assert.equal(evolution(egg, { ...egg, sessions: 1 }), undefined);
+  assert.equal(evolution(young, { ...young, prompts: 1 }), undefined);
+  assert.equal(evolution(young, egg), undefined);
 });

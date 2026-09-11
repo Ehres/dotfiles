@@ -12,7 +12,7 @@ import type { Addressed, TamagoEvent } from "./core/events.ts";
 import { footerPath } from "./core/footer.ts";
 import { merge } from "./core/merge.ts";
 import { WARN_AFTER, backoff } from "./core/retry.ts";
-import { stage, stageIndex, type StageId } from "./core/stage.ts";
+import { evolution } from "./core/stage.ts";
 import { transition } from "./core/transition.ts";
 import {
   EMPTY_DELTA,
@@ -59,7 +59,6 @@ const tui: TuiPlugin = async (api, options) => {
     const [sessions, setSessions] = createSignal<Record<string, Session>>({});
     const [ticks, setTicks] = createSignal(0);
     let pending: Delta = EMPTY_DELTA;
-    let known: StageId = stage(loaded.career);
 
     let warnedCorrupt = false;
     const warnCorrupt = () => {
@@ -83,17 +82,10 @@ const tui: TuiPlugin = async (api, options) => {
         }
       };
 
-    const announce = (next: Career) => {
-      const current = stage(next);
-      if (stageIndex(current) > stageIndex(known)) {
-        api.ui.toast({ variant: "success", title: name, message: `${name} evolved: ${current}!` });
-        known = current;
-      }
-    };
-
     const show = (next: Career) => {
+      const reached = evolution(career(), next);
       setCareer(next);
-      announce(next);
+      if (reached) api.ui.toast({ variant: "success", title: name, message: `${name} evolved: ${reached}!` });
     };
 
     const move = (ids: readonly string[], event: TamagoEvent, now: number) => {
