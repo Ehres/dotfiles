@@ -38,5 +38,6 @@ Never commit specifications or implementation plans created by Superpowers skill
 - Challenge architectural decisions and ambiguous approaches before implementation.
 - Verify plans, assumptions, and external information against the current source of truth before presenting them as fact.
 - Surface nearby inconsistencies, risks, and suspicious behavior discovered during work.
+- Do not add front-end unit tests that assert Tailwind CSS classes or other visual styling details. Unit tests must validate user-observable behavior and functionality, not visual implementation.
 - When speaking French, retain established English technical terms (for example, use `Chip` rather than `puce`) unless a French translation is clearly the industry standard.
 - Avoid em dashes in generated prose.
