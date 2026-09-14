@@ -43,6 +43,24 @@ session** for that one
 The regular heartbeat that lets time pass for the Tamago: recovering from
 hurt, falling asleep, advancing an animation.
 
+### Speech
+
+**Cue**:
+Why the Tamago speaks: an event or a pattern of events in one OpenCode
+session, never its content.
+_Avoid_: trigger, reason
+
+**Bubble**:
+The phrase shown above the Sprite for a Cue, for a few seconds, in one
+OpenCode session.
+_Avoid_: speech, message, quip
+
+**Voice**:
+The short memory that decides whether a Cue becomes a Bubble: the current
+Bubble, the last Cue spoken, recent failures. One per Session, forgotten
+with it.
+_Avoid_: cooldown state, history
+
 ### Over a lifetime
 
 **Career**:
@@ -92,6 +110,10 @@ animate.
 The eyes and the mark beside the head that change with the Activity while
 the body stays the same for a Stage.
 
+**Portrait**:
+The Sprite and its text column, topped by the Bubble when there is one.
+_Avoid_: card, widget
+
 ## Relationships
 
 - A **Career** has exactly one **Stage** at any time, and exactly one **XP**
@@ -106,6 +128,10 @@ the body stays the same for a Stage.
   size
 - An **Evolution** happens when the **XP** of a **Career** crosses a **Stage**
   threshold
+- A **Session** has exactly one **Voice**; a **Voice** holds at most one
+  **Bubble**; a **Bubble** comes from exactly one **Cue**
+- The home screen has no **Voice**: without an OpenCode session there is no
+  **Cue**
 
 ## Example dialogue
 

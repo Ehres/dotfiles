@@ -50,6 +50,30 @@ permission or a dismissed question is neither an error nor a counted tool.
 Colors come from the active OpenCode theme: accent by default, `error` when
 hurt, `warning` when waiting, `textMuted` when asleep.
 
+## How it talks
+
+A three-line bubble appears above the sprite in the sidebar for about five
+seconds when something notable happens in the session on screen. Phrases are
+local templates: no model, no network, and nothing read from prompts,
+messages, todo texts or diffs, only their counts.
+
+| Cue          | When                                            |
+| ------------ | ----------------------------------------------- |
+| `permission` | OpenCode asks for a permission                  |
+| `woke`       | the creature wakes from sleep                   |
+| `long_work`  | the session goes idle after 5 min of work       |
+| `big_diff`   | the session diff reaches 10 files, once         |
+| `streak`     | 3 tools fail within 30 s                        |
+| `compacted`  | the session is compacted                        |
+| `retried`    | OpenCode retries a step                         |
+| `todos_done` | every todo of the session is completed          |
+| `evolved`    | the creature reaches a new stage                |
+
+At most one bubble every 10 s; a rarer cue (an evolution, a streak) may
+interrupt a common one. Phrases rotate in order per cue. Tuning lives in
+`core/voice.ts`. The `Tamago: toggle bubbles` palette command mutes and
+unmutes; the choice is remembered across launches.
+
 ## How it grows
 
 Every counted action adds experience. Errors add nothing and remove nothing.

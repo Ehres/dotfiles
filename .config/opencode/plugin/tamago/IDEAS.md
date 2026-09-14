@@ -47,6 +47,10 @@ Source : `@opencode-ai/plugin/dist/tui.d.ts` et `@opencode-ai/sdk` v2.
 
 ### 1. Bulle de dialogue
 
+**Fait le 2026-09-14**, templates locaux et mode muet, voir
+`docs/superpowers/specs/2026-09-14-tamago-bubble-design.md`. La variante LLM
+ci-dessous reste une idée.
+
 Une bulle ASCII à côté du sprite dans la sidebar, avec une queue vers la tête :
 
 ```
@@ -194,8 +198,8 @@ ASCII si nécessaire.
 
 ## Ordre recommandé
 
-1. Bulle avec templates locaux, plus mode muet. Pose la mécanique "événement →
-   réaction ponctuelle" dont dépendent 5, 6 et 7.
+1. ~~Bulle avec templates locaux, plus mode muet.~~ Fait. Pose la mécanique
+   "événement → réaction ponctuelle" dont dépendent 5, 6 et 7.
 2. Commandes dans la palette : pet, card, mute, rename.
 3. Achievements et streak, qui alimentent ensuite accessoires et branches.
 4. Personnalité et branches, une fois qu'on a vu ce que les compteurs racontent
