@@ -3,12 +3,14 @@ import type { TuiThemeCurrent } from "@opencode-ai/plugin/tui";
 import type { RGBA } from "@opentui/core";
 import type { JSX } from "@opentui/solid";
 import { createMemo } from "solid-js";
+import { bubbleBorders } from "../core/bubble.ts";
 import { frameIndex } from "../core/cadence.ts";
 import { fmt } from "../core/format.ts";
 import { frameAt } from "../core/sprites.ts";
 import { stage, xp } from "../core/stage.ts";
 import type { Activity, Career, Session } from "../core/state.ts";
-import { Portrait } from "./portrait.tsx";
+import type { Bubble } from "../core/voice.ts";
+import { Portrait, type BubbleView } from "./portrait.tsx";
 
 export const MOOD: Record<Activity, string> = {
   idle: "chilling",
@@ -41,16 +43,23 @@ export function SidebarView(props: {
   career: () => Career;
   clock: () => number;
   footer: () => FooterInfo;
+  bubble: () => Bubble | undefined;
 }): JSX.Element {
   const activity = createMemo(() => props.session().activity);
   const current = createMemo(() => stage(props.career()));
   const total = createMemo(() => xp(props.career()));
   const lines = () => frameAt(current(), activity(), frameIndex(activity(), props.clock()));
   const color = () => spriteColor(props.theme(), activity());
+  const bubble = createMemo((): BubbleView | undefined => {
+    const current = props.bubble();
+    if (current === undefined) return undefined;
+    const { top, bottom } = bubbleBorders(current.text);
+    return { top, text: current.text, bottom, border: props.theme().textMuted, ink: props.theme().text };
+  });
 
   return (
     <box flexDirection="column" gap={1}>
-      <Portrait lines={lines} color={color}>
+      <Portrait lines={lines} color={color} bubble={bubble}>
         <text fg={props.theme().text}>
           <b>{props.name}</b>
         </text>

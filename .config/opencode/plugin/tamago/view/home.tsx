@@ -29,7 +29,7 @@ export function HomeView(props: {
 
   return (
     <box paddingTop={1}>
-      <Portrait lines={lines} color={() => props.theme().accent}>
+      <Portrait lines={lines} color={() => props.theme().accent} bubble={() => undefined}>
         <text fg={props.theme().text}>
           <b>{props.name}</b>
           <span style={{ fg: props.theme().textMuted }}> · {current()}</span>

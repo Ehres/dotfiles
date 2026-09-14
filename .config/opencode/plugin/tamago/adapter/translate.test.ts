@@ -38,6 +38,10 @@ test("SUBSCRIBED lists every SDK event type the translator handles, once", () =>
     "session.error",
     "session.created",
     "session.deleted",
+    "session.compacted",
+    "session.next.retried",
+    "todo.updated",
+    "session.diff",
   ]) {
     assert.ok((SUBSCRIBED as readonly string[]).includes(type), `${type} must be subscribed`);
   }
@@ -174,4 +178,41 @@ test("unknown or malformed events yield nothing and do not throw", () => {
   assert.deepEqual(t(ev({ type: "session.idle", properties: {} })), []);
   assert.deepEqual(t(ev({ type: "session.status", properties: { sessionID: "s" } })), []);
   assert.deepEqual(t(ev({})), []);
+});
+
+test("compaction and retry speak on their session and are dropped for children", () => {
+  const t = createTranslator({ isChild: (id) => id === "child" });
+  assert.deepEqual(t(ev({ type: "session.compacted", properties: { sessionID: "s" } })), [on("s", { type: "session_compacted" })]);
+  assert.deepEqual(t(ev({ type: "session.next.retried", properties: { sessionID: "s", attempt: 2, timestamp: 0, error: {} } })), [
+    on("s", { type: "session_retried" }),
+  ]);
+  assert.deepEqual(t(ev({ type: "session.compacted", properties: { sessionID: "child" } })), []);
+});
+
+test("todo.updated counts completed over non-cancelled todos, never reading content", () => {
+  const t = createTranslator();
+  const todos = [
+    { content: "secret a", status: "completed", priority: "high" },
+    { content: "secret b", status: "in_progress", priority: "low" },
+    { content: "secret c", status: "cancelled", priority: "low" },
+    { content: "secret d", status: "pending", priority: "low" },
+  ];
+  assert.deepEqual(t(ev({ type: "todo.updated", properties: { sessionID: "s", todos } })), [on("s", { type: "todos_updated", total: 3, done: 1 })]);
+  assert.deepEqual(t(ev({ type: "todo.updated", properties: { sessionID: "s", todos: [] } })), [on("s", { type: "todos_updated", total: 0, done: 0 })]);
+});
+
+test("session.diff reports the number of files only", () => {
+  const t = createTranslator();
+  const diff = [
+    { path: "a.ts", status: "modified", additions: 1, deletions: 1, patch: "secret" },
+    { path: "b.ts", status: "added", additions: 9, deletions: 0, patch: "secret" },
+  ];
+  assert.deepEqual(t(ev({ type: "session.diff", properties: { sessionID: "s", diff } })), [on("s", { type: "diff_updated", files: 2 })]);
+});
+
+test("malformed todo and diff payloads yield nothing", () => {
+  const t = createTranslator();
+  assert.deepEqual(t(ev({ type: "todo.updated", properties: { sessionID: "s", todos: "nope" } })), []);
+  assert.deepEqual(t(ev({ type: "session.diff", properties: { sessionID: "s" } })), []);
+  assert.deepEqual(t(ev({ type: "todo.updated", properties: { todos: [] } })), []);
 });

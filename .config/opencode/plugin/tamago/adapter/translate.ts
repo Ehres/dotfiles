@@ -14,6 +14,10 @@ export const SUBSCRIBED = [
   "session.error",
   "session.created",
   "session.deleted",
+  "session.compacted",
+  "session.next.retried",
+  "todo.updated",
+  "session.diff",
 ] as const;
 
 const KIND_BY_TOOL: Record<string, ToolKind> = {
@@ -161,6 +165,28 @@ export function createTranslator(options: TranslatorOptions = {}): (event: Event
         if (id === undefined) return [];
         children.delete(id);
         return [{ target: { type: "session", id }, event: { type: "session_gone" } }];
+      }
+      case "session.compacted":
+        return mood(sessionID, { type: "session_compacted" });
+      case "session.next.retried":
+        return mood(sessionID, { type: "session_retried" });
+      case "todo.updated": {
+        const todos = isRecord(props) && Array.isArray(props.todos) ? (props.todos as unknown[]) : undefined;
+        if (todos === undefined) return [];
+        let total = 0;
+        let done = 0;
+        for (const todo of todos) {
+          const status = isRecord(todo) ? str(todo.status) : undefined;
+          if (status === "cancelled") continue;
+          total += 1;
+          if (status === "completed") done += 1;
+        }
+        return mood(sessionID, { type: "todos_updated", total, done });
+      }
+      case "session.diff": {
+        const diff = isRecord(props) && Array.isArray(props.diff) ? props.diff : undefined;
+        if (diff === undefined) return [];
+        return mood(sessionID, { type: "diff_updated", files: diff.length });
       }
       default:
         return [];

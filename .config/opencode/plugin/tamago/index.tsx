@@ -15,6 +15,7 @@ import { merge } from "./core/merge.ts";
 import { WARN_AFTER, backoff } from "./core/retry.ts";
 import { evolution } from "./core/stage.ts";
 import { transition } from "./core/transition.ts";
+import { initialVoice, speak, type Voice } from "./core/voice.ts";
 import {
   EMPTY_DELTA,
   addDelta,
@@ -57,6 +58,10 @@ const tui: TuiPlugin = async (api, options) => {
     const [career, setCareer] = createSignal<Career>(loaded.career, { equals: sameCareer });
     /** One mood per root OpenCode session, keyed by session id. Never persisted. */
     const [sessions, setSessions] = createSignal<Record<string, Session>>({});
+    /** One Voice per root OpenCode session, keyed like `sessions`. Never persisted. */
+    const [voices, setVoices] = createSignal<Record<string, Voice>>({});
+    /** Persisted through api.kv; when muted no Cue is heard and every Bubble is cleared. */
+    const [muted, setMuted] = createSignal(api.kv.get<boolean>("tamago.muted", false) === true);
     /** Milliseconds since the plugin started; drives animation frames. */
     const started = Date.now();
     const [clock, setClock] = createSignal(0);
@@ -87,28 +92,44 @@ const tui: TuiPlugin = async (api, options) => {
     const show = (next: Career) => {
       const reached = evolution(career(), next);
       setCareer(next);
-      if (reached) api.ui.toast({ variant: "success", title: name, message: `${name} evolved: ${reached}!` });
+      if (!reached) return;
+      api.ui.toast({ variant: "success", title: name, message: `${name} evolved: ${reached}!` });
+      move(Object.keys(sessions()), { type: "evolved" }, Date.now());
     };
 
     const move = (ids: readonly string[], event: TamagoEvent, now: number) => {
       if (ids.length === 0) return;
-      setSessions((all) => {
-        let changed = false;
+      const before = sessions();
+      const after: Record<string, Session> = { ...before };
+      let changed = false;
+      for (const id of ids) {
+        const was = before[id] ?? initialSession(now);
+        const is = transition(was, event, now);
+        after[id] = is;
+        if (is !== was) changed = true;
+      }
+      if (changed) setSessions(after); // untouched otherwise: nobody re-renders on a quiet tick
+      if (muted()) return;
+      setVoices((all) => {
+        let spoke = false;
         const next = { ...all };
         for (const id of ids) {
-          const before = all[id] ?? initialSession(now);
-          const after = transition(before, event, now);
-          next[id] = after;
-          if (after !== before) changed = true;
+          const voice = all[id] ?? initialVoice();
+          const heard = speak(voice, event, before[id] ?? initialSession(now), after[id] ?? initialSession(now), now);
+          next[id] = heard;
+          if (heard !== voice) spoke = true;
         }
-        return changed ? next : all; // same object: nobody re-renders on a quiet tick
+        return spoke ? next : all;
       });
     };
 
     const apply = ({ target, event }: Addressed) => {
       const now = Date.now();
       if (event.type === "session_gone") {
-        if (target.type === "session") setSessions(({ [target.id]: _gone, ...rest }) => rest);
+        if (target.type === "session") {
+          setSessions(({ [target.id]: _gone, ...rest }) => rest);
+          setVoices(({ [target.id]: _silent, ...rest }) => rest);
+        }
       } else if (target.type === "session") {
         move([target.id], event, now);
       } else if (target.type === "every") {
@@ -138,6 +159,32 @@ const tui: TuiPlugin = async (api, options) => {
       scheduleTick();
     });
     scheduleTick();
+
+    const setMute = (value: boolean) => {
+      setMuted(value);
+      api.kv.set("tamago.muted", value);
+      if (!value) return;
+      setVoices((all) => {
+        const next: Record<string, Voice> = {};
+        for (const [id, voice] of Object.entries(all)) next[id] = voice.bubble === undefined ? voice : { ...voice, bubble: undefined };
+        return next;
+      });
+    };
+    api.lifecycle.onDispose(
+      api.keymap.registerLayer({
+        commands: [
+          {
+            name: "tamago.mute",
+            title: `${name}: toggle bubbles`,
+            description: "Mute or unmute what the creature says",
+            category: name,
+            /** What lists a command in the palette; OpenCode's own commands carry it. */
+            namespace: "palette",
+            run: guard(() => setMute(!muted())),
+          },
+        ],
+      }),
+    );
 
     /** Returns true when this window's delta reached the disk. Throws on disk errors. */
     const persist = (): boolean => {
@@ -209,6 +256,7 @@ const tui: TuiPlugin = async (api, options) => {
               career={career}
               clock={clock}
               footer={footer(props.session_id)}
+              bubble={() => voices()[props.session_id]?.bubble}
             />
           );
         },
