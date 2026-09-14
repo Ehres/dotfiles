@@ -24,6 +24,7 @@ const KIND_BY_TOOL: Record<string, ToolKind> = {
   edit: "edit",
   write: "edit",
   patch: "edit",
+  apply_patch: "edit",
   multiedit: "edit",
   bash: "bash",
 };

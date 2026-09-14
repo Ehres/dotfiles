@@ -20,6 +20,7 @@ test("toolKind buckets tool names", () => {
   assert.equal(toolKind("grep"), "read");
   assert.equal(toolKind("edit"), "edit");
   assert.equal(toolKind("write"), "edit");
+  assert.equal(toolKind("apply_patch"), "edit"); // GPT-style models edit through patches
   assert.equal(toolKind("bash"), "bash");
   assert.equal(toolKind("webfetch"), "other");
 });
