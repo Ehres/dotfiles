@@ -15,6 +15,15 @@ export type TamagoEvent =
   | { type: "session_error" }
   | { type: "session_started" }
   | { type: "session_gone" }
+  /** Speech events: they move nothing and count nothing, they only give the Voice something to say. */
+  | { type: "session_compacted" }
+  | { type: "session_retried" }
+  /** Todos of the session: `total` excludes cancelled ones, `done` counts completed ones. */
+  | { type: "todos_updated"; total: number; done: number }
+  /** Number of files in the session diff. */
+  | { type: "diff_updated"; files: number }
+  /** A new Stage was reached. Raised by index.tsx for every Session, never by the adapter. */
+  | { type: "evolved" }
   | { type: "tick" };
 
 /**

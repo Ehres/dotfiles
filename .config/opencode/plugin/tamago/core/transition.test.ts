@@ -133,3 +133,15 @@ test("session_gone changes nothing; forgetting the session is the caller's job",
   const working = replay([[{ type: "tool_started" }, 0]]);
   assert.deepEqual(replay([[{ type: "session_gone" }, 1]], working), working);
 });
+
+test("speech events never move a session", () => {
+  const speech: TamagoEvent[] = [
+    { type: "session_compacted" },
+    { type: "session_retried" },
+    { type: "todos_updated", total: 3, done: 3 },
+    { type: "diff_updated", files: 12 },
+    { type: "evolved" },
+  ];
+  const working = replay([[{ type: "tool_started" }, 0]]);
+  for (const event of speech) assert.equal(transition(working, event, 5), working, `${event.type} must be inert`);
+});

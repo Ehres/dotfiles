@@ -33,6 +33,11 @@ export function transition(start: Session, event: TamagoEvent, now: number): Ses
     case "file_edited":
     case "session_started":
     case "session_gone":
+    case "session_compacted":
+    case "session_retried":
+    case "todos_updated":
+    case "diff_updated":
+    case "evolved":
       return session;
     case "tick": {
       if (session.activity === "hurt" && now - session.since >= HURT_MS) {

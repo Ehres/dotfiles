@@ -28,6 +28,11 @@ test("activity-only events count nothing", () => {
     { type: "session_gone" },
     { type: "tool_cancelled" },
     { type: "tick" },
+    { type: "session_compacted" },
+    { type: "session_retried" },
+    { type: "todos_updated", total: 3, done: 3 },
+    { type: "diff_updated", files: 12 },
+    { type: "evolved" },
   ];
   for (const event of silent) assert.ok(isEmpty(count(event)), `${event.type} should not count`);
 });
