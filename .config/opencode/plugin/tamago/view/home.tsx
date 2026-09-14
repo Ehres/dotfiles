@@ -16,11 +16,11 @@ export function HomeView(props: {
   name: string;
   theme: () => TuiThemeCurrent;
   career: () => Career;
-  ticks: () => number;
+  clock: () => number;
 }): JSX.Element {
   const current = createMemo(() => stage(props.career()));
   const total = createMemo(() => xp(props.career()));
-  const lines = () => frameAt(current(), "idle", frameIndex("idle", props.ticks()));
+  const lines = () => frameAt(current(), "idle", frameIndex("idle", props.clock()));
   const progress = () => {
     const coming = next(props.career());
     if (!coming) return `${bar(1, BAR_WIDTH)} ${fmt(total())} xp · final form`;

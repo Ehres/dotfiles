@@ -39,13 +39,13 @@ export function SidebarView(props: {
   theme: () => TuiThemeCurrent;
   session: () => Session;
   career: () => Career;
-  ticks: () => number;
+  clock: () => number;
   footer: () => FooterInfo;
 }): JSX.Element {
   const activity = createMemo(() => props.session().activity);
   const current = createMemo(() => stage(props.career()));
   const total = createMemo(() => xp(props.career()));
-  const lines = () => frameAt(current(), activity(), frameIndex(activity(), props.ticks()));
+  const lines = () => frameAt(current(), activity(), frameIndex(activity(), props.clock()));
   const color = () => spriteColor(props.theme(), activity());
 
   return (

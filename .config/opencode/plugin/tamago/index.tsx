@@ -5,6 +5,7 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import { createSignal } from "solid-js";
 import { createErrorLog } from "./adapter/log.ts";
+import { tickInterval } from "./core/cadence.ts";
 import { createStore, type Loaded } from "./adapter/store.ts";
 import { SUBSCRIBED, createTranslator } from "./adapter/translate.ts";
 import { count } from "./core/count.ts";
@@ -30,7 +31,6 @@ import { SidebarView, type FooterInfo } from "./view/sidebar.tsx";
 
 const id = "opencode-tamago";
 const DATA_DIR = join(homedir(), ".local", "share", "opencode-tamago");
-const TICK_MS = 500;
 const FLUSH_MS = 2_000;
 /** Longest pause between two flush attempts while the disk keeps failing. */
 const FLUSH_MAX_MS = 60_000;
@@ -57,7 +57,9 @@ const tui: TuiPlugin = async (api, options) => {
     const [career, setCareer] = createSignal<Career>(loaded.career, { equals: sameCareer });
     /** One mood per root OpenCode session, keyed by session id. Never persisted. */
     const [sessions, setSessions] = createSignal<Record<string, Session>>({});
-    const [ticks, setTicks] = createSignal(0);
+    /** Milliseconds since the plugin started; drives animation frames. */
+    const started = Date.now();
+    const [clock, setClock] = createSignal(0);
     let pending: Delta = EMPTY_DELTA;
 
     let warnedCorrupt = false;
@@ -123,13 +125,19 @@ const tui: TuiPlugin = async (api, options) => {
     });
     for (const type of SUBSCRIBED) api.lifecycle.onDispose(api.event.on(type, onEvent));
 
-    const tick = setInterval(
-      guard(() => {
-        move(Object.keys(sessions()), { type: "tick" }, Date.now());
-        setTicks((t) => t + 1);
-      }),
-      TICK_MS,
-    );
+    /** Fast while a session shows effort, slow otherwise: same frames, four times fewer wake-ups when calm. */
+    let ticker: ReturnType<typeof setTimeout> | undefined;
+    const scheduleTick = () => {
+      const activities = Object.values(sessions()).map((session) => session.activity);
+      ticker = setTimeout(tick, tickInterval(activities));
+    };
+    const tick = guard(() => {
+      const now = Date.now();
+      move(Object.keys(sessions()), { type: "tick" }, now);
+      setClock(now - started);
+      scheduleTick();
+    });
+    scheduleTick();
 
     /** Returns true when this window's delta reached the disk. Throws on disk errors. */
     const persist = (): boolean => {
@@ -174,7 +182,7 @@ const tui: TuiPlugin = async (api, options) => {
 
     api.lifecycle.onDispose(
       guard(() => {
-        clearInterval(tick);
+        if (ticker !== undefined) clearTimeout(ticker);
         if (flusher !== undefined) clearTimeout(flusher);
         if (!isEmpty(pending) && store.flush(pending).outcome === "written") pending = EMPTY_DELTA;
       }),
@@ -199,7 +207,7 @@ const tui: TuiPlugin = async (api, options) => {
               theme={() => ctx.theme.current}
               session={sessionOf(props.session_id)}
               career={career}
-              ticks={ticks}
+              clock={clock}
               footer={footer(props.session_id)}
             />
           );
@@ -211,7 +219,7 @@ const tui: TuiPlugin = async (api, options) => {
       order: HOME_BOTTOM_ORDER,
       slots: {
         home_bottom(ctx) {
-          return <HomeView name={name} theme={() => ctx.theme.current} career={career} ticks={ticks} />;
+          return <HomeView name={name} theme={() => ctx.theme.current} career={career} clock={clock} />;
         },
       },
     });
