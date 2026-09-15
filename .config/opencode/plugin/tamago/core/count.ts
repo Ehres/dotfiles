@@ -21,6 +21,9 @@ export function count(event: TamagoEvent): Delta {
     case "tool_finished":
       delta.tools[event.kind] = 1;
       break;
+    case "question_asked":
+      delta.questions = 1;
+      break;
     default:
       break;
   }

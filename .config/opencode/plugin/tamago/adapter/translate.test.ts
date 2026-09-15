@@ -42,6 +42,9 @@ test("SUBSCRIBED lists every SDK event type the translator handles, once", () =>
     "session.next.retried",
     "todo.updated",
     "session.diff",
+    "question.asked",
+    "question.replied",
+    "question.rejected",
   ]) {
     assert.ok((SUBSCRIBED as readonly string[]).includes(type), `${type} must be subscribed`);
   }
@@ -217,4 +220,26 @@ test("malformed todo and diff payloads yield nothing", () => {
   assert.deepEqual(t(ev({ type: "todo.updated", properties: { sessionID: "s", todos: "nope" } })), []);
   assert.deepEqual(t(ev({ type: "session.diff", properties: { sessionID: "s" } })), []);
   assert.deepEqual(t(ev({ type: "todo.updated", properties: { todos: [] } })), []);
+});
+
+test("a question is counted once per id and moves its root session; a reply resumes it", () => {
+  const t = createTranslator();
+  const asked = ev({ type: "question.asked", properties: { id: "q1", sessionID: "s", questions: [] } });
+  assert.deepEqual(t(asked), [on("s", { type: "question_asked" })]);
+  assert.deepEqual(t(asked), [], "the same question again is ignored");
+  assert.deepEqual(t(ev({ type: "question.replied", properties: { sessionID: "s", requestID: "q1", answers: [] } })), [
+    on("s", { type: "question_replied" }),
+  ]);
+  assert.deepEqual(t(ev({ type: "question.rejected", properties: { sessionID: "s", requestID: "q1" } })), [
+    on("s", { type: "question_replied" }),
+  ]);
+});
+
+test("a child session's question counts but moves nobody, and its reply is dropped", () => {
+  const t = createTranslator();
+  t(ev({ type: "session.created", properties: { info: { id: "child", parentID: "root" } } }));
+  assert.deepEqual(t(ev({ type: "question.asked", properties: { id: "q2", sessionID: "child", questions: [] } })), [
+    none({ type: "question_asked" }),
+  ]);
+  assert.deepEqual(t(ev({ type: "question.replied", properties: { sessionID: "child", requestID: "q2", answers: [] } })), []);
 });

@@ -17,6 +17,7 @@ export function transition(start: Session, event: TamagoEvent, now: number): Ses
       return busy(at(session, "thinking", now), true);
     case "tool_started":
       return busy(at(session, "working", now), true);
+    case "question_replied":
     case "permission_replied":
       return busy(at(session, "working", now), true);
     case "session_busy":
@@ -24,6 +25,7 @@ export function transition(start: Session, event: TamagoEvent, now: number): Ses
     case "tool_failed":
     case "session_error":
       return at(session, "hurt", now);
+    case "question_asked":
     case "permission_asked":
       return at(session, "waiting", now);
     case "session_idle":

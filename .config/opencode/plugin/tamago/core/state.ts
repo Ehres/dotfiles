@@ -16,6 +16,7 @@ export type Counters = {
   tools: Record<ToolKind, number>;
   filesEdited: number;
   errors: number;
+  questions: number;
 };
 
 /** `name` is absent until the user renames the creature; the plugin option is the default. */
@@ -32,6 +33,7 @@ export const EMPTY_DELTA: Delta = {
   tools: { read: 0, edit: 0, bash: 0, other: 0 },
   filesEdited: 0,
   errors: 0,
+  questions: 0,
 };
 
 export function initialSession(now: number): Session {
@@ -49,6 +51,7 @@ export function isEmpty(delta: Delta): boolean {
     delta.prompts === 0 &&
     delta.filesEdited === 0 &&
     delta.errors === 0 &&
+    delta.questions === 0 &&
     TOOL_KINDS.every((kind) => delta.tools[kind] === 0)
   );
 }
@@ -63,6 +66,7 @@ export function addDelta(a: Delta, b: Delta): Delta {
     tools,
     filesEdited: a.filesEdited + b.filesEdited,
     errors: a.errors + b.errors,
+    questions: a.questions + b.questions,
     ...(rename === undefined ? {} : { rename }),
   };
 }
@@ -77,6 +81,7 @@ export function sameCareer(a: Career, b: Career): boolean {
     a.prompts === b.prompts &&
     a.filesEdited === b.filesEdited &&
     a.errors === b.errors &&
+    a.questions === b.questions &&
     TOOL_KINDS.every((kind) => a.tools[kind] === b.tools[kind])
   );
 }
@@ -103,6 +108,7 @@ export function hydrate(raw: unknown, now: number): { career: Career; corrupt: b
       tools,
       filesEdited: num(raw.filesEdited, 0),
       errors: num(raw.errors, 0),
+      questions: num(raw.questions, 0),
       hatchedAt: num(raw.hatchedAt, now),
       ...(name === undefined ? {} : { name }),
     },

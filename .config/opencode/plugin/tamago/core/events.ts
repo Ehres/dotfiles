@@ -11,6 +11,10 @@ export type TamagoEvent =
   | { type: "permission_asked" }
   /** `granted` is true for a "once" or "always" reply, false for a refusal. */
   | { type: "permission_replied"; granted: boolean }
+  /** The assistant asked the user something through the question tool. Counted; never XP. */
+  | { type: "question_asked" }
+  /** The user answered or dismissed the question. */
+  | { type: "question_replied" }
   | { type: "session_busy" }
   | { type: "session_idle" }
   | { type: "session_error" }

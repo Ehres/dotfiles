@@ -41,3 +41,10 @@ test("count never returns the shared EMPTY_DELTA object", () => {
   assert.notEqual(count({ type: "tick" }), EMPTY_DELTA);
   assert.notEqual(count({ type: "tick" }).tools, EMPTY_DELTA.tools);
 });
+
+test("a question asked counts one question and nothing else; a reply counts nothing", () => {
+  const asked = count({ type: "question_asked" });
+  assert.equal(asked.questions, 1);
+  assert.deepEqual({ ...asked, questions: 0 }, EMPTY_DELTA);
+  assert.equal(isEmpty(count({ type: "question_replied" })), true);
+});

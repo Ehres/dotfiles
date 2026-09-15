@@ -9,6 +9,7 @@ const career: Career = {
   tools: { read: 500, edit: 120, bash: 90, other: 7 },
   filesEdited: 60,
   errors: 9,
+  questions: 0,
   hatchedAt: 0,
 };
 

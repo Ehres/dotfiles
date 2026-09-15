@@ -28,6 +28,7 @@ test("addDelta sums every counter including nested tools", () => {
     tools: { read: 1, edit: 2, bash: 4, other: 0 },
     filesEdited: 4,
     errors: 0,
+    questions: 0,
   });
 });
 
@@ -97,4 +98,15 @@ test("sameCareer compares the name", () => {
   assert.equal(sameCareer(a, { ...a, name: { value: "Mochi", at: 3 } }), false);
   assert.equal(sameCareer(a, { ...a, name: { value: "Pixel", at: 4 } }), false);
   assert.equal(sameCareer(a, freshCareer(1)), false);
+});
+
+test("questions is a counter like the others", () => {
+  assert.equal(EMPTY_DELTA.questions, 0);
+  assert.equal(isEmpty({ ...EMPTY_DELTA, questions: 1 }), false);
+  assert.equal(addDelta({ ...EMPTY_DELTA, questions: 2 }, { ...EMPTY_DELTA, questions: 3 }).questions, 5);
+  assert.equal(hydrate({ questions: 4 }, 0).career.questions, 4);
+  assert.equal(hydrate({}, 0).career.questions, 0, "today's career.json has no questions field");
+  const a = { ...freshCareer(1), questions: 1 };
+  assert.equal(sameCareer(a, { ...a }), true);
+  assert.equal(sameCareer(a, { ...a, questions: 2 }), false);
 });

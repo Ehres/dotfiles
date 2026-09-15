@@ -145,3 +145,11 @@ test("speech events never move a session", () => {
   const working = replay([[{ type: "tool_started" }, 0]]);
   for (const event of speech) assert.equal(transition(working, event, 5), working, `${event.type} must be inert`);
 });
+
+test("a question makes the creature wait and the reply resumes work", () => {
+  const waiting = replay([[{ type: "question_asked" }, 0]]);
+  assert.equal(waiting.activity, "waiting");
+  const resumed = replay([[{ type: "question_replied" }, 1]], waiting);
+  assert.equal(resumed.activity, "working");
+  assert.equal(resumed.busy, true);
+});

@@ -9,6 +9,9 @@ export const SUBSCRIBED = [
   "file.edited",
   "permission.asked",
   "permission.replied",
+  "question.asked",
+  "question.replied",
+  "question.rejected",
   "session.status",
   "session.idle",
   "session.error",
@@ -78,6 +81,7 @@ export function createTranslator(options: TranslatorOptions = {}): (event: Event
   const running = new Set<string>();
   const done = new Set<string>();
   const prompts = new Set<string>();
+  const questions = new Set<string>();
   const children = new Set<string>();
 
   const isChild = (id: string): boolean => children.has(id) || (options.isChild?.(id) ?? false);
@@ -138,6 +142,15 @@ export function createTranslator(options: TranslatorOptions = {}): (event: Event
         const granted = reply === "once" || reply === "always";
         return mood(sessionID, { type: "permission_replied", granted });
       }
+      case "question.asked": {
+        const id = isRecord(props) ? str(props.id) : undefined;
+        if (id === undefined || questions.has(id)) return [];
+        remember(questions, id);
+        return work(sessionID, [{ type: "question_asked" }]);
+      }
+      case "question.replied":
+      case "question.rejected":
+        return mood(sessionID, { type: "question_replied" });
       case "session.status": {
         const status = isRecord(props) && isRecord(props.status) ? str(props.status.type) : undefined;
         if (status === "idle") return mood(sessionID, { type: "session_idle" });
