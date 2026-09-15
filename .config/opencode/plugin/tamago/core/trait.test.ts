@@ -1,0 +1,60 @@
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { freshCareer, type Career } from "./state.ts";
+import { TRAITS, eligible, traits, type Trait } from "./trait.ts";
+
+const table: readonly Trait[] = [
+  { id: "sarcastic", needs: [] },
+  { id: "stoic", needs: [] },
+  { id: "hat", needs: [] },
+  { id: "pirate", needs: ["sarcastic", "hat"] },
+  { id: "monocle", needs: ["hat"] },
+];
+
+const withPicks = (picks: Career["picks"]): Career => ({ ...freshCareer(1), picks });
+
+test("traits is empty for a fresh egg", () => {
+  assert.deepEqual(traits(freshCareer(1), table), []);
+});
+
+test("traits lists held Traits by Pick time, then by trait id on a tie", () => {
+  const career = withPicks({
+    m3: { trait: "stoic", at: 30 },
+    m1: { trait: "hat", at: 10 },
+    m2: { trait: "sarcastic", at: 10 },
+  });
+  assert.deepEqual(traits(career, table), ["hat", "sarcastic", "stoic"]);
+});
+
+test("traits drops a Pick naming a Trait the table no longer knows, silently", () => {
+  const career = withPicks({ m1: { trait: "hat", at: 1 }, m2: { trait: "retired", at: 2 } });
+  assert.deepEqual(traits(career, table), ["hat"]);
+});
+
+test("traits never lists the same Trait twice", () => {
+  const career = withPicks({ m1: { trait: "hat", at: 1 }, m2: { trait: "hat", at: 2 } });
+  assert.deepEqual(traits(career, table), ["hat"]);
+});
+
+test("eligible offers every starter Trait on a fresh egg, in table order", () => {
+  assert.deepEqual(eligible(freshCareer(1), table), ["sarcastic", "stoic", "hat"]);
+});
+
+test("eligible excludes held Traits and includes what their needs unlock", () => {
+  const career = withPicks({ m1: { trait: "hat", at: 1 } });
+  assert.deepEqual(eligible(career, table), ["sarcastic", "stoic", "monocle"]);
+});
+
+test("a Trait with several needs waits for all of them", () => {
+  const some = withPicks({ m1: { trait: "sarcastic", at: 1 } });
+  assert.equal(eligible(some, table).includes("pirate"), false);
+  const all = withPicks({ m1: { trait: "sarcastic", at: 1 }, m2: { trait: "hat", at: 2 } });
+  assert.deepEqual(eligible(all, table), ["stoic", "pirate", "monocle"]);
+});
+
+test("the shipped table is empty for now", () => {
+  assert.deepEqual(TRAITS, []);
+  const career = withPicks({ m1: { trait: "hat", at: 1 } });
+  assert.deepEqual(traits(career), []);
+  assert.deepEqual(eligible(career), []);
+});
