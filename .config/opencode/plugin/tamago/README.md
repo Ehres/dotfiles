@@ -79,7 +79,8 @@ order per cue. Tuning lives in `core/voice.ts`.
 
 ## Commands
 
-Four commands in the palette, under the creature's name:
+Four commands in the palette, always under `Tamago` so they stay easy to find
+whatever the creature is called; its Name only appears in their descriptions:
 
 | Command          | What it does                                                     |
 | ---------------- | ---------------------------------------------------------------- |

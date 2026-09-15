@@ -38,6 +38,8 @@ const FLUSH_MAX_MS = 60_000;
 const FOOTER_ORDER = 50;
 /** home_bottom is additive: below 100 renders above the built-in tips, keeping the OpenCode logo intact. */
 const HOME_BOTTOM_ORDER = 50;
+/** What the palette commands are filed under. Fixed on purpose: the user searches for the plugin, not for a Name they may change. */
+const PALETTE = "Tamago";
 
 const tui: TuiPlugin = async (api, options) => {
   /** The plugin option: the Name until the user renames the creature. */
@@ -113,7 +115,7 @@ const tui: TuiPlugin = async (api, options) => {
     const run = ({ window: next, effects }: Step) => {
       commit(next);
       for (const effect of effects) {
-        if (effect.type === "renamed") registerCommands(); // palette titles carry the Name and are fixed at registration
+        if (effect.type === "renamed") registerCommands(); // palette descriptions carry the Name and are fixed at registration
         else api.ui.toast({ variant: "success", title: name(), message: `${name()} evolved: ${effect.stage}!` });
       }
     };
@@ -193,39 +195,39 @@ const tui: TuiPlugin = async (api, options) => {
     let unregisterCommands: (() => void) | undefined;
     function registerCommands(): void {
       unregisterCommands?.();
-      const title = name();
+      const who = name();
       unregisterCommands = api.keymap.registerLayer({
         commands: [
           {
             name: "tamago.mute",
-            title: `${title}: toggle bubbles`,
-            description: "Mute or unmute what the creature says",
-            category: title,
+            title: `${PALETTE}: toggle bubbles`,
+            description: `Mute or unmute what ${who} says`,
+            category: PALETTE,
             /** What lists a command in the palette; OpenCode's own commands carry it. */
             namespace: "palette",
             run: guard(() => setMute(!muted())),
           },
           {
             name: "tamago.card",
-            title: `${title}: show card`,
-            description: "Who the creature is: stage, XP, age",
-            category: title,
+            title: `${PALETTE}: show card`,
+            description: `Who ${who} is: stage, XP, age`,
+            category: PALETTE,
             namespace: "palette",
             run: guard(showCard),
           },
           {
             name: "tamago.pet",
-            title: `${title}: pet`,
-            description: "Give the creature a pat",
-            category: title,
+            title: `${PALETTE}: pet`,
+            description: `Give ${who} a pat`,
+            category: PALETTE,
             namespace: "palette",
             run: guard(pet),
           },
           {
             name: "tamago.rename",
-            title: `${title}: rename`,
-            description: "Give the creature a new name, shared by every window",
-            category: title,
+            title: `${PALETTE}: rename`,
+            description: `Give ${who} a new name, shared by every window`,
+            category: PALETTE,
             namespace: "palette",
             run: guard(askName),
           },
