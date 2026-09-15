@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { MAX_TEXT } from "./bubble.ts";
+import { TEMPERAMENTS, type Temperament } from "./character.ts";
 import type { TamagoEvent } from "./events.ts";
 import { initialSession, type Session } from "./state.ts";
 import { transition } from "./transition.ts";
@@ -8,6 +9,7 @@ import {
   BIG_DIFF_FILES,
   BUBBLE_MS,
   CUES,
+  FLAVOR,
   LONG_WORK_MS,
   PHRASES,
   QUIET_MS,
@@ -20,11 +22,15 @@ import {
 } from "./voice.ts";
 
 /** Runs events through transition and speak together, like index.tsx does. */
-function replay(events: Array<[TamagoEvent, number]>, start = { voice: initialVoice(), session: initialSession(0) }) {
+function replay(
+  events: Array<[TamagoEvent, number]>,
+  start = { voice: initialVoice(), session: initialSession(0) },
+  temperament: Temperament = "stoic",
+) {
   let { voice, session } = start;
   for (const [event, now] of events) {
     const after = transition(session, event, now);
-    voice = speak(voice, event, session, after, now);
+    voice = speak(voice, event, session, after, now, temperament);
     session = after;
   }
   return { voice, session };
@@ -41,7 +47,7 @@ test("every phrase fits in MAX_TEXT and every Cue has at least one", () => {
 
 test("a permission request speaks, with the first phrase, for BUBBLE_MS", () => {
   const { voice } = replay([[{ type: "permission_asked" }, 100]]);
-  assert.deepEqual(voice.bubble, { cue: "permission", text: PHRASES.permission[0], since: 100, until: 100 + BUBBLE_MS });
+  assert.deepEqual(voice.bubble, { cue: "permission", text: FLAVOR.stoic?.permission?.[0], since: 100, until: 100 + BUBBLE_MS });
 });
 
 test("waking from sleep speaks", () => {
@@ -180,15 +186,15 @@ test("phrases are picked in order and wrap around", () => {
 test("an event that changes nothing returns the same Voice object", () => {
   const voice = initialVoice();
   const session = initialSession(0);
-  assert.equal(speak(voice, { type: "tool_finished", kind: "read" }, session, session, 1), voice);
-  assert.equal(speak(voice, { type: "tick" }, session, session, 1), voice);
+  assert.equal(speak(voice, { type: "tool_finished", kind: "read" }, session, session, 1, "stoic"), voice);
+  assert.equal(speak(voice, { type: "tick" }, session, session, 1, "stoic"), voice);
 });
 
 test("a reply within REPLY_MS answers a spoken May I?, replacing it despite the quiet window", () => {
   const asked = replay([[{ type: "permission_asked" }, 0]]);
   assert.equal(asked.voice.asked, 0);
   const granted = replay([[{ type: "permission_replied", granted: true }, 1]], asked);
-  assert.deepEqual(granted.voice.bubble, { cue: "granted", text: PHRASES.granted[0], since: 1, until: 1 + BUBBLE_MS });
+  assert.deepEqual(granted.voice.bubble, { cue: "granted", text: FLAVOR.stoic?.granted?.[0], since: 1, until: 1 + BUBBLE_MS });
   assert.equal(granted.voice.asked, undefined, "the question is answered");
   const denied = replay([[{ type: "permission_replied", granted: false }, REPLY_MS - 1]], asked);
   assert.equal(cueOf(denied.voice), "denied");
@@ -220,4 +226,29 @@ test("one reply per question: a second reply in the window is ignored", () => {
   const second = replay([[{ type: "tick" }, 1 + BUBBLE_MS], [{ type: "permission_replied", granted: false }, 2 + QUIET_MS]], first);
   assert.equal(cueOf(second.voice), undefined);
   assert.equal(second.voice.spoken.denied, undefined);
+});
+
+test("a flavored Cue speaks in the Temperament's words and rotates within them", () => {
+  const first = replay([[{ type: "permission_asked" }, 0]], undefined, "sarcastic");
+  assert.equal(first.voice.bubble?.text, FLAVOR.sarcastic?.permission?.[0]);
+  const second = replay([[{ type: "permission_asked" }, CUES.permission.cooldown + 1]], first, "sarcastic");
+  assert.equal(second.voice.bubble?.text, FLAVOR.sarcastic?.permission?.[1]);
+});
+
+test("a Cue without flavor falls back to the neutral phrases", () => {
+  const woke = replay([[{ type: "prompt_sent" }, 0]], { voice: initialVoice(), session: { activity: "sleeping", since: 0, busy: false } }, "dreamy");
+  assert.equal(woke.voice.bubble?.text, PHRASES.woke[0]);
+});
+
+test("every flavored phrase fits in MAX_TEXT and every Temperament flavors the same Cues", () => {
+  const cues = ["permission", "granted", "denied", "streak", "evolved"] as const;
+  for (const temperament of TEMPERAMENTS) {
+    const flavor = FLAVOR[temperament];
+    assert.ok(flavor, temperament);
+    for (const cue of cues) {
+      const phrases = flavor[cue];
+      assert.ok(phrases && phrases.length >= 2, `${temperament}/${cue}`);
+      for (const text of phrases) assert.ok(text.length <= MAX_TEXT, `${temperament}/${cue}: ${JSON.stringify(text)}`);
+    }
+  }
 });

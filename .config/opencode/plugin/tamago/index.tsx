@@ -6,6 +6,7 @@ import { join } from "node:path";
 import { createSignal } from "solid-js";
 import { createErrorLog } from "./adapter/log.ts";
 import { tickInterval } from "./core/cadence.ts";
+import { character } from "./core/character.ts";
 import { createStore, type Loaded } from "./adapter/store.ts";
 import { SUBSCRIBED, createTranslator } from "./adapter/translate.ts";
 import { count } from "./core/count.ts";
@@ -62,6 +63,8 @@ const tui: TuiPlugin = async (api, options) => {
     const [career, setCareer] = createSignal<Career>(loaded.career, { equals: sameCareer });
     /** The Name lives in the Career, so a rename in one window reaches the others on flush. */
     const name = (): string => career().name?.value ?? defaultName;
+    /** Computed from the Career like the Stage: never stored, identical in every window. */
+    const persona = () => character(career());
     /** One mood per root OpenCode session, keyed by session id. Never persisted. */
     const [sessions, setSessions] = createSignal<Record<string, Session>>({});
     /** One Voice per root OpenCode session, keyed like `sessions`. Never persisted. */
@@ -125,7 +128,7 @@ const tui: TuiPlugin = async (api, options) => {
         const next = { ...all };
         for (const id of ids) {
           const voice = all[id] ?? initialVoice();
-          const heard = speak(voice, event, before[id] ?? initialSession(now), after[id] ?? initialSession(now), now);
+          const heard = speak(voice, event, before[id] ?? initialSession(now), after[id] ?? initialSession(now), now, persona().temperament);
           next[id] = heard;
           if (heard !== voice) spoke = true;
         }
@@ -184,7 +187,15 @@ const tui: TuiPlugin = async (api, options) => {
     /** The dialog stack wraps the card in OpenCode's own centered Dialog; nothing to position here. */
     const showCard = () => {
       api.ui.dialog.replace(() => (
-        <CardView name={name()} theme={() => api.theme.current} career={career} clock={clock} heart={heart} now={Date.now} />
+        <CardView
+          name={name()}
+          theme={() => api.theme.current}
+          career={career}
+          clock={clock}
+          heart={heart}
+          temperament={() => persona().temperament}
+          now={Date.now}
+        />
       ));
     };
 
@@ -343,6 +354,7 @@ const tui: TuiPlugin = async (api, options) => {
               footer={footer(props.session_id)}
               bubble={() => voices()[props.session_id]?.bubble}
               heart={heart}
+              temperament={() => persona().temperament}
             />
           );
         },
@@ -353,7 +365,16 @@ const tui: TuiPlugin = async (api, options) => {
       order: HOME_BOTTOM_ORDER,
       slots: {
         home_bottom(ctx) {
-          return <HomeView name={name()} theme={() => ctx.theme.current} career={career} clock={clock} heart={heart} />;
+          return (
+            <HomeView
+              name={name()}
+              theme={() => ctx.theme.current}
+              career={career}
+              clock={clock}
+              heart={heart}
+              temperament={() => persona().temperament}
+            />
+          );
         },
       },
     });

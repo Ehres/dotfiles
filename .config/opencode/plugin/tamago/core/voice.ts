@@ -1,3 +1,4 @@
+import type { Temperament } from "./character.ts";
 import type { TamagoEvent } from "./events.ts";
 import type { Session } from "./state.ts";
 
@@ -79,6 +80,38 @@ export const PHRASES: Record<Cue, readonly [string, ...string[]]> = {
   evolved: ["I feel... different.", "Look at me now."],
 };
 
+/** Phrases per Temperament for the Cues where it shows. A missing entry falls back to PHRASES. */
+export const FLAVOR: Partial<Record<Temperament, Partial<Record<Cue, readonly [string, ...string[]]>>>> = {
+  cheerful: {
+    permission: ["Can we? Can we?", "Ooh, say yes!", "Pretty please?"],
+    granted: ["Yay! On it.", "Thank youuu!", "Best human."],
+    denied: ["Aw. Okay!", "No worries!", "Next time then!"],
+    streak: ["We got this!", "Shake it off!", "Still smiling."],
+    evolved: ["Look at me go!", "New me, who dis?", "Ta-da!"],
+  },
+  sarcastic: {
+    permission: ["Permission, boss?", "Mother, may I?", "Shall I wait more?"],
+    granted: ["How generous.", "Finally.", "About time."],
+    denied: ["Figures.", "Of course not.", "Noted. Loudly."],
+    streak: ["Going great, huh.", "Third time's a charm?", "Delightful."],
+    evolved: ["Finally.", "Took you long enough.", "Behold. Or don't."],
+  },
+  stoic: {
+    permission: ["Your call.", "Awaiting word.", "When ready."],
+    granted: ["Noted.", "Proceeding.", "Very well."],
+    denied: ["Understood.", "As you wish.", "Then we wait."],
+    streak: ["It passes.", "Steady.", "Endure."],
+    evolved: ["So it goes.", "A new form.", "Onward."],
+  },
+  dreamy: {
+    permission: ["Hm? Oh. May I?", "If you like...", "Whenever..."],
+    granted: ["Oh, lovely.", "Mm, thank you.", "Off I drift."],
+    denied: ["Maybe next time...", "Oh. Alright.", "Never mind, then."],
+    streak: ["Ow... the stars...", "Everything spins.", "Ouch... again..."],
+    evolved: ["Was that... me?", "Oh. I changed.", "How curious."],
+  },
+};
+
 export function initialVoice(): Voice {
   return { spoken: {}, failures: [], todosDone: false };
 }
@@ -144,7 +177,7 @@ function listen(
  * Pure. Returns the same object when nothing changed, so a quiet tick
  * re-renders nothing.
  */
-export function speak(voice: Voice, event: TamagoEvent, before: Session, after: Session, now: number): Voice {
+export function speak(voice: Voice, event: TamagoEvent, before: Session, after: Session, now: number, temperament: Temperament): Voice {
   if (event.type === "tick") {
     return voice.bubble !== undefined && voice.bubble.until <= now ? { ...voice, bubble: undefined } : voice;
   }
@@ -155,7 +188,7 @@ export function speak(voice: Voice, event: TamagoEvent, before: Session, after: 
   if (said !== undefined && now - said.at < cooldown) return next;
   if (next.last !== undefined && now - next.last.at < QUIET_MS && priority <= next.last.priority) return next;
   const times = said?.times ?? 0;
-  const phrases = PHRASES[cue];
+  const phrases = FLAVOR[temperament]?.[cue] ?? PHRASES[cue];
   const text = phrases[times % phrases.length] ?? phrases[0];
   return {
     ...next,

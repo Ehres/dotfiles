@@ -1,3 +1,4 @@
+import type { Temperament } from "./character.ts";
 import type { StageId } from "./stage.ts";
 import type { Activity } from "./state.ts";
 
@@ -95,14 +96,23 @@ export function frames(stage: StageId, activity: Activity): readonly Frame[] {
 export const PET_MS = 2_000;
 /** Not ASCII: one column in most terminals, two in a few, where line 0 overflows for PET_MS. */
 export const HEART = "♥";
-const HEARTS = new Map<StageId, Frame>();
 
-/** The Sprite while petted, whatever the Activity: happy eyes and a heart for the mark. Cached, so identity is stable. */
-export function heartFrame(stage: StageId): Frame {
-  const hit = HEARTS.get(stage);
+/** Eyes of a petted Tamago, per Temperament. Three columns, like every Face. */
+export const EYES: Record<Temperament, string> = {
+  cheerful: "^ ^",
+  sarcastic: "- o",
+  stoic: "o o",
+  dreamy: "~ ~",
+};
+const HEARTS = new Map<string, Frame>();
+
+/** The Sprite while petted, whatever the Activity: the Temperament's eyes and a heart for the mark. Cached, so identity is stable. */
+export function heartFrame(stage: StageId, temperament: Temperament): Frame {
+  const key = `${stage}/${temperament}`;
+  const hit = HEARTS.get(key);
   if (hit) return hit;
-  const built = fit(BODIES[stage]("^ ^", HEART));
-  HEARTS.set(stage, built);
+  const built = fit(BODIES[stage](EYES[temperament], HEART));
+  HEARTS.set(key, built);
   return built;
 }
 

@@ -4,6 +4,7 @@ import type { JSX } from "@opentui/solid";
 import { Index, createMemo } from "solid-js";
 import { frameIndex } from "../core/cadence.ts";
 import { age, progress } from "../core/card.ts";
+import type { Temperament } from "../core/character.ts";
 import { fmt } from "../core/format.ts";
 import { frameAt, heartFrame } from "../core/sprites.ts";
 import { stage, xp } from "../core/stage.ts";
@@ -20,10 +21,13 @@ export function CardView(props: {
   career: () => Career;
   clock: () => number;
   heart: () => boolean;
+  temperament: () => Temperament;
   now: () => number;
 }): JSX.Element {
   const current = createMemo(() => stage(props.career()));
-  const lines = createMemo(() => (props.heart() ? heartFrame(current()) : frameAt(current(), "idle", frameIndex("idle", props.clock()))));
+  const lines = createMemo(() =>
+    props.heart() ? heartFrame(current(), props.temperament()) : frameAt(current(), "idle", frameIndex("idle", props.clock())),
+  );
   return (
     <box paddingLeft={2} paddingRight={2} paddingBottom={1} gap={1}>
       <box flexDirection="row" justifyContent="space-between">

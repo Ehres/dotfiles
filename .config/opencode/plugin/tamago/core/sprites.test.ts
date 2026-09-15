@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { HEART, SPRITE_HEIGHT, SPRITE_WIDTH, frameAt, frames, heartFrame } from "./sprites.ts";
+import { TEMPERAMENTS } from "./character.ts";
+import { EYES, HEART, SPRITE_HEIGHT, SPRITE_WIDTH, frameAt, frames, heartFrame } from "./sprites.ts";
 import { STAGES } from "./stage.ts";
 import { ACTIVITIES } from "./state.ts";
 
@@ -53,13 +54,16 @@ test("frames and frameAt return the same objects for the same inputs, so memos s
   assert.notEqual(frameAt("young", "idle", 0), frameAt("young", "idle", 1));
 });
 
-test("the heart frame keeps the sprite size, shows happy eyes and a heart, and is stable", () => {
+test("a heart frame per Stage and Temperament keeps the size, wears the heart and the Temperament's eyes", () => {
   for (const entry of STAGES) {
-    const frame = heartFrame(entry.id);
-    assert.equal(frame.length, SPRITE_HEIGHT);
-    for (const line of frame) assert.equal(line.length, SPRITE_WIDTH, `${entry.id}: ${JSON.stringify(line)}`);
-    assert.ok(frame[0]?.includes(HEART), `${entry.id} wears the heart on line 0`);
-    assert.ok(frame.some((line) => line.includes("^ ^")), `${entry.id} smiles`);
-    assert.equal(heartFrame(entry.id), frame);
+    for (const temperament of TEMPERAMENTS) {
+      const frame = heartFrame(entry.id, temperament);
+      assert.equal(frame.length, SPRITE_HEIGHT);
+      for (const line of frame) assert.equal(line.length, SPRITE_WIDTH, `${entry.id}/${temperament}: ${JSON.stringify(line)}`);
+      assert.ok(frame[0]?.includes(HEART), `${entry.id}/${temperament} wears the heart on line 0`);
+      assert.ok(frame.some((line) => line.includes(EYES[temperament])), `${entry.id}/${temperament} eyes`);
+      assert.equal(heartFrame(entry.id, temperament), frame, "cached");
+    }
   }
+  assert.notEqual(heartFrame("young", "cheerful"), heartFrame("young", "sarcastic"));
 });
