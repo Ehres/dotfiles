@@ -133,9 +133,9 @@ live in `core/character.ts`. The card states the whole character:
 
 Everything lives in `~/.local/share/opencode-tamago/`:
 
-- `career.json`: the cumulative counters (including the questions the
-  assistant asked), the hatch date and the name with the time it was chosen.
-  One creature per machine, shared by every project.
+- `career.json`: the cumulative counters, the hatch date, the name with the
+  time it was chosen, and the Picks made at Milestones (empty for now). One
+  creature per machine, shared by every project.
 - `career.lock/`: a lock directory held for a few milliseconds during writes.
 - `error.log`: exceptions swallowed by the plugin, with timestamps.
 

@@ -236,27 +236,45 @@ yeux d'une couleur, corps d'une autre, accessoire en `theme.warning`. Les stades
 supérieurs pourraient utiliser des caractères de dessin de boîte, avec repli
 ASCII si nécessaire.
 
-### 11. Gamification : deck-building et choix
+### 11. Gamification : Milestones, Draws, Picks et Traits
 
-Direction posée le 2026-09-15, voir `CONTEXT.md`. Pas de run par OpenCode
-session : une session n'a pas de fin, n'est pas comparable à une autre et
-s'ouvre gratuitement. Pistes, aucune engagée :
+Direction posée le 2026-09-15, précisée le même jour, voir `CONTEXT.md` et
+`docs/superpowers/specs/2026-09-15-tamago-milestones-design.md`. Pas de run
+par OpenCode session : une session n'a pas de fin, n'est pas comparable à une
+autre et s'ouvre gratuitement.
 
-- **Deck** : les actions comptées deviennent des cartes gagnées (« Grep
-  parfait », « Bash sans erreur »). Le deck vit dans la Career, se garde et se
-  trie ; ses combinaisons débloquent traits, accessoires (idée 4) ou branches
-  (idée 3). Une carte gagnée dans une fenêtre est un Delta comme les autres.
-- **Choix** : à un jalon, une bulle annonce puis un `DialogSelect` propose
-  deux ou trois options tirées ; l'utilisateur en garde une. Premier jalon
-  naturel : l'Évolution, où l'on choisit par exemple entre une famille de
-  phrases pour la Voice et une forme pour le Stage suivant. Le choix est
-  persisté dans la Career ; en multi-instances, le premier écrit gagne pour
-  un jalon donné.
-- **Reliques** : les achievements (idée 5) deviennent des objets à effet
-  permanent plutôt que des badges.
+**Le drift.** Le deck-building a été abandonné comme forme : sans run, une
+carte n'a nulle part où être jouée et devient un badge. Ce qu'on garde du
+genre, c'est le choix « 1 parmi 3 » et les synergies ; ce qu'on laisse, c'est
+la collection comptée. Une collection, si elle revient, ce sera plusieurs
+Tamago sur une machine.
+
+**Fondations faites le 2026-09-15**, tables vides, runtime inchangé :
+
+- `Career.picks` : un Pick par Milestone, `{ trait, at }`, le plus ancien gagne
+  au merge (`core/pick.ts`, miroir inversé de `latest()`).
+- `core/milestone.ts` : Milestones calculés depuis les compteurs, par Stage ou
+  par mesure (sessions, prompts, filesEdited, questions, tools, xp ; jamais
+  errors).
+- `core/trait.ts` : Traits tenus et éligibles, synergies par `needs`.
+- `core/draw.ts` : Draw déterministe (FNV-1a sur `hatchedAt:milestone`,
+  mulberry32, Fisher-Yates), `pending` pour la file des Milestones à offrir.
+
+**Reste à faire**, dans cet ordre :
+
+- Le premier Milestone réel (l'Évolution vers hatchling) et deux ou trois
+  Traits de Voice ; la Bubble qui annonce un Draw pending puis le
+  `DialogSelect` ; le Pick fait comme un rename (`addDelta` puis `show`).
+- L'effet des Traits sur les trois surfaces : `voice.ts` choisit ses phrases
+  par Trait tenu en plus du Temperament, le Sprite gagne une marque, un Cue
+  s'active.
+- Les Traits tenus sur la carte (`tamago.card`).
+- Les Milestones par événement (« premier bash après minuit »), non dérivables
+  des compteurs : une map `reached` fusionnée par plus ancienne date, même forme
+  que `picks`.
 - Contraintes qui tiennent : pas de mort, jamais de retrait sur la Career,
-  aucune option n'est une punition, pas de lecture de contenu, merge
-  commutatif.
+  aucun Trait n'est une punition, pas de lecture de contenu, merge commutatif,
+  pas de re-roll.
 
 ## Ordre recommandé
 
@@ -268,8 +286,9 @@ s'ouvre gratuitement. Pistes, aucune engagée :
 3. Achievements et streak, qui alimentent ensuite accessoires et branches.
 4. ~~Personnalité~~ et branches, une fois qu'on a vu ce que les compteurs
    racontent après une semaine d'usage réel.
-5. Gamification (idée 11), une fois que 3 et 4 ont donné une lecture des
-   compteurs réels ; le choix à l'Évolution peut venir dès 3.
+5. Gamification (idée 11) : fondations faites ; le premier Milestone et le
+   `DialogSelect` peuvent venir dès maintenant, les Traits de Voice une fois que
+   le Temperament (idée 2) a montré ce qu'il raconte.
 
 ## Références
 

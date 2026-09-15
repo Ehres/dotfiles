@@ -6,13 +6,15 @@ with OpenCode on this machine.
 
 ## Direction
 
-Tamago doit devenir un peu plus un jeu, dans l'esprit du deck-building, avec
-les choix du rogue-like mais sans ses runs ni sa mort. La Career est la seule
-progression : on y collectionne, on y combine, on y débloque. À certains
-jalons, l'Évolution en premier, le Tamago propose un tirage de deux ou trois
-options et l'utilisateur en choisit une ; le choix marque durablement la
-créature (ses phrases, sa forme, ses traits) et aucune option n'est une
-pénalité. Ces règles n'existent pas encore ; les concepts qui en naîtront
+Tamago doit devenir un peu plus un jeu, avec les choix du rogue-like mais sans
+ses runs ni sa mort. La Career est la seule progression. À certains Milestones,
+l'Évolution en premier, le Tamago propose un Draw de deux ou trois Traits et
+l'utilisateur en garde un ; le Pick marque durablement la créature sur l'une
+de ses trois surfaces (ce qu'elle dit, ce à quoi elle réagit, son apparence)
+et aucun Trait n'est une pénalité. Les synergies vivent dans l'éligibilité des
+Traits, pas dans une collection : sans run, une carte n'aurait nulle part où
+être jouée. Si une collection revient un jour, ce sera plusieurs Tamago sur une
+machine. Les règles arrivent une à une ; les concepts qui en naissent
 rejoignent ce glossaire au fur et à mesure.
 
 ## Language
@@ -138,6 +140,30 @@ The family an OpenCode tool belongs to for counting: read, edit, bash or
 other.
 _Avoid_: tool type, category
 
+### Choices
+
+**Milestone**:
+A point of a Career worth a durable mark: an Evolution, a round count of
+sessions or tools. Decided by counters alone, computed and never stored.
+_Avoid_: achievement, badge, unlock, level
+
+**Draw**:
+The two or three Traits the Tamago offers at a Milestone. Deterministic from
+the Career, so every window offers the same Draw.
+_Avoid_: roll, loot, reward, options
+
+**Pick**:
+The Trait the user kept at a Milestone, and when. At most one per Milestone;
+across windows the earliest wins. Lives in the Career.
+_Avoid_: choice, selection, decision
+
+**Trait**:
+A durable mark on the Tamago granted by a Pick: a family of phrases for the
+Voice, a Cue it reacts to, a mark or a form on the Sprite. Computed from the
+Picks, never stored. A Trait is what the user chose; a Temperament is what the
+hatch date decided. A Trait adds to the Temperament, it never replaces it.
+_Avoid_: perk, upgrade, buff, card
+
 ### Appearance
 
 **Sprite**:
@@ -178,6 +204,17 @@ _Avoid_: card, widget
 - A **Character** is read, never written; two windows always show the same
 - The **Voice** speaks with the **Temperament**; the **Face** of a pet wears
   it; the card states the whole **Character**
+- A **Career** holds zero or one **Pick** per **Milestone**
+- A **Milestone** is reached when the counters of the **Career** satisfy its
+  rule; reaching it is a fact about the counters, not an event
+- A **Milestone** that is reached, has no **Pick** and whose **Draw** is not
+  empty is **pending**; the first pending one is the one offered
+- A **Trait** is **held** when a **Pick** names it, and **eligible** when it is
+  not held and every Trait it needs is held
+- A **Draw** contains only eligible **Traits**; once held, a Trait is never
+  drawn again
+- A **Pick** is a **Delta** like a rename: made in one window, flushed with the
+  counters, merged into the shared **Career**
 
 ## Example dialogue
 
