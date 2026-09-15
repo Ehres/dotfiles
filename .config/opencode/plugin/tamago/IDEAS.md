@@ -149,6 +149,13 @@ Un chapeau ou une aura débloquée à des jalons : 1 000 outils, 100 sessions,
 première session après minuit. Rendu sur la ligne 0 du sprite, à la place de la
 marque actuelle.
 
+Préalable posé le 2026-09-15 (audit) : la ligne 0 porte déjà la marque
+d'Activity et le cœur du pet, et une `Frame` est une liste de chaînes
+monochromes. Avant les accessoires, passer la `Frame` en segments typés (corps,
+yeux, marque, accessoire) dans `core/sprites.ts`, rendus par `view/portrait.tsx`
+et `view/card.tsx`. Refactor différé : rien ne le demande tant que 4 ou 10 n'est
+pas retenu.
+
 Référence : Claude Buddy a 8 chapeaux gatés par rareté (Common 60 %, Uncommon
 25 %, Rare 10 %, Epic 4 %, Legendary 1 %) et une variante "shiny" à 1 % avec
 shimmer arc-en-ciel. Ici on préférerait un déblocage par achievements plutôt
@@ -196,7 +203,11 @@ merge, ce qui reste commutatif. Reste `reset`.
   achievements s'y ajouteront avec l'idée 5.
 - ~~`tamago.rename`~~ : `DialogPrompt`, nom stocké dans `career.json`
 - ~~`tamago.mute`~~ : bulle silencieuse
-- `tamago.reset` : `DialogConfirm` puis œuf frais
+- `tamago.reset` : `DialogConfirm` puis œuf frais. À trancher avant : un reset
+  est un nouvel Hatch (nouveau `hatchedAt`, donc nouveau Temperament) et
+  contredit « never a withdrawal from the Career ». Les Deltas en attente des
+  autres fenêtres créditeraient l'œuf neuf à leur prochain flush ; décider s'ils
+  sont abandonnés (comparer `hatchedAt`) ou acceptés.
 
 Excellent rapport valeur/effort après la bulle.
 
@@ -235,6 +246,8 @@ Le sprite est monochrome par activité. OpenTUI permet des `<span>` colorés :
 yeux d'une couleur, corps d'une autre, accessoire en `theme.warning`. Les stades
 supérieurs pourraient utiliser des caractères de dessin de boîte, avec repli
 ASCII si nécessaire.
+
+Même préalable que l'idée 4 : la `Frame` en segments.
 
 ### 11. Gamification : Milestones, Draws, Picks et Traits
 
@@ -284,6 +297,10 @@ Tamago sur une machine.
    une bulle ».
 2. ~~Commandes dans la palette : pet, card, mute, rename.~~ Fait.
 3. Achievements et streak, qui alimentent ensuite accessoires et branches.
+   Avec le journal (idée 8) ils veulent tous deux des compteurs par jour :
+   stocker un historique par jour dans la Career, découper le Delta par jour,
+   fixer la frontière du jour, et dériver streaks et achievements de
+   l'historique (jamais stockés), comme le Stage.
 4. ~~Personnalité~~ et branches, une fois qu'on a vu ce que les compteurs
    racontent après une semaine d'usage réel.
 5. Gamification (idée 11) : fondations faites ; le premier Milestone et le

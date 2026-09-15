@@ -42,11 +42,11 @@ tools still earn XP, their prompts do not count. Activity follows the session:
 | `working`  | a tool starts running                          | the session idles                     |
 | `waiting`  | OpenCode asks for a permission                 | you reply                             |
 | `hurt`     | a tool fails, or the session errors            | after 3 s, working if busy, else idle |
+| `idle`     | the session goes idle                          | after 120 s, falls asleep             |
+| `sleeping` | 120 s of idle                                  | any activity                          |
 
 Stopping a tool yourself never hurts: an `Esc` during a run, a refused
 permission or a dismissed question is neither an error nor a counted tool.
-| `idle`     | the session goes idle                          | after 120 s, falls asleep             |
-| `sleeping` | 120 s of idle                                  | any activity                          |
 
 Colors come from the active OpenCode theme: accent by default, `error` when
 hurt, `warning` when waiting, `textMuted` when asleep.
