@@ -25,8 +25,9 @@ It is referenced from `.config/opencode/tui.jsonc`:
 }
 ```
 
-`name` is the only option. It is the label shown next to the sprite and in
-toasts.
+`name` is the only option: the label shown next to the sprite and in toasts
+until you rename the creature from the palette. A rename is saved with the
+career, so every window shows it.
 
 ## How it reacts
 
@@ -78,13 +79,14 @@ order per cue. Tuning lives in `core/voice.ts`.
 
 ## Commands
 
-Three commands in the palette, under the creature's name:
+Four commands in the palette, under the creature's name:
 
 | Command          | What it does                                                     |
 | ---------------- | ---------------------------------------------------------------- |
 | `toggle bubbles` | mutes and unmutes; the choice is remembered across launches     |
 | `show card`      | opens a dialog with the sprite, stage, XP, age and progress bar  |
 | `pet`            | the sprite smiles and wears a `♥` for 2 s, wherever it is drawn |
+| `rename`         | asks for a new name, 16 characters at most; empty keeps the old |
 
 Petting counts nothing and changes nothing in the career. The heart is the
 only non-ASCII character in a sprite: it takes one column in most terminals,
@@ -118,8 +120,8 @@ tuned after real use.
 
 Everything lives in `~/.local/share/opencode-tamago/`:
 
-- `career.json`: the cumulative counters and the hatch date. One creature per
-  machine, shared by every project.
+- `career.json`: the cumulative counters, the hatch date and the name with
+  the time it was chosen. One creature per machine, shared by every project.
 - `career.lock/`: a lock directory held for a few milliseconds during writes.
 - `error.log`: exceptions swallowed by the plugin, with timestamps.
 

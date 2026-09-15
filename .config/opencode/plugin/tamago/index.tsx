@@ -12,6 +12,7 @@ import { count } from "./core/count.ts";
 import type { Addressed, TamagoEvent } from "./core/events.ts";
 import { footerPath } from "./core/footer.ts";
 import { merge } from "./core/merge.ts";
+import { cleanName } from "./core/name.ts";
 import { WARN_AFTER, backoff } from "./core/retry.ts";
 import { evolution } from "./core/stage.ts";
 import { PET_MS } from "./core/sprites.ts";
@@ -43,7 +44,8 @@ const FOOTER_ORDER = 50;
 const HOME_BOTTOM_ORDER = 50;
 
 const tui: TuiPlugin = async (api, options) => {
-  const name = typeof options?.name === "string" && options.name.trim() ? options.name.trim() : "Tamago";
+  /** The plugin option: the Name until the user renames the creature. */
+  const defaultName = typeof options?.name === "string" && options.name.trim() ? options.name.trim() : "Tamago";
   const store = createStore(DATA_DIR);
   const logError = createErrorLog(DATA_DIR);
   const translate = createTranslator({ isChild: (id) => typeof api.state.session.get(id)?.parentID === "string" });
@@ -58,6 +60,8 @@ const tui: TuiPlugin = async (api, options) => {
 
   try {
     const [career, setCareer] = createSignal<Career>(loaded.career, { equals: sameCareer });
+    /** The Name lives in the Career, so a rename in one window reaches the others on flush. */
+    const name = (): string => career().name?.value ?? defaultName;
     /** One mood per root OpenCode session, keyed by session id. Never persisted. */
     const [sessions, setSessions] = createSignal<Record<string, Session>>({});
     /** One Voice per root OpenCode session, keyed like `sessions`. Never persisted. */
@@ -77,7 +81,7 @@ const tui: TuiPlugin = async (api, options) => {
       warnedCorrupt = true;
       api.ui.toast({
         variant: "warning",
-        title: name,
+        title: name(),
         message: "Saved progress was unreadable. It is kept aside as career.json.corrupt-*; starting from a fresh egg.",
       });
     };
@@ -95,9 +99,11 @@ const tui: TuiPlugin = async (api, options) => {
 
     const show = (next: Career) => {
       const reached = evolution(career(), next);
+      const renamed = next.name?.value !== career().name?.value;
       setCareer(next);
+      if (renamed) registerCommands(); // palette titles carry the Name and are fixed at registration
       if (!reached) return;
-      api.ui.toast({ variant: "success", title: name, message: `${name} evolved: ${reached}!` });
+      api.ui.toast({ variant: "success", title: name(), message: `${name()} evolved: ${reached}!` });
       move(Object.keys(sessions()), { type: "evolved" }, Date.now());
     };
 
@@ -178,7 +184,7 @@ const tui: TuiPlugin = async (api, options) => {
     /** The dialog stack wraps the card in OpenCode's own centered Dialog; nothing to position here. */
     const showCard = () => {
       api.ui.dialog.replace(() => (
-        <CardView name={name} theme={() => api.theme.current} career={career} clock={clock} heart={heart} now={Date.now} />
+        <CardView name={name()} theme={() => api.theme.current} career={career} clock={clock} heart={heart} now={Date.now} />
       ));
     };
 
@@ -196,37 +202,74 @@ const tui: TuiPlugin = async (api, options) => {
       if (heartTimer !== undefined) clearTimeout(heartTimer);
     });
 
-    api.lifecycle.onDispose(
-      api.keymap.registerLayer({
+    /** A rename is a Delta: shown at once here, flushed like the counters, latest wins across windows. */
+    const rename = (input: string) => {
+      const value = cleanName(input);
+      if (value === undefined || value === name()) return;
+      const delta: Delta = { ...EMPTY_DELTA, rename: { value, at: Date.now() } };
+      pending = addDelta(pending, delta);
+      show(merge(career(), delta));
+    };
+
+    const askName = () => {
+      api.ui.dialog.replace(() => (
+        <api.ui.DialogPrompt
+          title="Rename"
+          placeholder="A name for the creature"
+          value={name()}
+          onConfirm={guard((value: string) => {
+            api.ui.dialog.clear();
+            rename(value);
+          })}
+          onCancel={() => api.ui.dialog.clear()}
+        />
+      ));
+    };
+
+    let unregisterCommands: (() => void) | undefined;
+    function registerCommands(): void {
+      unregisterCommands?.();
+      const title = name();
+      unregisterCommands = api.keymap.registerLayer({
         commands: [
           {
             name: "tamago.mute",
-            title: `${name}: toggle bubbles`,
+            title: `${title}: toggle bubbles`,
             description: "Mute or unmute what the creature says",
-            category: name,
+            category: title,
             /** What lists a command in the palette; OpenCode's own commands carry it. */
             namespace: "palette",
             run: guard(() => setMute(!muted())),
           },
           {
             name: "tamago.card",
-            title: `${name}: show card`,
+            title: `${title}: show card`,
             description: "Who the creature is: stage, XP, age",
-            category: name,
+            category: title,
             namespace: "palette",
             run: guard(showCard),
           },
           {
             name: "tamago.pet",
-            title: `${name}: pet`,
+            title: `${title}: pet`,
             description: "Give the creature a pat",
-            category: name,
+            category: title,
             namespace: "palette",
             run: guard(pet),
           },
+          {
+            name: "tamago.rename",
+            title: `${title}: rename`,
+            description: "Give the creature a new name, shared by every window",
+            category: title,
+            namespace: "palette",
+            run: guard(askName),
+          },
         ],
-      }),
-    );
+      });
+    }
+    registerCommands();
+    api.lifecycle.onDispose(() => unregisterCommands?.());
 
     /** Returns true when this window's delta reached the disk. Throws on disk errors. */
     const persist = (): boolean => {
@@ -262,7 +305,7 @@ const tui: TuiPlugin = async (api, options) => {
         logError(err);
         failures += 1;
         if (failures === WARN_AFTER) {
-          api.ui.toast({ variant: "error", title: name, message: `${name} cannot save its progress. See ${DATA_DIR}/error.log.` });
+          api.ui.toast({ variant: "error", title: name(), message: `${name()} cannot save its progress. See ${DATA_DIR}/error.log.` });
         }
       }
       schedule();
@@ -292,7 +335,7 @@ const tui: TuiPlugin = async (api, options) => {
         sidebar_footer(ctx, props) {
           return (
             <SidebarView
-              name={name}
+              name={name()}
               theme={() => ctx.theme.current}
               session={sessionOf(props.session_id)}
               career={career}
@@ -310,7 +353,7 @@ const tui: TuiPlugin = async (api, options) => {
       order: HOME_BOTTOM_ORDER,
       slots: {
         home_bottom(ctx) {
-          return <HomeView name={name} theme={() => ctx.theme.current} career={career} clock={clock} heart={heart} />;
+          return <HomeView name={name()} theme={() => ctx.theme.current} career={career} clock={clock} heart={heart} />;
         },
       },
     });

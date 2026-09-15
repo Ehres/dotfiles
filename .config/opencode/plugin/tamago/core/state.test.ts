@@ -73,3 +73,28 @@ test("sameCareer compares every counter and the hatch date", () => {
   assert.equal(sameCareer(a, { ...a, tools: { ...a.tools, bash: 1 } }), false);
   assert.equal(sameCareer(a, { ...a, hatchedAt: 2 }), false);
 });
+
+test("a rename alone makes a delta non-empty, and addDelta keeps the latest one", () => {
+  const rename = { ...EMPTY_DELTA, rename: { value: "Pixel", at: 10 } };
+  assert.equal(isEmpty(rename), false);
+  const later = { ...EMPTY_DELTA, rename: { value: "Mochi", at: 20 } };
+  assert.deepEqual(addDelta(rename, later).rename, { value: "Mochi", at: 20 });
+  assert.deepEqual(addDelta(later, rename).rename, { value: "Mochi", at: 20 });
+  assert.equal(addDelta(EMPTY_DELTA, EMPTY_DELTA).rename, undefined);
+});
+
+test("hydrate reads a well-formed name and ignores a malformed one", () => {
+  assert.deepEqual(hydrate({ name: { value: "Pixel", at: 3 } }, 0).career.name, { value: "Pixel", at: 3 });
+  assert.equal(hydrate({ name: "Pixel" }, 0).career.name, undefined);
+  assert.equal(hydrate({ name: { value: "", at: 3 } }, 0).career.name, undefined);
+  assert.equal(hydrate({ name: { value: "Pixel", at: "3" } }, 0).career.name, undefined);
+  assert.equal(hydrate({}, 0).career.name, undefined);
+});
+
+test("sameCareer compares the name", () => {
+  const a = { ...freshCareer(1), name: { value: "Pixel", at: 3 } };
+  assert.equal(sameCareer(a, { ...a }), true);
+  assert.equal(sameCareer(a, { ...a, name: { value: "Mochi", at: 3 } }), false);
+  assert.equal(sameCareer(a, { ...a, name: { value: "Pixel", at: 4 } }), false);
+  assert.equal(sameCareer(a, freshCareer(1)), false);
+});

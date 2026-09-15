@@ -1,3 +1,5 @@
+import { latest, type Rename } from "./name.ts";
+
 export type Activity = "idle" | "thinking" | "working" | "waiting" | "hurt" | "sleeping";
 export type ToolKind = "read" | "edit" | "bash" | "other";
 
@@ -16,8 +18,10 @@ export type Counters = {
   errors: number;
 };
 
-export type Career = Counters & { hatchedAt: number };
-export type Delta = Counters;
+/** `name` is absent until the user renames the creature; the plugin option is the default. */
+export type Career = Counters & { hatchedAt: number; name?: Rename };
+/** `rename` is a Delta like any other: it waits for the flush and merges by latest. */
+export type Delta = Counters & { rename?: Rename };
 
 export const ACTIVITIES: readonly Activity[] = ["idle", "thinking", "working", "waiting", "hurt", "sleeping"];
 export const TOOL_KINDS: readonly ToolKind[] = ["read", "edit", "bash", "other"];
@@ -40,6 +44,7 @@ export function freshCareer(now: number): Career {
 
 export function isEmpty(delta: Delta): boolean {
   return (
+    delta.rename === undefined &&
     delta.sessions === 0 &&
     delta.prompts === 0 &&
     delta.filesEdited === 0 &&
@@ -51,12 +56,14 @@ export function isEmpty(delta: Delta): boolean {
 export function addDelta(a: Delta, b: Delta): Delta {
   const tools = { ...EMPTY_DELTA.tools };
   for (const kind of TOOL_KINDS) tools[kind] = a.tools[kind] + b.tools[kind];
+  const rename = latest(a.rename, b.rename);
   return {
     sessions: a.sessions + b.sessions,
     prompts: a.prompts + b.prompts,
     tools,
     filesEdited: a.filesEdited + b.filesEdited,
     errors: a.errors + b.errors,
+    ...(rename === undefined ? {} : { rename }),
   };
 }
 
@@ -64,6 +71,8 @@ export function addDelta(a: Delta, b: Delta): Delta {
 export function sameCareer(a: Career, b: Career): boolean {
   return (
     a.hatchedAt === b.hatchedAt &&
+    a.name?.value === b.name?.value &&
+    a.name?.at === b.name?.at &&
     a.sessions === b.sessions &&
     a.prompts === b.prompts &&
     a.filesEdited === b.filesEdited &&
@@ -85,6 +94,7 @@ export function hydrate(raw: unknown, now: number): { career: Career; corrupt: b
   const rawTools = isRecord(raw.tools) ? raw.tools : {};
   const tools = { ...EMPTY_DELTA.tools };
   for (const kind of TOOL_KINDS) tools[kind] = num(rawTools[kind], 0);
+  const name = rename(raw.name);
   return {
     corrupt: false,
     career: {
@@ -94,6 +104,15 @@ export function hydrate(raw: unknown, now: number): { career: Career; corrupt: b
       filesEdited: num(raw.filesEdited, 0),
       errors: num(raw.errors, 0),
       hatchedAt: num(raw.hatchedAt, now),
+      ...(name === undefined ? {} : { name }),
     },
   };
+}
+
+/** A stored name, only when both parts are well-formed. */
+function rename(value: unknown): Rename | undefined {
+  if (!isRecord(value)) return undefined;
+  if (typeof value.value !== "string" || value.value.length === 0) return undefined;
+  if (typeof value.at !== "number" || !Number.isFinite(value.at)) return undefined;
+  return { value: value.value, at: value.at };
 }

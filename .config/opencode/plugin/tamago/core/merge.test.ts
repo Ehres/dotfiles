@@ -30,3 +30,13 @@ test("merging the empty delta is the identity", () => {
   const career = merge(freshCareer(5), d2);
   assert.deepEqual(merge(career, EMPTY_DELTA), career);
 });
+
+const r1: Delta = { ...EMPTY_DELTA, rename: { value: "Pixel", at: 10 } };
+const r2: Delta = { ...EMPTY_DELTA, rename: { value: "Mochi", at: 20 } };
+
+test("the latest rename wins whatever the merge order, and an older one never overrides", () => {
+  const base = freshCareer(1);
+  assert.deepEqual(merge(merge(base, r1), r2), merge(merge(base, r2), r1));
+  assert.deepEqual(merge(merge(base, r2), r1).name, { value: "Mochi", at: 20 });
+  assert.deepEqual(merge(merge(base, r1), d1).name, { value: "Pixel", at: 10 }, "counters leave the name alone");
+});

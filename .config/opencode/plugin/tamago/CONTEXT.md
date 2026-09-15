@@ -29,7 +29,9 @@ The moment the Tamago comes into existence on a machine.
 _Avoid_: create, init, spawn
 
 **Name**:
-The label the user gives the Tamago; it has no effect on behavior.
+The label the user gives the Tamago; it has no effect on behavior. It lives
+in the Career, so every window shows the same one; when two windows rename at
+once, the latest rename wins.
 
 ### In the moment
 

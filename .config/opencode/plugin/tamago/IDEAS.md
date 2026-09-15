@@ -175,7 +175,9 @@ faits le 2026-09-15.** Le pet n'est pas une Bubble : la bulle est la voix de
 la session, le pet vient de l'utilisateur, donc il se voit sur le sprite
 lui-même (yeux `^ ^` et `♥` à la place de la marque, 2 s, dans toute la
 fenêtre). La carte montre l'identité seule : sprite, stade, XP, âge, barre.
-Les compteurs détaillés n'intéressent pas. Restent `rename` et `reset`.
+Les compteurs détaillés n'intéressent pas. **`rename` fait le 2026-09-15** :
+le Nom vit dans la Career (`name: { value, at }`), le plus récent gagne au
+merge, ce qui reste commutatif. Reste `reset`.
 
 - ~~`tamago.pet`~~ : cœur flottant 2 s au-dessus du sprite (comme `/buddy pet`).
   Geste d'interaction pur, décidé le 2026-09-15 : il ne compte rien et ne
@@ -185,7 +187,7 @@ Les compteurs détaillés n'intéressent pas. Restent `rename` et `reset`.
   réaction unique suffit pour poser le geste.
 - ~~`tamago.card`~~ : carte d'identité (sprite, stade, XP, âge). Les
   achievements s'y ajouteront avec l'idée 5.
-- `tamago.rename` : `DialogPrompt`, nom stocké dans `career.json` ou `api.kv`
+- ~~`tamago.rename`~~ : `DialogPrompt`, nom stocké dans `career.json`
 - ~~`tamago.mute`~~ : bulle silencieuse
 - `tamago.reset` : `DialogConfirm` puis œuf frais
 
@@ -254,7 +256,7 @@ s'ouvre gratuitement. Pistes, aucune engagée :
    "événement → réaction ponctuelle" dont dépendent 5, 6 et 7.
 1b. ~~Réponse à la permission.~~ Fait. Pose le motif « bulle qui répond à
    une bulle ».
-2. ~~Commandes dans la palette : pet, card, mute~~, reste rename.
+2. ~~Commandes dans la palette : pet, card, mute, rename.~~ Fait.
 3. Achievements et streak, qui alimentent ensuite accessoires et branches.
 4. Personnalité et branches, une fois qu'on a vu ce que les compteurs racontent
    après une semaine d'usage réel.
