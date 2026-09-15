@@ -33,6 +33,34 @@ The label the user gives the Tamago; it has no effect on behavior. It lives
 in the Career, so every window shows the same one; when two windows rename at
 once, the latest rename wins.
 
+**Temperament**:
+How the Tamago speaks and reacts, fixed at hatch and never changed: cheerful,
+sarcastic, stoic or dreamy. Derived from the hatch date, so every window
+agrees without storing anything.
+_Avoid_: personality, mood, attitude
+
+**Craft**:
+What the Career says the Tamago does most, weighted: scribe (edits), shell
+(bash) or sage (reads). Absent before `young`.
+_Avoid_: class, job, role
+
+**Stance**:
+How the Tamago works with the user: prudent when it asks many questions per
+prompt, bold otherwise. Absent before `young`.
+_Avoid_: autonomy level, style
+
+**Vocation**:
+A Craft and a Stance together, "prudent shell".
+
+**Character**:
+Temperament and Vocation together, "sarcastic · prudent shell".
+_Avoid_: personality, traits, profile
+
+**Question**:
+The assistant asking the user something through the question tool. Counted
+in the Career; it never adds XP.
+_Avoid_: prompt (that is the user's), permission (that is OpenCode's)
+
 ### In the moment
 
 **Activity**:
@@ -145,6 +173,11 @@ _Avoid_: card, widget
   **Bubble**; a **Bubble** comes from exactly one **Cue**
 - The home screen has no **Voice**: without an OpenCode session there is no
   **Cue**
+- A **Career** has exactly one **Temperament**, decided by its hatch date
+- A **Career** at `young` or above has exactly one **Vocation**; below, none
+- A **Character** is read, never written; two windows always show the same
+- The **Voice** speaks with the **Temperament**; the **Face** of a pet wears
+  it; the card states the whole **Character**
 
 ## Example dialogue
 

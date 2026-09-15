@@ -3,8 +3,8 @@ import type { TuiThemeCurrent } from "@opencode-ai/plugin/tui";
 import type { JSX } from "@opentui/solid";
 import { Index, createMemo } from "solid-js";
 import { frameIndex } from "../core/cadence.ts";
-import { age, progress } from "../core/card.ts";
-import type { Temperament } from "../core/character.ts";
+import { age } from "../core/card.ts";
+import { describe, type Character, type Temperament } from "../core/character.ts";
 import { fmt } from "../core/format.ts";
 import { frameAt, heartFrame } from "../core/sprites.ts";
 import { stage, xp } from "../core/stage.ts";
@@ -13,7 +13,7 @@ import type { Career } from "../core/state.ts";
 /**
  * The card opened from the palette. OpenCode's dialog stack wraps it in its
  * own centered Dialog, so this only lays out the inside, like DialogAlert:
- * title row with the esc hint, the idle Portrait, the XP bar.
+ * title row with the esc hint, the idle Portrait, the Character.
  */
 export function CardView(props: {
   name: string;
@@ -22,6 +22,7 @@ export function CardView(props: {
   clock: () => number;
   heart: () => boolean;
   temperament: () => Temperament;
+  character: () => Character;
   now: () => number;
 }): JSX.Element {
   const current = createMemo(() => stage(props.career()));
@@ -47,7 +48,7 @@ export function CardView(props: {
           <text fg={props.theme().textMuted}>{age(props.career().hatchedAt, props.now())}</text>
         </box>
       </box>
-      <text fg={props.theme().textMuted}>{progress(props.career())}</text>
+      <text fg={props.theme().textMuted}>{describe(props.character())}</text>
     </box>
   );
 }

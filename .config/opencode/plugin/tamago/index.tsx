@@ -194,6 +194,7 @@ const tui: TuiPlugin = async (api, options) => {
           clock={clock}
           heart={heart}
           temperament={() => persona().temperament}
+          character={persona}
           now={Date.now}
         />
       ));

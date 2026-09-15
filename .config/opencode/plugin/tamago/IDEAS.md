@@ -105,6 +105,11 @@ sur `once`/`always`, `denied` (« Oh. Okay. », « Fair enough. ») sur `reject`
 
 ### 2. Personnalité et nom
 
+**Fait le 2026-09-15**, voir `docs/superpowers/specs/2026-09-15-tamago-character-design.md`.
+Deux traits calculés, jamais stockés : Temperament par hash de `hatchedAt`,
+Vocation (Craft par table de poids, Stance par ratio questions / prompts) à
+partir de `young`. Surfaces : bulles, pet, carte. La sidebar ne change pas.
+
 Aujourd'hui `name` vient des options du plugin. Tirer un tempérament à
 l'éclosion (sarcastique, encourageant, stoïque) qui filtre les templates de la
 bulle, stocké dans `career.json`.
@@ -135,6 +140,8 @@ selon la qualité des soins. Ici la branche dépendrait du ratio d'outils :
 
 Implémentation : indexer `BODIES` par stade + branche au lieu du stade seul. La
 branche se calcule depuis `Counters`, comme `stage()`.
+
+`craft()` dans `core/character.ts` est le sélecteur de branche attendu ici.
 
 ### 4. Accessoires et rareté
 
@@ -197,7 +204,8 @@ Excellent rapport valeur/effort après la bulle.
 
 Enrichir le reducer et le translator :
 
-- `question.asked` → activité "curious", yeux `? ?`
+- `question.asked` → activité "curious", yeux `? ?` (le compteur et l'attente
+  existent depuis l'idée 2 ; reste la bulle)
 - `session.next.retried` → activité "dizzy", yeux `@ @`
 - `session.compacted` → bâillement bref
 - `todo.updated` avec tout coché → célébration courte
@@ -258,8 +266,8 @@ s'ouvre gratuitement. Pistes, aucune engagée :
    une bulle ».
 2. ~~Commandes dans la palette : pet, card, mute, rename.~~ Fait.
 3. Achievements et streak, qui alimentent ensuite accessoires et branches.
-4. Personnalité et branches, une fois qu'on a vu ce que les compteurs racontent
-   après une semaine d'usage réel.
+4. ~~Personnalité~~ et branches, une fois qu'on a vu ce que les compteurs
+   racontent après une semaine d'usage réel.
 5. Gamification (idée 11), une fois que 3 et 4 ont donné une lecture des
    compteurs réels ; le choix à l'Évolution peut venir dès 3.
 

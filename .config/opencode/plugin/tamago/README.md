@@ -84,8 +84,8 @@ Four commands in the palette, under the creature's name:
 | Command          | What it does                                                     |
 | ---------------- | ---------------------------------------------------------------- |
 | `toggle bubbles` | mutes and unmutes; the choice is remembered across launches     |
-| `show card`      | opens a dialog with the sprite, stage, XP, age and progress bar  |
-| `pet`            | the sprite smiles and wears a `♥` for 2 s, wherever it is drawn |
+| `show card`      | opens a dialog with the sprite, stage, XP, age and character     |
+| `pet`            | the sprite wears a `♥` and its temperament's eyes for 2 s       |
 | `rename`         | asks for a new name, 16 characters at most; empty keeps the old |
 
 Petting counts nothing and changes nothing in the career. The heart is the
@@ -116,12 +116,26 @@ drift. A `success` toast fires in each open OpenCode window when the stage
 changes. Weights and thresholds live in `core/stage.ts` and are meant to be
 tuned after real use.
 
+## Who it is
+
+The hatch date decides a temperament, once and for all: cheerful, sarcastic,
+stoic or dreamy. It colors the bubbles for permissions, replies, error streaks
+and evolutions, and the eyes when you pet it. Nothing is stored: every window
+computes the same temperament from `hatchedAt`.
+
+From the `young` stage, the counters add a vocation: a craft, scribe, shell or
+sage, whichever weighted score is highest, and a stance, prudent from five
+questions asked per hundred prompts, bold below. Weights and the threshold
+live in `core/character.ts`. The card states the whole character:
+`sarcastic · prudent shell`.
+
 ## Data
 
 Everything lives in `~/.local/share/opencode-tamago/`:
 
-- `career.json`: the cumulative counters, the hatch date and the name with
-  the time it was chosen. One creature per machine, shared by every project.
+- `career.json`: the cumulative counters (including the questions the
+  assistant asked), the hatch date and the name with the time it was chosen.
+  One creature per machine, shared by every project.
 - `career.lock/`: a lock directory held for a few milliseconds during writes.
 - `error.log`: exceptions swallowed by the plugin, with timestamps.
 
