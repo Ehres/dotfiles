@@ -245,6 +245,21 @@ if [[ -d .config/opencode/plugin/tamago/core ]]; then
   else
     warn "opencode-tamago typecheck skipped -- run 'pnpm install --ignore-workspace' in .config/opencode/plugin/tamago"
   fi
+
+  # The translator matches exact error texts and undocumented fields of the
+  # OpenCode release its SDK types were pinned to. A newer OpenCode can change
+  # them and the plugin just goes quiet: events stop matching, nothing is
+  # logged. Compare the installed major.minor with the pinned SDK's.
+  pinned=$(sed -n 's/.*"@opencode-ai\/plugin": *"\([0-9]*\.[0-9]*\)\..*/\1/p' .config/opencode/plugin/tamago/package.json)
+  if ! command -v opencode >/dev/null; then
+    warn "opencode not on PATH -- cannot compare its version with the pinned SDK ($pinned)"
+  elif installed=$(opencode --version 2>/dev/null | sed -n 's/^\([0-9]*\.[0-9]*\)\..*/\1/p'); [[ -z "$installed" || -z "$pinned" ]]; then
+    warn "could not read the opencode version or the pinned SDK version"
+  elif [[ "$installed" != "$pinned" ]]; then
+    warn "opencode $installed is installed but the tamago SDK types are pinned to $pinned -- retest the translator (aborts, permission refusals, palette commands) and bump package.json"
+  else
+    ok "opencode $installed matches the tamago SDK types"
+  fi
 fi
 
 # --------------------------------------------------------------------------
