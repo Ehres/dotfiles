@@ -22,17 +22,18 @@ export const MOOD: Record<Activity, string> = {
   sleeping: "zzz",
 };
 
+/** Which theme color paints the sprite in each Activity. One row per Activity: a new one cannot fall back to the accent unnoticed. */
+export const TONE: Record<Activity, "accent" | "error" | "warning" | "textMuted"> = {
+  idle: "accent",
+  thinking: "accent",
+  working: "accent",
+  waiting: "warning",
+  hurt: "error",
+  sleeping: "textMuted",
+};
+
 export function spriteColor(theme: TuiThemeCurrent, activity: Activity): RGBA {
-  switch (activity) {
-    case "hurt":
-      return theme.error;
-    case "waiting":
-      return theme.warning;
-    case "sleeping":
-      return theme.textMuted;
-    default:
-      return theme.accent;
-  }
+  return theme[TONE[activity]];
 }
 
 export type FooterInfo = { parent: string; name: string; version: string };

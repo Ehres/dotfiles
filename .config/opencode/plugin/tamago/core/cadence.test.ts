@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { FAST_MS, SLOW_MS, frameIndex, tickInterval } from "./cadence.ts";
+import { ACTIVITIES } from "./state.ts";
+import { CADENCE, FAST_MS, SLOW_MS, frameIndex, tickInterval } from "./cadence.ts";
 
 test("fast activities advance one frame every FAST_MS of elapsed time", () => {
   assert.equal(frameIndex("working", 0), 0);
@@ -31,4 +32,8 @@ test("the tick runs fast while any session thinks, works or heals, slow otherwis
 
 test("the slow cadence is a whole multiple of the fast one, so a mode switch never skips or repeats a frame", () => {
   assert.equal(SLOW_MS % FAST_MS, 0);
+});
+
+test("every Activity has a cadence entry, so a new Activity cannot silently fall back to a default", () => {
+  for (const activity of ACTIVITIES) assert.ok(activity in CADENCE, `${activity} missing from CADENCE`);
 });
