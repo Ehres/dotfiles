@@ -84,3 +84,10 @@ test("hydratePicks keeps well-formed entries and drops the rest silently", () =>
   };
   assert.deepEqual(hydratePicks(raw), { "evolution:hatchling": { trait: "sarcastic", at: 10 } });
 });
+
+test("hydratePicks drops a __proto__ key instead of setting the prototype", () => {
+  const picks = hydratePicks(JSON.parse('{"__proto__":{"trait":"evil","at":1},"m":{"trait":"ok","at":2}}'));
+  assert.deepEqual(picks, { m: { trait: "ok", at: 2 } });
+  assert.equal(Object.getPrototypeOf(picks), Object.prototype);
+  assert.equal((picks as Record<string, unknown>)["trait"], undefined);
+});

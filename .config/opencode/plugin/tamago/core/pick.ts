@@ -56,7 +56,7 @@ export function hydratePicks(raw: unknown): Picks {
   if (!isRecord(raw)) return {};
   const out: Picks = {};
   for (const [milestone, value] of Object.entries(raw)) {
-    if (milestone.length === 0) continue;
+    if (milestone.length === 0 || milestone === "__proto__") continue;
     const kept = pick(value);
     if (kept !== undefined) out[milestone] = kept;
   }
