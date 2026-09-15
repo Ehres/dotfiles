@@ -74,8 +74,21 @@ messages, todo texts or diffs, only their counts.
 At most one bubble every 10 s; a rarer cue (an evolution, a streak) may
 interrupt a common one. `granted` and `denied` only answer a `permission` the
 creature actually voiced, within 30 s and once per question. Phrases rotate in
-order per cue. Tuning lives in `core/voice.ts`. The `Tamago: toggle bubbles`
-palette command mutes and unmutes; the choice is remembered across launches.
+order per cue. Tuning lives in `core/voice.ts`.
+
+## Commands
+
+Three commands in the palette, under the creature's name:
+
+| Command          | What it does                                                     |
+| ---------------- | ---------------------------------------------------------------- |
+| `toggle bubbles` | mutes and unmutes; the choice is remembered across launches     |
+| `show card`      | opens a dialog with the sprite, stage, XP, age and progress bar  |
+| `pet`            | the sprite smiles and wears a `♥` for 2 s, wherever it is drawn |
+
+Petting counts nothing and changes nothing in the career. The heart is the
+only non-ASCII character in a sprite: it takes one column in most terminals,
+two in a few, where the top line overflows by one column while it shows.
 
 ## How it grows
 

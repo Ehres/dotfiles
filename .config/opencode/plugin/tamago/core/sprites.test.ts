@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { SPRITE_HEIGHT, SPRITE_WIDTH, frameAt, frames } from "./sprites.ts";
+import { HEART, SPRITE_HEIGHT, SPRITE_WIDTH, frameAt, frames, heartFrame } from "./sprites.ts";
 import { STAGES } from "./stage.ts";
 import { ACTIVITIES } from "./state.ts";
 
@@ -51,4 +51,15 @@ test("frames and frameAt return the same objects for the same inputs, so memos s
   assert.equal(frameAt("young", "idle", 0), frameAt("young", "idle", 0));
   assert.equal(frameAt("young", "idle", 0), frameAt("young", "idle", 2), "index wraps onto the same frame object");
   assert.notEqual(frameAt("young", "idle", 0), frameAt("young", "idle", 1));
+});
+
+test("the heart frame keeps the sprite size, shows happy eyes and a heart, and is stable", () => {
+  for (const entry of STAGES) {
+    const frame = heartFrame(entry.id);
+    assert.equal(frame.length, SPRITE_HEIGHT);
+    for (const line of frame) assert.equal(line.length, SPRITE_WIDTH, `${entry.id}: ${JSON.stringify(line)}`);
+    assert.ok(frame[0]?.includes(HEART), `${entry.id} wears the heart on line 0`);
+    assert.ok(frame.some((line) => line.includes("^ ^")), `${entry.id} smiles`);
+    assert.equal(heartFrame(entry.id), frame);
+  }
 });

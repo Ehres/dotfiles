@@ -91,6 +91,21 @@ export function frames(stage: StageId, activity: Activity): readonly Frame[] {
   return built;
 }
 
+/** How long the heart stays on the sprite after a pet. */
+export const PET_MS = 2_000;
+/** Not ASCII: one column in most terminals, two in a few, where line 0 overflows for PET_MS. */
+export const HEART = "♥";
+const HEARTS = new Map<StageId, Frame>();
+
+/** The Sprite while petted, whatever the Activity: happy eyes and a heart for the mark. Cached, so identity is stable. */
+export function heartFrame(stage: StageId): Frame {
+  const hit = HEARTS.get(stage);
+  if (hit) return hit;
+  const built = fit(BODIES[stage]("^ ^", HEART));
+  HEARTS.set(stage, built);
+  return built;
+}
+
 export function frameAt(stage: StageId, activity: Activity, index: number): Frame {
   const all = frames(stage, activity);
   const frame = all[((index % all.length) + all.length) % all.length];

@@ -170,18 +170,23 @@ Référence : l'issue Claude Code #59081 propose streaks quotidiens, badges,
 
 ### 6. Interaction directe (commandes)
 
-Via `api.keymap.registerLayer`, dans la palette :
+Via `api.keymap.registerLayer`, dans la palette. **`mute`, `card` et `pet`
+faits le 2026-09-15.** Le pet n'est pas une Bubble : la bulle est la voix de
+la session, le pet vient de l'utilisateur, donc il se voit sur le sprite
+lui-même (yeux `^ ^` et `♥` à la place de la marque, 2 s, dans toute la
+fenêtre). La carte montre l'identité seule : sprite, stade, XP, âge, barre.
+Les compteurs détaillés n'intéressent pas. Restent `rename` et `reset`.
 
-- `tamago.pet` : cœur flottant 2 s au-dessus du sprite (comme `/buddy pet`).
+- ~~`tamago.pet`~~ : cœur flottant 2 s au-dessus du sprite (comme `/buddy pet`).
   Geste d'interaction pur, décidé le 2026-09-15 : il ne compte rien et ne
   change rien à la Career, Tamago n'ayant aucun besoin à satisfaire. Sa valeur
   vient de la réaction, qui doit varier selon le tempérament (idée 2) : le pet
   devient la manière de découvrir qui est son Tamago. Sans personnalité, une
   réaction unique suffit pour poser le geste.
-- `tamago.card` : `DialogAlert` avec la carte complète (sprite, stade, XP,
-  compteurs par outil, âge, achievements)
+- ~~`tamago.card`~~ : carte d'identité (sprite, stade, XP, âge). Les
+  achievements s'y ajouteront avec l'idée 5.
 - `tamago.rename` : `DialogPrompt`, nom stocké dans `career.json` ou `api.kv`
-- `tamago.mute` / `tamago.unmute` : bulle silencieuse
+- ~~`tamago.mute`~~ : bulle silencieuse
 - `tamago.reset` : `DialogConfirm` puis œuf frais
 
 Excellent rapport valeur/effort après la bulle.
@@ -249,7 +254,7 @@ s'ouvre gratuitement. Pistes, aucune engagée :
    "événement → réaction ponctuelle" dont dépendent 5, 6 et 7.
 1b. ~~Réponse à la permission.~~ Fait. Pose le motif « bulle qui répond à
    une bulle ».
-2. Commandes dans la palette : pet, card, mute, rename.
+2. ~~Commandes dans la palette : pet, card, mute~~, reste rename.
 3. Achievements et streak, qui alimentent ensuite accessoires et branches.
 4. Personnalité et branches, une fois qu'on a vu ce que les compteurs racontent
    après une semaine d'usage réel.

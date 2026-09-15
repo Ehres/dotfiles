@@ -6,7 +6,7 @@ import { createMemo } from "solid-js";
 import { bubbleBorders } from "../core/bubble.ts";
 import { frameIndex } from "../core/cadence.ts";
 import { fmt } from "../core/format.ts";
-import { frameAt } from "../core/sprites.ts";
+import { frameAt, heartFrame } from "../core/sprites.ts";
 import { stage, xp } from "../core/stage.ts";
 import type { Activity, Career, Session } from "../core/state.ts";
 import type { Bubble } from "../core/voice.ts";
@@ -44,11 +44,12 @@ export function SidebarView(props: {
   clock: () => number;
   footer: () => FooterInfo;
   bubble: () => Bubble | undefined;
+  heart: () => boolean;
 }): JSX.Element {
   const activity = createMemo(() => props.session().activity);
   const current = createMemo(() => stage(props.career()));
   const total = createMemo(() => xp(props.career()));
-  const lines = () => frameAt(current(), activity(), frameIndex(activity(), props.clock()));
+  const lines = () => (props.heart() ? heartFrame(current()) : frameAt(current(), activity(), frameIndex(activity(), props.clock())));
   const color = () => spriteColor(props.theme(), activity());
   const bubble = createMemo((): BubbleView | undefined => {
     const current = props.bubble();

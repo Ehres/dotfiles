@@ -14,6 +14,7 @@ import { footerPath } from "./core/footer.ts";
 import { merge } from "./core/merge.ts";
 import { WARN_AFTER, backoff } from "./core/retry.ts";
 import { evolution } from "./core/stage.ts";
+import { PET_MS } from "./core/sprites.ts";
 import { transition } from "./core/transition.ts";
 import { initialVoice, speak, type Voice } from "./core/voice.ts";
 import {
@@ -27,6 +28,7 @@ import {
   type Delta,
   type Session,
 } from "./core/state.ts";
+import { CardView } from "./view/card.tsx";
 import { HomeView } from "./view/home.tsx";
 import { SidebarView, type FooterInfo } from "./view/sidebar.tsx";
 
@@ -60,6 +62,8 @@ const tui: TuiPlugin = async (api, options) => {
     const [sessions, setSessions] = createSignal<Record<string, Session>>({});
     /** One Voice per root OpenCode session, keyed like `sessions`. Never persisted. */
     const [voices, setVoices] = createSignal<Record<string, Voice>>({});
+    /** True while the sprite wears the heart after a pet. Per window, like the sprite itself. */
+    const [heart, setHeart] = createSignal(false);
     /** Persisted through api.kv; when muted no Cue is heard and every Bubble is cleared. */
     const [muted, setMuted] = createSignal(api.kv.get<boolean>("tamago.muted", false) === true);
     /** Milliseconds since the plugin started; drives animation frames. */
@@ -170,6 +174,28 @@ const tui: TuiPlugin = async (api, options) => {
         return next;
       });
     };
+
+    /** The dialog stack wraps the card in OpenCode's own centered Dialog; nothing to position here. */
+    const showCard = () => {
+      api.ui.dialog.replace(() => (
+        <CardView name={name} theme={() => api.theme.current} career={career} clock={clock} heart={heart} now={Date.now} />
+      ));
+    };
+
+    /** The heart is drawn wherever the sprite is, in this window; petting counts nothing. */
+    let heartTimer: ReturnType<typeof setTimeout> | undefined;
+    const pet = () => {
+      setHeart(true);
+      if (heartTimer !== undefined) clearTimeout(heartTimer);
+      heartTimer = setTimeout(
+        guard(() => setHeart(false)),
+        PET_MS,
+      );
+    };
+    api.lifecycle.onDispose(() => {
+      if (heartTimer !== undefined) clearTimeout(heartTimer);
+    });
+
     api.lifecycle.onDispose(
       api.keymap.registerLayer({
         commands: [
@@ -181,6 +207,22 @@ const tui: TuiPlugin = async (api, options) => {
             /** What lists a command in the palette; OpenCode's own commands carry it. */
             namespace: "palette",
             run: guard(() => setMute(!muted())),
+          },
+          {
+            name: "tamago.card",
+            title: `${name}: show card`,
+            description: "Who the creature is: stage, XP, age",
+            category: name,
+            namespace: "palette",
+            run: guard(showCard),
+          },
+          {
+            name: "tamago.pet",
+            title: `${name}: pet`,
+            description: "Give the creature a pat",
+            category: name,
+            namespace: "palette",
+            run: guard(pet),
           },
         ],
       }),
@@ -257,6 +299,7 @@ const tui: TuiPlugin = async (api, options) => {
               clock={clock}
               footer={footer(props.session_id)}
               bubble={() => voices()[props.session_id]?.bubble}
+              heart={heart}
             />
           );
         },
@@ -267,7 +310,7 @@ const tui: TuiPlugin = async (api, options) => {
       order: HOME_BOTTOM_ORDER,
       slots: {
         home_bottom(ctx) {
-          return <HomeView name={name} theme={() => ctx.theme.current} career={career} clock={clock} />;
+          return <HomeView name={name} theme={() => ctx.theme.current} career={career} clock={clock} heart={heart} />;
         },
       },
     });
