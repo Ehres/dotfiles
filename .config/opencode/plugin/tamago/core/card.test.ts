@@ -11,6 +11,7 @@ const career: Career = {
   errors: 9,
   questions: 0,
   hatchedAt: 0,
+  picks: {},
 };
 
 test("age counts whole days since hatching", () => {

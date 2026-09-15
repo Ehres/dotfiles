@@ -110,3 +110,41 @@ test("questions is a counter like the others", () => {
   assert.equal(sameCareer(a, { ...a }), true);
   assert.equal(sameCareer(a, { ...a, questions: 2 }), false);
 });
+
+test("freshCareer has no picks", () => {
+  assert.deepEqual(freshCareer(1).picks, {});
+});
+
+test("a pick alone makes a delta non-empty", () => {
+  assert.equal(isEmpty({ ...EMPTY_DELTA, picks: { m: { trait: "x", at: 1 } } }), false);
+  assert.equal(isEmpty({ ...EMPTY_DELTA, picks: {} }), true, "an empty picks record is still empty");
+});
+
+test("addDelta merges picks first-wins and omits the key when there is none", () => {
+  const early = { ...EMPTY_DELTA, picks: { m: { trait: "early", at: 10 } } };
+  const late = { ...EMPTY_DELTA, picks: { m: { trait: "late", at: 20 }, n: { trait: "hat", at: 5 } } };
+  const expected = { m: { trait: "early", at: 10 }, n: { trait: "hat", at: 5 } };
+  assert.deepEqual(addDelta(early, late).picks, expected);
+  assert.deepEqual(addDelta(late, early).picks, expected);
+  assert.equal("picks" in addDelta(EMPTY_DELTA, EMPTY_DELTA), false);
+  assert.equal("picks" in addDelta({ ...EMPTY_DELTA, picks: {} }, EMPTY_DELTA), false);
+  assert.equal(addDelta(early, { ...EMPTY_DELTA, prompts: 1 }).prompts, 1, "counters still add up beside picks");
+});
+
+test("hydrate reads well-formed picks and gives {} otherwise", () => {
+  assert.deepEqual(hydrate({}, 0).career.picks, {}, "today's career.json has no picks field");
+  assert.deepEqual(hydrate({ picks: "x" }, 0).career.picks, {});
+  assert.deepEqual(hydrate({ picks: [] }, 0).career.picks, {});
+  const { career, corrupt } = hydrate({ picks: { m: { trait: "x", at: 1 }, bad: { trait: "", at: 1 } } }, 0);
+  assert.equal(corrupt, false);
+  assert.deepEqual(career.picks, { m: { trait: "x", at: 1 } });
+});
+
+test("sameCareer compares the picks", () => {
+  const a = { ...freshCareer(1), picks: { m: { trait: "x", at: 1 } } };
+  assert.equal(sameCareer(a, { ...a, picks: { m: { trait: "x", at: 1 } } }), true);
+  assert.equal(sameCareer(a, { ...a, picks: { m: { trait: "y", at: 1 } } }), false);
+  assert.equal(sameCareer(a, { ...a, picks: { m: { trait: "x", at: 2 } } }), false);
+  assert.equal(sameCareer(a, { ...a, picks: { m: { trait: "x", at: 1 }, n: { trait: "z", at: 3 } } }), false);
+  assert.equal(sameCareer(a, freshCareer(1)), false);
+});

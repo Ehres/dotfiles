@@ -13,6 +13,7 @@ const owner: Career = {
   errors: 109,
   questions: 0,
   hatchedAt: 1789113932488,
+  picks: {},
 };
 
 const counters = (patch: Partial<Counters>): Counters => ({ ...EMPTY_DELTA, tools: { ...EMPTY_DELTA.tools }, ...patch });

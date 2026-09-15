@@ -165,3 +165,25 @@ test("a corrupt file is set aside, not overwritten, and the next flush starts fr
   assert.equal(second.career?.prompts, 1);
   assert.equal(second.career?.hatchedAt, 5);
 });
+
+test("a pick round-trips through flush and load, and the earlier pick wins across stores", () => {
+  const dir = scratch();
+  const a = createStore(dir, () => 7);
+  const b = createStore(dir, () => 7);
+  assert.equal(b.flush(d({ picks: { "evolution:young": { trait: "later", at: 20 } } })).outcome, "written");
+  const result = a.flush(d({ picks: { "evolution:young": { trait: "earlier", at: 10 } } }));
+  assert.equal(result.outcome, "written");
+  const expected = { "evolution:young": { trait: "earlier", at: 10 } };
+  assert.deepEqual(result.career?.picks, expected);
+  assert.deepEqual(a.load().career.picks, expected);
+  assert.deepEqual(JSON.parse(readFileSync(join(dir, CAREER_FILE), "utf8")).picks, expected);
+});
+
+test("a career file written before picks existed loads with empty picks", () => {
+  const dir = scratch();
+  writeFileSync(join(dir, CAREER_FILE), JSON.stringify({ prompts: 3, hatchedAt: 5 }));
+  const loaded = createStore(dir).load();
+  assert.equal(loaded.corrupt, false);
+  assert.deepEqual(loaded.career.picks, {});
+  assert.equal(loaded.career.prompts, 3);
+});

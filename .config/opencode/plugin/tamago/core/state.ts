@@ -1,4 +1,5 @@
 import { latest, type Rename } from "./name.ts";
+import { firstPicks, hydratePicks, samePicks, type Picks } from "./pick.ts";
 
 export type Activity = "idle" | "thinking" | "working" | "waiting" | "hurt" | "sleeping";
 export type ToolKind = "read" | "edit" | "bash" | "other";
@@ -19,10 +20,10 @@ export type Counters = {
   questions: number;
 };
 
-/** `name` is absent until the user renames the creature; the plugin option is the default. */
-export type Career = Counters & { hatchedAt: number; name?: Rename };
-/** `rename` is a Delta like any other: it waits for the flush and merges by latest. */
-export type Delta = Counters & { rename?: Rename };
+/** `name` is absent until the user renames the creature; the plugin option is the default. `picks` is always present, `{}` until the first Pick. */
+export type Career = Counters & { hatchedAt: number; name?: Rename; picks: Picks };
+/** `rename` and `picks` are Deltas like any other: they wait for the flush; the latest rename wins, the earliest Pick wins. */
+export type Delta = Counters & { rename?: Rename; picks?: Picks };
 
 export const ACTIVITIES: readonly Activity[] = ["idle", "thinking", "working", "waiting", "hurt", "sleeping"];
 export const TOOL_KINDS: readonly ToolKind[] = ["read", "edit", "bash", "other"];
@@ -41,12 +42,13 @@ export function initialSession(now: number): Session {
 }
 
 export function freshCareer(now: number): Career {
-  return { ...EMPTY_DELTA, tools: { ...EMPTY_DELTA.tools }, hatchedAt: now };
+  return { ...EMPTY_DELTA, tools: { ...EMPTY_DELTA.tools }, hatchedAt: now, picks: {} };
 }
 
 export function isEmpty(delta: Delta): boolean {
   return (
     delta.rename === undefined &&
+    (delta.picks === undefined || Object.keys(delta.picks).length === 0) &&
     delta.sessions === 0 &&
     delta.prompts === 0 &&
     delta.filesEdited === 0 &&
@@ -60,6 +62,7 @@ export function addDelta(a: Delta, b: Delta): Delta {
   const tools = { ...EMPTY_DELTA.tools };
   for (const kind of TOOL_KINDS) tools[kind] = a.tools[kind] + b.tools[kind];
   const rename = latest(a.rename, b.rename);
+  const picks = firstPicks(a.picks ?? {}, b.picks ?? {});
   return {
     sessions: a.sessions + b.sessions,
     prompts: a.prompts + b.prompts,
@@ -68,6 +71,7 @@ export function addDelta(a: Delta, b: Delta): Delta {
     errors: a.errors + b.errors,
     questions: a.questions + b.questions,
     ...(rename === undefined ? {} : { rename }),
+    ...(Object.keys(picks).length === 0 ? {} : { picks }),
   };
 }
 
@@ -82,7 +86,8 @@ export function sameCareer(a: Career, b: Career): boolean {
     a.filesEdited === b.filesEdited &&
     a.errors === b.errors &&
     a.questions === b.questions &&
-    TOOL_KINDS.every((kind) => a.tools[kind] === b.tools[kind])
+    TOOL_KINDS.every((kind) => a.tools[kind] === b.tools[kind]) &&
+    samePicks(a.picks, b.picks)
   );
 }
 
@@ -110,6 +115,7 @@ export function hydrate(raw: unknown, now: number): { career: Career; corrupt: b
       errors: num(raw.errors, 0),
       questions: num(raw.questions, 0),
       hatchedAt: num(raw.hatchedAt, now),
+      picks: hydratePicks(raw.picks),
       ...(name === undefined ? {} : { name }),
     },
   };

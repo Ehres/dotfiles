@@ -40,3 +40,31 @@ test("the latest rename wins whatever the merge order, and an older one never ov
   assert.deepEqual(merge(merge(base, r2), r1).name, { value: "Mochi", at: 20 });
   assert.deepEqual(merge(merge(base, r1), d1).name, { value: "Pixel", at: 10 }, "counters leave the name alone");
 });
+
+const k1: Delta = { ...EMPTY_DELTA, picks: { "evolution:hatchling": { trait: "sarcastic", at: 10 } } };
+const k2: Delta = { ...EMPTY_DELTA, picks: { "evolution:hatchling": { trait: "stoic", at: 20 }, "sessions:100": { trait: "hat", at: 30 } } };
+
+test("the earliest pick wins whatever the merge order, and a later one never overrides", () => {
+  const base = freshCareer(1);
+  assert.deepEqual(merge(merge(base, k1), k2), merge(merge(base, k2), k1));
+  assert.deepEqual(merge(merge(base, k2), k1).picks, {
+    "evolution:hatchling": { trait: "sarcastic", at: 10 },
+    "sessions:100": { trait: "hat", at: 30 },
+  });
+});
+
+test("counters leave the picks alone and picks leave the name alone", () => {
+  const base = freshCareer(1);
+  assert.deepEqual(merge(merge(base, k1), d1).picks, k1.picks);
+  assert.deepEqual(merge(merge(base, r1), k1).name, { value: "Pixel", at: 10 });
+  assert.equal("rename" in merge(base, k1), false, "a Career never carries a pending rename");
+});
+
+test("merging a delta without picks keeps the very same picks object", () => {
+  const career = merge(freshCareer(1), k1);
+  assert.equal(merge(career, d1).picks, career.picks);
+});
+
+test("a fresh career merged with the empty delta has empty picks", () => {
+  assert.deepEqual(merge(freshCareer(1), EMPTY_DELTA).picks, {});
+});
