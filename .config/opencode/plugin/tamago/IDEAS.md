@@ -120,6 +120,9 @@ Référence : Claude Buddy utilise 5 stats (DEBUGGING, PATIENCE, CHAOS, WISDOM,
 SNARK) tirées de façon déterministe depuis l'id utilisateur, et un nom plus une
 personnalité générés une fois par LLM puis persistés.
 
+Le pet (idée 6) est le premier endroit où le tempérament se voit : chaque
+tempérament a sa propre famille de réactions.
+
 ### 3. Évolutions ramifiées
 
 Les 5 stades sont linéaires. Le Tamagotchi original branche la forme adulte
@@ -169,7 +172,12 @@ Référence : l'issue Claude Code #59081 propose streaks quotidiens, badges,
 
 Via `api.keymap.registerLayer`, dans la palette :
 
-- `tamago.pet` : cœur flottant 2 s au-dessus du sprite (comme `/buddy pet`)
+- `tamago.pet` : cœur flottant 2 s au-dessus du sprite (comme `/buddy pet`).
+  Geste d'interaction pur, décidé le 2026-09-15 : il ne compte rien et ne
+  change rien à la Career, Tamago n'ayant aucun besoin à satisfaire. Sa valeur
+  vient de la réaction, qui doit varier selon le tempérament (idée 2) : le pet
+  devient la manière de découvrir qui est son Tamago. Sans personnalité, une
+  réaction unique suffit pour poser le geste.
 - `tamago.card` : `DialogAlert` avec la carte complète (sprite, stade, XP,
   compteurs par outil, âge, achievements)
 - `tamago.rename` : `DialogPrompt`, nom stocké dans `career.json` ou `api.kv`
