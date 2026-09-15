@@ -28,6 +28,15 @@ export type Delta = Counters & { rename?: Rename; picks?: Picks };
 export const ACTIVITIES: readonly Activity[] = ["idle", "thinking", "working", "waiting", "hurt", "sleeping"];
 export const TOOL_KINDS: readonly ToolKind[] = ["read", "edit", "bash", "other"];
 
+/** Every plain numeric counter. Adding one to `Counters` without listing it here is a type error, and listing it is all it takes. */
+export const COUNTER_KEYS = ["sessions", "prompts", "filesEdited", "errors", "questions"] as const satisfies readonly (keyof Counters)[];
+type PlainCounter = (typeof COUNTER_KEYS)[number];
+const _everyCounterListed: Exclude<Exclude<keyof Counters, "tools">, PlainCounter> extends never ? true : never = true;
+
+/** Every key a Career may carry on disk. The store keeps any other key verbatim, so a newer build's data survives an older build's flush. */
+export const CAREER_KEYS = [...COUNTER_KEYS, "tools", "hatchedAt", "name", "picks"] as const satisfies readonly (keyof Career)[];
+const _everyCareerKeyListed: Exclude<keyof Career, (typeof CAREER_KEYS)[number]> extends never ? true : never = true;
+
 export const EMPTY_DELTA: Delta = {
   sessions: 0,
   prompts: 0,
@@ -49,27 +58,25 @@ export function isEmpty(delta: Delta): boolean {
   return (
     delta.rename === undefined &&
     (delta.picks === undefined || Object.keys(delta.picks).length === 0) &&
-    delta.sessions === 0 &&
-    delta.prompts === 0 &&
-    delta.filesEdited === 0 &&
-    delta.errors === 0 &&
-    delta.questions === 0 &&
+    COUNTER_KEYS.every((key) => delta[key] === 0) &&
     TOOL_KINDS.every((kind) => delta.tools[kind] === 0)
   );
 }
 
-export function addDelta(a: Delta, b: Delta): Delta {
+/** The counters of `a` and `b` added up. */
+function addCounters(a: Counters, b: Counters): Counters {
   const tools = { ...EMPTY_DELTA.tools };
   for (const kind of TOOL_KINDS) tools[kind] = a.tools[kind] + b.tools[kind];
+  const out: Counters = { ...EMPTY_DELTA, tools };
+  for (const key of COUNTER_KEYS) out[key] = a[key] + b[key];
+  return out;
+}
+
+export function addDelta(a: Delta, b: Delta): Delta {
   const rename = latest(a.rename, b.rename);
   const picks = firstPicks(a.picks ?? {}, b.picks ?? {});
   return {
-    sessions: a.sessions + b.sessions,
-    prompts: a.prompts + b.prompts,
-    tools,
-    filesEdited: a.filesEdited + b.filesEdited,
-    errors: a.errors + b.errors,
-    questions: a.questions + b.questions,
+    ...addCounters(a, b),
     ...(rename === undefined ? {} : { rename }),
     ...(Object.keys(picks).length === 0 ? {} : { picks }),
   };
@@ -81,11 +88,7 @@ export function sameCareer(a: Career, b: Career): boolean {
     a.hatchedAt === b.hatchedAt &&
     a.name?.value === b.name?.value &&
     a.name?.at === b.name?.at &&
-    a.sessions === b.sessions &&
-    a.prompts === b.prompts &&
-    a.filesEdited === b.filesEdited &&
-    a.errors === b.errors &&
-    a.questions === b.questions &&
+    COUNTER_KEYS.every((key) => a[key] === b[key]) &&
     TOOL_KINDS.every((kind) => a.tools[kind] === b.tools[kind]) &&
     samePicks(a.picks, b.picks)
   );
@@ -105,20 +108,9 @@ export function hydrate(raw: unknown, now: number): { career: Career; corrupt: b
   const tools = { ...EMPTY_DELTA.tools };
   for (const kind of TOOL_KINDS) tools[kind] = num(rawTools[kind], 0);
   const name = rename(raw.name);
-  return {
-    corrupt: false,
-    career: {
-      sessions: num(raw.sessions, 0),
-      prompts: num(raw.prompts, 0),
-      tools,
-      filesEdited: num(raw.filesEdited, 0),
-      errors: num(raw.errors, 0),
-      questions: num(raw.questions, 0),
-      hatchedAt: num(raw.hatchedAt, now),
-      picks: hydratePicks(raw.picks),
-      ...(name === undefined ? {} : { name }),
-    },
-  };
+  const career: Career = { ...EMPTY_DELTA, tools, hatchedAt: num(raw.hatchedAt, now), picks: hydratePicks(raw.picks), ...(name === undefined ? {} : { name }) };
+  for (const key of COUNTER_KEYS) career[key] = num(raw[key], 0);
+  return { corrupt: false, career };
 }
 
 /** A stored name, only when both parts are well-formed. */

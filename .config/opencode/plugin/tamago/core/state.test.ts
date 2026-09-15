@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { EMPTY_DELTA, addDelta, freshCareer, hydrate, initialSession, isEmpty, sameCareer } from "./state.ts";
+import { CAREER_KEYS, EMPTY_DELTA, addDelta, freshCareer, hydrate, initialSession, isEmpty, sameCareer } from "./state.ts";
 
 test("initialSession starts idle and not busy", () => {
   assert.deepEqual(initialSession(42), { activity: "idle", since: 42, busy: false });
@@ -147,4 +147,12 @@ test("sameCareer compares the picks", () => {
   assert.equal(sameCareer(a, { ...a, picks: { m: { trait: "x", at: 2 } } }), false);
   assert.equal(sameCareer(a, { ...a, picks: { m: { trait: "x", at: 1 }, n: { trait: "z", at: 3 } } }), false);
   assert.equal(sameCareer(a, freshCareer(1)), false);
+});
+
+test("CAREER_KEYS names every key a hydrated Career can carry", () => {
+  const full = hydrate(
+    { sessions: 1, prompts: 1, tools: { read: 1 }, filesEdited: 1, errors: 1, questions: 1, hatchedAt: 1, name: { value: "x", at: 1 }, picks: { m: { trait: "t", at: 1 } } },
+    0,
+  ).career;
+  for (const key of Object.keys(full)) assert.ok(CAREER_KEYS.includes(key as keyof typeof full), `${key} missing from CAREER_KEYS`);
 });

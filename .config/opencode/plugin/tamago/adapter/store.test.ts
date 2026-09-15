@@ -187,3 +187,23 @@ test("a career file written before picks existed loads with empty picks", () => 
   assert.deepEqual(loaded.career.picks, {});
   assert.equal(loaded.career.prompts, 3);
 });
+
+test("flush keeps top-level keys it does not know, so a newer build's data survives an older build's flush", () => {
+  const dir = scratch();
+  writeFileSync(join(dir, CAREER_FILE), JSON.stringify({ prompts: 1, hatchedAt: 5, relics: { ember: { at: 9 } } }));
+  const result = createStore(dir, () => 7).flush(d({ prompts: 1 }));
+  assert.equal(result.outcome, "written");
+  const onDisk = JSON.parse(readFileSync(join(dir, CAREER_FILE), "utf8"));
+  assert.equal(onDisk.prompts, 2);
+  assert.deepEqual(onDisk.relics, { ember: { at: 9 } });
+  assert.equal("relics" in (result.career ?? {}), false, "the in-memory Career only carries what it knows");
+});
+
+test("a known key with a malformed value is repaired on flush, not carried over", () => {
+  const dir = scratch();
+  writeFileSync(join(dir, CAREER_FILE), JSON.stringify({ hatchedAt: 5, name: "not a rename", picks: [1, 2] }));
+  createStore(dir, () => 7).flush(d({ prompts: 1 }));
+  const onDisk = JSON.parse(readFileSync(join(dir, CAREER_FILE), "utf8"));
+  assert.equal("name" in onDisk, false);
+  assert.deepEqual(onDisk.picks, {});
+});

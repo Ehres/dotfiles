@@ -19,6 +19,10 @@ AGENTS.md. Vocabulary lives in `CONTEXT.md`; use those terms.
 - Every handler is wrapped by `guard`: the TUI never crashes because of this
   plugin.
 - Counters only grow; `merge` stays commutative and preserves `hatchedAt`.
+- A new Career field is listed in `CAREER_KEYS` (a plain counter in
+  `COUNTER_KEYS`), or the build fails. The store carries any key it does not
+  know verbatim, so an older build still running never erases a newer one's
+  data.
 - Weights and thresholds are tuned in the `stage.ts` tables, not in code paths.
 
 ## Verify

@@ -3,13 +3,23 @@ import { randomUUID } from "node:crypto";
 import { join } from "node:path";
 import { decideLock } from "../core/lock.ts";
 import { merge } from "../core/merge.ts";
-import { freshCareer, hydrate, type Career, type Delta } from "../core/state.ts";
+import { CAREER_KEYS, freshCareer, hydrate, type Career, type Delta } from "../core/state.ts";
 
 export const CAREER_FILE = "career.json";
 export const LOCK_DIR = "career.lock";
 export const LOCK_OWNER_FILE = "owner";
 
 export type Loaded = { career: Career; corrupt: boolean };
+
+/** What was read, plus the top-level keys this build does not know, kept verbatim so a newer build's data survives our flush. */
+type Read = Loaded & { unknown: Record<string, unknown> };
+
+const KNOWN: ReadonlySet<string> = new Set<string>(CAREER_KEYS);
+
+function unknownKeys(raw: unknown): Record<string, unknown> {
+  if (typeof raw !== "object" || raw === null || Array.isArray(raw)) return {};
+  return Object.fromEntries(Object.entries(raw).filter(([key]) => !KNOWN.has(key)));
+}
 
 /**
  * written: the delta is on disk, `career` is the merged result.
@@ -35,13 +45,14 @@ export function createStore(dir: string, now: () => number = Date.now): Store {
   const ownerFile = join(lock, LOCK_OWNER_FILE);
   let token = "";
 
-  function read(): Loaded {
+  function read(): Read {
     mkdirSync(dir, { recursive: true });
     try {
-      return hydrate(JSON.parse(readFileSync(file, "utf8")), now());
+      const raw: unknown = JSON.parse(readFileSync(file, "utf8"));
+      return { ...hydrate(raw, now()), unknown: unknownKeys(raw) };
     } catch (err) {
-      if (code(err) === "ENOENT") return { career: freshCareer(now()), corrupt: false };
-      if (err instanceof SyntaxError) return { career: freshCareer(now()), corrupt: true };
+      if (code(err) === "ENOENT") return { career: freshCareer(now()), corrupt: false, unknown: {} };
+      if (err instanceof SyntaxError) return { career: freshCareer(now()), corrupt: true, unknown: {} };
       throw err;
     }
   }
@@ -103,7 +114,10 @@ export function createStore(dir: string, now: () => number = Date.now): Store {
   }
 
   return {
-    load: read,
+    load: () => {
+      const { career, corrupt } = read();
+      return { career, corrupt };
+    },
     flush(delta) {
       if (!acquire()) return { outcome: "busy" };
       try {
@@ -114,7 +128,7 @@ export function createStore(dir: string, now: () => number = Date.now): Store {
         }
         const merged = merge(loaded.career, delta);
         const tmp = `${file}.${process.pid}.tmp`;
-        writeFileSync(tmp, JSON.stringify(merged, null, 2));
+        writeFileSync(tmp, JSON.stringify({ ...loaded.unknown, ...merged }, null, 2));
         if (!owns()) {
           rmSync(tmp, { force: true });
           return { outcome: "busy" };

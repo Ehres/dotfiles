@@ -143,7 +143,10 @@ Everything lives in `~/.local/share/opencode-tamago/`:
 Several OpenCode instances can run at once. Each keeps its gains in memory and
 merges them into `career.json` every 2 s under the lock, so progress made in
 one window shows up in the others within a couple of seconds and nothing is
-lost. A lock older than 10 s is treated as orphaned and taken over.
+lost. A lock older than 10 s is treated as orphaned and taken over. A window
+still running an older build of the plugin keeps the top-level fields it does
+not know exactly as it found them, so upgrading with a window open loses
+nothing.
 
 To start over, quit OpenCode and delete `career.json`. If the file is not
 valid JSON, the plugin sets it aside as `career.json.corrupt-<timestamp>`,
