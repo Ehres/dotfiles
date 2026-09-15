@@ -86,6 +86,20 @@ Décisions à prendre : durée d'affichage (opencode-pets utilise 5 s), fréquen
 maximale (une bulle toutes les 10 s), retour à la ligne selon la largeur de la
 sidebar, mode muet persistant via `api.kv`.
 
+### 1b. Réponse à la permission
+
+Quand Tamago a demandé « May I? » et que l'utilisateur répond dans les 30 s,
+une seconde bulle répond à la réponse : `granted` (« Thanks! », « On it. »)
+sur `once`/`always`, `denied` (« Oh. Okay. », « Fair enough. ») sur `reject`.
+
+- `permission_replied` gagne `granted: boolean` ; `permission.replied` porte
+  déjà `reply: "once" | "always" | "reject"`.
+- Deux Cues de priorité 2 pour remplacer la bulle « May I? » malgré la
+  fenêtre de silence ; sans question posée récemment, aucune réponse, donc pas
+  de bulle à chaque permission.
+- Touche `core/events.ts`, `core/voice.ts`, `adapter/translate.ts` et leurs
+  tests ; rien dans `index.tsx` ni les vues.
+
 ### 2. Personnalité et nom
 
 Aujourd'hui `name` vient des options du plugin. Tirer un tempérament à
@@ -196,14 +210,40 @@ yeux d'une couleur, corps d'une autre, accessoire en `theme.warning`. Les stades
 supérieurs pourraient utiliser des caractères de dessin de boîte, avec repli
 ASCII si nécessaire.
 
+### 11. Gamification : deck-building et choix
+
+Direction posée le 2026-09-15, voir `CONTEXT.md`. Pas de run par OpenCode
+session : une session n'a pas de fin, n'est pas comparable à une autre et
+s'ouvre gratuitement. Pistes, aucune engagée :
+
+- **Deck** : les actions comptées deviennent des cartes gagnées (« Grep
+  parfait », « Bash sans erreur »). Le deck vit dans la Career, se garde et se
+  trie ; ses combinaisons débloquent traits, accessoires (idée 4) ou branches
+  (idée 3). Une carte gagnée dans une fenêtre est un Delta comme les autres.
+- **Choix** : à un jalon, une bulle annonce puis un `DialogSelect` propose
+  deux ou trois options tirées ; l'utilisateur en garde une. Premier jalon
+  naturel : l'Évolution, où l'on choisit par exemple entre une famille de
+  phrases pour la Voice et une forme pour le Stage suivant. Le choix est
+  persisté dans la Career ; en multi-instances, le premier écrit gagne pour
+  un jalon donné.
+- **Reliques** : les achievements (idée 5) deviennent des objets à effet
+  permanent plutôt que des badges.
+- Contraintes qui tiennent : pas de mort, jamais de retrait sur la Career,
+  aucune option n'est une punition, pas de lecture de contenu, merge
+  commutatif.
+
 ## Ordre recommandé
 
 1. ~~Bulle avec templates locaux, plus mode muet.~~ Fait. Pose la mécanique
    "événement → réaction ponctuelle" dont dépendent 5, 6 et 7.
+1b. Réponse à la permission : petit, pose le motif « bulle qui répond à une
+   bulle ».
 2. Commandes dans la palette : pet, card, mute, rename.
 3. Achievements et streak, qui alimentent ensuite accessoires et branches.
 4. Personnalité et branches, une fois qu'on a vu ce que les compteurs racontent
    après une semaine d'usage réel.
+5. Gamification (idée 11), une fois que 3 et 4 ont donné une lecture des
+   compteurs réels ; le choix à l'Évolution peut venir dès 3.
 
 ## Références
 

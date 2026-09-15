@@ -4,6 +4,17 @@ A creature that lives in the OpenCode terminal, reacts to what the current
 OpenCode session is doing, and grows from everything the user has ever done
 with OpenCode on this machine.
 
+## Direction
+
+Tamago doit devenir un peu plus un jeu, dans l'esprit du deck-building, avec
+les choix du rogue-like mais sans ses runs ni sa mort. La Career est la seule
+progression : on y collectionne, on y combine, on y débloque. À certains
+jalons, l'Évolution en premier, le Tamago propose un tirage de deux ou trois
+options et l'utilisateur en choisit une ; le choix marque durablement la
+créature (ses phrases, sa forme, ses traits) et aucune option n'est une
+pénalité. Ces règles n'existent pas encore ; les concepts qui en naîtront
+rejoignent ce glossaire au fur et à mesure.
+
 ## Language
 
 ### The creature
