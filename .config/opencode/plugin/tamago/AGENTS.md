@@ -11,6 +11,10 @@ AGENTS.md. Vocabulary lives in `CONTEXT.md`; use those terms.
   return JSX.
 - Moving a Session (`transition`) and counting XP (`count`) are separate pure
   functions; an event may move several Sessions but is counted once.
+- What an event, a tick, a flush or a palette command does to the Window is a
+  pure function in `core/window.ts`, tested. `index.tsx` only feeds it, mirrors
+  the result into signals and performs the returned effects (toast, palette
+  refresh). New behavior goes in the reducer, not in `index.tsx`.
 - Child (subagent) sessions never move a Session. Their work counts, their
   prompts do not.
 - Stage, and anything else derived from counters, is computed, never stored.

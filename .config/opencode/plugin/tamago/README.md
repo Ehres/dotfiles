@@ -175,6 +175,7 @@ Layout:
 ```
 index.tsx      the only module that touches api.* and timers; wires the layers
 core/          pure data and strings; knows nothing about OpenCode or Solid
+core/window.ts what one window does with an event, a tick, a flush or a command
 adapter/       the only layer touching SDK event shapes and the disk
 view/          Solid components fed with accessors, returning JSX
 ```

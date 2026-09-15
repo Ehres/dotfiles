@@ -1,0 +1,139 @@
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import type { Addressed } from "./events.ts";
+import { STAGES, WEIGHTS } from "./stage.ts";
+import { EMPTY_DELTA, freshCareer, isEmpty, type Career } from "./state.ts";
+import { BUBBLE_MS } from "./voice.ts";
+import { adopt, flushed, freshWindow, receive, rename, setMuted, tick, type Window } from "./window.ts";
+
+const T0 = 1_000_000;
+const to = (id: string, event: Addressed["event"]): Addressed => ({ target: { type: "session", id }, event });
+const every = (event: Addressed["event"]): Addressed => ({ target: { type: "every" }, event });
+const none = (event: Addressed["event"]): Addressed => ({ target: { type: "none" }, event });
+
+/** A Window with two Sessions already moving, so "every" has someone to reach. */
+function twoSessions(): Window {
+  let w = freshWindow(freshCareer(T0));
+  w = receive(w, to("a", { type: "prompt_sent" }), T0).window;
+  w = receive(w, to("b", { type: "prompt_sent" }), T0).window;
+  return w;
+}
+
+/** Sessions worth exactly the XP of `stage`, so one more prompt crosses into it. */
+function careerJustBelow(stage: (typeof STAGES)[number]["id"]): Career {
+  const threshold = STAGES.find((entry) => entry.id === stage)?.xp ?? 0;
+  return { ...freshCareer(T0), sessions: (threshold - WEIGHTS.prompts) / WEIGHTS.sessions };
+}
+
+test("an event addressed to a Session moves that Session only and counts once", () => {
+  const w = twoSessions();
+  const { window: next } = receive(w, to("a", { type: "tool_started" }), T0 + 1);
+  assert.equal(next.sessions.a?.activity, "working");
+  assert.equal(next.sessions.b?.activity, "thinking");
+  assert.equal(next.pending.prompts, 2, "the two prompts counted once each");
+  assert.equal(next.career.prompts, 2, "shown at once in the Career");
+});
+
+test("an event addressed to every Session moves them all but counts once", () => {
+  const w = twoSessions();
+  const { window: next } = receive(w, every({ type: "session_error" }), T0 + 1);
+  assert.equal(next.sessions.a?.activity, "hurt");
+  assert.equal(next.sessions.b?.activity, "hurt");
+  assert.equal(next.pending.errors, 1);
+});
+
+test("an event addressed to nobody counts and moves no Session", () => {
+  const w = twoSessions();
+  const { window: next } = receive(w, none({ type: "tool_finished", kind: "bash" }), T0 + 1);
+  assert.equal(next.sessions, w.sessions, "same Sessions object");
+  assert.equal(next.pending.tools.bash, 1);
+});
+
+test("session_gone forgets the Session and its Voice", () => {
+  let w = twoSessions();
+  w = receive(w, to("a", { type: "permission_asked" }), T0 + 1).window;
+  assert.ok(w.voices.a?.bubble, "a spoke");
+  const { window: next } = receive(w, to("a", { type: "session_gone" }), T0 + 2);
+  assert.deepEqual(Object.keys(next.sessions), ["b"]);
+  assert.deepEqual(Object.keys(next.voices), ["b"]);
+  assert.ok(isEmpty(EMPTY_DELTA) && next.pending === w.pending, "nothing counted");
+});
+
+test("a quiet tick returns the very same Window", () => {
+  const w = twoSessions();
+  assert.equal(tick(w, T0 + 1), w);
+});
+
+test("a tick lets a Bubble expire and a hurt Session recover", () => {
+  let w = twoSessions();
+  w = receive(w, to("a", { type: "permission_asked" }), T0).window;
+  w = receive(w, to("b", { type: "tool_failed" }), T0).window;
+  const later = tick(w, T0 + BUBBLE_MS + 3_000);
+  assert.equal(later.voices.a?.bubble, undefined);
+  assert.equal(later.sessions.b?.activity, "working");
+});
+
+test("adopting a Career that crosses a Stage reports the Evolution and every Session hears it", () => {
+  let w = freshWindow(careerJustBelow("hatchling"));
+  w = receive(w, to("a", { type: "session_busy" }), T0).window; // moves, counts nothing
+  w = receive(w, to("b", { type: "session_busy" }), T0).window;
+  const evolved = { ...w.career, prompts: w.career.prompts + 1 };
+  const step = adopt(w, evolved, T0 + 1);
+  assert.deepEqual(step.effects, [{ type: "evolved", stage: "hatchling" }]);
+  assert.equal(step.window.voices.a?.bubble?.cue, "evolved");
+  assert.equal(step.window.voices.b?.bubble?.cue, "evolved");
+});
+
+test("earning the crossing Delta through receive reports the Evolution too", () => {
+  const w = freshWindow(careerJustBelow("hatchling"));
+  const step = receive(w, to("a", { type: "prompt_sent" }), T0);
+  assert.deepEqual(step.effects, [{ type: "evolved", stage: "hatchling" }]);
+});
+
+test("adopting an equal Career changes nothing and reports nothing", () => {
+  const w = twoSessions();
+  const step = adopt(w, { ...w.career }, T0 + 1);
+  assert.equal(step.window, w);
+  assert.deepEqual(step.effects, []);
+});
+
+test("a rename is shown at once, kept pending, and reported so the palette can follow", () => {
+  const w = twoSessions();
+  const step = rename(w, "  Momo  ", T0 + 5);
+  assert.equal(step.window.career.name?.value, "Momo");
+  assert.deepEqual(step.window.pending.rename, { value: "Momo", at: T0 + 5 });
+  assert.deepEqual(step.effects, [{ type: "renamed" }]);
+});
+
+test("an empty rename, or the current Name again, changes nothing", () => {
+  let w = twoSessions();
+  assert.equal(rename(w, "   ", T0).window, w);
+  w = rename(w, "Momo", T0).window;
+  assert.equal(rename(w, "Momo", T0 + 1).window, w);
+});
+
+test("muting silences every Cue and clears the Bubbles on screen; unmuting lets them speak again", () => {
+  let w = twoSessions();
+  w = receive(w, to("a", { type: "permission_asked" }), T0).window;
+  const quiet = setMuted(w, true);
+  assert.equal(quiet.voices.a?.bubble, undefined);
+  const still = receive(quiet, to("b", { type: "permission_asked" }), T0 + 1).window;
+  assert.equal(still.voices.b?.bubble, undefined);
+  assert.equal(still.sessions.b?.activity, "waiting", "the Session still moves");
+  const loud = receive(setMuted(still, false), to("b", { type: "permission_asked" }), T0 + 200_000).window;
+  assert.equal(loud.voices.b?.bubble?.cue, "permission");
+});
+
+test("flushed adopts the merged Career and forgets the pending Delta", () => {
+  const w = twoSessions();
+  const onDisk = { ...w.career, prompts: 40 };
+  const step = flushed(w, onDisk, T0 + 1);
+  assert.ok(isEmpty(step.window.pending));
+  assert.equal(step.window.career.prompts, 40);
+});
+
+test("renaming to the Name already shown, even the plugin default that the Career never stored, changes nothing", () => {
+  const w = twoSessions();
+  assert.equal(w.career.name, undefined);
+  assert.equal(rename(w, "Tamago", T0, "Tamago").window, w);
+});

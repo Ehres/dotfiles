@@ -86,6 +86,13 @@ session** for that one
 The regular heartbeat that lets time pass for the Tamago: recovering from
 hurt, falling asleep, advancing an animation.
 
+**Window**:
+Everything one OpenCode window holds in memory about the Tamago: the Career
+as shown there, its Delta, one Session and one Voice per OpenCode session on
+screen, and whether the Voice is muted. Moved by pure functions; forgotten
+when the window closes.
+_Avoid_: state, store, world, instance
+
 ### Speech
 
 **Cue**:
@@ -185,8 +192,8 @@ _Avoid_: card, widget
 
 - A **Career** has exactly one **Stage** at any time, and exactly one **XP**
 - A **Career** belongs to one machine; every OpenCode window shares it
-- Each root OpenCode session has its own **Session**; each window has one
-  **Delta**
+- Each OpenCode window has exactly one **Window**, which holds one **Delta**
+  and one **Session** per root OpenCode session on screen
 - A child (subagent) OpenCode session has no **Session** of its own; its work
   still reaches the **Career**
 - Many **Deltas** merge into one **Career**; the order does not matter
