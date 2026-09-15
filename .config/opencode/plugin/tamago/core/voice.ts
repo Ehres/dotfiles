@@ -4,6 +4,8 @@ import type { Session } from "./state.ts";
 /** Why the Tamago speaks. Born from events and transitions, never from content. */
 export type Cue =
   | "permission"
+  | "granted"
+  | "denied"
   | "woke"
   | "long_work"
   | "big_diff"
@@ -21,6 +23,8 @@ export type Voice = {
   bubble?: Bubble;
   /** Start and priority of the last Bubble, for the quiet window. */
   last?: { at: number; priority: number };
+  /** When the Tamago last voiced "May I?" and is still waiting for the answer. */
+  asked?: number;
   /** Times each Cue was spoken, for deterministic phrase selection and cooldowns. */
   spoken: Partial<Record<Cue, { at: number; times: number }>>;
   /** Timestamps of recent tool_failed, pruned to STREAK_MS. */
@@ -35,6 +39,8 @@ export type Voice = {
 export const BUBBLE_MS = 5_000;
 /** Minimum gap between two Bubble starts, unless a strictly higher priority interrupts. */
 export const QUIET_MS = 10_000;
+/** How long after voicing "May I?" a reply still deserves an answer. */
+export const REPLY_MS = 30_000;
 /** Busy time after which going idle deserves a word. */
 export const LONG_WORK_MS = 300_000;
 /** Files in the session diff from which the Tamago calls it a big site. */
@@ -46,6 +52,8 @@ export const STREAK_COUNT = 3;
 /** Tuning table: a higher priority may interrupt the quiet window; Infinity means once per Session. */
 export const CUES: Record<Cue, { priority: number; cooldown: number }> = {
   permission: { priority: 1, cooldown: 120_000 },
+  granted: { priority: 2, cooldown: 0 },
+  denied: { priority: 2, cooldown: 0 },
   woke: { priority: 1, cooldown: 0 },
   long_work: { priority: 1, cooldown: 0 },
   big_diff: { priority: 1, cooldown: Infinity },
@@ -59,6 +67,8 @@ export const CUES: Record<Cue, { priority: number; cooldown: number }> = {
 /** English, like the Moods. Every phrase is at most MAX_TEXT characters; a test enforces it. */
 export const PHRASES: Record<Cue, readonly [string, ...string[]]> = {
   permission: ["May I?", "Your call.", "Say the word."],
+  granted: ["Thanks!", "On it.", "Much obliged."],
+  denied: ["Oh. Okay.", "Fair enough.", "Noted."],
   woke: ["Mmh? Already?", "Was I out long?"],
   long_work: ["Phew. Done.", "That was a big one."],
   big_diff: ["Quite the site here.", "That's a lot of files."],
@@ -87,6 +97,12 @@ function listen(
   switch (event.type) {
     case "permission_asked":
       cue = "permission";
+      break;
+    case "permission_replied":
+      if (next.asked !== undefined) {
+        if (now - next.asked < REPLY_MS) cue = event.granted ? "granted" : "denied";
+        next = { ...next, asked: undefined };
+      }
       break;
     case "session_idle":
       if (before.busy && next.busySince !== undefined && now - next.busySince >= LONG_WORK_MS) cue = "long_work";
@@ -146,5 +162,6 @@ export function speak(voice: Voice, event: TamagoEvent, before: Session, after: 
     bubble: { cue, text, since: now, until: now + BUBBLE_MS },
     last: { at: now, priority },
     spoken: { ...next.spoken, [cue]: { at: now, times: times + 1 } },
+    ...(cue === "permission" ? { asked: now } : {}),
   };
 }

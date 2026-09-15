@@ -133,8 +133,11 @@ export function createTranslator(options: TranslatorOptions = {}): (event: Event
         return [{ target: NONE, event: { type: "file_edited" } }];
       case "permission.asked":
         return mood(sessionID, { type: "permission_asked" });
-      case "permission.replied":
-        return mood(sessionID, { type: "permission_replied" });
+      case "permission.replied": {
+        const reply = isRecord(props) ? str(props.reply) : undefined;
+        const granted = reply === "once" || reply === "always";
+        return mood(sessionID, { type: "permission_replied", granted });
+      }
       case "session.status": {
         const status = isRecord(props) && isRecord(props.status) ? str(props.status.type) : undefined;
         if (status === "idle") return mood(sessionID, { type: "session_idle" });

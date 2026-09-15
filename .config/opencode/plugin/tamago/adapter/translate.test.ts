@@ -114,7 +114,9 @@ test("a user message counts one prompt even when updated several times", () => {
 test("session-bound events target their session", () => {
   const t = createTranslator();
   assert.deepEqual(t(ev({ type: "permission.asked", properties: { sessionID: "s" } })), [on("s", { type: "permission_asked" })]);
-  assert.deepEqual(t(ev({ type: "permission.replied", properties: { sessionID: "s", reply: "once" } })), [on("s", { type: "permission_replied" })]);
+  assert.deepEqual(t(ev({ type: "permission.replied", properties: { sessionID: "s", reply: "once" } })), [on("s", { type: "permission_replied", granted: true })]);
+  assert.deepEqual(t(ev({ type: "permission.replied", properties: { sessionID: "s", reply: "always" } })), [on("s", { type: "permission_replied", granted: true })]);
+  assert.deepEqual(t(ev({ type: "permission.replied", properties: { sessionID: "s", reply: "reject" } })), [on("s", { type: "permission_replied", granted: false })]);
   assert.deepEqual(t(ev({ type: "session.idle", properties: { sessionID: "s" } })), [on("s", { type: "session_idle" })]);
   assert.deepEqual(t(ev({ type: "session.error", properties: { sessionID: "s", error: { name: "UnknownError" } } })), [on("s", { type: "session_error" })]);
   assert.deepEqual(t(ev({ type: "session.deleted", properties: { info: { id: "s" } } })), [on("s", { type: "session_gone" })]);

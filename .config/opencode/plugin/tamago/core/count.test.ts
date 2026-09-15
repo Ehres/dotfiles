@@ -22,7 +22,7 @@ test("activity-only events count nothing", () => {
   const silent: TamagoEvent[] = [
     { type: "tool_started" },
     { type: "permission_asked" },
-    { type: "permission_replied" },
+    { type: "permission_replied", granted: true },
     { type: "session_busy" },
     { type: "session_idle" },
     { type: "session_gone" },

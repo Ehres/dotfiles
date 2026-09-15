@@ -11,6 +11,7 @@ import {
   LONG_WORK_MS,
   PHRASES,
   QUIET_MS,
+  REPLY_MS,
   STREAK_MS,
   initialVoice,
   speak,
@@ -181,4 +182,42 @@ test("an event that changes nothing returns the same Voice object", () => {
   const session = initialSession(0);
   assert.equal(speak(voice, { type: "tool_finished", kind: "read" }, session, session, 1), voice);
   assert.equal(speak(voice, { type: "tick" }, session, session, 1), voice);
+});
+
+test("a reply within REPLY_MS answers a spoken May I?, replacing it despite the quiet window", () => {
+  const asked = replay([[{ type: "permission_asked" }, 0]]);
+  assert.equal(asked.voice.asked, 0);
+  const granted = replay([[{ type: "permission_replied", granted: true }, 1]], asked);
+  assert.deepEqual(granted.voice.bubble, { cue: "granted", text: PHRASES.granted[0], since: 1, until: 1 + BUBBLE_MS });
+  assert.equal(granted.voice.asked, undefined, "the question is answered");
+  const denied = replay([[{ type: "permission_replied", granted: false }, REPLY_MS - 1]], asked);
+  assert.equal(cueOf(denied.voice), "denied");
+});
+
+test("a reply after REPLY_MS, or to a permission the Tamago never voiced, says nothing", () => {
+  const asked = replay([[{ type: "permission_asked" }, 0]]);
+  const late = replay([[{ type: "tick" }, BUBBLE_MS], [{ type: "permission_replied", granted: true }, REPLY_MS]], asked);
+  assert.equal(cueOf(late.voice), undefined);
+  assert.equal(late.voice.spoken.granted, undefined);
+  assert.equal(late.voice.asked, undefined, "a late reply still closes the question");
+  const quiet = replay(
+    [
+      [{ type: "permission_replied", granted: true }, 1],
+      [{ type: "permission_asked" }, 2],
+      [{ type: "permission_replied", granted: false }, 3],
+    ],
+    asked,
+  );
+  assert.equal(cueOf(quiet.voice), "granted", "the second ask was under cooldown, so its reply is not answered");
+  assert.equal(quiet.voice.spoken.denied, undefined);
+  const mute = replay([[{ type: "permission_replied", granted: true }, 1]]);
+  assert.equal(mute.voice.bubble, undefined);
+});
+
+test("one reply per question: a second reply in the window is ignored", () => {
+  const asked = replay([[{ type: "permission_asked" }, 0]]);
+  const first = replay([[{ type: "permission_replied", granted: true }, 1]], asked);
+  const second = replay([[{ type: "tick" }, 1 + BUBBLE_MS], [{ type: "permission_replied", granted: false }, 2 + QUIET_MS]], first);
+  assert.equal(cueOf(second.voice), undefined);
+  assert.equal(second.voice.spoken.denied, undefined);
 });

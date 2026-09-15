@@ -73,7 +73,7 @@ test("hurt recovers after HURT_MS to working when the session is busy, else idle
 test("permissions make the creature wait and a reply resumes work", () => {
   const waiting = replay([[{ type: "permission_asked" }, 0]]);
   assert.equal(waiting.activity, "waiting");
-  const resumed = replay([[{ type: "permission_replied" }, 1]], waiting);
+  const resumed = replay([[{ type: "permission_replied", granted: true }, 1]], waiting);
   assert.equal(resumed.activity, "working");
   assert.equal(resumed.busy, true);
 });

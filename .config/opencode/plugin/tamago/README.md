@@ -60,6 +60,8 @@ messages, todo texts or diffs, only their counts.
 | Cue          | When                                            |
 | ------------ | ----------------------------------------------- |
 | `permission` | OpenCode asks for a permission                  |
+| `granted`    | you allow the permission it just asked about    |
+| `denied`     | you refuse the permission it just asked about   |
 | `woke`       | the creature wakes from sleep                   |
 | `long_work`  | the session goes idle after 5 min of work       |
 | `big_diff`   | the session diff reaches 10 files, once         |
@@ -70,9 +72,10 @@ messages, todo texts or diffs, only their counts.
 | `evolved`    | the creature reaches a new stage                |
 
 At most one bubble every 10 s; a rarer cue (an evolution, a streak) may
-interrupt a common one. Phrases rotate in order per cue. Tuning lives in
-`core/voice.ts`. The `Tamago: toggle bubbles` palette command mutes and
-unmutes; the choice is remembered across launches.
+interrupt a common one. `granted` and `denied` only answer a `permission` the
+creature actually voiced, within 30 s and once per question. Phrases rotate in
+order per cue. Tuning lives in `core/voice.ts`. The `Tamago: toggle bubbles`
+palette command mutes and unmutes; the choice is remembered across launches.
 
 ## How it grows
 

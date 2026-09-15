@@ -88,6 +88,9 @@ sidebar, mode muet persistant via `api.kv`.
 
 ### 1b. Réponse à la permission
 
+**Fait le 2026-09-15.** Cues `granted` et `denied`, fenêtre de 30 s, une
+réponse par question, seulement si la bulle « May I? » est réellement sortie.
+
 Quand Tamago a demandé « May I? » et que l'utilisateur répond dans les 30 s,
 une seconde bulle répond à la réponse : `granted` (« Thanks! », « On it. »)
 sur `once`/`always`, `denied` (« Oh. Okay. », « Fair enough. ») sur `reject`.
@@ -236,8 +239,8 @@ s'ouvre gratuitement. Pistes, aucune engagée :
 
 1. ~~Bulle avec templates locaux, plus mode muet.~~ Fait. Pose la mécanique
    "événement → réaction ponctuelle" dont dépendent 5, 6 et 7.
-1b. Réponse à la permission : petit, pose le motif « bulle qui répond à une
-   bulle ».
+1b. ~~Réponse à la permission.~~ Fait. Pose le motif « bulle qui répond à
+   une bulle ».
 2. Commandes dans la palette : pet, card, mute, rename.
 3. Achievements et streak, qui alimentent ensuite accessoires et branches.
 4. Personnalité et branches, une fois qu'on a vu ce que les compteurs racontent

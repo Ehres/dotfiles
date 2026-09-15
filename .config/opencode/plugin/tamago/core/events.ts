@@ -9,7 +9,8 @@ export type TamagoEvent =
   | { type: "tool_cancelled" }
   | { type: "file_edited" }
   | { type: "permission_asked" }
-  | { type: "permission_replied" }
+  /** `granted` is true for a "once" or "always" reply, false for a refusal. */
+  | { type: "permission_replied"; granted: boolean }
   | { type: "session_busy" }
   | { type: "session_idle" }
   | { type: "session_error" }
