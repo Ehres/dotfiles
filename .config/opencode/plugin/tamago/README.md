@@ -84,7 +84,7 @@ Four commands in the palette, under the creature's name:
 | Command          | What it does                                                     |
 | ---------------- | ---------------------------------------------------------------- |
 | `toggle bubbles` | mutes and unmutes; the choice is remembered across launches     |
-| `show card`      | opens a dialog with the sprite, stage, XP, age and character     |
+| `show card`      | opens a dialog with the sprite, stage, XP, age, character and bar |
 | `pet`            | the sprite wears a `♥` and its temperament's eyes for 2 s       |
 | `rename`         | asks for a new name, 16 characters at most; empty keeps the old |
 
