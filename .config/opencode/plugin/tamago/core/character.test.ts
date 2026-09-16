@@ -1,8 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { CRAFTS, STANCE, TEMPERAMENTS, character, craft, describe, stance, temperament, vocation } from "./character.ts";
-import { STAGES } from "./stage.ts";
 import { EMPTY_DELTA, freshCareer, type Career, type Counters } from "./state.ts";
+import { RARITY, REFERENCE } from "./species.ts";
+import { STAGES, type Paced } from "./stage.ts";
 
 /** The owner's real career on 2026-09-15, plus questions. */
 const owner: Career = {
@@ -17,7 +18,7 @@ const owner: Career = {
   picks: {},
 };
 
-const counters = (patch: Partial<Counters>): Counters => ({ ...EMPTY_DELTA, tools: { ...EMPTY_DELTA.tools }, ...patch });
+const counters = (patch: Partial<Counters>, species = REFERENCE): Paced => ({ ...EMPTY_DELTA, tools: { ...EMPTY_DELTA.tools }, species, ...patch });
 
 test("temperament is deterministic and spread over the four", () => {
   assert.equal(temperament(owner.hatchedAt), temperament(owner.hatchedAt));
@@ -64,4 +65,11 @@ test("character and describe", () => {
   assert.equal(describe(full), `${full.temperament} · bold shell`);
   const egg = character(freshCareer(owner.hatchedAt));
   assert.equal(describe(egg), full.temperament);
+});
+
+test("vocation waits for young in growth, so a rare species gets it later", () => {
+  const young = STAGES.find((entry) => entry.id === "young")!;
+  assert.notEqual(vocation(counters({ prompts: young.xp / 2 })), undefined, "a cat is young");
+  assert.equal(vocation(counters({ prompts: young.xp / 2 }, "dragon")), undefined, "a dragon at the same counters is not");
+  assert.notEqual(vocation(counters({ prompts: young.xp / 2 / RARITY.legendary.pace }, "dragon")), undefined);
 });

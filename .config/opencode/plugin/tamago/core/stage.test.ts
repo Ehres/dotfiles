@@ -1,10 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { STAGES, WEIGHTS, next, stage, stageIndex, xp, evolution } from "./stage.ts";
-import { freshCareer } from "./state.ts";
-import { EMPTY_DELTA, type Counters } from "./state.ts";
+import { STAGES, WEIGHTS, growth, next, stage, stageIndex, xp, evolution, type Paced } from "./stage.ts";
+import { EMPTY_DELTA, freshCareer, type Counters } from "./state.ts";
+import { RARITY, REFERENCE } from "./species.ts";
 
-const counters = (patch: Partial<Counters>): Counters => ({ ...EMPTY_DELTA, ...patch });
+const counters = (patch: Partial<Counters>, species = REFERENCE): Paced => ({ ...EMPTY_DELTA, tools: { ...EMPTY_DELTA.tools }, species, ...patch });
 
 test("xp is the weighted sum from the WEIGHTS table", () => {
   const c = counters({
@@ -82,4 +82,42 @@ test("evolution is silent when the stage is unchanged or goes down, as after a r
   assert.equal(evolution(egg, { ...egg, sessions: 1 }), undefined);
   assert.equal(evolution(young, { ...young, prompts: 1 }), undefined);
   assert.equal(evolution(young, egg), undefined);
+});
+
+test("growth is xp at pace 1 and scales with the pace of the species", () => {
+  const c = counters({ prompts: 100 }); // 200 xp
+  assert.equal(growth(c), xp(c));
+  assert.equal(growth(counters({ prompts: 100 }, "dragon")), xp(c) * RARITY.legendary.pace);
+  assert.equal(growth(counters({ prompts: 100 }, "unknown-species")), xp(c), "an unknown species grows at pace 1");
+});
+
+test("a rarer species is never at a higher stage for the same counters", () => {
+  for (const entry of STAGES) {
+    const common = counters({ prompts: entry.xp / WEIGHTS.prompts });
+    const legendary = counters({ prompts: entry.xp / WEIGHTS.prompts }, "dragon");
+    assert.ok(stageIndex(stage(legendary)) <= stageIndex(stage(common)), entry.id);
+  }
+  assert.equal(stage(counters({ prompts: 100 })), "hatchling", "200 xp hatches a cat");
+  assert.equal(stage(counters({ prompts: 100 }, "dragon")), "egg", "200 xp is 50 growth for a dragon");
+  assert.equal(stage(counters({ prompts: 400 }, "dragon")), "hatchling", "800 xp is 200 growth for a dragon");
+});
+
+test("next reports the raw xp threshold and the same progress for two species at the same growth", () => {
+  const hatch = STAGES[1]!;
+  const young = STAGES[2]!;
+  const midway = (hatch.xp + young.xp) / 2; // growth
+  const cat = next(counters({ prompts: midway / WEIGHTS.prompts }));
+  const dragon = next(counters({ prompts: midway / RARITY.legendary.pace / WEIGHTS.prompts }, "dragon"));
+  assert.ok(cat && dragon);
+  assert.equal(cat.threshold, young.xp);
+  assert.equal(dragon.threshold, Math.ceil(young.xp / RARITY.legendary.pace));
+  assert.ok(Math.abs(cat.progress - dragon.progress) < 1e-9);
+  assert.equal(dragon.stage, "young");
+});
+
+test("evolution across a species change is undefined when the stage does not rise", () => {
+  const cat = { ...freshCareer(0), sessions: 20 }; // 200 xp, hatchling
+  const dragon = { ...cat, species: "dragon" }; // 50 growth, egg
+  assert.equal(evolution(cat, dragon), undefined);
+  assert.equal(evolution(dragon, cat), "hatchling");
 });

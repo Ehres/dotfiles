@@ -1,4 +1,4 @@
-import { WEIGHTS, stage, stageIndex } from "./stage.ts";
+import { WEIGHTS, stage, stageIndex, type Paced } from "./stage.ts";
 import type { Career, Counters } from "./state.ts";
 
 export type Temperament = "cheerful" | "sarcastic" | "stoic" | "dreamy";
@@ -63,9 +63,9 @@ export function stance(counters: Counters): Stance {
   return counters.questions * STANCE.questions >= counters.prompts * STANCE.prompts ? "prudent" : "bold";
 }
 
-export function vocation(counters: Counters): Vocation | undefined {
-  if (stageIndex(stage(counters)) < VOCATION_FROM) return undefined;
-  return { craft: craft(counters), stance: stance(counters) };
+export function vocation(paced: Paced): Vocation | undefined {
+  if (stageIndex(stage(paced)) < VOCATION_FROM) return undefined;
+  return { craft: craft(paced), stance: stance(paced) };
 }
 
 export function character(career: Career): Character {

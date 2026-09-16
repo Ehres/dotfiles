@@ -32,3 +32,9 @@ test("an elder has reached its final form", () => {
   const elder: Career = { ...career, prompts: 20_000 };
   assert.equal(progress(elder, 4), "[####] 41,467 xp · final form");
 });
+
+test("progress shows raw xp against a raw threshold farther away for a rarer species", () => {
+  const dragon: Career = { ...career, species: "dragon" }; // 2,147 xp, 536.75 growth: hatchling
+  const text = progress(dragon, 10);
+  assert.ok(text.endsWith("2,147 / 6,000 xp → young"), text);
+});

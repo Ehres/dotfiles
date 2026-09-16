@@ -1,10 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { MILESTONES, isReached, measure, reached, type Milestone } from "./milestone.ts";
-import { STAGES, xp } from "./stage.ts";
+import { STAGES, growth, type Paced } from "./stage.ts";
 import { EMPTY_DELTA, type Counters } from "./state.ts";
+import { RARITY, REFERENCE } from "./species.ts";
 
-const counters = (patch: Partial<Counters>): Counters => ({ ...EMPTY_DELTA, tools: { ...EMPTY_DELTA.tools }, ...patch });
+const counters = (patch: Partial<Counters>, species = REFERENCE): Paced => ({ ...EMPTY_DELTA, tools: { ...EMPTY_DELTA.tools }, species, ...patch });
 
 /** Enough sessions to sit exactly on a Stage threshold: sessions weigh 10 XP each. */
 const sessionsFor = (stage: (typeof STAGES)[number]["id"]): number => (STAGES.find((entry) => entry.id === stage)?.xp ?? 0) / 10;
@@ -20,7 +21,10 @@ test("measure reads a plain counter", () => {
 test("measure tools sums the four kinds and xp reuses xp()", () => {
   const c = counters({ tools: { read: 1, edit: 2, bash: 3, other: 4 }, prompts: 5 });
   assert.equal(measure(c, "tools"), 10);
-  assert.equal(measure(c, "xp"), xp(c));
+  assert.equal(measure(c, "xp"), growth(c));
+  const dragon = counters({ tools: { read: 1, edit: 2, bash: 3, other: 4 }, prompts: 5 }, "dragon");
+  assert.equal(measure(dragon, "xp"), growth(dragon));
+  assert.equal(measure(dragon, "xp"), measure(c, "xp") * RARITY.legendary.pace, "the xp Measure follows Growth");
 });
 
 const table: readonly Milestone[] = [
@@ -64,4 +68,11 @@ test("reached is empty on a fresh egg and on an empty table", () => {
 test("the shipped table is empty for now", () => {
   assert.deepEqual(MILESTONES, []);
   assert.deepEqual(reached(counters({ sessions: 10_000 })), []);
+});
+
+test("a stage Milestone comes later in raw xp for a rarer species", () => {
+  const m: Milestone = { id: "evolution:young", stage: "young" };
+  assert.equal(isReached(counters({ sessions: sessionsFor("young") }), m), true);
+  assert.equal(isReached(counters({ sessions: sessionsFor("young") }, "dragon"), m), false);
+  assert.equal(isReached(counters({ sessions: sessionsFor("young") / RARITY.legendary.pace }, "dragon"), m), true);
 });
