@@ -62,7 +62,9 @@ test("a non-corruption read error (EISDIR) is not treated as corruption and is n
   mkdirSync(file); // career.json is a directory: readFileSync throws EISDIR, not SyntaxError
   const store = createStore(dir);
   assert.throws(() => store.load());
-  assert.throws(() => store.flush(d({ prompts: 1 }), active(store)));
+  // active(store) would call load() itself and throw before flush ever runs; a literal
+  // target reaches the same active-file path and lets flush's own read throw instead.
+  assert.throws(() => store.flush(d({ prompts: 1 }), 0));
   assert.ok(existsSync(file) && statSync(file).isDirectory(), "career path is still a directory");
   assert.deepEqual(
     readdirSync(dir).filter((name) => name.endsWith(".tmp")),
