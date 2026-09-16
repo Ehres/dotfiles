@@ -21,8 +21,8 @@ export type Window = {
   muted: boolean;
 };
 
-/** What the window must do beyond re-rendering: toast an Evolution, refresh palette titles after a rename. */
-export type Effect = { type: "evolved"; stage: StageId } | { type: "renamed" };
+/** What the window must do beyond re-rendering: toast an Evolution, refresh palette titles after a rename, refresh them and say who steps in after a Switch. */
+export type Effect = { type: "evolved"; stage: StageId } | { type: "renamed" } | { type: "switched" };
 
 export type Step = { window: Window; effects: Effect[] };
 
@@ -59,9 +59,15 @@ function move(window: Window, ids: readonly string[], event: TamagoEvent, now: n
   return { ...window, sessions: moved ? after : before, voices };
 }
 
-/** Shows a Career seen elsewhere, a Flush result or a re-read: an Evolution reaches every Session, a rename the palette. */
+/**
+ * Shows a Career seen elsewhere, a Flush result or a re-read. Same hatch date:
+ * an Evolution reaches every Session, a rename the palette. Another hatch
+ * date: a Switch — another Tamago is active now — which is neither an
+ * Evolution nor a rename, so nobody speaks and only the palette refreshes.
+ */
 export function adopt(window: Window, career: Career, now: number): Step {
   if (sameCareer(window.career, career)) return { window, effects: [] };
+  if (window.career.hatchedAt !== career.hatchedAt) return { window: { ...window, career }, effects: [{ type: "switched" }] };
   const effects: Effect[] = [];
   const reached = evolution(window.career, career);
   if (window.career.name?.value !== career.name?.value) effects.push({ type: "renamed" });

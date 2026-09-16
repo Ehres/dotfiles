@@ -137,3 +137,30 @@ test("renaming to the Name already shown, even the plugin default that the Caree
   assert.equal(w.career.name, undefined);
   assert.equal(rename(w, "Tamago", T0, "Tamago").window, w);
 });
+
+test("adopting a Career hatched at another time is a Switch: no Evolution, no Bubble, the Session stays", () => {
+  let w = freshWindow(freshCareer(T0));
+  w = receive(w, to("a", { type: "session_busy" }), T0).window; // idle → thinking, counts nothing
+  const elder: Career = { ...freshCareer(T0 + 1), sessions: 2_000, name: { value: "Momo", at: 1 } }; // 20,000 xp
+  const step = adopt(w, elder, T0 + 2);
+  assert.deepEqual(step.effects, [{ type: "switched" }]);
+  assert.equal(step.window.career, elder);
+  assert.equal(step.window.voices.a?.bubble, undefined, "a Switch is not an Evolution: nobody speaks");
+  assert.equal(step.window.sessions.a?.activity, "thinking", "the OpenCode session goes on");
+});
+
+test("a Switch that changes the Name reports switched alone, not renamed", () => {
+  const w = freshWindow({ ...freshCareer(T0), name: { value: "Pixel", at: 1 } });
+  const step = adopt(w, { ...freshCareer(T0 + 1), name: { value: "Momo", at: 2 } }, T0 + 3);
+  assert.deepEqual(step.effects, [{ type: "switched" }]);
+});
+
+test("flushed with another active Career is a Switch and forgets the pending Delta", () => {
+  let w = freshWindow(freshCareer(T0));
+  w = receive(w, to("a", { type: "prompt_sent" }), T0).window;
+  assert.equal(isEmpty(w.pending), false);
+  const step = flushed(w, freshCareer(T0 + 5), T0 + 6);
+  assert.deepEqual(step.effects, [{ type: "switched" }]);
+  assert.equal(isEmpty(step.window.pending), true);
+  assert.equal(step.window.career.hatchedAt, T0 + 5);
+});

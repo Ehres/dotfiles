@@ -116,7 +116,7 @@ const tui: TuiPlugin = async (api, options) => {
     const run = ({ window: next, effects }: Step) => {
       commit(next);
       for (const effect of effects) {
-        if (effect.type === "renamed") registerCommands(); // palette descriptions carry the Name and are fixed at registration
+        if (effect.type === "renamed" || effect.type === "switched") registerCommands(); // palette descriptions carry the Name and are fixed at registration
         else if (effect.stage === "hatchling") api.ui.toast({ variant: "success", title: name(), message: reveal(name(), career()) });
         else api.ui.toast({ variant: "success", title: name(), message: `${name()} evolved: ${effect.stage}!` });
       }
