@@ -32,6 +32,10 @@ AGENTS.md. Vocabulary lives in `CONTEXT.md`; use those terms.
   `COUNTER_KEYS`), or the build fails. The store carries any key it does not
   know verbatim, so an older build still running never erases a newer one's
   data.
+- The active Career lives in `career.json`, resting ones in
+  `roster/<hatchedAt>.json`, one lock for all. A Delta is flushed to the
+  Career it was earned under, the active one when that Career is not on disk.
+  The Roster never shrinks: the plugin never deletes a Career file.
 - Weights and thresholds are tuned in the `stage.ts` tables, not in code paths.
 
 ## Verify

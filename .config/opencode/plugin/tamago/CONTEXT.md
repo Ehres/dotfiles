@@ -23,12 +23,13 @@ une ; les concepts qui en naissent rejoignent ce glossaire au fur et à mesure.
 ### The creature
 
 **Tamago**:
-The creature itself, one per machine, shared by every project and every
-OpenCode window.
+The creature itself: one active per machine, shared by every project and
+every OpenCode window; the others rest in the Roster.
 _Avoid_: pet, buddy, companion, mascot
 
 **Hatch**:
-The moment the Tamago comes into existence on a machine.
+The moment a Tamago comes into existence on a machine. A new Hatch needs
+every Tamago of the machine to be `elder`.
 _Avoid_: create, init, spawn
 
 **Name**:
@@ -137,7 +138,8 @@ _Avoid_: profile, save, progress, stats
 
 **Delta**:
 Gains earned in one OpenCode window that have not yet been merged into the
-Career.
+Career. A Delta belongs to the Career it was earned under; a Flush credits
+that Career, active or resting.
 _Avoid_: pending, buffer, diff
 
 **Flush**:
@@ -173,6 +175,33 @@ _Avoid_: level up, upgrade, growth
 The family an OpenCode tool belongs to for counting: read, edit, bash or
 other.
 _Avoid_: tool type, category
+
+### The roster
+
+**Roster**:
+Every Career of a machine, the active one and the resting ones. None ever
+leaves it.
+_Avoid_: collection, list, save slots
+
+**Active**:
+The Career a machine shows and grows right now. Exactly one per machine: the
+one `career.json` holds.
+_Avoid_: current, selected, main
+
+**Resting**:
+A Career of the Roster that is not the active one. Whole, never changed,
+except by a Delta earned under it before a Switch.
+_Avoid_: archived, inactive, retired, frozen
+
+**Growing**:
+A Tamago whose Stage is below `elder`. At most one per machine: that is what
+keeps a Hatch rare.
+_Avoid_: in progress, unfinished, young (that is a Stage)
+
+**Switch**:
+Bringing a resting Career to the front; the active one goes to rest. Nothing
+is earned or lost.
+_Avoid_: load, select, swap
 
 ### Choices
 
@@ -223,7 +252,21 @@ _Avoid_: card, widget
   merge like the hatch date
 - A **Species** has exactly one **Rarity**; a **Rarity** has one draw weight
   and one **Pace**
-- A **Career** belongs to one machine; every OpenCode window shares it
+- A machine has exactly one **Roster**; a **Roster** has exactly one
+  **active** Career and zero or more **resting** ones; every OpenCode window
+  shares them
+- A **Roster** has at most one **growing** Tamago; a **Hatch** is possible
+  only when it has none
+- A **Delta** belongs to the **Career** it was earned under; the **Flush**
+  credits that Career, active or resting
+- A **Switch** changes no **Career**; it changes which one is active
+- A **Career** is identified by its hatch date: two Careers of one machine
+  never hatch in the same millisecond, since a Hatch needs the whole Roster
+  to be `elder`
+- The sidebar, the home and the card show the **active** Career; the
+  **Voices** are its
+- An older build knows only the **active** Career: its Deltas credit it,
+  whichever it is at Flush time
 - Each OpenCode window has exactly one **Window**, which holds one **Delta**
   and one **Session** per root OpenCode session on screen
 - A child (subagent) OpenCode session has no **Session** of its own; its work

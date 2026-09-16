@@ -80,7 +80,7 @@ order per cue. Tuning lives in `core/voice.ts`.
 
 ## Commands
 
-Four commands in the palette, always under `Tamago` so they stay easy to find
+Six commands in the palette, always under `Tamago` so they stay easy to find
 whatever the creature is called; its Name only appears in their descriptions:
 
 | Command          | What it does                                                     |
@@ -89,6 +89,8 @@ whatever the creature is called; its Name only appears in their descriptions:
 | `show card`      | opens a dialog with the sprite, species and rarity, stage, XP, age, character and bar |
 | `pet`            | the sprite wears a `♥` and its temperament's eyes for 2 s       |
 | `rename`         | asks for a new name, 16 characters at most; empty keeps the old |
+| `hatch a new egg` | lays a fresh egg once every creature on the machine is `elder` |
+| `switch`         | brings another creature of this machine to the front            |
 
 Petting counts nothing and changes nothing in the career. The heart is the
 only non-ASCII character in a sprite: it takes one column in most terminals,
@@ -115,6 +117,18 @@ times the XP of a common one for every stage, and the card shows its farther
 thresholds. Rarer is slower, never faster, so the common creature is never the
 slow one. Careers saved before species existed are the `cat`. Tables live in
 `core/species.ts`.
+
+## Several creatures
+
+A machine can hold several creatures. One is active: it is drawn, it earns
+XP, it talks. The others rest in `roster/`, whole, with their name, species
+and picks. `hatch a new egg` lays a fresh egg and makes it active, but only
+once every creature on the machine is `elder`: a new egg costs a whole career.
+`switch` brings a resting creature back to the front; nothing is earned or
+lost. A window opened before a switch keeps crediting the creature it shows
+until its next flush, then follows the new active one. A window still running
+an older build knows only `career.json`, so its gains go to whichever
+creature is active when it flushes.
 
 ## How it grows
 
@@ -160,8 +174,10 @@ Everything lives in `~/.local/share/opencode-tamago/`:
 
 - `career.json`: the cumulative counters (including the questions the
   assistant asked), the hatch date, the species, the name with the time it was
-  chosen, and the Picks made at Milestones (empty for now). One creature per
-  machine, shared by every project.
+  chosen, and the Picks made at Milestones (empty for now). One active creature
+  per machine, shared by every project.
+- `roster/<hatchedAt>.json`: the resting creatures, one file each, same
+  format as `career.json`. Never deleted by the plugin.
 - `career.lock/`: a lock directory held for a few milliseconds during writes.
 - `error.log`: exceptions swallowed by the plugin, with timestamps.
 

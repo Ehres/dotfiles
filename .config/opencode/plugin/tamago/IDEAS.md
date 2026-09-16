@@ -200,9 +200,9 @@ merge, ce qui reste commutatif.
   achievements s'y ajouteront avec l'idée 5.
 - ~~`tamago.rename`~~ : `DialogPrompt`, nom stocké dans `career.json`
 - ~~`tamago.mute`~~ : bulle silencieuse
-- ~~`tamago.reset`~~ : remplacé le 2026-09-16 par `tamago.hatch` et
-  `tamago.switch` du lot 2 de l'idée 12. On n'efface jamais une Career : on
-  en éclot une nouvelle à côté, si tous les Tamago de la machine sont elder.
+- ~~`tamago.reset`~~ : remplacé par ~~`tamago.hatch`~~ et ~~`tamago.switch`~~,
+  faits le 2026-09-16 (idée 12, lot 2). On n'efface jamais une Career : on en
+  éclot une nouvelle à côté, si tous les Tamago de la machine sont elder.
 
 Excellent rapport valeur/effort après la bulle.
 
@@ -303,12 +303,13 @@ Quatre lots :
    `docs/superpowers/specs/2026-09-15-tamago-species-design.md`. Table,
    tirage, stockage, Pace, Sprites de cat / owl / dragon, révélation à
    hatchling. Seul, il ne se voit qu'à une nouvelle éclosion.
-2. **Roster.** Plusieurs Careers sur la machine, une seule active ; Delta
-   ciblé par identifiant de Career, pour qu'une fenêtre ouverte avant une
-   éclosion crédite encore l'ancien Tamago ; migration du `career.json`
-   actuel ; commandes `tamago.hatch` (porte : au plus un Tamago sous elder à
-   la fois) et `tamago.switch` (`DialogSelect` : nom, Species, Rarity,
-   Stage). Rend le lot 1 jouable et donne un sens à la Rarity.
+2. **Roster**, **fait le 2026-09-16**, voir
+   `docs/superpowers/specs/2026-09-16-tamago-roster-design.md`. L'active
+   reste dans `career.json`, les Tamago au repos dans
+   `roster/<hatchedAt>.json` sous le même verrou ; un Delta crédite la Career
+   sous laquelle il a été gagné ; `tamago.hatch` (porte : au plus un Tamago
+   sous elder) et `tamago.switch`. Rend le lot 1 jouable et donne un sens à
+   la Rarity.
 3. **Feuille de caractère.** Huit colonnes tirées depuis `hatchedAt` : quatre
    colonnes Temperament lues au maximum, quatre colonnes de comportement lues
    en valeur, Énergie (`SLEEP_MS`, `FAST_MS` / `SLOW_MS`), Bavardage
@@ -332,7 +333,7 @@ donc jamais de suppression d'une Career du roster.
 1b. ~~Réponse à la permission.~~ Fait.
 2. ~~Commandes dans la palette : pet, card, mute, rename.~~ Fait.
 3. ~~Species visuelle (idée 12, lot 1).~~ Fait.
-4. Roster (idée 12, lot 2) : ce qui rend les Species jouables.
+4. ~~Roster (idée 12, lot 2).~~ Fait.
 5. Feuille de caractère (idée 12, lot 3), une fois plusieurs Species sous les
    yeux.
 6. Gamification (idée 11) : le premier Milestone et le `DialogSelect` ; les
