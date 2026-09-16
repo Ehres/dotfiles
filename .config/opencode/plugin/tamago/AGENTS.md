@@ -17,12 +17,17 @@ AGENTS.md. Vocabulary lives in `CONTEXT.md`; use those terms.
   refresh). New behavior goes in the reducer, not in `index.tsx`.
 - Child (subagent) sessions never move a Session. Their work counts, their
   prompts do not.
-- Stage, and anything else derived from counters, is computed, never stored.
+- Stage, Growth, and anything else derived from counters, is computed, never
+  stored. Anything that decides a Stage takes a `Paced` (counters plus
+  Species), never bare counters.
 - Errors never change XP.
-- Every Frame of a Stage has the same size; colors come from the theme.
+- Every Frame of every Species and Stage has the same size; a body is a
+  `(eyes, mark) => lines` function so Faces and the pet work on every Species;
+  colors come from the theme.
 - Every handler is wrapped by `guard`: the TUI never crashes because of this
   plugin.
-- Counters only grow; `merge` stays commutative and preserves `hatchedAt`.
+- Counters only grow; `merge` stays commutative and preserves `hatchedAt` and
+  `species`. A Species is drawn once, in `freshCareer`, and never recomputed.
 - A new Career field is listed in `CAREER_KEYS` (a plain counter in
   `COUNTER_KEYS`), or the build fails. The store carries any key it does not
   know verbatim, so an older build still running never erases a newer one's

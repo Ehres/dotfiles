@@ -13,9 +13,10 @@ l'utilisateur en garde un ; le Pick marque durablement la créature sur l'une
 de ses trois surfaces (ce qu'elle dit, ce à quoi elle réagit, son apparence)
 et aucun Trait n'est une pénalité. Les synergies vivent dans l'éligibilité des
 Traits, pas dans une collection : sans run, une carte n'aurait nulle part où
-être jouée. Si une collection revient un jour, ce sera plusieurs Tamago sur une
-machine. Les règles arrivent une à une ; les concepts qui en naissent
-rejoignent ce glossaire au fur et à mesure.
+être jouée. Chaque Tamago est d'une Species tirée à l'éclosion, plus ou moins
+rare, plus ou moins lente à grandir ; la collection viendra comme plusieurs
+Tamago sur une machine, un seul en cours à la fois. Les règles arrivent une à
+une ; les concepts qui en naissent rejoignent ce glossaire au fur et à mesure.
 
 ## Language
 
@@ -40,6 +41,21 @@ How the Tamago speaks and reacts, fixed at hatch and never changed: cheerful,
 sarcastic, stoic or dreamy. Derived from the hatch date, so every window
 agrees without storing anything.
 _Avoid_: personality, mood, attitude
+
+**Species**:
+What a Tamago is, decided at hatch and never changed: which creature is drawn
+at every Stage, and its Rarity. Drawn from the hatch date, then stored in the
+Career so that adding a Species later never changes an existing Tamago.
+_Avoid_: skin, style, breed, form, type
+
+**Rarity**:
+How unlikely a Species is to hatch: common, uncommon, rare, epic or legendary.
+A Rarity also sets the Pace of its Species; every Species has exactly one.
+_Avoid_: tier, grade, level
+
+**Reference Species**:
+The Species of every Career that recorded none: the cat drawn before Species
+existed. Common, Pace 1.
 
 **Craft**:
 What the Career says the Tamago does most, weighted: scribe (edits), shell
@@ -115,7 +131,8 @@ _Avoid_: cooldown state, history
 
 **Career**:
 Everything the Tamago has lived through on this machine: counts of OpenCode
-sessions, prompts, tools by kind, files edited, errors, and the hatch date.
+sessions, prompts, tools by kind, files edited, errors, the hatch date and the
+Species.
 _Avoid_: profile, save, progress, stats
 
 **Delta**:
@@ -132,9 +149,19 @@ The single number that summarizes a Career, a weighted sum of its counts.
 Errors never count.
 _Avoid_: score, points, level
 
+**Pace**:
+How fast a Species turns XP into Growth: 1 for common, less for every rarer
+Rarity. Set by the Rarity, never by the Species alone.
+_Avoid_: speed, multiplier, handicap
+
+**Growth**:
+The XP of a Career times the Pace of its Species; the number the Stage
+thresholds are compared to. Computed, never stored.
+_Avoid_: effective XP, scaled XP, level
+
 **Stage**:
-The Tamago's form, one of egg, hatchling, young, adult, elder, decided by XP
-alone.
+The Tamago's form, one of egg, hatchling, young, adult, elder, decided by
+Growth alone.
 _Avoid_: level, form, phase, tier
 
 **Evolution**:
@@ -190,18 +217,26 @@ _Avoid_: card, widget
 
 ## Relationships
 
-- A **Career** has exactly one **Stage** at any time, and exactly one **XP**
+- A **Career** has exactly one **Stage** at any time, exactly one **XP** and
+  exactly one **Growth**, its XP times the **Pace** of its **Species**
+- A **Career** has exactly one **Species**, drawn at hatch, stored, kept on
+  merge like the hatch date
+- A **Species** has exactly one **Rarity**; a **Rarity** has one draw weight
+  and one **Pace**
 - A **Career** belongs to one machine; every OpenCode window shares it
 - Each OpenCode window has exactly one **Window**, which holds one **Delta**
   and one **Session** per root OpenCode session on screen
 - A child (subagent) OpenCode session has no **Session** of its own; its work
   still reaches the **Career**
 - Many **Deltas** merge into one **Career**; the order does not matter
-- A **Stage** and an **Activity** together select one **Sprite**
+- A **Species**, a **Stage** and an **Activity** together select one
+  **Sprite**; at `egg` the Species selects nothing, every egg is the same
+- The **Species** shows at the Evolution to `hatchling`, on the card, in a
+  Bubble and in the toast; before that the card says it is still an egg
 - A **Sprite** has one or more **Frames**; every Frame of a Stage has the same
   size
-- An **Evolution** happens when the **XP** of a **Career** crosses a **Stage**
-  threshold
+- An **Evolution** happens when the **Growth** of a **Career** crosses a
+  **Stage** threshold
 - A **Session** has exactly one **Voice**; a **Voice** holds at most one
   **Bubble**; a **Bubble** comes from exactly one **Cue**
 - The home screen has no **Voice**: without an OpenCode session there is no

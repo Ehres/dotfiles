@@ -71,6 +71,7 @@ messages, todo texts or diffs, only their counts.
 | `retried`    | OpenCode retries a step                         |
 | `todos_done` | every todo of the session is completed          |
 | `evolved`    | the creature reaches a new stage                |
+| `hatched`    | the egg hatches: the species is revealed        |
 
 At most one bubble every 10 s; a rarer cue (an evolution, a streak) may
 interrupt a common one. `granted` and `denied` only answer a `permission` the
@@ -85,13 +86,35 @@ whatever the creature is called; its Name only appears in their descriptions:
 | Command          | What it does                                                     |
 | ---------------- | ---------------------------------------------------------------- |
 | `toggle bubbles` | mutes and unmutes; the choice is remembered across launches     |
-| `show card`      | opens a dialog with the sprite, stage, XP, age, character and bar |
+| `show card`      | opens a dialog with the sprite, species and rarity, stage, XP, age, character and bar |
 | `pet`            | the sprite wears a `♥` and its temperament's eyes for 2 s       |
 | `rename`         | asks for a new name, 16 characters at most; empty keeps the old |
 
 Petting counts nothing and changes nothing in the career. The heart is the
 only non-ASCII character in a sprite: it takes one column in most terminals,
 two in a few, where the top line overflows by one column while it shows.
+
+## What it is
+
+Every egg hatches into a species, drawn once from the hatch date and stored
+with the career: a `cat` or an `owl` most of the time, a `dragon` once in a
+hundred. The egg looks the same for every species; the creature shows at
+`hatchling`, with a toast and a bubble. A species never changes: the only way
+to meet another one is a new egg.
+
+| Rarity      | Draw | Pace |
+| ----------- | ---- | ---- |
+| `common`    | 60 % | 1    |
+| `uncommon`  | 25 % | 0.8  |
+| `rare`      | 10 % | 0.5  |
+| `epic`      | 4 %  | 0.4  |
+| `legendary` | 1 %  | 0.25 |
+
+The pace scales how fast XP turns into growth: a legendary creature needs four
+times the XP of a common one for every stage, and the card shows its farther
+thresholds. Rarer is slower, never faster, so the common creature is never the
+slow one. Careers saved before species existed are the `cat`. Tables live in
+`core/species.ts`.
 
 ## How it grows
 
@@ -112,10 +135,11 @@ xp = prompts × 2
 | `adult`     | 6 000  |
 | `elder`     | 20 000 |
 
-The stage is never stored. It is recomputed from the counters, so it cannot
-drift. A `success` toast fires in each open OpenCode window when the stage
-changes. Weights and thresholds live in `core/stage.ts` and are meant to be
-tuned after real use.
+Thresholds are for a common species; a rarer one divides its pace out of
+them. The stage is never stored. It is recomputed from the counters and the
+species, so it cannot drift. A `success` toast fires in each open OpenCode
+window when the stage changes. Weights and thresholds live in `core/stage.ts`
+and are meant to be tuned after real use.
 
 ## Who it is
 
@@ -135,9 +159,9 @@ live in `core/character.ts`. The card states the whole character:
 Everything lives in `~/.local/share/opencode-tamago/`:
 
 - `career.json`: the cumulative counters (including the questions the
-  assistant asked), the hatch date, the name with the time it was chosen, and
-  the Picks made at Milestones (empty for now). One creature per machine,
-  shared by every project.
+  assistant asked), the hatch date, the species, the name with the time it was
+  chosen, and the Picks made at Milestones (empty for now). One creature per
+  machine, shared by every project.
 - `career.lock/`: a lock directory held for a few milliseconds during writes.
 - `error.log`: exceptions swallowed by the plugin, with timestamps.
 
@@ -149,9 +173,10 @@ still running an older build of the plugin keeps the top-level fields it does
 not know exactly as it found them, so upgrading with a window open loses
 nothing.
 
-To start over, quit OpenCode and delete `career.json`. If the file is not
-valid JSON, the plugin sets it aside as `career.json.corrupt-<timestamp>`,
-says so in a single warning toast, and starts a fresh egg. If the disk itself
+To start over, quit OpenCode and delete `career.json`: the next egg draws a
+new species. If the file is not valid JSON, the plugin sets it aside as
+`career.json.corrupt-<timestamp>`, says so in a single warning toast, and
+starts a fresh egg. If the disk itself
 fails, the plugin keeps your gains in memory, retries with a growing pause up
 to a minute, logs the error once per distinct message, and after three
 consecutive failures shows a single error toast pointing at `error.log`.

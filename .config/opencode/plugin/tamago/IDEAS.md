@@ -17,6 +17,10 @@ Ce que Tamago fait aujourd'hui :
   atomique (`adapter/store.ts`, `core/merge.ts`).
 - Deux vues Solid : sidebar (`view/sidebar.tsx`, slot `sidebar_footer`) et
   home (`view/home.tsx`, slot `home_bottom`). Un toast à chaque évolution.
+- Species tirée à l'éclosion et stockée (`core/species.ts`) : cat et owl en
+  common, dragon en legendary ; le Pace de la Rarity ralentit le Growth
+  (`core/stage.ts`) ; un corps par Species et par Stage, œuf commun
+  (`core/sprites.ts`) ; Cue `hatched` et toast de révélation.
 
 Compteurs persistés dans `Career` : sessions, prompts, tools par kind
 (read/edit/bash/other), filesEdited, errors, hatchedAt.
@@ -130,18 +134,10 @@ tempérament a sa propre famille de réactions.
 
 ### 3. Évolutions ramifiées
 
-Les 5 stades sont linéaires. Le Tamagotchi original branche la forme adulte
-selon la qualité des soins. Ici la branche dépendrait du ratio d'outils :
-
-- "scribe" si edit domine
-- "shell" si bash domine
-- "sage" si read domine
-- chemin "maudit" si errors / tools est élevé
-
-Implémentation : indexer `BODIES` par stade + branche au lieu du stade seul. La
-branche se calcule depuis `Counters`, comme `stage()`.
-
-`craft()` dans `core/character.ts` est le sélecteur de branche attendu ici.
+**Abandonnée le 2026-09-16.** La Species (idée 12) est la seule chose qui
+dessine le corps ; deux systèmes qui redessinent le corps ne cohabitent pas.
+Le Craft s'exprime par la voix et la carte, éventuellement par une marque,
+jamais par la forme.
 
 ### 4. Accessoires et rareté
 
@@ -191,7 +187,7 @@ lui-même (yeux `^ ^` et `♥` à la place de la marque, 2 s, dans toute la
 fenêtre). La carte montre l'identité seule : sprite, stade, XP, âge, barre.
 Les compteurs détaillés n'intéressent pas. **`rename` fait le 2026-09-15** :
 le Nom vit dans la Career (`name: { value, at }`), le plus récent gagne au
-merge, ce qui reste commutatif. Reste `reset`.
+merge, ce qui reste commutatif.
 
 - ~~`tamago.pet`~~ : cœur flottant 2 s au-dessus du sprite (comme `/buddy pet`).
   Geste d'interaction pur, décidé le 2026-09-15 : il ne compte rien et ne
@@ -203,11 +199,9 @@ merge, ce qui reste commutatif. Reste `reset`.
   achievements s'y ajouteront avec l'idée 5.
 - ~~`tamago.rename`~~ : `DialogPrompt`, nom stocké dans `career.json`
 - ~~`tamago.mute`~~ : bulle silencieuse
-- `tamago.reset` : `DialogConfirm` puis œuf frais. À trancher avant : un reset
-  est un nouvel Hatch (nouveau `hatchedAt`, donc nouveau Temperament) et
-  contredit « never a withdrawal from the Career ». Les Deltas en attente des
-  autres fenêtres créditeraient l'œuf neuf à leur prochain flush ; décider s'ils
-  sont abandonnés (comparer `hatchedAt`) ou acceptés.
+- ~~`tamago.reset`~~ : remplacé le 2026-09-16 par `tamago.hatch` et
+  `tamago.switch` du lot 2 de l'idée 12. On n'efface jamais une Career : on
+  en éclot une nouvelle à côté, si tous les Tamago de la machine sont elder.
 
 Excellent rapport valeur/effort après la bulle.
 
@@ -289,23 +283,63 @@ Tamago sur une machine.
   aucun Trait n'est une punition, pas de lecture de contenu, merge commutatif,
   pas de re-roll.
 
+### 12. Species : créatures, rareté, roster et feuille de caractère
+
+Brainstorm du 2026-09-15 et 2026-09-16. Une **Species** est ce qu'un Tamago
+est, décidée à l'éclosion, jamais changée : un corps par Stage à partir de
+hatchling (l'œuf est commun et ne révèle rien), une **Rarity** parmi common,
+uncommon, rare, epic, legendary qui fixe le poids de tirage (60 / 25 / 10 /
+4 / 1) et le **Pace** (1 / 0,8 / 0,5 / 0,4 / 0,25) : plus rare, plus lent à
+grandir, jamais l'inverse, pour que le commun ne soit pas la punition de la
+majorité. La Species est stockée dans la Career pour qu'ajouter une Species
+ne réassigne jamais un Tamago existant ; une Career sans Species est le
+`cat` de référence. Pas de re-roll : la seule façon d'avoir une autre Species
+est un nouvel œuf, donc une nouvelle Career.
+
+Quatre lots :
+
+1. **Species visuelle**, **fait le 2026-09-16**, voir
+   `docs/superpowers/specs/2026-09-15-tamago-species-design.md`. Table,
+   tirage, stockage, Pace, Sprites de cat / owl / dragon, révélation à
+   hatchling. Seul, il ne se voit qu'à une nouvelle éclosion.
+2. **Roster.** Plusieurs Careers sur la machine, une seule active ; Delta
+   ciblé par identifiant de Career, pour qu'une fenêtre ouverte avant une
+   éclosion crédite encore l'ancien Tamago ; migration du `career.json`
+   actuel ; commandes `tamago.hatch` (porte : au plus un Tamago sous elder à
+   la fois) et `tamago.switch` (`DialogSelect` : nom, Species, Rarity,
+   Stage). Rend le lot 1 jouable et donne un sens à la Rarity.
+3. **Feuille de caractère.** Huit colonnes tirées depuis `hatchedAt` : quatre
+   colonnes Temperament lues au maximum, quatre colonnes de comportement lues
+   en valeur, Énergie (`SLEEP_MS`, `FAST_MS` / `SLOW_MS`), Bavardage
+   (`QUIET_MS`, `BUBBLE_MS`), Sensibilité (`HURT_MS`, `STREAK_COUNT`),
+   Patience (`LONG_WORK_MS`). La Species ajoute ses modificateurs par colonne
+   (+1, –3) et la valeur médiane redonne le comportement d'aujourd'hui. À
+   modificateurs nuls, la feuille doit redonner exactement le Temperament
+   actuel : la colonne du Temperament historique reçoit la valeur haute du
+   tirage, les trois autres se tirent en dessous.
+4. **Enrichissements.** Phrases signature par Species mêlées à celles du
+   Temperament, dessin des Species suivantes jusqu'à la vingtaine, vue de
+   collection, œuf teinté par Rarity.
+
+Contraintes qui tiennent : aucune Species n'est une punition, pas de lecture
+de contenu, merge commutatif, pas de re-roll, jamais de retrait sur la Career,
+donc jamais de suppression d'une Career du roster.
+
 ## Ordre recommandé
 
-1. ~~Bulle avec templates locaux, plus mode muet.~~ Fait. Pose la mécanique
-   "événement → réaction ponctuelle" dont dépendent 5, 6 et 7.
-1b. ~~Réponse à la permission.~~ Fait. Pose le motif « bulle qui répond à
-   une bulle ».
+1. ~~Bulle avec templates locaux, plus mode muet.~~ Fait.
+1b. ~~Réponse à la permission.~~ Fait.
 2. ~~Commandes dans la palette : pet, card, mute, rename.~~ Fait.
-3. Achievements et streak, qui alimentent ensuite accessoires et branches.
-   Avec le journal (idée 8) ils veulent tous deux des compteurs par jour :
-   stocker un historique par jour dans la Career, découper le Delta par jour,
-   fixer la frontière du jour, et dériver streaks et achievements de
-   l'historique (jamais stockés), comme le Stage.
-4. ~~Personnalité~~ et branches, une fois qu'on a vu ce que les compteurs
-   racontent après une semaine d'usage réel.
-5. Gamification (idée 11) : fondations faites ; le premier Milestone et le
-   `DialogSelect` peuvent venir dès maintenant, les Traits de Voice une fois que
-   le Temperament (idée 2) a montré ce qu'il raconte.
+3. ~~Species visuelle (idée 12, lot 1).~~ Fait.
+4. Roster (idée 12, lot 2) : ce qui rend les Species jouables.
+5. Feuille de caractère (idée 12, lot 3), une fois plusieurs Species sous les
+   yeux.
+6. Gamification (idée 11) : le premier Milestone et le `DialogSelect` ; les
+   Traits de Voice s'écriront contre la feuille.
+7. Achievements et streak, avec le journal (idée 8), après une semaine d'usage
+   réel des Species.
+8. Enrichissements Species (idée 12, lot 4), accessoires et couleur (idées 4
+   et 10) sur la `Frame` en segments.
 
 ## Références
 
