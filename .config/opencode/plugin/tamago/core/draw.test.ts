@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { DRAW_SIZE, draw, pending, seed } from "./draw.ts";
+import { DRAW_SIZE, draw, pending } from "./draw.ts";
+import { seed } from "./random.ts";
 import type { Milestone } from "./milestone.ts";
 import { freshCareer, type Career } from "./state.ts";
 import { eligible, type Trait } from "./trait.ts";
@@ -16,13 +17,6 @@ const milestones: readonly Milestone[] = [
 ];
 
 const career = (patch: Partial<Career> = {}): Career => ({ ...freshCareer(1_700_000_000_000), ...patch });
-
-test("seed is stable for the same inputs and differs between Milestones and hatch dates", () => {
-  assert.equal(seed(1, "m"), seed(1, "m"));
-  assert.notEqual(seed(1, "m"), seed(1, "n"));
-  assert.notEqual(seed(1, "m"), seed(2, "m"));
-  assert.ok(Number.isInteger(seed(1, "m")) && seed(1, "m") >= 0 && seed(1, "m") <= 0xffffffff, "a 32-bit unsigned integer");
-});
 
 test("seed and draw are pinned: changing the formula would change every pending Draw on every machine", () => {
   // Values computed at the commit that shipped the formula. Never update them to make a new formula pass.
