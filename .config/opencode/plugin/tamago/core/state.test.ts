@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { CAREER_KEYS, EMPTY_DELTA, addDelta, freshCareer, hydrate, initialSession, isEmpty, sameCareer } from "./state.ts";
+import { REFERENCE, hatch } from "./species.ts";
 
 test("initialSession starts idle and not busy", () => {
   assert.deepEqual(initialSession(42), { activity: "idle", since: 42, busy: false });
@@ -155,4 +156,28 @@ test("CAREER_KEYS names every key a hydrated Career can carry", () => {
     0,
   ).career;
   for (const key of Object.keys(full)) assert.ok(CAREER_KEYS.includes(key as keyof typeof full), `${key} missing from CAREER_KEYS`);
+});
+
+test("freshCareer draws its species from the hatch date", () => {
+  assert.equal(freshCareer(1000).species, hatch(1000));
+  assert.equal(freshCareer(1000).species, freshCareer(1000).species);
+});
+
+test("CAREER_KEYS lists species", () => {
+  assert.ok(CAREER_KEYS.includes("species"));
+});
+
+test("hydrate reads a species string, keeps an unknown one verbatim, and defaults to the reference", () => {
+  assert.equal(hydrate({}, 0).career.species, REFERENCE, "a file written before Species existed");
+  assert.equal(hydrate({ species: "owl" }, 0).career.species, "owl");
+  assert.equal(hydrate({ species: "from-a-newer-build" }, 0).career.species, "from-a-newer-build");
+  assert.equal(hydrate({ species: "" }, 0).career.species, REFERENCE);
+  assert.equal(hydrate({ species: 3 }, 0).career.species, REFERENCE);
+  assert.equal(hydrate({ species: 3 }, 0).corrupt, false);
+});
+
+test("sameCareer compares the species", () => {
+  const a = freshCareer(1);
+  assert.equal(sameCareer(a, { ...a }), true);
+  assert.equal(sameCareer(a, { ...a, species: "some-other" }), false);
 });

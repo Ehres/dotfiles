@@ -1,5 +1,6 @@
 import { latest, type Rename } from "./name.ts";
 import { firstPicks, hydratePicks, samePicks, type Picks } from "./pick.ts";
+import { REFERENCE, hatch, type SpeciesId } from "./species.ts";
 
 export type Activity = "idle" | "thinking" | "working" | "waiting" | "hurt" | "sleeping";
 export type ToolKind = "read" | "edit" | "bash" | "other";
@@ -20,8 +21,8 @@ export type Counters = {
   questions: number;
 };
 
-/** `name` is absent until the user renames the creature; the plugin option is the default. `picks` is always present, `{}` until the first Pick. */
-export type Career = Counters & { hatchedAt: number; name?: Rename; picks: Picks };
+/** `species` is drawn at hatch and never changes. `name` is absent until the user renames the creature; the plugin option is the default. `picks` is always present, `{}` until the first Pick. */
+export type Career = Counters & { hatchedAt: number; species: SpeciesId; name?: Rename; picks: Picks };
 /** `rename` and `picks` are Deltas like any other: they wait for the flush; the latest rename wins, the earliest Pick wins. */
 export type Delta = Counters & { rename?: Rename; picks?: Picks };
 
@@ -34,7 +35,7 @@ type PlainCounter = (typeof COUNTER_KEYS)[number];
 const _everyCounterListed: Exclude<Exclude<keyof Counters, "tools">, PlainCounter> extends never ? true : never = true;
 
 /** Every key a Career may carry on disk. The store keeps any other key verbatim, so a newer build's data survives an older build's flush. */
-export const CAREER_KEYS = [...COUNTER_KEYS, "tools", "hatchedAt", "name", "picks"] as const satisfies readonly (keyof Career)[];
+export const CAREER_KEYS = [...COUNTER_KEYS, "tools", "hatchedAt", "species", "name", "picks"] as const satisfies readonly (keyof Career)[];
 const _everyCareerKeyListed: Exclude<keyof Career, (typeof CAREER_KEYS)[number]> extends never ? true : never = true;
 
 export const EMPTY_DELTA: Delta = {
@@ -51,7 +52,7 @@ export function initialSession(now: number): Session {
 }
 
 export function freshCareer(now: number): Career {
-  return { ...EMPTY_DELTA, tools: { ...EMPTY_DELTA.tools }, hatchedAt: now, picks: {} };
+  return { ...EMPTY_DELTA, tools: { ...EMPTY_DELTA.tools }, hatchedAt: now, species: hatch(now), picks: {} };
 }
 
 export function isEmpty(delta: Delta): boolean {
@@ -86,6 +87,7 @@ export function addDelta(a: Delta, b: Delta): Delta {
 export function sameCareer(a: Career, b: Career): boolean {
   return (
     a.hatchedAt === b.hatchedAt &&
+    a.species === b.species &&
     a.name?.value === b.name?.value &&
     a.name?.at === b.name?.at &&
     COUNTER_KEYS.every((key) => a[key] === b[key]) &&
@@ -108,7 +110,15 @@ export function hydrate(raw: unknown, now: number): { career: Career; corrupt: b
   const tools = { ...EMPTY_DELTA.tools };
   for (const kind of TOOL_KINDS) tools[kind] = num(rawTools[kind], 0);
   const name = rename(raw.name);
-  const career: Career = { ...EMPTY_DELTA, tools, hatchedAt: num(raw.hatchedAt, now), picks: hydratePicks(raw.picks), ...(name === undefined ? {} : { name }) };
+  const species = typeof raw.species === "string" && raw.species.length > 0 ? raw.species : REFERENCE;
+  const career: Career = {
+    ...EMPTY_DELTA,
+    tools,
+    hatchedAt: num(raw.hatchedAt, now),
+    species,
+    picks: hydratePicks(raw.picks),
+    ...(name === undefined ? {} : { name }),
+  };
   for (const key of COUNTER_KEYS) career[key] = num(raw[key], 0);
   return { corrupt: false, career };
 }

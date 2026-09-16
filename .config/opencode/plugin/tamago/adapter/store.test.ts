@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { LOCK_STALE_MS } from "../core/lock.ts";
 import { EMPTY_DELTA, freshCareer, type Delta } from "../core/state.ts";
+import { REFERENCE, hatch } from "../core/species.ts";
 import { CAREER_FILE, LOCK_DIR, LOCK_OWNER_FILE, createStore } from "./store.ts";
 
 const scratch = () => mkdtempSync(join(tmpdir(), "tamago-store-"));
@@ -206,4 +207,22 @@ test("a known key with a malformed value is repaired on flush, not carried over"
   const onDisk = JSON.parse(readFileSync(join(dir, CAREER_FILE), "utf8"));
   assert.equal("name" in onDisk, false);
   assert.deepEqual(onDisk.picks, {});
+});
+
+test("a species round-trips through flush and load; a file without one loads as the reference; an unknown one survives a flush", () => {
+  const dir = scratch();
+  const store = createStore(dir, () => 7);
+  assert.equal(store.flush(d({ prompts: 1 })).outcome, "written");
+  const onDisk = JSON.parse(readFileSync(join(dir, CAREER_FILE), "utf8"));
+  assert.equal(onDisk.species, hatch(7));
+  assert.equal(store.load().career.species, hatch(7));
+
+  writeFileSync(join(dir, CAREER_FILE), JSON.stringify({ prompts: 3, hatchedAt: 5 }));
+  assert.equal(store.load().career.species, REFERENCE);
+
+  writeFileSync(join(dir, CAREER_FILE), JSON.stringify({ prompts: 3, hatchedAt: 5, species: "from-a-newer-build" }));
+  const flushed = store.flush(d({ prompts: 1 }));
+  assert.equal(flushed.outcome, "written");
+  assert.equal(flushed.career?.species, "from-a-newer-build");
+  assert.equal(JSON.parse(readFileSync(join(dir, CAREER_FILE), "utf8")).species, "from-a-newer-build");
 });

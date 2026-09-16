@@ -68,3 +68,9 @@ test("merging a delta without picks keeps the very same picks object", () => {
 test("a fresh career merged with the empty delta has empty picks", () => {
   assert.deepEqual(merge(freshCareer(1), EMPTY_DELTA).picks, {});
 });
+
+test("merge keeps the species of the career whatever the delta", () => {
+  const career = { ...freshCareer(777), species: "dragon" };
+  assert.equal(merge(career, d1).species, "dragon");
+  assert.equal(merge(career, EMPTY_DELTA).species, "dragon");
+});
