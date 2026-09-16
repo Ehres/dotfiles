@@ -300,3 +300,97 @@ test("roster without a roster directory has no resting Career and creates nothin
   assert.deepEqual(roster.resting, []);
   assert.ok(!existsSync(join(dir, ROSTER_DIR)));
 });
+
+test("switch makes a resting Career active and the active one resting, carrying unknown keys both ways", () => {
+  const dir = scratch();
+  const store = createStore(dir, () => 7);
+  store.flush(d({ prompts: 1 }), 7);
+  mkdirSync(join(dir, ROSTER_DIR));
+  writeFileSync(join(dir, ROSTER_DIR, "3.json"), JSON.stringify({ ...freshCareer(3), sessions: 4, keep: 1 }));
+  const result = store.switch(3);
+  assert.equal(result.outcome, "written");
+  assert.equal(result.career?.hatchedAt, 3);
+  assert.equal(result.career?.sessions, 4);
+  assert.equal(store.load().career.hatchedAt, 3, "career.json holds the new active");
+  assert.equal(JSON.parse(readFileSync(join(dir, CAREER_FILE), "utf8")).keep, 1);
+  const rested = JSON.parse(readFileSync(join(dir, ROSTER_DIR, "7.json"), "utf8"));
+  assert.equal(rested.prompts, 1);
+  assert.ok(!existsSync(join(dir, ROSTER_DIR, "3.json")));
+  assert.ok(!existsSync(join(dir, LOCK_DIR)), "lock released");
+});
+
+test("switch to a Career that is not resting changes nothing and reports missing", () => {
+  const dir = scratch();
+  const store = createStore(dir, () => 7);
+  store.flush(d({ prompts: 1 }), 7);
+  assert.equal(store.switch(3).outcome, "missing");
+  assert.equal(store.load().career.hatchedAt, 7);
+  assert.ok(!existsSync(join(dir, ROSTER_DIR)));
+});
+
+test("switch to a corrupt resting file sets it aside and reports missing", () => {
+  const dir = scratch();
+  const store = createStore(dir, () => 7);
+  store.flush(d({ prompts: 1 }), 7);
+  mkdirSync(join(dir, ROSTER_DIR));
+  writeFileSync(join(dir, ROSTER_DIR, "3.json"), "{not json");
+  assert.equal(store.switch(3).outcome, "missing");
+  assert.ok(!existsSync(join(dir, ROSTER_DIR, "3.json")));
+  assert.ok(readdirSync(join(dir, ROSTER_DIR)).some((name) => name.startsWith("3.json.corrupt-")));
+  assert.equal(store.load().career.prompts, 1, "the active one is untouched");
+});
+
+test("hatch lays a fresh egg as the active Career and rests the previous one", () => {
+  const dir = scratch();
+  const store = createStore(dir, () => 7);
+  store.flush(d({ sessions: 2_000 }), 7);
+  const result = store.hatch(9);
+  assert.equal(result.outcome, "written");
+  assert.deepEqual(result.career, freshCareer(9));
+  assert.deepEqual(store.load().career, freshCareer(9));
+  assert.equal(JSON.parse(readFileSync(join(dir, ROSTER_DIR, "7.json"), "utf8")).sessions, 2_000);
+  assert.ok(!existsSync(join(dir, LOCK_DIR)), "lock released");
+});
+
+test("hatch on an empty directory just lays the egg", () => {
+  const dir = scratch();
+  const store = createStore(dir, () => 7);
+  const result = store.hatch(9);
+  assert.equal(result.outcome, "written");
+  assert.deepEqual(result.career, freshCareer(9));
+  assert.ok(!existsSync(join(dir, ROSTER_DIR)));
+});
+
+test("hatch over a corrupt active file sets it aside and lays the egg", () => {
+  const dir = scratch();
+  writeFileSync(join(dir, CAREER_FILE), "{not json");
+  const store = createStore(dir, () => 7);
+  assert.equal(store.hatch(9).outcome, "written");
+  assert.deepEqual(store.load().career, freshCareer(9));
+  assert.ok(readdirSync(dir).some((name) => name.startsWith(`${CAREER_FILE}.corrupt-`)));
+});
+
+test("a Delta earned under the previous active reaches it after a Switch, and that window learns the new active", () => {
+  const dir = scratch();
+  const a = createStore(dir, () => 7);
+  const b = createStore(dir, () => 7);
+  a.flush(d({ prompts: 1 }), 7);
+  mkdirSync(join(dir, ROSTER_DIR));
+  writeFileSync(join(dir, ROSTER_DIR, "3.json"), JSON.stringify(freshCareer(3)));
+  assert.equal(a.switch(3).outcome, "written");
+  const late = b.flush(d({ prompts: 5 }), 7); // b still shows the Career hatched at 7
+  assert.equal(late.outcome, "written");
+  assert.equal(late.career?.hatchedAt, 3, "b is told the active is now 3");
+  assert.equal(JSON.parse(readFileSync(join(dir, ROSTER_DIR, "7.json"), "utf8")).prompts, 6);
+});
+
+test("switch and hatch are busy while another instance holds the lock", () => {
+  const dir = scratch();
+  const store = createStore(dir, () => 7);
+  store.flush(d({ prompts: 1 }), 7);
+  mkdirSync(join(dir, LOCK_DIR));
+  writeFileSync(join(dir, LOCK_DIR, LOCK_OWNER_FILE), "someone-else");
+  assert.equal(store.switch(3).outcome, "busy");
+  assert.equal(store.hatch(9).outcome, "busy");
+  assert.equal(store.load().career.hatchedAt, 7);
+});

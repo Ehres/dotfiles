@@ -34,6 +34,14 @@ function unknownKeys(raw: unknown): Record<string, unknown> {
  */
 export type FlushResult = { outcome: "written"; career: Career } | { outcome: "busy" } | { outcome: "corrupt"; career: Career };
 
+/**
+ * written: `career` is the new active Career.
+ * busy: another instance holds the lock; nothing changed.
+ * missing: no resting Career with that hatch date; nothing changed.
+ * corrupt: the active file was unreadable; it was set aside, nothing else changed, `career` is a fresh egg.
+ */
+export type SwitchResult = { outcome: "written"; career: Career } | { outcome: "busy" } | { outcome: "missing" } | { outcome: "corrupt"; career: Career };
+
 export type Store = {
   /** The active Career. */
   load(): Loaded;
@@ -41,6 +49,10 @@ export type Store = {
   roster(): { roster: Roster; corrupt: boolean };
   /** Credits `delta` to the Career hatched at `target`, active or resting; to the active one when no such Career is on disk. */
   flush(delta: Delta, target: CareerId): FlushResult;
+  /** Brings the resting Career hatched at `target` to the front; the active one goes to rest. */
+  switch(target: CareerId): SwitchResult;
+  /** Lays a fresh egg hatched at `at` as the active Career; the active one goes to rest. The gate is the caller's. */
+  hatch(at: number): SwitchResult;
 };
 
 function code(err: unknown): string | undefined {
@@ -165,6 +177,12 @@ export function createStore(dir: string, now: () => number = Date.now): Store {
     return out.sort((a, b) => a.hatchedAt - b.hatchedAt);
   }
 
+  /** Copies the active Career into the roster, unknown keys included. False when the lock was stolen. */
+  function rest(active: Read): boolean {
+    mkdirSync(rosterDir, { recursive: true });
+    return write(restingFile(active.career.hatchedAt), { ...active.unknown, ...active.career });
+  }
+
   return {
     load: () => {
       const { career, corrupt } = read();
@@ -196,6 +214,42 @@ export function createStore(dir: string, now: () => number = Date.now): Store {
         const merged = merge(loaded.career, delta);
         if (!write(file, { ...loaded.unknown, ...merged })) return { outcome: "busy" };
         return { outcome: "written", career: merged };
+      } finally {
+        release();
+      }
+    },
+    switch(target) {
+      if (!acquire()) return { outcome: "busy" };
+      try {
+        const current = readAt(file);
+        if (current?.corrupt) {
+          setAside(file);
+          return { outcome: "corrupt", career: current.career };
+        }
+        const path = restingFile(target);
+        const coming = readAt(path);
+        if (coming === undefined) return { outcome: "missing" };
+        if (coming.corrupt) {
+          setAside(path);
+          return { outcome: "missing" };
+        }
+        if (current !== undefined && !rest(current)) return { outcome: "busy" };
+        if (!owns()) return { outcome: "busy" }; // the copy is on disk and career.json untouched: a consistent state
+        renameSync(path, file);
+        return { outcome: "written", career: coming.career };
+      } finally {
+        release();
+      }
+    },
+    hatch(at) {
+      if (!acquire()) return { outcome: "busy" };
+      try {
+        const current = readAt(file);
+        if (current?.corrupt) setAside(file);
+        else if (current !== undefined && !rest(current)) return { outcome: "busy" };
+        const egg = freshCareer(at);
+        if (!write(file, { ...egg })) return { outcome: "busy" };
+        return { outcome: "written", career: egg };
       } finally {
         release();
       }
