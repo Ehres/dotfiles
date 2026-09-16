@@ -14,7 +14,8 @@ export type Cue =
   | "compacted"
   | "retried"
   | "todos_done"
-  | "evolved";
+  | "evolved"
+  | "hatched";
 
 /** The phrase shown above the sprite for one Cue, until `until`. */
 export type Bubble = { cue: Cue; text: string; since: number; until: number };
@@ -63,6 +64,7 @@ export const CUES: Record<Cue, { priority: number; cooldown: number }> = {
   retried: { priority: 2, cooldown: 60_000 },
   todos_done: { priority: 2, cooldown: 0 },
   evolved: { priority: 3, cooldown: 0 },
+  hatched: { priority: 3, cooldown: 0 },
 };
 
 /** English, like the Moods. Every phrase is at most MAX_TEXT characters; a test enforces it. */
@@ -78,6 +80,7 @@ export const PHRASES: Record<Cue, readonly [string, ...string[]]> = {
   retried: ["Again? Fine.", "Once more, then."],
   todos_done: ["And that's a wrap.", "All ticked off."],
   evolved: ["I feel... different.", "Look at me now."],
+  hatched: ["So this is what I am.", "Out at last!", "Hello, world."],
 };
 
 /** Phrases per Temperament for the Cues where it shows. A missing entry falls back to PHRASES. */
@@ -88,6 +91,7 @@ export const FLAVOR: Partial<Record<Temperament, Partial<Record<Cue, readonly [s
     denied: ["Aw. Okay!", "No worries!", "Next time then!"],
     streak: ["We got this!", "Shake it off!", "Still smiling."],
     evolved: ["Look at me go!", "New me, who dis?", "Ta-da!"],
+    hatched: ["I'm out! Hi!", "Look, it's me!", "Best day ever."],
   },
   sarcastic: {
     permission: ["Permission, boss?", "Mother, may I?", "Shall I wait more?"],
@@ -95,6 +99,7 @@ export const FLAVOR: Partial<Record<Temperament, Partial<Record<Cue, readonly [s
     denied: ["Figures.", "Of course not.", "Noted. Loudly."],
     streak: ["Going great, huh.", "Third time's a charm?", "Delightful."],
     evolved: ["Finally.", "Took you long enough.", "Behold. Or don't."],
+    hatched: ["Took long enough.", "Behold. Me.", "Well. Here I am."],
   },
   stoic: {
     permission: ["Your call.", "Awaiting word.", "When ready."],
@@ -102,6 +107,7 @@ export const FLAVOR: Partial<Record<Temperament, Partial<Record<Cue, readonly [s
     denied: ["Understood.", "As you wish.", "Then we wait."],
     streak: ["It passes.", "Steady.", "Endure."],
     evolved: ["So it goes.", "A new form.", "Onward."],
+    hatched: ["I am here.", "It begins.", "So. This form."],
   },
   dreamy: {
     permission: ["Hm? Oh. May I?", "If you like...", "Whenever..."],
@@ -109,6 +115,7 @@ export const FLAVOR: Partial<Record<Temperament, Partial<Record<Cue, readonly [s
     denied: ["Maybe next time...", "Oh. Alright.", "Never mind, then."],
     streak: ["Ow... the stars...", "Everything spins.", "Ouch... again..."],
     evolved: ["Was that... me?", "Oh. I changed.", "How curious."],
+    hatched: ["Oh... hello.", "Am I... out?", "What a soft light."],
   },
 };
 
@@ -162,7 +169,7 @@ function listen(
       if (event.files >= BIG_DIFF_FILES) cue = "big_diff";
       break;
     case "evolved":
-      cue = "evolved";
+      cue = event.stage === "hatchling" ? "hatched" : "evolved";
       break;
     default:
       break;

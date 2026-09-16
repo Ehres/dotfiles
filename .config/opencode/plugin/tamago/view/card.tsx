@@ -3,7 +3,7 @@ import type { TuiThemeCurrent } from "@opencode-ai/plugin/tui";
 import type { JSX } from "@opentui/solid";
 import { Index, createMemo } from "solid-js";
 import { frameIndex } from "../core/cadence.ts";
-import { age, progress } from "../core/card.ts";
+import { age, progress, speciesLine } from "../core/card.ts";
 import { describe, type Character, type Temperament } from "../core/character.ts";
 import { fmt } from "../core/format.ts";
 import type { SpeciesId } from "../core/species.ts";
@@ -46,6 +46,7 @@ export function CardView(props: {
           <Index each={lines()}>{(line) => <text fg={props.theme().accent}>{line()}</text>}</Index>
         </box>
         <box flexDirection="column" justifyContent="center">
+          <text fg={props.theme().textMuted}>{speciesLine(props.career())}</text>
           <text fg={props.theme().textMuted}>
             {current()} · {fmt(xp(props.career()))} xp
           </text>

@@ -80,8 +80,8 @@ test("adopting a Career that crosses a Stage reports the Evolution and every Ses
   const evolved = { ...w.career, prompts: w.career.prompts + 1 };
   const step = adopt(w, evolved, T0 + 1);
   assert.deepEqual(step.effects, [{ type: "evolved", stage: "hatchling" }]);
-  assert.equal(step.window.voices.a?.bubble?.cue, "evolved");
-  assert.equal(step.window.voices.b?.bubble?.cue, "evolved");
+  assert.equal(step.window.voices.a?.bubble?.cue, "hatched");
+  assert.equal(step.window.voices.b?.bubble?.cue, "hatched");
 });
 
 test("earning the crossing Delta through receive reports the Evolution too", () => {

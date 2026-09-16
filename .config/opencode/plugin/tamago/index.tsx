@@ -9,6 +9,7 @@ import { tickInterval } from "./core/cadence.ts";
 import { character } from "./core/character.ts";
 import { createStore, type Loaded } from "./adapter/store.ts";
 import { SUBSCRIBED, createTranslator } from "./adapter/translate.ts";
+import { reveal } from "./core/card.ts";
 import { footerPath } from "./core/footer.ts";
 import { WARN_AFTER, backoff } from "./core/retry.ts";
 import { PET_MS } from "./core/sprites.ts";
@@ -116,6 +117,7 @@ const tui: TuiPlugin = async (api, options) => {
       commit(next);
       for (const effect of effects) {
         if (effect.type === "renamed") registerCommands(); // palette descriptions carry the Name and are fixed at registration
+        else if (effect.stage === "hatchling") api.ui.toast({ variant: "success", title: name(), message: reveal(name(), career()) });
         else api.ui.toast({ variant: "success", title: name(), message: `${name()} evolved: ${effect.stage}!` });
       }
     };
@@ -211,7 +213,7 @@ const tui: TuiPlugin = async (api, options) => {
           {
             name: "tamago.card",
             title: `${PALETTE}: show card`,
-            description: `Who ${who} is: stage, XP, age`,
+            description: `Who ${who} is: species, stage, XP, age`,
             category: PALETTE,
             namespace: "palette",
             run: guard(showCard),

@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { DAY_MS, age, progress } from "./card.ts";
+import { DAY_MS, age, progress, reveal, speciesLine } from "./card.ts";
+import { REFERENCE } from "./species.ts";
 import { freshCareer, type Career } from "./state.ts";
 
 const career: Career = {
@@ -37,4 +38,16 @@ test("progress shows raw xp against a raw threshold farther away for a rarer spe
   const dragon: Career = { ...career, species: "dragon" }; // 2,147 xp, 536.75 growth: hatchling
   const text = progress(dragon, 10);
   assert.ok(text.endsWith("2,147 / 6,000 xp → young"), text);
+});
+
+test("speciesLine hides the species while still an egg, then names it with its rarity", () => {
+  assert.equal(speciesLine(freshCareer(0)), "still an egg");
+  assert.equal(speciesLine({ ...freshCareer(0), species: "owl", sessions: 20 }), "owl · common"); // 200 xp: hatchling
+  assert.equal(speciesLine({ ...career, species: "dragon" }), "dragon · legendary");
+  assert.equal(speciesLine({ ...career, species: "nope" }), `${REFERENCE} · common`, "an unknown species reads as the reference");
+});
+
+test("reveal names the species with the right article", () => {
+  assert.equal(reveal("Tamago", { ...career, species: "owl" }), "Tamago hatched: an owl, common!");
+  assert.equal(reveal("Momo", { ...career, species: "dragon" }), "Momo hatched: a dragon, legendary!");
 });

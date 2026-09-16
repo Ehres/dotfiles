@@ -68,7 +68,7 @@ export function adopt(window: Window, career: Career, now: number): Step {
   let next: Window = { ...window, career };
   if (reached !== undefined) {
     effects.push({ type: "evolved", stage: reached });
-    next = move(next, Object.keys(next.sessions), { type: "evolved" }, now);
+    next = move(next, Object.keys(next.sessions), { type: "evolved", stage: reached }, now);
   }
   return { window: next, effects };
 }

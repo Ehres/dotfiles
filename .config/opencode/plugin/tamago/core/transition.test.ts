@@ -140,7 +140,7 @@ test("speech events never move a session", () => {
     { type: "session_retried" },
     { type: "todos_updated", total: 3, done: 3 },
     { type: "diff_updated", files: 12 },
-    { type: "evolved" },
+    { type: "evolved", stage: "young" },
   ];
   const working = replay([[{ type: "tool_started" }, 0]]);
   for (const event of speech) assert.equal(transition(working, event, 5), working, `${event.type} must be inert`);

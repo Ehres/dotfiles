@@ -1,4 +1,5 @@
 import type { ToolKind } from "./state.ts";
+import type { StageId } from "./stage.ts";
 
 export type TamagoEvent =
   | { type: "prompt_sent" }
@@ -27,8 +28,8 @@ export type TamagoEvent =
   | { type: "todos_updated"; total: number; done: number }
   /** Number of files in the session diff. */
   | { type: "diff_updated"; files: number }
-  /** A new Stage was reached. Raised by index.tsx for every Session, never by the adapter. */
-  | { type: "evolved" }
+  /** A new Stage was reached. Raised by core/window.ts for every Session, never by the adapter. `hatchling` is the hatch: the Species shows. */
+  | { type: "evolved"; stage: StageId }
   | { type: "tick" };
 
 /**

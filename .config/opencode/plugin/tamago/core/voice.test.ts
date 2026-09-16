@@ -102,7 +102,8 @@ test("failures older than STREAK_MS are forgotten", () => {
 test("compaction, retry and evolution speak", () => {
   assert.equal(cueOf(replay([[{ type: "session_compacted" }, 0]]).voice), "compacted");
   assert.equal(cueOf(replay([[{ type: "session_retried" }, 0]]).voice), "retried");
-  assert.equal(cueOf(replay([[{ type: "evolved" }, 0]]).voice), "evolved");
+  assert.equal(cueOf(replay([[{ type: "evolved", stage: "young" }, 0]]).voice), "evolved");
+  assert.equal(cueOf(replay([[{ type: "evolved", stage: "hatchling" }, 0]]).voice), "hatched");
 });
 
 test("todos_done speaks once when every todo is done, and again after the list reopens", () => {
@@ -241,7 +242,7 @@ test("a Cue without flavor falls back to the neutral phrases", () => {
 });
 
 test("every flavored phrase fits in MAX_TEXT and every Temperament flavors the same Cues", () => {
-  const cues = ["permission", "granted", "denied", "streak", "evolved"] as const;
+  const cues = ["permission", "granted", "denied", "streak", "evolved", "hatched"] as const;
   for (const temperament of TEMPERAMENTS) {
     const flavor = FLAVOR[temperament];
     assert.ok(flavor, temperament);
