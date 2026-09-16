@@ -8,8 +8,9 @@ avant implémentation.
 
 Ce que Tamago fait aujourd'hui :
 
-- Sprite ASCII 11×5 (`core/sprites.ts`), 5 stades linéaires pilotés par l'XP
-  cumulé (`core/stage.ts`) : egg → hatchling → young → adult → elder.
+- Sprite ASCII 11×5 par Species et par Stage (`core/sprites.ts`), 5 stades
+  pilotés par le Growth, l'XP fois le Pace de la Species (`core/stage.ts`) :
+  egg → hatchling → young → adult → elder.
 - 6 activités de session (`core/state.ts`) : idle, thinking, working, waiting,
   hurt, sleeping. Animation des yeux et d'une "marque" à côté de la tête.
 - Transitions et comptage purs (`core/transition.ts`, `core/count.ts`), translator SDK → événements internes ciblés par session
@@ -23,7 +24,7 @@ Ce que Tamago fait aujourd'hui :
   (`core/sprites.ts`) ; Cue `hatched` et toast de révélation.
 
 Compteurs persistés dans `Career` : sessions, prompts, tools par kind
-(read/edit/bash/other), filesEdited, errors, hatchedAt.
+(read/edit/bash/other), filesEdited, errors, hatchedAt, species.
 
 ## Ce que l'API OpenCode 1.18 offre et qu'on n'utilise pas
 

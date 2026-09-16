@@ -18,7 +18,7 @@ test("measure reads a plain counter", () => {
   assert.equal(measure(c, "questions"), 4);
 });
 
-test("measure tools sums the four kinds and xp reuses xp()", () => {
+test("measure tools sums the four kinds and xp follows growth", () => {
   const c = counters({ tools: { read: 1, edit: 2, bash: 3, other: 4 }, prompts: 5 });
   assert.equal(measure(c, "tools"), 10);
   assert.equal(measure(c, "xp"), growth(c));

@@ -121,17 +121,21 @@ const BODIES: Record<SpeciesId, Record<Grown, Body>> = {
   },
 };
 
+/** Whether this build draws that Species itself; anything else draws as the reference. */
+function known(species: SpeciesId): boolean {
+  return Object.hasOwn(BODIES, species);
+}
+
 /** The body to draw: the common egg, else the Species' body, else the reference's for a Species this build does not know. */
 function body(species: SpeciesId, stage: StageId): Body {
   if (stage === "egg") return EGG;
-  const own = BODIES[species] ?? BODIES[REFERENCE];
-  return (own ?? BODIES.cat!)[stage];
+  return BODIES[known(species) ? species : REFERENCE]![stage];
 }
 
 /** The cache key: every egg shares one entry so identity holds across Species; an unknown Species shares the reference's. */
 function keyOf(species: SpeciesId, stage: StageId): string {
   if (stage === "egg") return "egg";
-  return `${BODIES[species] === undefined ? REFERENCE : species}/${stage}`;
+  return `${known(species) ? species : REFERENCE}/${stage}`;
 }
 
 const FACES: Record<Activity, readonly Face[]> = {

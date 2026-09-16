@@ -209,7 +209,7 @@ animate.
 
 **Face**:
 The eyes and the mark beside the head that change with the Activity while
-the body stays the same for a Stage.
+the body stays the same for a Species and a Stage.
 
 **Portrait**:
 The Sprite and its text column, topped by the Bubble when there is one.
@@ -233,8 +233,8 @@ _Avoid_: card, widget
   **Sprite**; at `egg` the Species selects nothing, every egg is the same
 - The **Species** shows at the Evolution to `hatchling`, on the card, in a
   Bubble and in the toast; before that the card says it is still an egg
-- A **Sprite** has one or more **Frames**; every Frame of a Stage has the same
-  size
+- A **Sprite** has one or more **Frames**; every Frame of every Species and
+  Stage has the same size
 - An **Evolution** happens when the **Growth** of a **Career** crosses a
   **Stage** threshold
 - A **Session** has exactly one **Voice**; a **Voice** holds at most one

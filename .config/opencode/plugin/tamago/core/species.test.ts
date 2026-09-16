@@ -62,6 +62,8 @@ test("hatch lands on each Rarity within a loose band of its weight over ten thou
 });
 
 test("hatch is pinned: the owner's hatch date always gives the same Species", () => {
-  // Value computed once at the commit that shipped the draw. Never update it to make a new formula pass.
+  // Values computed once at the commit that shipped the draw. Never update them to make a new formula pass.
   assert.equal(hatch(1789113932488), "cat");
+  assert.equal(hatch(1789113932489), "owl");
+  assert.equal(hatch(1789113932549), "dragon");
 });

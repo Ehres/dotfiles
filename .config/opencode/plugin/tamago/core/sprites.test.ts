@@ -81,6 +81,15 @@ test("an unknown species draws like the reference", () => {
   }
 });
 
+test("a species id that names an Object.prototype member draws like the reference instead of crashing", () => {
+  for (const id of ["constructor", "toString", "hasOwnProperty"]) {
+    for (const { id: stage } of STAGES) {
+      assert.equal(frames(id, stage, "idle"), frames(REFERENCE, stage, "idle"), `${id}/${stage}`);
+      assert.equal(heartFrame(id, stage, "stoic"), heartFrame(REFERENCE, stage, "stoic"), `${id}/${stage} heart`);
+    }
+  }
+});
+
 test("a heart frame per species, Stage and Temperament keeps the size, wears the heart and the Temperament's eyes", () => {
   for (const species of ids) {
     for (const entry of STAGES) {
