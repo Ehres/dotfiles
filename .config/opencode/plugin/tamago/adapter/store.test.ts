@@ -298,14 +298,43 @@ test("flush to a Career that is not on disk, with no active either, mints a fres
   assert.ok(!existsSync(join(dir, ROSTER_DIR, "999.json")));
 });
 
+test("with an active file on disk, a flush to a Career that is not on disk credits the active one and creates no file", () => {
+  const dir = scratch();
+  const store = createStore(dir, () => 7);
+  store.flush(d({ prompts: 1 }), 7); // creates career.json hatched at 7
+  const result = store.flush(d({ prompts: 2 }), 999);
+  assert.equal(result.outcome, "written");
+  assert.equal(result.career?.hatchedAt, 7, "the active Career on disk is credited, not a fresh one at the missing target");
+  assert.equal(result.career?.prompts, 3);
+  assert.ok(!existsSync(join(dir, ROSTER_DIR, "999.json")));
+  assert.ok(!existsSync(join(dir, ROSTER_DIR)));
+});
+
+test("with an active file on disk, a flush to a resting Career credits it and reports the active one unchanged", () => {
+  const dir = scratch();
+  const store = createStore(dir, () => 7);
+  store.flush(d({ prompts: 1 }), 7); // creates career.json hatched at 7
+  mkdirSync(join(dir, ROSTER_DIR));
+  writeFileSync(join(dir, ROSTER_DIR, "3.json"), JSON.stringify({ ...freshCareer(3), prompts: 10 }));
+  const result = store.flush(d({ prompts: 5 }), 3);
+  assert.equal(result.outcome, "written");
+  assert.equal(result.career?.hatchedAt, 7, "the window is told about the active Career, unaffected by a Delta credited elsewhere");
+  assert.equal(result.career?.prompts, 1);
+  const onDisk = JSON.parse(readFileSync(join(dir, ROSTER_DIR, "3.json"), "utf8"));
+  assert.equal(onDisk.prompts, 15);
+  assert.equal(store.load().career.prompts, 1, "the active one on disk was not touched");
+});
+
 test("flush to a corrupt resting file sets it aside and credits the active one", () => {
   const dir = scratch();
   const store = createStore(dir, () => 7);
+  store.flush(d({ prompts: 1 }), 7); // creates career.json hatched at 7
   mkdirSync(join(dir, ROSTER_DIR));
   writeFileSync(join(dir, ROSTER_DIR, "3.json"), "{not json");
   const result = store.flush(d({ prompts: 1 }), 3);
   assert.equal(result.outcome, "written");
-  assert.equal(result.career?.prompts, 1);
+  assert.equal(result.career?.hatchedAt, 7);
+  assert.equal(result.career?.prompts, 2);
   assert.ok(!existsSync(join(dir, ROSTER_DIR, "3.json")));
   assert.ok(readdirSync(join(dir, ROSTER_DIR)).some((name) => name.startsWith("3.json.corrupt-")));
 });
