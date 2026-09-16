@@ -1,5 +1,5 @@
 /** @jsxImportSource @opentui/solid */
-import type { TuiPlugin, TuiPluginModule } from "@opencode-ai/plugin/tui";
+import type { TuiDialogSelectOption, TuiPlugin, TuiPluginModule } from "@opencode-ai/plugin/tui";
 import type { Event } from "@opencode-ai/sdk/v2";
 import { homedir } from "node:os";
 import { join } from "node:path";
@@ -26,6 +26,7 @@ import {
   type Step,
   type Window,
 } from "./core/window.ts";
+import { blocked, blockers, entry, idOf, stepsIn, switchable } from "./core/roster.ts";
 import { CardView } from "./view/card.tsx";
 import { HomeView } from "./view/home.tsx";
 import { SidebarView, type FooterInfo } from "./view/sidebar.tsx";
@@ -116,8 +117,11 @@ const tui: TuiPlugin = async (api, options) => {
     const run = ({ window: next, effects }: Step) => {
       commit(next);
       for (const effect of effects) {
-        if (effect.type === "renamed" || effect.type === "switched") registerCommands(); // palette descriptions carry the Name and are fixed at registration
-        else if (effect.stage === "hatchling") api.ui.toast({ variant: "success", title: name(), message: reveal(name(), career()) });
+        if (effect.type === "renamed") registerCommands(); // palette descriptions carry the Name and are fixed at registration
+        else if (effect.type === "switched") {
+          registerCommands();
+          api.ui.toast({ variant: "info", title: name(), message: stepsIn(career(), defaultName) });
+        } else if (effect.stage === "hatchling") api.ui.toast({ variant: "success", title: name(), message: reveal(name(), career()) });
         else api.ui.toast({ variant: "success", title: name(), message: `${name()} evolved: ${effect.stage}!` });
       }
     };
@@ -195,6 +199,81 @@ const tui: TuiPlugin = async (api, options) => {
       ));
     };
 
+    const BUSY = "Another window is writing. Try again.";
+
+    /** The Delta must reach its own Career before the active one changes. False, with a toast, when the disk is busy; disk errors throw and `guard` logs them. */
+    const settle = (): boolean => {
+      if (persist()) return true;
+      api.ui.toast({ variant: "warning", title: name(), message: BUSY });
+      return false;
+    };
+
+    const switchTo = (id: number) => {
+      if (!settle()) return;
+      const result = store.switch(id);
+      if (result.outcome === "written") run(flushed(window, result.career, Date.now()));
+      else if (result.outcome === "missing") api.ui.toast({ variant: "warning", title: name(), message: "That Tamago is gone from the roster." });
+      else if (result.outcome === "corrupt") warnCorrupt();
+      else api.ui.toast({ variant: "warning", title: name(), message: BUSY });
+    };
+
+    const askSwitch = () => {
+      const { roster, corrupt } = store.roster();
+      if (corrupt) {
+        warnCorrupt();
+        return;
+      }
+      const others = switchable(roster);
+      if (others.length === 0) {
+        api.ui.toast({ variant: "info", title: name(), message: "Nobody else in the roster yet." });
+        return;
+      }
+      const now = Date.now();
+      const options: TuiDialogSelectOption<number>[] = others.map((other) => ({ title: entry(other, defaultName, now), value: idOf(other) }));
+      api.ui.dialog.replace(() => (
+        <api.ui.DialogSelect
+          title="Switch Tamago"
+          options={options}
+          onSelect={guard((option: TuiDialogSelectOption<number>) => {
+            api.ui.dialog.clear();
+            switchTo(option.value);
+          })}
+        />
+      ));
+    };
+
+    const lay = () => {
+      if (!settle()) return;
+      const result = store.hatch(Date.now());
+      if (result.outcome === "written") run(flushed(window, result.career, Date.now()));
+      else if (result.outcome === "corrupt") warnCorrupt();
+      else api.ui.toast({ variant: "warning", title: name(), message: BUSY });
+    };
+
+    const askHatch = () => {
+      const { roster, corrupt } = store.roster();
+      if (corrupt) {
+        warnCorrupt();
+        return;
+      }
+      const first = blockers(roster)[0];
+      if (first !== undefined) {
+        api.ui.toast({ variant: "warning", title: name(), message: blocked(first, defaultName) });
+        return;
+      }
+      api.ui.dialog.replace(() => (
+        <api.ui.DialogConfirm
+          title="Hatch a new egg?"
+          message={`${name()} rests in the roster; switch back anytime.`}
+          onConfirm={guard(() => {
+            api.ui.dialog.clear();
+            lay();
+          })}
+          onCancel={() => api.ui.dialog.clear()}
+        />
+      ));
+    };
+
     let unregisterCommands: (() => void) | undefined;
     function registerCommands(): void {
       unregisterCommands?.();
@@ -233,6 +312,22 @@ const tui: TuiPlugin = async (api, options) => {
             category: PALETTE,
             namespace: "palette",
             run: guard(askName),
+          },
+          {
+            name: "tamago.hatch",
+            title: `${PALETTE}: hatch a new egg`,
+            description: "Hatch a new egg once every Tamago is elder",
+            category: PALETTE,
+            namespace: "palette",
+            run: guard(askHatch),
+          },
+          {
+            name: "tamago.switch",
+            title: `${PALETTE}: switch`,
+            description: "Bring another Tamago of this machine to the front",
+            category: PALETTE,
+            namespace: "palette",
+            run: guard(askSwitch),
           },
         ],
       });
