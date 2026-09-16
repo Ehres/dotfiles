@@ -42,7 +42,11 @@ export function entry(career: Career, fallback: string, now: number): string {
 
 /** The refusal when a Hatch is blocked. */
 export function blocked(first: Career, fallback: string): string {
-  return `${nameOf(first, fallback)} is still ${stage(first)}. Hatch when every Tamago is elder.`;
+  const who = nameOf(first, fallback);
+  const stageOf = stage(first);
+  return stageOf === "egg"
+    ? `${who} is still an egg. Hatch when every Tamago is elder.`
+    : `${who} is still ${stageOf}. Hatch when every Tamago is elder.`;
 }
 
 /** The toast when another Career becomes active, whether this window caused it or learned it at a Flush. */

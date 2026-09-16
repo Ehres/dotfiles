@@ -23,6 +23,38 @@ test("load on an empty directory yields a fresh, non-corrupt egg and creates the
   assert.ok(existsSync(dir));
 });
 
+test("load on an empty directory says the file is not present, so an idle window adopts nothing", () => {
+  const dir = scratch();
+  const store = createStore(dir, () => 42);
+  assert.equal(store.load().present, false);
+  assert.equal(store.load().present, false, "still absent on the second read");
+  store.flush(d({ prompts: 1 }), 42);
+  assert.equal(store.load().present, true);
+});
+
+test("the first flush on an empty directory mints the egg with the window's own identity", () => {
+  const dir = scratch();
+  const store = createStore(dir, () => 42);
+  const result = store.flush(d({ prompts: 1 }), 5);
+  assert.equal(result.outcome, "written");
+  assert.equal(result.career?.hatchedAt, 5, "the disk egg is the window's egg, not a new one");
+  assert.equal(result.career?.species, hatch(5));
+  assert.equal(result.career?.prompts, 1);
+});
+
+test("with no active file, a flush to an existing resting Career credits it and creates no active file", () => {
+  const dir = scratch();
+  const store = createStore(dir, () => 42);
+  mkdirSync(join(dir, ROSTER_DIR));
+  writeFileSync(join(dir, ROSTER_DIR, "3.json"), JSON.stringify({ ...freshCareer(3), prompts: 10 }));
+  const result = store.flush(d({ prompts: 1 }), 3);
+  assert.equal(result.outcome, "written");
+  assert.equal(result.career?.hatchedAt, 3);
+  assert.equal(result.career?.prompts, 11);
+  assert.ok(!existsSync(join(dir, CAREER_FILE)));
+  assert.equal(JSON.parse(readFileSync(join(dir, ROSTER_DIR, "3.json"), "utf8")).prompts, 11);
+});
+
 test("flush merges deltas into the file and returns the merged career", () => {
   const dir = scratch();
   const store = createStore(dir, () => 7);
@@ -117,22 +149,24 @@ test("a stale lock left by another owner is stolen and released", () => {
 test("a flush that loses the lock mid-way drops its write and does not release the thief's lock", () => {
   const dir = scratch();
   const lock = join(dir, LOCK_DIR);
+  // An active file must already be on disk for this trap: flush() now reads it with a
+  // plain readAt(file), which only calls now() (via hydrate) when the file exists. On a
+  // truly empty directory it would never call now() at all, and the thief would never
+  // get a chance to strike.
+  writeFileSync(join(dir, CAREER_FILE), JSON.stringify(freshCareer(5)));
   // now() is called exactly once between acquiring the lock and the rename: inside
-  // read(), via hydrate(..., now()) or freshCareer(now()). We use that single call
-  // as the hook to simulate another instance stealing the lock mid-flush: it
-  // overwrites the owner file with a foreign token, so the owns() check right
-  // before rename fails and the write is abandoned.
+  // readAt(), via hydrate(..., now()). We use that single call as the hook to simulate
+  // another instance stealing the lock mid-flush: it overwrites the owner file with a
+  // foreign token, so the owns() check right before rename fails and the write is abandoned.
   let calls = 0;
   const now = () => {
     calls += 1;
     if (calls === 1) writeFileSync(join(lock, LOCK_OWNER_FILE), "1:thief");
     return Date.now();
   };
-  // active() reads via a separate, plain-`now` store: calling it on `now` itself would
-  // burn the one tick the trap above is counting on, before flush ever acquires the lock.
-  const result = createStore(dir, now).flush(d({ prompts: 1 }), active(createStore(dir)));
+  const result = createStore(dir, now).flush(d({ prompts: 1 }), 5);
   assert.deepEqual(result, { outcome: "busy" });
-  assert.ok(!existsSync(join(dir, CAREER_FILE)), "no career file written");
+  assert.equal(JSON.parse(readFileSync(join(dir, CAREER_FILE), "utf8")).prompts, 0, "career file left unwritten, unchanged");
   assert.deepEqual(
     readdirSync(dir).filter((name) => name.endsWith(".tmp")),
     [],
@@ -239,28 +273,28 @@ test("a species round-trips through flush and load; a file without one loads as 
   assert.equal(JSON.parse(readFileSync(join(dir, CAREER_FILE), "utf8")).species, "from-a-newer-build");
 });
 
-test("flush credits a resting Career by its hatch date, keeps its unknown keys, and reports the active one", () => {
+test("flush credits a resting Career by its hatch date and keeps its unknown keys; with no active file it reports the resting one", () => {
   const dir = scratch();
   const store = createStore(dir, () => 7);
   mkdirSync(join(dir, ROSTER_DIR));
   writeFileSync(join(dir, ROSTER_DIR, "3.json"), JSON.stringify({ ...freshCareer(3), prompts: 10, later: true }));
   const result = store.flush(d({ prompts: 1 }), 3);
   assert.equal(result.outcome, "written");
-  assert.equal(result.career?.hatchedAt, 7, "the window is told what the active Career is");
+  assert.equal(result.career?.hatchedAt, 3, "no active file exists, so the window is told about the resting Career it just credited");
   const onDisk = JSON.parse(readFileSync(join(dir, ROSTER_DIR, "3.json"), "utf8"));
   assert.equal(onDisk.prompts, 11);
   assert.equal(onDisk.later, true);
-  assert.equal(store.load().career.prompts, 0, "the active one was not credited");
+  assert.equal(store.load().career.prompts, 0, "no career.json was written");
   assert.ok(!existsSync(join(dir, LOCK_DIR)), "lock released");
 });
 
-test("flush to a Career that is not on disk credits the active one and creates no file", () => {
+test("flush to a Career that is not on disk, with no active either, mints a fresh one at the target and creates no roster file", () => {
   const dir = scratch();
   const store = createStore(dir, () => 7);
   const result = store.flush(d({ prompts: 1 }), 999);
   assert.equal(result.outcome, "written");
   assert.equal(result.career?.prompts, 1);
-  assert.equal(result.career?.hatchedAt, 7);
+  assert.equal(result.career?.hatchedAt, 999, "nothing was on disk under 999 or as an active Career, so the target's own identity is minted");
   assert.ok(!existsSync(join(dir, ROSTER_DIR, "999.json")));
 });
 
@@ -382,6 +416,20 @@ test("a Delta earned under the previous active reaches it after a Switch, and th
   assert.equal(late.outcome, "written");
   assert.equal(late.career?.hatchedAt, 3, "b is told the active is now 3");
   assert.equal(JSON.parse(readFileSync(join(dir, ROSTER_DIR, "7.json"), "utf8")).prompts, 6);
+});
+
+test("an older build, which only knows career.json, credits whichever Career is active after a switch", () => {
+  const dir = scratch();
+  const store = createStore(dir, () => 7);
+  store.flush(d({ prompts: 1 }), 7);
+  mkdirSync(join(dir, ROSTER_DIR));
+  writeFileSync(join(dir, ROSTER_DIR, "3.json"), JSON.stringify(freshCareer(3)));
+  assert.equal(store.switch(3).outcome, "written");
+  const old = store.flush(d({ prompts: 5 }), active(store)); // an old build passes no target; the active id stands in for it
+  assert.equal(old.outcome, "written");
+  assert.equal(old.career?.hatchedAt, 3);
+  assert.equal(JSON.parse(readFileSync(join(dir, CAREER_FILE), "utf8")).prompts, 5);
+  assert.equal(JSON.parse(readFileSync(join(dir, ROSTER_DIR, "7.json"), "utf8")).prompts, 1, "the resting one is untouched");
 });
 
 test("switch and hatch are busy while another instance holds the lock", () => {

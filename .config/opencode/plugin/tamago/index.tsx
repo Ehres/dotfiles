@@ -55,7 +55,7 @@ const tui: TuiPlugin = async (api, options) => {
     loaded = store.load();
   } catch (err) {
     logError(err);
-    loaded = { career: freshCareer(Date.now()), corrupt: false };
+    loaded = { career: freshCareer(Date.now()), corrupt: false, present: false };
   }
 
   try {
@@ -210,6 +210,7 @@ const tui: TuiPlugin = async (api, options) => {
 
     const switchTo = (id: number) => {
       if (!settle()) return;
+      if (id === window.career.hatchedAt) return; // another window brought it to the front while we flushed
       const result = store.switch(id);
       if (result.outcome === "written") run(flushed(window, result.career, Date.now()));
       else if (result.outcome === "missing") api.ui.toast({ variant: "warning", title: name(), message: "That Tamago is gone from the roster." });
@@ -251,6 +252,7 @@ const tui: TuiPlugin = async (api, options) => {
     };
 
     const askHatch = () => {
+      if (!settle()) return;
       const { roster, corrupt } = store.roster();
       if (corrupt) {
         warnCorrupt();
@@ -341,7 +343,7 @@ const tui: TuiPlugin = async (api, options) => {
         // Nothing of ours to write, but other instances may have progressed.
         const fresh = store.load();
         if (fresh.corrupt) warnCorrupt();
-        else run(adopt(window, fresh.career, Date.now()));
+        else if (fresh.present) run(adopt(window, fresh.career, Date.now())); // nothing on disk yet: keep showing our own egg
         return true;
       }
       const result = store.flush(window.pending, window.career.hatchedAt); // the pending Delta was earned under the Career shown

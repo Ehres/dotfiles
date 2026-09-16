@@ -42,7 +42,7 @@ test("entry names the Tamago, its species and rarity, its stage and its age; an 
 });
 
 test("blocked names who is still growing and what to wait for", () => {
-  assert.equal(blocked(egg(T0, { name: { value: "Momo", at: 1 } }), "Tamago"), "Momo is still egg. Hatch when every Tamago is elder.");
+  assert.equal(blocked(egg(T0, { name: { value: "Momo", at: 1 } }), "Tamago"), "Momo is still an egg. Hatch when every Tamago is elder.");
   assert.equal(blocked({ ...egg(T0), sessions: 20 }, "Tamago"), "Tamago is still hatchling. Hatch when every Tamago is elder.");
 });
 

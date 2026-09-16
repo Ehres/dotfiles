@@ -12,7 +12,7 @@ export const ROSTER_DIR = "roster";
 export const LOCK_DIR = "career.lock";
 export const LOCK_OWNER_FILE = "owner";
 
-export type Loaded = { career: Career; corrupt: boolean };
+export type Loaded = { career: Career; corrupt: boolean; present: boolean };
 
 /** What was read, plus the top-level keys this build does not know, kept verbatim so a newer build's data survives our flush. */
 type Read = Loaded & { unknown: Record<string, unknown> };
@@ -26,7 +26,9 @@ function unknownKeys(raw: unknown): Record<string, unknown> {
 
 /**
  * written: the delta is on disk, `career` is what the window must show: the
- *   active Career (merged when it was the target, as found otherwise).
+ *   active Career if one exists, the target Career otherwise (merged into the
+ *   resting one when found there, freshly minted at `target` when nothing at
+ *   all was on disk).
  * busy: another instance holds the lock; keep the delta and retry later.
  * corrupt: the active file was unreadable JSON; it was set aside and nothing
  *   was written. The next flush starts from a fresh egg.
@@ -47,7 +49,7 @@ export type Store = {
   load(): Loaded;
   /** Every Career on disk: the active one and the resting ones by hatch date. A corrupt resting file is set aside and skipped. */
   roster(): { roster: Roster; corrupt: boolean };
-  /** Credits `delta` to the Career hatched at `target`, active or resting; to the active one when no such Career is on disk. */
+  /** Credits `delta` to the Career hatched at `target`, active or resting; to the active one when it is on disk but `target` is not, or mints a fresh Career at `target` when nothing at all is on disk. */
   flush(delta: Delta, target: CareerId): FlushResult;
   /** Brings the resting Career hatched at `target` to the front; the active one goes to rest. */
   switch(target: CareerId): SwitchResult;
@@ -72,18 +74,18 @@ export function createStore(dir: string, now: () => number = Date.now): Store {
   function readAt(path: string): Read | undefined {
     try {
       const raw: unknown = JSON.parse(readFileSync(path, "utf8"));
-      return { ...hydrate(raw, now()), unknown: unknownKeys(raw) };
+      return { ...hydrate(raw, now()), unknown: unknownKeys(raw), present: true };
     } catch (err) {
       if (code(err) === "ENOENT") return undefined;
-      if (err instanceof SyntaxError) return { career: freshCareer(now()), corrupt: true, unknown: {} };
+      if (err instanceof SyntaxError) return { career: freshCareer(now()), corrupt: true, unknown: {}, present: true };
       throw err;
     }
   }
 
-  /** The active Career: a fresh egg, not corrupt, when the file does not exist yet. */
+  /** The active Career: a fresh egg, not corrupt, `present: false` when the file does not exist yet. */
   function read(): Read {
     mkdirSync(dir, { recursive: true });
-    return readAt(file) ?? { career: freshCareer(now()), corrupt: false, unknown: {} };
+    return readAt(file) ?? { career: freshCareer(now()), corrupt: false, unknown: {}, present: false };
   }
 
   /** Moves an unreadable file out of the way so nothing is ever written over it. */
@@ -185,8 +187,8 @@ export function createStore(dir: string, now: () => number = Date.now): Store {
 
   return {
     load: () => {
-      const { career, corrupt } = read();
-      return { career, corrupt };
+      const { career, corrupt, present } = read();
+      return { career, corrupt, present };
     },
     roster: () => {
       const { career, corrupt } = read();
@@ -195,24 +197,28 @@ export function createStore(dir: string, now: () => number = Date.now): Store {
     flush(delta, target) {
       if (!acquire()) return { outcome: "busy" };
       try {
-        const loaded = read();
-        if (loaded.corrupt) {
+        const active = readAt(file);
+        if (active?.corrupt) {
           setAside(file);
-          return { outcome: "corrupt", career: loaded.career };
+          return { outcome: "corrupt", career: active.career };
         }
-        if (loaded.career.hatchedAt !== target) {
+        if (active === undefined || active.career.hatchedAt !== target) {
           const path = restingFile(target);
           const rested = readAt(path);
           if (rested !== undefined && !rested.corrupt) {
-            if (!write(path, { ...rested.unknown, ...merge(rested.career, delta) })) return { outcome: "busy" };
-            return { outcome: "written", career: loaded.career };
+            const merged = merge(rested.career, delta);
+            if (!write(path, { ...rested.unknown, ...merged })) return { outcome: "busy" };
+            return { outcome: "written", career: active?.career ?? merged };
           }
           if (rested?.corrupt) setAside(path);
           // No such resting Career on disk: the Delta credits the active one, as before the Roster existed.
           // This is also what settles two windows hatching their own egg on a fresh machine: the loser's egg was never written.
+          // With no active either, the window's own identity is what gets minted below, not a freshly-timestamped stranger.
         }
-        const merged = merge(loaded.career, delta);
-        if (!write(file, { ...loaded.unknown, ...merged })) return { outcome: "busy" };
+        const base = active?.career ?? freshCareer(target);
+        const unknown = active?.unknown ?? {};
+        const merged = merge(base, delta);
+        if (!write(file, { ...unknown, ...merged })) return { outcome: "busy" };
         return { outcome: "written", career: merged };
       } finally {
         release();
