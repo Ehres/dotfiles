@@ -249,7 +249,7 @@ const tui: TuiPlugin = async (api, options) => {
         else run(adopt(window, fresh.career, Date.now()));
         return true;
       }
-      const result = store.flush(window.pending);
+      const result = store.flush(window.pending, window.career.hatchedAt); // the pending Delta was earned under the Career shown
       if (result.outcome === "busy") return false; // lock held elsewhere: keep the delta, retry next time
       if (result.outcome === "corrupt") {
         warnCorrupt();
@@ -284,7 +284,7 @@ const tui: TuiPlugin = async (api, options) => {
       guard(() => {
         if (ticker !== undefined) clearTimeout(ticker);
         if (flusher !== undefined) clearTimeout(flusher);
-        if (!isEmpty(window.pending)) store.flush(window.pending);
+        if (!isEmpty(window.pending)) store.flush(window.pending, window.career.hatchedAt);
       }),
     );
 
