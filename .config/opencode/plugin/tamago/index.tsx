@@ -151,6 +151,7 @@ const tui: TuiPlugin = async (api, options) => {
           name={name()}
           theme={() => api.theme.current}
           career={career}
+          species={() => career().species}
           clock={clock}
           heart={heart}
           temperament={() => persona().temperament}
@@ -304,6 +305,7 @@ const tui: TuiPlugin = async (api, options) => {
               theme={() => ctx.theme.current}
               session={sessionOf(props.session_id)}
               career={career}
+              species={() => career().species}
               clock={clock}
               footer={footer(props.session_id)}
               bubble={() => voices()[props.session_id]?.bubble}
@@ -324,6 +326,7 @@ const tui: TuiPlugin = async (api, options) => {
               name={name()}
               theme={() => ctx.theme.current}
               career={career}
+              species={() => career().species}
               clock={clock}
               heart={heart}
               temperament={() => persona().temperament}

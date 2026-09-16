@@ -7,6 +7,7 @@ import { bubbleBorders } from "../core/bubble.ts";
 import { frameIndex } from "../core/cadence.ts";
 import type { Temperament } from "../core/character.ts";
 import { fmt } from "../core/format.ts";
+import type { SpeciesId } from "../core/species.ts";
 import { frameAt, heartFrame } from "../core/sprites.ts";
 import { stage, xp } from "../core/stage.ts";
 import type { Activity, Career, Session } from "../core/state.ts";
@@ -43,6 +44,7 @@ export function SidebarView(props: {
   theme: () => TuiThemeCurrent;
   session: () => Session;
   career: () => Career;
+  species: () => SpeciesId;
   clock: () => number;
   footer: () => FooterInfo;
   bubble: () => Bubble | undefined;
@@ -53,7 +55,9 @@ export function SidebarView(props: {
   const current = createMemo(() => stage(props.career()));
   const total = createMemo(() => xp(props.career()));
   const lines = () =>
-    props.heart() ? heartFrame(current(), props.temperament()) : frameAt(current(), activity(), frameIndex(activity(), props.clock()));
+    props.heart()
+      ? heartFrame(props.species(), current(), props.temperament())
+      : frameAt(props.species(), current(), activity(), frameIndex(activity(), props.clock()));
   const color = () => spriteColor(props.theme(), activity());
   const bubble = createMemo((): BubbleView | undefined => {
     const current = props.bubble();

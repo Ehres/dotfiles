@@ -1,4 +1,5 @@
 import type { Temperament } from "./character.ts";
+import { REFERENCE, type SpeciesId } from "./species.ts";
 import type { StageId } from "./stage.ts";
 import type { Activity } from "./state.ts";
 
@@ -15,43 +16,123 @@ function fit(lines: string[]): Frame {
   return lines.map((line) => line.padEnd(SPRITE_WIDTH));
 }
 
-const BODIES: Record<StageId, Body> = {
-  egg: (e, m) => [
-    `   .---.  ${m}`,
-    "  /     \\",
-    ` |  ${e}  |`,
-    "  \\     /",
-    "   '---'",
-  ],
-  hatchling: (e, m) => [
-    `   .---.  ${m}`,
-    `  ( ${e} )`,
-    "   \\ ^ /",
-    "    '-'",
-    "",
-  ],
-  young: (e, m) => [
-    `   .---.  ${m}`,
-    `  ( ${e} )`,
-    "  /| ^ |\\",
-    "   |___|",
-    "   /   \\",
-  ],
-  adult: (e, m) => [
-    `  /\\   /\\ ${m}`,
-    `  ( ${e} )`,
-    " /| ^^^ |\\",
-    "  |_____|",
-    "  /|   |\\",
-  ],
-  elder: (e, m) => [
-    `  \\|/ \\|/ ${m}`,
-    `  ( ${e} )`,
-    " /|~^^^~|\\",
-    "  |_____|",
-    "  /|   |\\",
-  ],
+/** The egg every Species hatches from: what is inside only shows at hatchling. */
+const EGG: Body = (e, m) => [
+  `   .---.  ${m}`,
+  "  /     \\",
+  ` |  ${e}  |`,
+  "  \\     /",
+  "   '---'",
+];
+
+type Grown = Exclude<StageId, "egg">;
+
+/** Four bodies per Species. Every body takes three-column eyes and a one-column mark at column 10 of line 0, and fits in SPRITE_WIDTH × SPRITE_HEIGHT. */
+const BODIES: Record<SpeciesId, Record<Grown, Body>> = {
+  cat: {
+    hatchling: (e, m) => [
+      `   .---.  ${m}`,
+      `  ( ${e} )`,
+      "   \\ ^ /",
+      "    '-'",
+      "",
+    ],
+    young: (e, m) => [
+      `   .---.  ${m}`,
+      `  ( ${e} )`,
+      "  /| ^ |\\",
+      "   |___|",
+      "   /   \\",
+    ],
+    adult: (e, m) => [
+      `  /\\   /\\ ${m}`,
+      `  ( ${e} )`,
+      " /| ^^^ |\\",
+      "  |_____|",
+      "  /|   |\\",
+    ],
+    elder: (e, m) => [
+      `  \\|/ \\|/ ${m}`,
+      `  ( ${e} )`,
+      " /|~^^^~|\\",
+      "  |_____|",
+      "  /|   |\\",
+    ],
+  },
+  owl: {
+    hatchling: (e, m) => [
+      `  /\\   /\\ ${m}`,
+      `  ( ${e} )`,
+      "  (  v  )",
+      "   '---'",
+      "",
+    ],
+    young: (e, m) => [
+      `  /\\   /\\ ${m}`,
+      `  ( ${e} )`,
+      "  ((  v  ))",
+      "   |/|\\|",
+      "   ~~ ~~",
+    ],
+    adult: (e, m) => [
+      `  /\\___/\\ ${m}`,
+      `  ( ${e} )`,
+      "  ((  v  ))",
+      "  /|/|\\|\\",
+      "   ~~   ~~",
+    ],
+    elder: (e, m) => [
+      `  /\\_^_/\\ ${m}`,
+      `  ( ${e} )`,
+      "  ((  v  ))",
+      "  /|\\|/|\\",
+      "   ~~~~~~~",
+    ],
+  },
+  dragon: {
+    hatchling: (e, m) => [
+      `   ^   ^  ${m}`,
+      `  ( ${e} )`,
+      "   \\_~_/",
+      "    '-'",
+      "",
+    ],
+    young: (e, m) => [
+      `  ^\\   /^ ${m}`,
+      `  ( ${e} )`,
+      "  /\\_~_/\\",
+      "   |___|",
+      "   /   \\",
+    ],
+    adult: (e, m) => [
+      `  ^\\   /^ ${m}`,
+      `  ( ${e} )`,
+      " /\\| ~ |/\\",
+      "  |_____|",
+      "  /|   |\\",
+    ],
+    elder: (e, m) => [
+      `  ^\\ ^ /^ ${m}`,
+      `  ( ${e} )`,
+      " /\\|~~~|/\\",
+      " \\_|___|_/",
+      "  /|   |\\",
+    ],
+  },
 };
+
+/** The body to draw: the common egg, else the Species' body, else the reference's for a Species this build does not know. */
+function body(species: SpeciesId, stage: StageId): Body {
+  if (stage === "egg") return EGG;
+  const own = BODIES[species] ?? BODIES[REFERENCE];
+  return (own ?? BODIES.cat!)[stage];
+}
+
+/** The cache key: every egg shares one entry so identity holds across Species; an unknown Species shares the reference's. */
+function keyOf(species: SpeciesId, stage: StageId): string {
+  if (stage === "egg") return "egg";
+  return `${BODIES[species] === undefined ? REFERENCE : species}/${stage}`;
+}
 
 const FACES: Record<Activity, readonly Face[]> = {
   idle: [
@@ -79,15 +160,15 @@ const FACES: Record<Activity, readonly Face[]> = {
   sleeping: [{ eyes: "- -", mark: "z" }],
 };
 
-/** One entry per stage × activity pair; frames never change, so callers can rely on identity. */
+/** One entry per species × stage × activity; frames never change, so callers can rely on identity. */
 const CACHE = new Map<string, readonly Frame[]>();
 
-export function frames(stage: StageId, activity: Activity): readonly Frame[] {
-  const key = `${stage}/${activity}`;
+export function frames(species: SpeciesId, stage: StageId, activity: Activity): readonly Frame[] {
+  const key = `${keyOf(species, stage)}/${activity}`;
   const hit = CACHE.get(key);
   if (hit) return hit;
-  const body = BODIES[stage];
-  const built = FACES[activity].map((face) => fit(body(face.eyes, face.mark)));
+  const draw = body(species, stage);
+  const built = FACES[activity].map((face) => fit(draw(face.eyes, face.mark)));
   CACHE.set(key, built);
   return built;
 }
@@ -107,17 +188,17 @@ export const EYES: Record<Temperament, string> = {
 const HEARTS = new Map<string, Frame>();
 
 /** The Sprite while petted, whatever the Activity: the Temperament's eyes and a heart for the mark. Cached, so identity is stable. */
-export function heartFrame(stage: StageId, temperament: Temperament): Frame {
-  const key = `${stage}/${temperament}`;
+export function heartFrame(species: SpeciesId, stage: StageId, temperament: Temperament): Frame {
+  const key = `${keyOf(species, stage)}/${temperament}`;
   const hit = HEARTS.get(key);
   if (hit) return hit;
-  const built = fit(BODIES[stage](EYES[temperament], HEART));
+  const built = fit(body(species, stage)(EYES[temperament], HEART));
   HEARTS.set(key, built);
   return built;
 }
 
-export function frameAt(stage: StageId, activity: Activity, index: number): Frame {
-  const all = frames(stage, activity);
+export function frameAt(species: SpeciesId, stage: StageId, activity: Activity, index: number): Frame {
+  const all = frames(species, stage, activity);
   const frame = all[((index % all.length) + all.length) % all.length];
   return frame ?? fit([]);
 }

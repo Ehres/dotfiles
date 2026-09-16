@@ -5,6 +5,7 @@ import { createMemo } from "solid-js";
 import { frameIndex } from "../core/cadence.ts";
 import { progress } from "../core/card.ts";
 import type { Temperament } from "../core/character.ts";
+import type { SpeciesId } from "../core/species.ts";
 import { frameAt, heartFrame } from "../core/sprites.ts";
 import { stage } from "../core/stage.ts";
 import type { Career } from "../core/state.ts";
@@ -15,13 +16,16 @@ export function HomeView(props: {
   name: string;
   theme: () => TuiThemeCurrent;
   career: () => Career;
+  species: () => SpeciesId;
   clock: () => number;
   heart: () => boolean;
   temperament: () => Temperament;
 }): JSX.Element {
   const current = createMemo(() => stage(props.career()));
   const lines = () =>
-    props.heart() ? heartFrame(current(), props.temperament()) : frameAt(current(), "idle", frameIndex("idle", props.clock()));
+    props.heart()
+      ? heartFrame(props.species(), current(), props.temperament())
+      : frameAt(props.species(), current(), "idle", frameIndex("idle", props.clock()));
 
   return (
     <box paddingTop={1}>
