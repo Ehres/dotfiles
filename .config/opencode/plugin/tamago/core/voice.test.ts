@@ -1,5 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { MEDIAN, type Behavior } from "./behavior.ts";
 import { MAX_TEXT } from "./bubble.ts";
 import { TEMPERAMENTS, type Temperament } from "./character.ts";
 import type { TamagoEvent } from "./events.ts";
@@ -21,16 +22,17 @@ import {
   type Voice,
 } from "./voice.ts";
 
-/** Runs events through transition and speak together, like index.tsx does. */
+/** Runs events through transition and speak together, like core/window.ts does. */
 function replay(
   events: Array<[TamagoEvent, number]>,
   start = { voice: initialVoice(), session: initialSession(0) },
   temperament: Temperament = "stoic",
+  behavior: Behavior = MEDIAN,
 ) {
   let { voice, session } = start;
   for (const [event, now] of events) {
-    const after = transition(session, event, now);
-    voice = speak(voice, event, session, after, now, temperament);
+    const after = transition(session, event, now, behavior);
+    voice = speak(voice, event, session, after, now, temperament, behavior);
     session = after;
   }
   return { voice, session };
@@ -252,4 +254,26 @@ test("every flavored phrase fits in MAX_TEXT and every Temperament flavors the s
       for (const text of phrases) assert.ok(text.length <= MAX_TEXT, `${temperament}/${cue}: ${JSON.stringify(text)}`);
     }
   }
+});
+
+test("an injected Behavior sets the Bubble length, the quiet gap, the long-work threshold and the streak count", () => {
+  const chatty: Behavior = { ...MEDIAN, bubbleMs: 2_000, quietMs: 4_000, longWorkMs: 100_000, streakCount: 2 };
+  const asked = replay([[{ type: "permission_asked" }, 100]], undefined, "stoic", chatty);
+  assert.equal(asked.voice.bubble?.until, 100 + 2_000);
+
+  // compacted has priority 2 and no cooldown: only the quiet gap keeps a second one from speaking
+  const twice = (gap: number) => replay([[{ type: "session_compacted" }, 0], [{ type: "session_compacted" }, gap]], undefined, "stoic", chatty).voice;
+  assert.equal(twice(3_999).spoken.compacted?.times, 1, "still quiet");
+  assert.equal(twice(4_000).spoken.compacted?.times, 2, "the gap is over");
+  assert.equal(replay([[{ type: "session_compacted" }, 0], [{ type: "session_compacted" }, 4_000]]).voice.spoken.compacted?.times, 1, "QUIET_MS without a Behavior");
+
+  const long = replay([[{ type: "tool_started" }, 0], [{ type: "session_idle" }, 100_000]], undefined, "stoic", chatty);
+  assert.equal(cueOf(long.voice), "long_work");
+  const short = replay([[{ type: "tool_started" }, 0], [{ type: "session_idle" }, 99_999]], undefined, "stoic", chatty);
+  assert.notEqual(cueOf(short.voice), "long_work");
+  assert.notEqual(cueOf(replay([[{ type: "tool_started" }, 0], [{ type: "session_idle" }, 100_000]]).voice), "long_work", "LONG_WORK_MS without a Behavior");
+
+  const two = replay([[{ type: "tool_failed" }, 0], [{ type: "tool_failed" }, 1]], undefined, "stoic", chatty);
+  assert.equal(cueOf(two.voice), "streak");
+  assert.notEqual(cueOf(replay([[{ type: "tool_failed" }, 0], [{ type: "tool_failed" }, 1]]).voice), "streak", "STREAK_COUNT is three without a Behavior");
 });

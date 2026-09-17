@@ -1,4 +1,4 @@
-import { MEDIAN } from "./behavior.ts";
+import { MEDIAN, type Behavior } from "./behavior.ts";
 import type { Temperament } from "./character.ts";
 import type { TamagoEvent } from "./events.ts";
 import type { Session } from "./state.ts";
@@ -131,6 +131,7 @@ function listen(
   before: Session,
   after: Session,
   now: number,
+  behavior: Behavior,
 ): { voice: Voice; cue?: Cue } {
   let next = voice;
   let cue: Cue | undefined;
@@ -146,12 +147,12 @@ function listen(
       }
       break;
     case "session_idle":
-      if (before.busy && next.busySince !== undefined && now - next.busySince >= LONG_WORK_MS) cue = "long_work";
+      if (before.busy && next.busySince !== undefined && now - next.busySince >= behavior.longWorkMs) cue = "long_work";
       break;
     case "tool_failed": {
       const failures = [...next.failures.filter((at) => now - at < STREAK_MS), now];
       next = { ...next, failures };
-      if (failures.length >= STREAK_COUNT) cue = "streak";
+      if (failures.length >= behavior.streakCount) cue = "streak";
       break;
     }
     case "session_compacted":
@@ -183,24 +184,25 @@ function listen(
 /**
  * Moves one Voice through an event and the Session transition it caused.
  * Pure. Returns the same object when nothing changed, so a quiet tick
- * re-renders nothing.
+ * re-renders nothing. The Behavior sets how long a Bubble stays, the quiet
+ * gap, the long-work threshold and the streak count.
  */
-export function speak(voice: Voice, event: TamagoEvent, before: Session, after: Session, now: number, temperament: Temperament): Voice {
+export function speak(voice: Voice, event: TamagoEvent, before: Session, after: Session, now: number, temperament: Temperament, behavior: Behavior = MEDIAN): Voice {
   if (event.type === "tick") {
     return voice.bubble !== undefined && voice.bubble.until <= now ? { ...voice, bubble: undefined } : voice;
   }
-  const { voice: next, cue } = listen(voice, event, before, after, now);
+  const { voice: next, cue } = listen(voice, event, before, after, now, behavior);
   if (cue === undefined) return next;
   const { priority, cooldown } = CUES[cue];
   const said = next.spoken[cue];
   if (said !== undefined && now - said.at < cooldown) return next;
-  if (next.last !== undefined && now - next.last.at < QUIET_MS && priority <= next.last.priority) return next;
+  if (next.last !== undefined && now - next.last.at < behavior.quietMs && priority <= next.last.priority) return next;
   const times = said?.times ?? 0;
   const phrases = FLAVOR[temperament]?.[cue] ?? PHRASES[cue];
   const text = phrases[times % phrases.length] ?? phrases[0];
   return {
     ...next,
-    bubble: { cue, text, since: now, until: now + BUBBLE_MS },
+    bubble: { cue, text, since: now, until: now + behavior.bubbleMs },
     last: { at: now, priority },
     spoken: { ...next.spoken, [cue]: { at: now, times: times + 1 } },
     ...(cue === "permission" ? { asked: now } : {}),
