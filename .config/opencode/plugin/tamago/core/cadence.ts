@@ -1,9 +1,10 @@
+import { MEDIAN } from "./behavior.ts";
 import type { Activity } from "./state.ts";
 
-/** Frame period of animations that show effort, and the tick period while any session shows it. */
-export const FAST_MS = 500;
-/** Frame period of calm animations, and the tick period when every session is calm. */
-export const SLOW_MS = 2_000;
+/** Frame period of animations that show effort, and the tick period while any session shows it: the median of the Sheet's energy Stat. */
+export const FAST_MS = MEDIAN.fastMs;
+/** Frame period of calm animations, and the tick period when every session is calm: the median of the Sheet's energy Stat. */
+export const SLOW_MS = MEDIAN.slowMs;
 
 /**
  * Tuning table, one entry per Activity: how often its frames alternate

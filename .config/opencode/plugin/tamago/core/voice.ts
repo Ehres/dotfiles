@@ -1,3 +1,4 @@
+import { MEDIAN } from "./behavior.ts";
 import type { Temperament } from "./character.ts";
 import type { TamagoEvent } from "./events.ts";
 import type { Session } from "./state.ts";
@@ -37,19 +38,19 @@ export type Voice = {
   todosDone: boolean;
 };
 
-/** How long a Bubble stays up. Checked on tick, so it lives up to one tick longer. */
-export const BUBBLE_MS = 5_000;
-/** Minimum gap between two Bubble starts, unless a strictly higher priority interrupts. */
-export const QUIET_MS = 10_000;
+/** How long a Bubble stays up: the median of the Sheet's chatter Stat. Checked on tick, so it lives up to one tick longer. */
+export const BUBBLE_MS = MEDIAN.bubbleMs;
+/** Minimum gap between two Bubble starts, unless a strictly higher priority interrupts: the median of the Sheet's chatter Stat. */
+export const QUIET_MS = MEDIAN.quietMs;
 /** How long after voicing "May I?" a reply still deserves an answer. */
 export const REPLY_MS = 30_000;
-/** Busy time after which going idle deserves a word. */
-export const LONG_WORK_MS = 300_000;
+/** Busy time after which going idle deserves a word: the median of the Sheet's patience Stat. */
+export const LONG_WORK_MS = MEDIAN.longWorkMs;
 /** Files in the session diff from which the Tamago calls it a big site. */
 export const BIG_DIFF_FILES = 10;
-/** Window and count of failures that make a streak. */
+/** Window of failures that make a streak, and their count: the median of the Sheet's sensitivity Stat. */
 export const STREAK_MS = 30_000;
-export const STREAK_COUNT = 3;
+export const STREAK_COUNT = MEDIAN.streakCount;
 
 /** Tuning table: a higher priority may interrupt the quiet window; Infinity means once per Session. */
 export const CUES: Record<Cue, { priority: number; cooldown: number }> = {

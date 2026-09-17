@@ -1,3 +1,4 @@
+import { MEDIAN } from "./behavior.ts";
 import type { ToolKind } from "./state.ts";
 import type { StageId } from "./stage.ts";
 
@@ -40,7 +41,7 @@ export type Target = { type: "session"; id: string } | { type: "every" } | { typ
 
 export type Addressed = { target: Target; event: TamagoEvent };
 
-/** How long the creature stays hurt after an error before recovering. */
-export const HURT_MS = 3_000;
-/** How long the creature stays idle before falling asleep. */
-export const SLEEP_MS = 120_000;
+/** How long the creature stays hurt after an error before recovering: the median of the Sheet's sensitivity Stat. */
+export const HURT_MS = MEDIAN.hurtMs;
+/** How long the creature stays idle before falling asleep: the median of the Sheet's energy Stat. */
+export const SLEEP_MS = MEDIAN.sleepMs;
