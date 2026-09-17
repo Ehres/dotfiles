@@ -1,3 +1,4 @@
+import { BODIES, type Body } from "./bodies.ts";
 import type { Temperament } from "./character.ts";
 import { REFERENCE, type SpeciesId } from "./species.ts";
 import type { StageId } from "./stage.ts";
@@ -9,7 +10,6 @@ export const SPRITE_HEIGHT = 5;
 export type Frame = readonly string[];
 
 type Face = { eyes: string; mark: string };
-type Body = (eyes: string, mark: string) => string[];
 
 /** Pads every line to SPRITE_WIDTH so a short line never shifts the layout. */
 function fit(lines: string[]): Frame {
@@ -24,102 +24,6 @@ const EGG: Body = (e, m) => [
   "  \\     /",
   "   '---'",
 ];
-
-type Grown = Exclude<StageId, "egg">;
-
-/** Four bodies per Species. Every body takes three-column eyes and a one-column mark at column 10 of line 0, and fits in SPRITE_WIDTH × SPRITE_HEIGHT. */
-const BODIES: Record<SpeciesId, Record<Grown, Body>> = {
-  cat: {
-    hatchling: (e, m) => [
-      `   .---.  ${m}`,
-      `  ( ${e} )`,
-      "   \\ ^ /",
-      "    '-'",
-      "",
-    ],
-    young: (e, m) => [
-      `   .---.  ${m}`,
-      `  ( ${e} )`,
-      "  /| ^ |\\",
-      "   |___|",
-      "   /   \\",
-    ],
-    adult: (e, m) => [
-      `  /\\   /\\ ${m}`,
-      `  ( ${e} )`,
-      " /| ^^^ |\\",
-      "  |_____|",
-      "  /|   |\\",
-    ],
-    elder: (e, m) => [
-      `  \\|/ \\|/ ${m}`,
-      `  ( ${e} )`,
-      " /|~^^^~|\\",
-      "  |_____|",
-      "  /|   |\\",
-    ],
-  },
-  owl: {
-    hatchling: (e, m) => [
-      `  /\\   /\\ ${m}`,
-      `  ( ${e} )`,
-      "  (  v  )",
-      "   '---'",
-      "",
-    ],
-    young: (e, m) => [
-      `  /\\   /\\ ${m}`,
-      `  ( ${e} )`,
-      "  ((  v  ))",
-      "   |/|\\|",
-      "   ~~ ~~",
-    ],
-    adult: (e, m) => [
-      `  /\\___/\\ ${m}`,
-      `  ( ${e} )`,
-      "  ((  v  ))",
-      "  /|/|\\|\\",
-      "   ~~   ~~",
-    ],
-    elder: (e, m) => [
-      `  /\\_^_/\\ ${m}`,
-      `  ( ${e} )`,
-      "  ((  v  ))",
-      "  /|\\|/|\\",
-      "   ~~~~~~~",
-    ],
-  },
-  dragon: {
-    hatchling: (e, m) => [
-      `   ^   ^  ${m}`,
-      `  ( ${e} )`,
-      "   \\_~_/",
-      "    '-'",
-      "",
-    ],
-    young: (e, m) => [
-      `  ^\\   /^ ${m}`,
-      `  ( ${e} )`,
-      "  /\\_~_/\\",
-      "   |___|",
-      "   /   \\",
-    ],
-    adult: (e, m) => [
-      `  ^\\   /^ ${m}`,
-      `  ( ${e} )`,
-      " /\\| ~ |/\\",
-      "  |_____|",
-      "  /|   |\\",
-    ],
-    elder: (e, m) => [
-      `  ^\\ ^ /^ ${m}`,
-      `  ( ${e} )`,
-      " /\\|~~~|/\\",
-      " \\_|___|_/",
-      "  /|   |\\",
-    ],
-  },
-};
 
 /** Whether this build draws that Species itself; anything else draws as the reference. */
 function known(species: SpeciesId): boolean {
