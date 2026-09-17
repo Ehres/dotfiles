@@ -3,6 +3,7 @@ import type { TuiThemeCurrent } from "@opencode-ai/plugin/tui";
 import type { RGBA } from "@opentui/core";
 import type { JSX } from "@opentui/solid";
 import { createMemo } from "solid-js";
+import type { Behavior } from "../core/behavior.ts";
 import { bubbleBorders } from "../core/bubble.ts";
 import { frameIndex } from "../core/cadence.ts";
 import type { Temperament } from "../core/character.ts";
@@ -50,6 +51,7 @@ export function SidebarView(props: {
   bubble: () => Bubble | undefined;
   heart: () => boolean;
   temperament: () => Temperament;
+  behavior: () => Behavior;
 }): JSX.Element {
   const activity = createMemo(() => props.session().activity);
   const current = createMemo(() => stage(props.career()));
@@ -57,7 +59,7 @@ export function SidebarView(props: {
   const lines = () =>
     props.heart()
       ? heartFrame(props.species(), current(), props.temperament())
-      : frameAt(props.species(), current(), activity(), frameIndex(activity(), props.clock()));
+      : frameAt(props.species(), current(), activity(), frameIndex(activity(), props.clock(), props.behavior()));
   const color = () => spriteColor(props.theme(), activity());
   const bubble = createMemo((): BubbleView | undefined => {
     const current = props.bubble();

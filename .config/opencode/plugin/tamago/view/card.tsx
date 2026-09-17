@@ -2,6 +2,7 @@
 import type { TuiThemeCurrent } from "@opencode-ai/plugin/tui";
 import type { JSX } from "@opentui/solid";
 import { Index, createMemo } from "solid-js";
+import type { Behavior } from "../core/behavior.ts";
 import { frameIndex } from "../core/cadence.ts";
 import { age, progress, speciesLine } from "../core/card.ts";
 import { describe, type Character, type Temperament } from "../core/character.ts";
@@ -24,6 +25,7 @@ export function CardView(props: {
   clock: () => number;
   heart: () => boolean;
   temperament: () => Temperament;
+  behavior: () => Behavior;
   character: () => Character;
   now: () => number;
 }): JSX.Element {
@@ -31,7 +33,7 @@ export function CardView(props: {
   const lines = createMemo(() =>
     props.heart()
       ? heartFrame(props.species(), current(), props.temperament())
-      : frameAt(props.species(), current(), "idle", frameIndex("idle", props.clock())),
+      : frameAt(props.species(), current(), "idle", frameIndex("idle", props.clock(), props.behavior())),
   );
   return (
     <box paddingLeft={2} paddingRight={2} paddingBottom={1} gap={1}>

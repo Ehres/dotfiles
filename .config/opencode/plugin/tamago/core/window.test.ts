@@ -1,6 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { behavior } from "./behavior.ts";
 import type { Addressed } from "./events.ts";
+import { HURT_MS, SLEEP_MS } from "./events.ts";
 import { STAGES, WEIGHTS } from "./stage.ts";
 import { EMPTY_DELTA, freshCareer, isEmpty, type Career } from "./state.ts";
 import { BUBBLE_MS } from "./voice.ts";
@@ -163,4 +165,39 @@ test("flushed with another active Career is a Switch and forgets the pending Del
   assert.deepEqual(step.effects, [{ type: "switched" }]);
   assert.equal(isEmpty(step.window.pending), true);
   assert.equal(step.window.career.hatchedAt, T0 + 5);
+});
+
+/**
+ * Hatch dates whose draw pins a behavior Stat, found once by search over
+ * draw(); asserted below so a formula change fails loudly rather than here.
+ */
+const THIN_SKIN = 1_000_005; // sensitivity 0: hurt lasts 1.5 s
+const SLEEPY = 1_000_015; // energy 0: falls asleep after 60 s
+const EVEN = 1_006_599; // every behavior Stat at 5: MEDIAN
+
+test("the Sheet of the Career sets how fast hurt heals", () => {
+  assert.equal(behavior({ hatchedAt: THIN_SKIN, species: "cat" }).hurtMs, 1_500);
+  let w = freshWindow({ ...freshCareer(THIN_SKIN), species: "cat" });
+  w = receive(w, to("a", { type: "tool_failed" }), T0).window;
+  assert.equal(tick(w, T0 + 1_499).sessions.a?.activity, "hurt");
+  assert.equal(tick(w, T0 + 1_500).sessions.a?.activity, "idle", `heals before HURT_MS (${HURT_MS})`);
+});
+
+test("the Sheet of the Career sets when idle falls asleep", () => {
+  assert.equal(behavior({ hatchedAt: SLEEPY, species: "cat" }).sleepMs, 60_000);
+  let w = freshWindow({ ...freshCareer(SLEEPY), species: "cat" });
+  w = receive(w, to("a", { type: "prompt_sent" }), T0).window;
+  w = receive(w, to("a", { type: "session_idle" }), T0 + 1).window;
+  assert.equal(tick(w, T0 + 1 + 59_999).sessions.a?.activity, "idle");
+  assert.equal(tick(w, T0 + 1 + 60_000).sessions.a?.activity, "sleeping", `sleeps before SLEEP_MS (${SLEEP_MS})`);
+});
+
+test("after a Switch the next tick applies the Behavior of the new Career", () => {
+  assert.deepEqual(behavior({ hatchedAt: EVEN, species: "cat" }).hurtMs, HURT_MS);
+  let w = freshWindow({ ...freshCareer(EVEN), species: "cat" });
+  w = receive(w, to("a", { type: "tool_failed" }), T0).window;
+  assert.equal(tick(w, T0 + 1_500).sessions.a?.activity, "hurt", "a median Career heals at HURT_MS");
+  const step = adopt(w, { ...freshCareer(THIN_SKIN), species: "cat" }, T0 + 1);
+  assert.deepEqual(step.effects, [{ type: "switched" }]);
+  assert.equal(tick(step.window, T0 + 1_500).sessions.a?.activity, "idle", "the thin-skinned Career heals at 1.5 s");
 });

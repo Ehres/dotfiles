@@ -1,3 +1,4 @@
+import { behavior } from "./behavior.ts";
 import type { Addressed, TamagoEvent } from "./events.ts";
 import { character } from "./character.ts";
 import { count } from "./count.ts";
@@ -30,15 +31,16 @@ export function freshWindow(career: Career, muted = false): Window {
   return { career, pending: EMPTY_DELTA, sessions: {}, voices: {}, muted };
 }
 
-/** Moves the Sessions `ids` through `event`, then lets each Voice hear it unless muted. Same references when nothing changed. */
+/** Moves the Sessions `ids` through `event` with the Behavior of the Career, then lets each Voice hear it unless muted. Same references when nothing changed. */
 function move(window: Window, ids: readonly string[], event: TamagoEvent, now: number): Window {
   if (ids.length === 0) return window;
+  const conduct = behavior(window.career);
   const before = window.sessions;
   const after: Record<string, Session> = { ...before };
   let moved = false;
   for (const id of ids) {
     const was = before[id] ?? initialSession(now);
-    const is = transition(was, event, now);
+    const is = transition(was, event, now, conduct);
     after[id] = is;
     if (is !== was) moved = true;
   }
@@ -49,7 +51,7 @@ function move(window: Window, ids: readonly string[], event: TamagoEvent, now: n
     let spoke = false;
     for (const id of ids) {
       const voice = voices[id] ?? initialVoice();
-      const heard = speak(voice, event, before[id] ?? initialSession(now), after[id] ?? initialSession(now), now, temperament);
+      const heard = speak(voice, event, before[id] ?? initialSession(now), after[id] ?? initialSession(now), now, temperament, conduct);
       next[id] = heard;
       if (heard !== voice) spoke = true;
     }

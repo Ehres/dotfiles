@@ -5,6 +5,7 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import { createSignal } from "solid-js";
 import { createErrorLog } from "./adapter/log.ts";
+import { behavior } from "./core/behavior.ts";
 import { tickInterval } from "./core/cadence.ts";
 import { character } from "./core/character.ts";
 import { createStore, type Loaded } from "./adapter/store.ts";
@@ -75,6 +76,8 @@ const tui: TuiPlugin = async (api, options) => {
     const name = (): string => career().name?.value ?? defaultName;
     /** Computed from the Career like the Stage: never stored, identical in every window. */
     const persona = () => character(career());
+    /** The Behavior of the active Career: how fast it animates, how long it stays hurt. Derived like the Character. */
+    const conduct = () => behavior(career());
     /** True while the sprite wears the heart after a pet. Per window, like the sprite itself. */
     const [heart, setHeart] = createSignal(false);
     /** Milliseconds since the plugin started; drives animation frames. */
@@ -131,11 +134,11 @@ const tui: TuiPlugin = async (api, options) => {
     });
     for (const type of SUBSCRIBED) api.lifecycle.onDispose(api.event.on(type, onEvent));
 
-    /** Fast while a session shows effort, slow otherwise: same frames, four times fewer wake-ups when calm. */
+    /** Fast while a session shows effort, slow otherwise, at the pace of the active Career's Sheet. */
     let ticker: ReturnType<typeof setTimeout> | undefined;
     const scheduleTick = () => {
       const activities = Object.values(window.sessions).map((session) => session.activity);
-      ticker = setTimeout(tick, tickInterval(activities));
+      ticker = setTimeout(tick, tickInterval(activities, behavior(window.career)));
     };
     const tick = guard(() => {
       const now = Date.now();
@@ -161,6 +164,7 @@ const tui: TuiPlugin = async (api, options) => {
           clock={clock}
           heart={heart}
           temperament={() => persona().temperament}
+          behavior={conduct}
           character={persona}
           now={Date.now}
         />
@@ -410,6 +414,7 @@ const tui: TuiPlugin = async (api, options) => {
               bubble={() => voices()[props.session_id]?.bubble}
               heart={heart}
               temperament={() => persona().temperament}
+              behavior={conduct}
             />
           );
         },
@@ -429,6 +434,7 @@ const tui: TuiPlugin = async (api, options) => {
               clock={clock}
               heart={heart}
               temperament={() => persona().temperament}
+              behavior={conduct}
             />
           );
         },
