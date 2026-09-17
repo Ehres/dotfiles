@@ -59,10 +59,10 @@ function within(r: number, min: number, max: number): number {
 export function draw(hatchedAt: number): Sheet {
   const high = historical(hatchedAt);
   const top = within(roll(hatchedAt, high), SCALE.high, SCALE.max);
-  const sheet = {} as Sheet; // filled below for every Stat of STATS
-  for (const stat of TEMPERAMENTS) sheet[stat] = stat === high ? top : within(roll(hatchedAt, stat), SCALE.min, top - 1);
-  for (const stat of BEHAVIOR_STATS) sheet[stat] = within(roll(hatchedAt, stat), SCALE.min, SCALE.max);
-  return sheet;
+  const drawn = {} as Sheet; // filled below for every Stat of STATS
+  for (const stat of TEMPERAMENTS) drawn[stat] = stat === high ? top : within(roll(hatchedAt, stat), SCALE.min, top - 1);
+  for (const stat of BEHAVIOR_STATS) drawn[stat] = within(roll(hatchedAt, stat), SCALE.min, SCALE.max);
+  return drawn;
 }
 
 /**
@@ -74,7 +74,7 @@ export function draw(hatchedAt: number): Sheet {
 export function sheet(hatchedAt: number, id: SpeciesId, table: readonly Species[] = SPECIES): Sheet {
   const drawn = draw(hatchedAt);
   const modifiers = species(id, table).sheet ?? {};
-  const result = { ...drawn };
+  const result = {} as Sheet; // both loops below fill every Stat
   for (const stat of TEMPERAMENTS) result[stat] = drawn[stat] + (modifiers[stat] ?? 0);
   for (const stat of BEHAVIOR_STATS) result[stat] = Math.min(SCALE.max, Math.max(SCALE.min, drawn[stat] + (modifiers[stat] ?? 0)));
   return result;

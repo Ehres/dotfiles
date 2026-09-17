@@ -23,7 +23,8 @@ test("the scale and the bounds are what the spec says", () => {
   assert.deepEqual(SCALE, { min: 0, max: 10, median: 5, high: 6 });
   assert.equal(MODIFIER_MAX, 3);
   assert.equal(MODIFIERS_SUM_MAX, 8);
-  assert.deepEqual(STATS, [...TEMPERAMENTS, ...BEHAVIOR_STATS]);
+  assert.deepEqual(TEMPERAMENTS, ["cheerful", "sarcastic", "stoic", "dreamy"]);
+  assert.deepEqual(STATS, ["cheerful", "sarcastic", "stoic", "dreamy", "energy", "chatter", "sensitivity", "patience"]);
   assert.deepEqual(BEHAVIOR_STATS, ["energy", "chatter", "sensitivity", "patience"]);
 });
 
