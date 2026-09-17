@@ -189,11 +189,12 @@ function domain(cue: Cue, times: number): string {
 
 /**
  * The phrase a Tamago says the `times`-th time it speaks `cue`. Seeded from
- * the hatch date, the Cue and the count: every window agrees, nothing is
- * stored, and one hears a different phrase from one time to the next. The
- * Register first, at REGISTER shares; then, for the Temperament, which of the
- * four at the weight of its Stat; then a phrase, uniform. At `hatched` the
- * Species always speaks: that is where it shows.
+ * the hatch date, the Cue and the count: every window agrees for the same
+ * occurrence of the Cue, nothing is stored, and one hears a different phrase
+ * from one time to the next. The Register first, at REGISTER shares; then,
+ * for the Temperament, which of the four at the weight of its Stat; then a
+ * phrase, uniform. At `hatched` the Species always speaks: that is where it
+ * shows.
  */
 export function phrase(cue: Cue, speaker: Speaker, times: number): string {
   const random = generator(seed(speaker.hatchedAt, domain(cue, times)));

@@ -47,7 +47,8 @@ AGENTS.md. Vocabulary lives in `CONTEXT.md`; use those terms.
   `core/signatures/<rarity>.ts`. The tests fail at the first table that lacks
   it. The rarity weights live in `core/luck.ts`, never in `species.ts`.
 - The voice never picks a phrase by rotation or by `Math.random`: `phrase`
-  seeds from the hatch date, the Cue and its count, so every window agrees.
+  seeds from the hatch date, the Cue and its count, so every window agrees for
+  the same occurrence of the Cue.
 
 ## Verify
 

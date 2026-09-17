@@ -170,7 +170,7 @@ _Avoid_: cooldown state, history
 Who speaks a Cue: the Species through its Signature, one of the four
 Temperaments at the weight of its Stat, or the neutral phrases. Drawn at each
 Cue spoken from the hatch date, the Cue and its count, so every window hears
-the same phrase and nothing is stored.
+the same phrase for the same occurrence of the Cue, and nothing is stored.
 _Avoid_: mode, voice (that is the memory), layer
 
 **Signature**:

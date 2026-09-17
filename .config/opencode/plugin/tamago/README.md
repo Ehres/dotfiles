@@ -79,8 +79,8 @@ messages, todo texts or diffs, only their counts.
 
 At most one bubble every 10 s; a rarer cue (an evolution, a streak) may
 interrupt a common one. `granted` and `denied` only answer a `permission` the
-creature actually voiced, within 30 s and once per question. Phrases rotate in
-order per cue. Tuning lives in `core/voice.ts`.
+creature actually voiced, within 30 s and once per question. Which phrase is
+spoken is drawn, never rotated. Tuning lives in `core/voice.ts`.
 
 The 5 s of a bubble, the 10 s between two, the 5 min of a long work and the
 3 failures of a streak are those of a median sheet; a chatty creature speaks
@@ -93,9 +93,9 @@ phrases for every cue, in `core/signature.ts` and one file per rarity under
 at each cue, 70 % the species, 25 % a temperament, 5 % neutral; within the
 temperament share, each of the four speaks at the weight of its stat, so a
 sarcastic 9 with a dreamy 3 drifts off now and then. The draw is seeded from
-the hatch date, the cue and its count: every window hears the same phrase,
-and the same creature does not repeat itself. At the hatch the species always
-speaks.
+the hatch date, the cue and its count: every window hears the same phrase for
+the same occurrence of the cue, and the same creature does not repeat itself.
+At the hatch the species always speaks.
 
 ## Commands
 
@@ -123,13 +123,13 @@ the roster has earned it. The egg looks the same for every species; the
 creature shows at `hatchling`, with a toast and a bubble. A species never
 changes: the only way to meet another one is a new egg.
 
-| Rarity      | First egg | After one common elder | Cap   | Pace |
-| ----------- | --------- | ---------------------- | ----- | ---- |
-| `common`    | 65 %      | 61 %                   | 20 %  | 1    |
-| `uncommon`  | 25 %      | 26.5 %                 | 42 %  | 0.8  |
-| `rare`      | 10 %      | 11 %                   | 21 %  | 0.5  |
-| `epic`      | 0         | 1 %                    | 11 %  | 0.4  |
-| `legendary` | 0         | 0.5 %                  | 5.6 % | 0.25 |
+| Rarity      | First egg | After one common elder | Cap    | Pace |
+| ----------- | --------- | ---------------------- | ------ | ---- |
+| `common`    | 65 %      | 61 %                   | 20 %   | 1    |
+| `uncommon`  | 25 %      | 26.5 %                 | 41.9 % | 0.8  |
+| `rare`      | 10 %      | 11 %                   | 21.3 % | 0.5  |
+| `epic`      | 0         | 1 %                    | 11.3 % | 0.4  |
+| `legendary` | 0         | 0.5 %                  | 5.6 %  | 0.25 |
 
 A first egg never hatches an epic or a legendary: they are earned. Every
 creature of the machine raised to `elder` adds luck to the next egg, 1 for a
