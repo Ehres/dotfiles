@@ -4,6 +4,8 @@ import { MEDIAN, type Behavior } from "./behavior.ts";
 import { MAX_TEXT } from "./bubble.ts";
 import { TEMPERAMENTS, type Temperament } from "./character.ts";
 import type { TamagoEvent } from "./events.ts";
+import { SIGNATURE } from "./signature.ts";
+import type { SpeciesId } from "./species.ts";
 import { initialSession, type Session } from "./state.ts";
 import { transition } from "./transition.ts";
 import {
@@ -28,11 +30,12 @@ function replay(
   start = { voice: initialVoice(), session: initialSession(0) },
   temperament: Temperament = "stoic",
   behavior: Behavior = MEDIAN,
+  species?: SpeciesId,
 ) {
   let { voice, session } = start;
   for (const [event, now] of events) {
     const after = transition(session, event, now, behavior);
-    voice = speak(voice, event, session, after, now, temperament, behavior);
+    voice = speak(voice, event, session, after, now, temperament, behavior, species);
     session = after;
   }
   return { voice, session };
@@ -241,6 +244,33 @@ test("a flavored Cue speaks in the Temperament's words and rotates within them",
 test("a Cue without flavor falls back to the neutral phrases", () => {
   const woke = replay([[{ type: "prompt_sent" }, 0]], { voice: initialVoice(), session: { activity: "sleeping", since: 0, busy: false } }, "dreamy");
   assert.equal(woke.voice.bubble?.text, PHRASES.woke[0]);
+});
+
+test("a Species with a Signature for the Cue speaks it, whatever the Temperament", () => {
+  const asleep = { voice: initialVoice(), session: { activity: "sleeping", since: 0, busy: false } as Session };
+  const owl = replay([[{ type: "prompt_sent" }, 0]], asleep, "dreamy", MEDIAN, "owl");
+  assert.equal(owl.voice.bubble?.text, SIGNATURE.owl?.woke?.[0]);
+  const stoicOwl = replay([[{ type: "prompt_sent" }, 0]], asleep, "stoic", MEDIAN, "owl");
+  assert.equal(stoicOwl.voice.bubble?.text, SIGNATURE.owl?.woke?.[0]);
+});
+
+test("without a Signature for the Cue, the Temperament speaks; without either, the neutral phrases", () => {
+  const owlAsks = replay([[{ type: "permission_asked" }, 0]], undefined, "sarcastic", MEDIAN, "owl");
+  assert.equal(owlAsks.voice.bubble?.text, FLAVOR.sarcastic?.permission?.[0], "the owl has no permission Signature");
+  const owlCompacts = replay([[{ type: "session_compacted" }, 0]], undefined, "sarcastic", MEDIAN, "owl");
+  assert.equal(owlCompacts.voice.bubble?.text, PHRASES.compacted[0], "nobody flavors compacted");
+});
+
+test("without a Species, no Signature: the Temperament and the neutral phrases as before", () => {
+  const asleep = { voice: initialVoice(), session: { activity: "sleeping", since: 0, busy: false } as Session };
+  assert.equal(replay([[{ type: "prompt_sent" }, 0]], asleep, "dreamy").voice.bubble?.text, PHRASES.woke[0]);
+});
+
+test("the Species speaks at the hatch and rotates within its Signature", () => {
+  const first = replay([[{ type: "evolved", stage: "hatchling" }, 0]], undefined, "cheerful", MEDIAN, "dragon");
+  assert.equal(first.voice.bubble?.text, SIGNATURE.dragon?.hatched?.[0]);
+  const second = replay([[{ type: "evolved", stage: "hatchling" }, BUBBLE_MS + QUIET_MS]], first, "cheerful", MEDIAN, "dragon");
+  assert.equal(second.voice.bubble?.text, SIGNATURE.dragon?.hatched?.[1]);
 });
 
 test("every flavored phrase fits in MAX_TEXT and every Temperament flavors the same Cues", () => {

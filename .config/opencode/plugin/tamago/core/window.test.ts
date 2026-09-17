@@ -5,6 +5,7 @@ import type { Addressed } from "./events.ts";
 import { HURT_MS, SLEEP_MS } from "./events.ts";
 import { STAGES, WEIGHTS } from "./stage.ts";
 import { EMPTY_DELTA, freshCareer, isEmpty, type Career } from "./state.ts";
+import { SIGNATURE } from "./signature.ts";
 import { BUBBLE_MS } from "./voice.ts";
 import { adopt, flushed, freshWindow, receive, rename, setMuted, tick, type Window } from "./window.ts";
 
@@ -200,4 +201,14 @@ test("after a Switch the next tick applies the Behavior of the new Career", () =
   const step = adopt(w, { ...freshCareer(THIN_SKIN), species: "cat" }, T0 + 1);
   assert.deepEqual(step.effects, [{ type: "switched" }]);
   assert.equal(tick(step.window, T0 + 1_500).sessions.a?.activity, "idle", "the thin-skinned Career heals at 1.5 s");
+});
+
+test("the Voice speaks with the Signature of the Career's Species", () => {
+  let w = freshWindow({ ...freshCareer(T0), species: "owl" });
+  w = receive(w, to("a", { type: "prompt_sent" }), T0).window;
+  w = receive(w, to("a", { type: "session_idle" }), T0 + 1).window;
+  w = tick(w, T0 + 1 + SLEEP_MS);
+  assert.equal(w.sessions.a?.activity, "sleeping");
+  w = receive(w, to("a", { type: "prompt_sent" }), T0 + 2 + SLEEP_MS + BUBBLE_MS + 10_000).window;
+  assert.equal(w.voices.a?.bubble?.text, SIGNATURE.owl?.woke?.[0]);
 });
