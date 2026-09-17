@@ -1,4 +1,5 @@
-import { HURT_MS, SLEEP_MS, type TamagoEvent } from "./events.ts";
+import { MEDIAN, type Behavior } from "./behavior.ts";
+import type { TamagoEvent } from "./events.ts";
 import type { Activity, Session } from "./state.ts";
 
 function at(session: Session, activity: Activity, now: number): Session {
@@ -9,8 +10,8 @@ function busy(session: Session, value: boolean): Session {
   return session.busy === value ? session : { ...session, busy: value };
 }
 
-/** Moves one Session through an event. Pure: counting lives in count.ts. */
-export function transition(start: Session, event: TamagoEvent, now: number): Session {
+/** Moves one Session through an event. Pure: counting lives in count.ts. The Behavior says how long hurt lasts and when idle falls asleep. */
+export function transition(start: Session, event: TamagoEvent, now: number, behavior: Behavior = MEDIAN): Session {
   const session = event.type !== "tick" && start.activity === "sleeping" ? at(start, "idle", now) : start;
   switch (event.type) {
     case "prompt_sent":
@@ -42,10 +43,10 @@ export function transition(start: Session, event: TamagoEvent, now: number): Ses
     case "evolved":
       return session;
     case "tick": {
-      if (session.activity === "hurt" && now - session.since >= HURT_MS) {
+      if (session.activity === "hurt" && now - session.since >= behavior.hurtMs) {
         return at(session, session.busy ? "working" : "idle", now);
       }
-      if (session.activity === "idle" && now - session.since >= SLEEP_MS) {
+      if (session.activity === "idle" && now - session.since >= behavior.sleepMs) {
         return at(session, "sleeping", now);
       }
       return session;

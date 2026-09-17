@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { HURT_MS, SLEEP_MS, type TamagoEvent } from "./events.ts";
 import { transition } from "./transition.ts";
 import { initialSession, type Session } from "./state.ts";
+import { MEDIAN, type Behavior } from "./behavior.ts";
 
 function replay(events: Array<[TamagoEvent, number]>, start: Session = initialSession(0)): Session {
   let session = start;
@@ -152,4 +153,19 @@ test("a question makes the creature wait and the reply resumes work", () => {
   const resumed = replay([[{ type: "question_replied" }, 1]], waiting);
   assert.equal(resumed.activity, "working");
   assert.equal(resumed.busy, true);
+});
+
+test("an injected Behavior sets how long hurt lasts and when idle falls asleep; the default is still MEDIAN", () => {
+  const brisk: Behavior = { ...MEDIAN, hurtMs: 1_500, sleepMs: 60_000 };
+  const hurt = transition(initialSession(0), { type: "tool_failed" }, 0, brisk);
+  assert.equal(hurt.activity, "hurt");
+  assert.equal(transition(hurt, { type: "tick" }, 1_499, brisk).activity, "hurt");
+  assert.equal(transition(hurt, { type: "tick" }, 1_500, brisk).activity, "idle");
+  assert.equal(transition(hurt, { type: "tick" }, 1_500).activity, "hurt", "without a Behavior, HURT_MS still rules");
+  assert.equal(transition(hurt, { type: "tick" }, HURT_MS).activity, "idle");
+  const idle = initialSession(0);
+  assert.equal(transition(idle, { type: "tick" }, 59_999, brisk).activity, "idle");
+  assert.equal(transition(idle, { type: "tick" }, 60_000, brisk).activity, "sleeping");
+  assert.equal(transition(idle, { type: "tick" }, 60_000).activity, "idle", "without a Behavior, SLEEP_MS still rules");
+  assert.equal(transition(idle, { type: "tick" }, SLEEP_MS).activity, "sleeping");
 });
