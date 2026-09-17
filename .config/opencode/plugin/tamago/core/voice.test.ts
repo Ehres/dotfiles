@@ -304,7 +304,7 @@ test("over a thousand occurrences the Species speaks about 70 %, the Temperament
   }
   assert.ok(counts.species >= 650 && counts.species <= 750, `species ${counts.species}`);
   assert.ok(counts.temperament >= 200 && counts.temperament <= 300, `temperament ${counts.temperament}`);
-  assert.ok(counts.neutral >= 20 && counts.neutral <= 80, `neutral ${counts.neutral}`);
+  assert.ok(counts.neutral >= 30 && counts.neutral <= 70, `neutral ${counts.neutral}`);
 });
 
 test("among the Temperament's phrases, each Temperament speaks at the weight of its Stat", () => {

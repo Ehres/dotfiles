@@ -492,6 +492,21 @@ test("hatch weighs the new egg by the Luck of the elders on disk, active and res
   assert.equal(readdirSync(join(dir, ROSTER_DIR)).length, 5, "the former active Career rests, counted once");
 });
 
+test("hatch over a corrupt resting file quarantines it and weighs it as nothing", () => {
+  const dir = scratch();
+  const store = createStore(dir, () => 1);
+  writeFileSync(join(dir, CAREER_FILE), JSON.stringify({ ...freshCareer(5), species: "cat", sessions: 2_000 }));
+  mkdirSync(join(dir, ROSTER_DIR), { recursive: true });
+  writeFileSync(join(dir, ROSTER_DIR, "2.json"), JSON.stringify({ ...freshCareer(2), species: "cat", sessions: 2_000 }));
+  writeFileSync(join(dir, ROSTER_DIR, "3.json"), "{not json");
+  const at = 999_999;
+  const result = store.hatch(at);
+  assert.equal(result.outcome, "written");
+  assert.ok(!existsSync(join(dir, ROSTER_DIR, "3.json")));
+  assert.ok(readdirSync(join(dir, ROSTER_DIR)).some((name) => name.startsWith("3.json.corrupt-")), "the corrupt resting file is quarantined at the hatch");
+  assert.equal(result.career?.species, hatch(at, SPECIES, weightsAt(2)), "two elders count, the corrupt file weighs nothing");
+});
+
 test("hatch on an empty directory lays a first egg: no epic, no legendary", () => {
   const dir = scratch();
   const store = createStore(dir, () => 1);

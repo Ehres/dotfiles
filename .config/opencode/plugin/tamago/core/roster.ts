@@ -1,8 +1,8 @@
 import { age, speciesLine } from "./card.ts";
-import { stage } from "./stage.ts";
-import type { Career } from "./state.ts";
 import { LUCK_POINTS } from "./luck.ts";
 import { species } from "./species.ts";
+import { stage } from "./stage.ts";
+import type { Career } from "./state.ts";
 
 /** Every Career of the machine: the active one, then the resting ones. */
 export type Roster = { active: Career; resting: readonly Career[] };

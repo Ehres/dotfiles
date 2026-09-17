@@ -2,8 +2,8 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, s
 import { randomUUID } from "node:crypto";
 import { join } from "node:path";
 import { decideLock } from "../core/lock.ts";
-import { merge } from "../core/merge.ts";
 import { weightsAt } from "../core/luck.ts";
+import { merge } from "../core/merge.ts";
 import { luck, type CareerId, type Roster } from "../core/roster.ts";
 import { CAREER_KEYS, freshCareer, hydrate, type Career, type Delta } from "../core/state.ts";
 

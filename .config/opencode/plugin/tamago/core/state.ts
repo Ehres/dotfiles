@@ -1,6 +1,6 @@
+import { weightsAt } from "./luck.ts";
 import { latest, type Rename } from "./name.ts";
 import { firstPicks, hydratePicks, samePicks, type Picks } from "./pick.ts";
-import { weightsAt } from "./luck.ts";
 import { REFERENCE, SPECIES, hatch, type Rarity, type SpeciesId } from "./species.ts";
 
 export type Activity = "idle" | "thinking" | "working" | "waiting" | "hurt" | "sleeping";
