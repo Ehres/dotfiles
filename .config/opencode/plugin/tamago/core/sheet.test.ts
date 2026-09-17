@@ -11,10 +11,12 @@ import {
   factor,
   historical,
   sheet,
+  speakerOf,
   temperamentOf,
   type Sheet,
 } from "./sheet.ts";
 import type { Species } from "./species.ts";
+import { freshCareer } from "./state.ts";
 
 /** Ten thousand hatch dates a second apart, the range the Temperament test always used. */
 const DATES = Array.from({ length: 10_000 }, (_, i) => 1_789_000_000_000 + i * 1_000);
@@ -114,4 +116,13 @@ test("factor halves at min, is 1 at median, doubles at max, and grows", () => {
   assert.equal(factor(SCALE.median), 1);
   assert.equal(factor(SCALE.max), 2);
   for (let v = SCALE.min; v < SCALE.max; v++) assert.ok(factor(v) < factor(v + 1), `${v}`);
+});
+
+test("speakerOf derives the Speaker of a Career: its hatch date, its Species and its Sheet with the Species' Modifiers", () => {
+  const career = { ...freshCareer(1_789_113_932_488), species: "owl" };
+  const speaker = speakerOf(career);
+  assert.equal(speaker.hatchedAt, career.hatchedAt);
+  assert.equal(speaker.species, "owl");
+  assert.deepEqual(speaker.sheet, sheet(career.hatchedAt, "owl"));
+  assert.notDeepEqual(speaker.sheet, sheet(career.hatchedAt, "cat"), "the owl weighs on the Sheet");
 });

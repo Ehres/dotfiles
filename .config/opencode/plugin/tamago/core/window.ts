@@ -1,9 +1,9 @@
 import { behavior } from "./behavior.ts";
 import type { Addressed, TamagoEvent } from "./events.ts";
-import { character } from "./character.ts";
 import { count } from "./count.ts";
 import { merge } from "./merge.ts";
 import { cleanName } from "./name.ts";
+import { speakerOf } from "./sheet.ts";
 import { evolution, type StageId } from "./stage.ts";
 import { EMPTY_DELTA, addDelta, initialSession, isEmpty, sameCareer, type Career, type Delta, type Session } from "./state.ts";
 import { transition } from "./transition.ts";
@@ -31,7 +31,7 @@ export function freshWindow(career: Career, muted = false): Window {
   return { career, pending: EMPTY_DELTA, sessions: {}, voices: {}, muted };
 }
 
-/** Moves the Sessions `ids` through `event` with the Behavior of the Career, then lets each Voice hear it unless muted. Same references when nothing changed. */
+/** Moves the Sessions `ids` through `event` with the Behavior of the Career, then lets each Voice hear it as the Career's Speaker unless muted. Same references when nothing changed. */
 function move(window: Window, ids: readonly string[], event: TamagoEvent, now: number): Window {
   if (ids.length === 0) return window;
   const conduct = behavior(window.career);
@@ -46,12 +46,12 @@ function move(window: Window, ids: readonly string[], event: TamagoEvent, now: n
   }
   let voices = window.voices;
   if (!window.muted) {
-    const temperament = character(window.career).temperament;
+    const speaker = speakerOf(window.career);
     const next = { ...voices };
     let spoke = false;
     for (const id of ids) {
       const voice = voices[id] ?? initialVoice();
-      const heard = speak(voice, event, before[id] ?? initialSession(now), after[id] ?? initialSession(now), now, temperament, conduct, window.career.species);
+      const heard = speak(voice, event, before[id] ?? initialSession(now), after[id] ?? initialSession(now), now, speaker, conduct);
       next[id] = heard;
       if (heard !== voice) spoke = true;
     }

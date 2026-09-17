@@ -3,10 +3,10 @@ import assert from "node:assert/strict";
 import { behavior } from "./behavior.ts";
 import type { Addressed } from "./events.ts";
 import { HURT_MS, SLEEP_MS } from "./events.ts";
+import { speakerOf } from "./sheet.ts";
 import { STAGES, WEIGHTS } from "./stage.ts";
 import { EMPTY_DELTA, freshCareer, isEmpty, type Career } from "./state.ts";
-import { SIGNATURE } from "./signature.ts";
-import { BUBBLE_MS } from "./voice.ts";
+import { BUBBLE_MS, phrase } from "./voice.ts";
 import { adopt, flushed, freshWindow, receive, rename, setMuted, tick, type Window } from "./window.ts";
 
 const T0 = 1_000_000;
@@ -203,12 +203,14 @@ test("after a Switch the next tick applies the Behavior of the new Career", () =
   assert.equal(tick(step.window, T0 + 1_500).sessions.a?.activity, "idle", "the thin-skinned Career heals at 1.5 s");
 });
 
-test("the Voice speaks with the Signature of the Career's Species", () => {
-  let w = freshWindow({ ...freshCareer(T0), species: "owl" });
+test("the Voice speaks as the Career's Speaker: the phrase of its Species, Temperaments and hatch date", () => {
+  const career: Career = { ...freshCareer(T0), species: "owl" };
+  let w = freshWindow(career);
   w = receive(w, to("a", { type: "prompt_sent" }), T0).window;
   w = receive(w, to("a", { type: "session_idle" }), T0 + 1).window;
   w = tick(w, T0 + 1 + SLEEP_MS);
   assert.equal(w.sessions.a?.activity, "sleeping");
   w = receive(w, to("a", { type: "prompt_sent" }), T0 + 2 + SLEEP_MS + BUBBLE_MS + 10_000).window;
-  assert.equal(w.voices.a?.bubble?.text, SIGNATURE.owl?.woke?.[0]);
+  assert.equal(w.voices.a?.bubble?.cue, "woke");
+  assert.equal(w.voices.a?.bubble?.text, phrase("woke", speakerOf(career), 0));
 });

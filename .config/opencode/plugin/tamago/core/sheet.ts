@@ -1,5 +1,6 @@
 import { generator, seed } from "./random.ts";
 import { SPECIES, species, type Species, type SpeciesId } from "./species.ts";
+import type { Career } from "./state.ts";
 
 export type Temperament = "cheerful" | "sarcastic" | "stoic" | "dreamy";
 /** The four Temperament Stats, read at the maximum. Order matters: ties go to the first one. Never reorder once shipped. */
@@ -85,6 +86,13 @@ export function temperamentOf(sheet: Sheet): Temperament {
   let best: Temperament = TEMPERAMENTS[0] ?? "cheerful";
   for (const stat of TEMPERAMENTS) if (sheet[stat] > sheet[best]) best = stat;
   return best;
+}
+
+/** What it takes to make a Tamago speak: its hatch date for the seed, its Species for the Signature, its Sheet for the Temperaments. Derived from the Career, never stored. */
+export type Speaker = { hatchedAt: number; species: SpeciesId; sheet: Sheet };
+
+export function speakerOf(career: Career, table: readonly Species[] = SPECIES): Speaker {
+  return { hatchedAt: career.hatchedAt, species: career.species, sheet: sheet(career.hatchedAt, career.species, table) };
 }
 
 /** 2^((v − median) / (max − median)): 0.5 at min, 1 at median, 2 at max. Geometric, because a duration is felt in ratio. */

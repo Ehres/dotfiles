@@ -1,8 +1,8 @@
 import { MEDIAN, type Behavior } from "./behavior.ts";
-import type { Temperament } from "./character.ts";
 import type { TamagoEvent } from "./events.ts";
+import { generator, seed } from "./random.ts";
+import { TEMPERAMENTS, temperamentOf, type Speaker, type Temperament } from "./sheet.ts";
 import { SIGNATURE } from "./signature.ts";
-import type { SpeciesId } from "./species.ts";
 import type { Session } from "./state.ts";
 
 /** Why the Tamago speaks. Born from events and transitions, never from content. */
@@ -30,7 +30,7 @@ export type Voice = {
   last?: { at: number; priority: number };
   /** When the Tamago last voiced "May I?" and is still waiting for the answer. */
   asked?: number;
-  /** Times each Cue was spoken, for deterministic phrase selection and cooldowns. */
+  /** Times each Cue was spoken, for the seed of the next phrase and for cooldowns. */
   spoken: Partial<Record<Cue, { at: number; times: number }>>;
   /** Timestamps of recent tool_failed, pruned to STREAK_MS. */
   failures: number[];
@@ -149,9 +149,57 @@ export const FLAVOR: Record<Temperament, Record<Cue, Phrases>> = {
   },
 };
 
-/** The phrases for a Cue: the Signature of the Species when it has one, else the Temperament's flavor. Replaced by `phrase` in the next task. */
-export function phrases(cue: Cue, temperament: Temperament, species?: SpeciesId): Phrases {
-  return (species === undefined ? undefined : SIGNATURE[species]?.[cue]) ?? FLAVOR[temperament][cue];
+/** Who speaks a Cue: the Species, one of the four Temperaments, or nobody in particular. */
+export type Register = "species" | "temperament" | "neutral";
+/** Tuning table: the share of each Register, out of their sum. The Species first, so a Tamago is recognized by ear; the Temperament as a nuance; the neutral phrases as a common ground. */
+export const REGISTER: Record<Register, number> = { species: 70, temperament: 25, neutral: 5 };
+const REGISTERS: readonly Register[] = ["species", "temperament", "neutral"];
+
+/** The key a number in [0, 1) lands on, by cumulative weight in `keys` order. Callers never pass all-zero weights. */
+function weighted<K extends string>(r: number, keys: readonly K[], weight: (key: K) => number): K {
+  const total = keys.reduce((sum, key) => sum + weight(key), 0);
+  let cumulative = 0;
+  for (const key of keys) {
+    cumulative += weight(key) / total;
+    if (r < cumulative) return key;
+  }
+  return keys[keys.length - 1] as K;
+}
+
+/** The phrases of a Register for a Cue. A Species this build does not know has no Signature: its Temperament speaks in its place. */
+function pool(cue: Cue, speaker: Speaker, register: Register, r: number): Phrases {
+  switch (register) {
+    case "species":
+      return SIGNATURE[speaker.species]?.[cue] ?? FLAVOR[temperamentOf(speaker.sheet)][cue];
+    case "temperament": {
+      // A Temperament Stat may sit below zero after a Modifier: it weighs nothing. All four at zero cannot happen with a drawn Sheet; the Temperament speaks then.
+      const stat = (temperament: Temperament): number => Math.max(0, speaker.sheet[temperament]);
+      const total = TEMPERAMENTS.reduce((sum, temperament) => sum + stat(temperament), 0);
+      return FLAVOR[total > 0 ? weighted(r, TEMPERAMENTS, stat) : temperamentOf(speaker.sheet)][cue];
+    }
+    case "neutral":
+      return PHRASES[cue];
+  }
+}
+
+/** The domain of the voice seed: one draw per Cue and occurrence, so a Cue added later never moves the others. No Milestone id is ever `voice:…`. */
+function domain(cue: Cue, times: number): string {
+  return `voice:${cue}:${times}`;
+}
+
+/**
+ * The phrase a Tamago says the `times`-th time it speaks `cue`. Seeded from
+ * the hatch date, the Cue and the count: every window agrees, nothing is
+ * stored, and one hears a different phrase from one time to the next. The
+ * Register first, at REGISTER shares; then, for the Temperament, which of the
+ * four at the weight of its Stat; then a phrase, uniform. At `hatched` the
+ * Species always speaks: that is where it shows.
+ */
+export function phrase(cue: Cue, speaker: Speaker, times: number): string {
+  const random = generator(seed(speaker.hatchedAt, domain(cue, times)));
+  const register = cue === "hatched" ? "species" : weighted(random(), REGISTERS, (key) => REGISTER[key]);
+  const own = pool(cue, speaker, register, random());
+  return own[Math.floor(random() * own.length)] ?? own[0];
 }
 
 export function initialVoice(): Voice {
@@ -219,8 +267,8 @@ function listen(
  * Moves one Voice through an event and the Session transition it caused.
  * Pure. Returns the same object when nothing changed, so a quiet tick
  * re-renders nothing. The Behavior sets how long a Bubble stays, the quiet
- * gap, the long-work threshold and the streak count. The Species, when given,
- * speaks its Signature over the Temperament.
+ * gap, the long-work threshold and the streak count. The Speaker sets who
+ * speaks: see `phrase`.
  */
 export function speak(
   voice: Voice,
@@ -228,9 +276,8 @@ export function speak(
   before: Session,
   after: Session,
   now: number,
-  temperament: Temperament,
+  speaker: Speaker,
   behavior: Behavior = MEDIAN,
-  species?: SpeciesId,
 ): Voice {
   if (event.type === "tick") {
     return voice.bubble !== undefined && voice.bubble.until <= now ? { ...voice, bubble: undefined } : voice;
@@ -242,8 +289,7 @@ export function speak(
   if (said !== undefined && now - said.at < cooldown) return next;
   if (next.last !== undefined && now - next.last.at < behavior.quietMs && priority <= next.last.priority) return next;
   const times = said?.times ?? 0;
-  const pool = phrases(cue, temperament, species);
-  const text = pool[times % pool.length] ?? pool[0];
+  const text = phrase(cue, speaker, times);
   return {
     ...next,
     bubble: { cue, text, since: now, until: now + behavior.bubbleMs },
