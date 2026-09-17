@@ -61,6 +61,13 @@ _Avoid_: tier, grade, level
 The Species of every Career that recorded none: the cat drawn before Species
 existed. Common, Pace 1.
 
+**Luck**:
+How much the elders of the machine tilt the next Hatch toward the rare: the
+points of every `elder` of the Roster, by Rarity. Read from the disk at the
+Hatch, never stored, never shown. A first egg has none: epic and legendary
+are earned.
+_Avoid_: pity, bonus, streak
+
 **Craft**:
 What the Career says the Tamago does most, weighted: scribe (edits), shell
 (bash) or sage (reads). Absent before `young`.
@@ -159,10 +166,16 @@ Bubble, the last Cue spoken, recent failures. One per Session, forgotten
 with it.
 _Avoid_: cooldown state, history
 
+**Register**:
+Who speaks a Cue: the Species through its Signature, one of the four
+Temperaments at the weight of its Stat, or the neutral phrases. Drawn at each
+Cue spoken from the hatch date, the Cue and its count, so every window hears
+the same phrase and nothing is stored.
+_Avoid_: mode, voice (that is the memory), layer
+
 **Signature**:
-The phrases a Species owns for at most three Cues, `hatched` always among
-them. Where the Species has a Signature for a Cue it speaks it, whatever the
-Temperament; elsewhere the Temperament speaks, then the neutral phrases.
+The phrases a Species owns for every Cue: its Register in the voice. At the
+hatch it is always the Signature that speaks.
 _Avoid_: species flavor, catchphrase, override
 
 ### Over a lifetime
@@ -343,9 +356,13 @@ _Avoid_: card, widget
 - A **Character** is read, never written; two windows always show the same
 - The **Voice** speaks with the **Temperament**; the **Face** of a pet wears
   it; the card states the whole **Character**
-- The **Voice** speaks the **Signature** of the **Species** over the
-  **Temperament**, for the few **Cues** the Signature covers; at the hatch it
-  is always the Species that speaks
+- The **Voice** draws a **Register** for each **Cue** it speaks: the
+  **Signature** of the **Species** most often, a **Temperament** at the
+  weight of its **Stat**, the neutral phrases rarely; at the hatch it is
+  always the Species
+- The **Luck** of a **Hatch** is read from the **Roster** and weighs the
+  **Rarity** draw; the **Species** drawn is stored, so the Luck of later
+  Hatches never changes it
 - A **Career** holds zero or one **Pick** per **Milestone**
 - A **Milestone** is reached when the counters of the **Career** satisfy its
   rule; reaching it is a fact about the counters, not an event

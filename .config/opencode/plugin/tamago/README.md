@@ -86,12 +86,16 @@ The 5 s of a bubble, the 10 s between two, the 5 min of a long work and the
 3 failures of a streak are those of a median sheet; a chatty creature speaks
 sooner and longer, a sensitive one complains earlier.
 
-Each species also has a signature: its own phrases for three cues, always
-including the hatch. A cat purrs when the todos are done and grumbles when
-woken, an owl comments on long nights and early dawns, a dragon shrugs off
-error streaks and brags at each evolution. Where the species has a signature
-it speaks it, whatever the temperament; elsewhere the temperament speaks.
-The table lives in `core/signature.ts`, one entry per species.
+Three registers share the phrases. Each species has a signature: its own
+phrases for every cue, in `core/signature.ts` and one file per rarity under
+`core/signatures/`. Each temperament has its flavor for every cue, in
+`core/voice.ts`, next to the neutral phrases. Which register speaks is drawn
+at each cue, 70 % the species, 25 % a temperament, 5 % neutral; within the
+temperament share, each of the four speaks at the weight of its stat, so a
+sarcastic 9 with a dreamy 3 drifts off now and then. The draw is seeded from
+the hatch date, the cue and its count: every window hears the same phrase,
+and the same creature does not repeat itself. At the hatch the species always
+speaks.
 
 ## Commands
 
@@ -114,18 +118,26 @@ two in a few, where the top line overflows by one column while it shows.
 ## What it is
 
 Every egg hatches into a species, drawn once from the hatch date and stored
-with the career: a `cat` or an `owl` most of the time, a `dragon` once in a
-hundred. The egg looks the same for every species; the creature shows at
-`hatchling`, with a toast and a bubble. A species never changes: the only way
-to meet another one is a new egg.
+with the career: a `cat` or an `owl` most of the time, a `dragon` only once
+the roster has earned it. The egg looks the same for every species; the
+creature shows at `hatchling`, with a toast and a bubble. A species never
+changes: the only way to meet another one is a new egg.
 
-| Rarity      | Draw | Pace |
-| ----------- | ---- | ---- |
-| `common`    | 60 % | 1    |
-| `uncommon`  | 25 % | 0.8  |
-| `rare`      | 10 % | 0.5  |
-| `epic`      | 4 %  | 0.4  |
-| `legendary` | 1 %  | 0.25 |
+| Rarity      | First egg | After one common elder | Cap   | Pace |
+| ----------- | --------- | ---------------------- | ----- | ---- |
+| `common`    | 65 %      | 61 %                   | 20 %  | 1    |
+| `uncommon`  | 25 %      | 26.5 %                 | 42 %  | 0.8  |
+| `rare`      | 10 %      | 11 %                   | 21 %  | 0.5  |
+| `epic`      | 0         | 1 %                    | 11 %  | 0.4  |
+| `legendary` | 0         | 0.5 %                  | 5.6 % | 0.25 |
+
+A first egg never hatches an epic or a legendary: they are earned. Every
+creature of the machine raised to `elder` adds luck to the next egg, 1 for a
+common, 2 an uncommon, 3 a rare, 4 an epic, 5 a legendary, and each point
+moves 4 % out of common toward the rarer tiers until common rests at 20 %.
+Luck is read from the roster at the hatch and never stored or shown; the
+species drawn is stored, so later luck changes nothing for a living creature.
+The curve lives in `core/luck.ts`.
 
 The pace scales how fast XP turns into growth: a legendary creature needs four
 times the XP of a common one for every stage, and the card shows its farther

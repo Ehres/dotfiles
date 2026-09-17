@@ -42,6 +42,12 @@ AGENTS.md. Vocabulary lives in `CONTEXT.md`; use those terms.
   `core/behavior.ts` holds the values, the old constants re-export its
   fields, and every function that takes a Behavior defaults to it. The Sheet
   is derived like the Stage: never stored, never cached in the Window.
+- A new Species is one line in `SPECIES` (with its Modifiers), four bodies in
+  `core/bodies/<rarity>.ts` and a full Signature in
+  `core/signatures/<rarity>.ts`. The tests fail at the first table that lacks
+  it. The rarity weights live in `core/luck.ts`, never in `species.ts`.
+- The voice never picks a phrase by rotation or by `Math.random`: `phrase`
+  seeds from the hatch date, the Cue and its count, so every window agrees.
 
 ## Verify
 
