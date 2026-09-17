@@ -37,6 +37,11 @@ AGENTS.md. Vocabulary lives in `CONTEXT.md`; use those terms.
   Career it was earned under, the active one when that Career is not on disk.
   The Roster never shrinks: the plugin never deletes a Career file.
 - Weights and thresholds are tuned in the `stage.ts` tables, not in code paths.
+- Timings and counts that a Stat sets are read from a `Behavior`, never from
+  a constant, in `transition`, `speak` and `cadence`; `MEDIAN` in
+  `core/behavior.ts` holds the values, the old constants re-export its
+  fields, and every function that takes a Behavior defaults to it. The Sheet
+  is derived like the Stage: never stored, never cached in the Window.
 
 ## Verify
 

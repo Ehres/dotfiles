@@ -310,15 +310,18 @@ Quatre lots :
    sous laquelle il a été gagné ; `tamago.hatch` (porte : au plus un Tamago
    sous elder) et `tamago.switch`. Rend le lot 1 jouable et donne un sens à
    la Rarity.
-3. **Feuille de caractère.** Huit colonnes tirées depuis `hatchedAt` : quatre
-   colonnes Temperament lues au maximum, quatre colonnes de comportement lues
-   en valeur, Énergie (`SLEEP_MS`, `FAST_MS` / `SLOW_MS`), Bavardage
-   (`QUIET_MS`, `BUBBLE_MS`), Sensibilité (`HURT_MS`, `STREAK_COUNT`),
-   Patience (`LONG_WORK_MS`). La Species ajoute ses modificateurs par colonne
-   (+1, –3) et la valeur médiane redonne le comportement d'aujourd'hui. À
-   modificateurs nuls, la feuille doit redonner exactement le Temperament
-   actuel : la colonne du Temperament historique reçoit la valeur haute du
-   tirage, les trois autres se tirent en dessous.
+3. **Feuille de caractère**, **fait le 2026-09-17**, voir
+   `docs/superpowers/specs/2026-09-17-tamago-character-sheet-design.md`. Huit
+   Stats de 0 à 10 tirées depuis `hatchedAt` (`core/sheet.ts`) : quatre Stats
+   Temperament lues au maximum, quatre Stats de comportement lues en valeur,
+   energy (`sleepMs`, `fastMs` / `slowMs`), chatter (`quietMs`, `bubbleMs`),
+   sensitivity (`hurtMs`, `streakCount`), patience (`longWorkMs`), par un
+   facteur 2^((v − 5) / 5) : moitié à 0, double à 10, `MEDIAN` à 5
+   (`core/behavior.ts`). La Species ajoute ses Modifiers (owl : stoic +2,
+   cheerful −1, energy −2, chatter −1, patience +2 ; dragon : sarcastic +3,
+   sensitivity −2, energy +2 ; cat : aucun). À Modifiers nuls, la Sheet
+   redonne le Temperament historique. La carte montre les quatre Stats de
+   comportement en barres.
 4. **Enrichissements.** Phrases signature par Species mêlées à celles du
    Temperament, dessin des Species suivantes jusqu'à la vingtaine, vue de
    collection, œuf teinté par Rarity.
@@ -334,8 +337,7 @@ donc jamais de suppression d'une Career du roster.
 2. ~~Commandes dans la palette : pet, card, mute, rename.~~ Fait.
 3. ~~Species visuelle (idée 12, lot 1).~~ Fait.
 4. ~~Roster (idée 12, lot 2).~~ Fait.
-5. Feuille de caractère (idée 12, lot 3), une fois plusieurs Species sous les
-   yeux.
+5. ~~Feuille de caractère (idée 12, lot 3).~~ Fait.
 6. Gamification (idée 11) : le premier Milestone et le `DialogSelect` ; les
    Traits de Voice s'écriront contre la feuille.
 7. Achievements et streak, avec le journal (idée 8), après une semaine d'usage

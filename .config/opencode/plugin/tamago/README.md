@@ -48,6 +48,10 @@ tools still earn XP, their prompts do not count. Activity follows the session:
 Stopping a tool yourself never hurts: an `Esc` during a run, a refused
 permission or a dismissed question is neither an error nor a counted tool.
 
+The 3 s and 120 s above are those of a median sheet. Each creature has its
+own: a sensitive one stays hurt longer, an energetic one stays awake longer
+and animates faster. See "Who it is".
+
 Colors come from the active OpenCode theme: accent by default, `error` when
 hurt, `warning` when waiting, `textMuted` when asleep.
 
@@ -78,6 +82,10 @@ interrupt a common one. `granted` and `denied` only answer a `permission` the
 creature actually voiced, within 30 s and once per question. Phrases rotate in
 order per cue. Tuning lives in `core/voice.ts`.
 
+The 5 s of a bubble, the 10 s between two, the 5 min of a long work and the
+3 failures of a streak are those of a median sheet; a chatty creature speaks
+sooner and longer, a sensitive one complains earlier.
+
 ## Commands
 
 Six commands in the palette, always under `Tamago` so they stay easy to find
@@ -86,7 +94,7 @@ whatever the creature is called; its Name only appears in their descriptions:
 | Command           | What it does                                                                          |
 | ----------------- | ------------------------------------------------------------------------------------- |
 | `toggle bubbles`  | mutes and unmutes; the choice is remembered across launches                           |
-| `show card`       | opens a dialog with the sprite, species and rarity, stage, XP, age, character and bar |
+| `show card`       | opens a dialog with the sprite, species and rarity, stage, XP, age, character, stats and bar |
 | `pet`             | the sprite wears a `♥` and its temperament's eyes for 2 s                             |
 | `rename`          | asks for a new name, 16 characters at most; empty keeps the old                       |
 | `hatch a new egg` | lays a fresh egg once every creature on the machine is `elder`                        |
@@ -157,10 +165,24 @@ and are meant to be tuned after real use.
 
 ## Who it is
 
-The hatch date decides a temperament, once and for all: cheerful, sarcastic,
-stoic or dreamy. It colors the bubbles for permissions, replies, error streaks
-and evolutions, and the eyes when you pet it. Nothing is stored: every window
-computes the same temperament from `hatchedAt`.
+The hatch date draws a character sheet: eight stats from 0 to 10, computed
+by every window from `hatchedAt` and never stored. Four carry the names of the
+temperaments, cheerful, sarcastic, stoic and dreamy: the highest one is the
+creature's temperament, fixed for life. It colors the bubbles for
+permissions, replies, error streaks and evolutions, and the eyes when you pet
+it. Four are behavior stats: energy sets when it falls asleep and how fast it
+animates, chatter how often it speaks and how long a bubble stays,
+sensitivity how long it stays hurt and how many failures make a streak,
+patience from when a work is long. Each stat scales its durations between
+half and double; 5 is exactly the plugin's old constants.
+
+The species weighs on the sheet without deciding it: an owl adds stoic +2,
+cheerful −1, energy −2, chatter −1, patience +2; a dragon sarcastic +3,
+sensitivity −2, energy +2; a cat nothing, so every creature from before the
+sheet keeps its temperament. About one owl in four is stoic because of its
+species rather than its draw. The modifiers live in `core/species.ts`; tune a
+species before one has hatched, since changing its line changes every living
+one. The card shows the four behavior stats as bars from `hatchling` on.
 
 From the `young` stage, the counters add a vocation: a craft, scribe, shell or
 sage, whichever weighted score is highest, and a stance, prudent from five
@@ -180,6 +202,9 @@ Everything lives in `~/.local/share/opencode-tamago/`:
   format as `career.json`. Never deleted by the plugin.
 - `career.lock/`: a lock directory held for a few milliseconds during writes.
 - `error.log`: exceptions swallowed by the plugin, with timestamps.
+
+The sheet, the temperament and the behavior are derived from the hatch date
+and the species: nothing new is written to disk.
 
 Several OpenCode instances can run at once. Each keeps its gains in memory and
 merges them into `career.json` every 2 s under the lock, so progress made in

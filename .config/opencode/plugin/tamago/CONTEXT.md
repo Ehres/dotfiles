@@ -39,14 +39,17 @@ once, the latest rename wins.
 
 **Temperament**:
 How the Tamago speaks and reacts, fixed at hatch and never changed: cheerful,
-sarcastic, stoic or dreamy. Derived from the hatch date, so every window
-agrees without storing anything.
+sarcastic, stoic or dreamy. The highest Temperament Stat of the Sheet: drawn
+from the hatch date and weighed by the Species, so every window agrees
+without storing anything.
 _Avoid_: personality, mood, attitude
 
 **Species**:
 What a Tamago is, decided at hatch and never changed: which creature is drawn
 at every Stage, and its Rarity. Drawn from the hatch date, then stored in the
 Career so that adding a Species later never changes an existing Tamago.
+A Species also carries Modifiers to the Sheet: it weighs on the character, it
+does not decide it.
 _Avoid_: skin, style, breed, form, type
 
 **Rarity**:
@@ -79,6 +82,34 @@ _Avoid_: personality, traits, profile
 The assistant asking the user something through the question tool. Counted
 in the Career; it never adds XP.
 _Avoid_: prompt (that is the user's), permission (that is OpenCode's)
+
+### The sheet
+
+**Sheet**:
+The eight Stats of a Tamago, integers from 0 to 10, drawn from its hatch date
+then shifted by the Modifiers of its Species. Derived, never stored: every
+window computes the same one.
+_Avoid_: profile, attributes, character (that is the Temperament and the
+Vocation)
+
+**Stat**:
+One line of the Sheet. Four Temperament Stats (cheerful, sarcastic, stoic,
+dreamy), read at the maximum; four behavior Stats (energy, chatter,
+sensitivity, patience), read by value.
+_Avoid_: column, attribute, trait (that is a Pick), score
+
+**Modifier**:
+The integer a Species adds to a Stat, between −3 and +3, 0 when the table says
+nothing. The Reference Species has none.
+_Avoid_: bonus, malus, buff
+
+**Behavior**:
+The seven durations and the count the behavior Stats set for a Tamago: when
+it falls asleep, how fast it animates, how long it stays hurt, how many
+failures make a streak, how long a Bubble stays and keeps the next one quiet,
+from when a work is long. Computed from the Sheet and passed to the pure
+functions; the median of every Stat gives the values from before the Sheet.
+_Avoid_: settings, config, tuning, timings
 
 ### In the moment
 
@@ -284,7 +315,23 @@ _Avoid_: card, widget
   **Bubble**; a **Bubble** comes from exactly one **Cue**
 - The home screen has no **Voice**: without an OpenCode session there is no
   **Cue**
-- A **Career** has exactly one **Temperament**, decided by its hatch date
+- A **Career** has exactly one **Sheet**, derived from its hatch date and its
+  **Species**; two windows compute the same one
+- A **Sheet** has exactly eight **Stats**: four of Temperament, four of
+  behavior
+- The **Temperament** of a Career is its highest Temperament **Stat**; on a
+  tie, the first in Temperament order
+- A **Species** has zero or more **Modifiers**, at most one per **Stat**; the
+  **Reference Species** has none
+- With no **Modifier**, the **Temperament** of the **Sheet** is the one the
+  hatch date alone gave before the Sheet existed
+- A **Career** has exactly one **Behavior**, computed from its behavior
+  **Stats**; a median **Sheet** gives the **Behavior** from before the Sheet
+- The **Behavior** applies from `egg` on; the card shows the **Sheet** from
+  `hatchling` on, like the **Species**
+- The **Behavior** and the **Temperament** enter the reducer through the
+  **Career** of the **Window**; `transition`, `speak`, `tickInterval` and
+  `frameIndex` take them as parameters and hold none as a constant
 - A **Career** at `young` or above has exactly one **Vocation**; below, none
 - A **Character** is read, never written; two windows always show the same
 - The **Voice** speaks with the **Temperament**; the **Face** of a pet wears
