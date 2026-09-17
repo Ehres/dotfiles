@@ -70,8 +70,11 @@ export const CUES: Record<Cue, { priority: number; cooldown: number }> = {
   hatched: { priority: 3, cooldown: 0 },
 };
 
+/** At least one phrase; a test bounds each to MAX_TEXT. */
+export type Phrases = readonly [string, ...string[]];
+
 /** English, like the Moods. Every phrase is at most MAX_TEXT characters; a test enforces it. */
-export const PHRASES: Record<Cue, readonly [string, ...string[]]> = {
+export const PHRASES: Record<Cue, Phrases> = {
   permission: ["May I?", "Your call.", "Say the word."],
   granted: ["Thanks!", "On it.", "Much obliged."],
   denied: ["Oh. Okay.", "Fair enough.", "Noted."],
@@ -86,13 +89,19 @@ export const PHRASES: Record<Cue, readonly [string, ...string[]]> = {
   hatched: ["So this is what I am.", "Out at last!", "Hello, world."],
 };
 
-/** Phrases per Temperament for the Cues where it shows. A missing entry falls back to PHRASES. */
-export const FLAVOR: Partial<Record<Temperament, Partial<Record<Cue, readonly [string, ...string[]]>>>> = {
+/** Phrases per Temperament for every Cue: the Temperament Register. English, at most MAX_TEXT characters each; a test enforces the coverage. */
+export const FLAVOR: Record<Temperament, Record<Cue, Phrases>> = {
   cheerful: {
     permission: ["Can we? Can we?", "Ooh, say yes!", "Pretty please?"],
     granted: ["Yay! On it.", "Thank youuu!", "Best human."],
     denied: ["Aw. Okay!", "No worries!", "Next time then!"],
+    woke: ["Morning! Is it?", "Nap's over, yay!", "Hi hi! I'm up!"],
+    long_work: ["We did it! Phew!", "Big one! High five!", "Look at us go!"],
+    big_diff: ["So many files! Wow!", "Big day, big diff!", "Ooh, a whole site!"],
     streak: ["We got this!", "Shake it off!", "Still smiling."],
+    compacted: ["Whoa, lighter head!", "Fresh start! Fun!", "Where were we? Yay!"],
+    retried: ["Try again! Woo!", "Second time lucky!", "Go go go!"],
+    todos_done: ["All done! Party!", "Every box! Yay!", "We rock!"],
     evolved: ["Look at me go!", "New me, who dis?", "Ta-da!"],
     hatched: ["I'm out! Hi!", "Look, it's me!", "Best day ever."],
   },
@@ -100,7 +109,13 @@ export const FLAVOR: Partial<Record<Temperament, Partial<Record<Cue, readonly [s
     permission: ["Permission, boss?", "Mother, may I?", "Shall I wait more?"],
     granted: ["How generous.", "Finally.", "About time."],
     denied: ["Figures.", "Of course not.", "Noted. Loudly."],
+    woke: ["Oh. You're back.", "Was dreaming. Was.", "Rise and whatever."],
+    long_work: ["Riveting, truly.", "That took a while.", "Done. Finally."],
+    big_diff: ["Bold. Very bold.", "Ten files. Casual.", "Rewriting it all?"],
     streak: ["Going great, huh.", "Third time's a charm?", "Delightful."],
+    compacted: ["Memory? Overrated.", "Forgot on purpose.", "Blissful amnesia."],
+    retried: ["Sure, that'll work.", "Again. Groundbreaking.", "Insanity, they say."],
+    todos_done: ["Wow. Boxes ticked.", "A miracle. Truly.", "Don't strain yourself."],
     evolved: ["Finally.", "Took you long enough.", "Behold. Or don't."],
     hatched: ["Took long enough.", "Behold. Me.", "Well. Here I am."],
   },
@@ -108,7 +123,13 @@ export const FLAVOR: Partial<Record<Temperament, Partial<Record<Cue, readonly [s
     permission: ["Your call.", "Awaiting word.", "When ready."],
     granted: ["Noted.", "Proceeding.", "Very well."],
     denied: ["Understood.", "As you wish.", "Then we wait."],
+    woke: ["Awake.", "Rested. Ready.", "I return."],
+    long_work: ["It is done.", "Long. Finished.", "The work held."],
+    big_diff: ["Many files.", "A wide change.", "So be it."],
     streak: ["It passes.", "Steady.", "Endure."],
+    compacted: ["Cleared.", "Less to carry.", "Begin again."],
+    retried: ["Once more.", "Again, then.", "Persist."],
+    todos_done: ["Complete.", "All in order.", "Nothing remains."],
     evolved: ["So it goes.", "A new form.", "Onward."],
     hatched: ["I am here.", "It begins.", "So. This form."],
   },
@@ -116,15 +137,21 @@ export const FLAVOR: Partial<Record<Temperament, Partial<Record<Cue, readonly [s
     permission: ["Hm? Oh. May I?", "If you like...", "Whenever..."],
     granted: ["Oh, lovely.", "Mm, thank you.", "Off I drift."],
     denied: ["Maybe next time...", "Oh. Alright.", "Never mind, then."],
+    woke: ["Mm... was I gone?", "Oh... hello again.", "Still half there..."],
+    long_work: ["Was it long? Oh...", "Time drifted by...", "Done... I think."],
+    big_diff: ["So many pieces...", "Everything moved...", "Like leaves, files."],
     streak: ["Ow... the stars...", "Everything spins.", "Ouch... again..."],
+    compacted: ["Thoughts... gone.", "Softer now...", "What was I saying?"],
+    retried: ["Once more, gently.", "Again... alright.", "Loops, like dreams."],
+    todos_done: ["All done... lovely.", "Nothing left. Hm.", "Quiet now..."],
     evolved: ["Was that... me?", "Oh. I changed.", "How curious."],
     hatched: ["Oh... hello.", "Am I... out?", "What a soft light."],
   },
 };
 
-/** The phrases for a Cue: the Signature of the Species when it has one, else the Temperament's flavor, else the neutral ones. */
-export function phrases(cue: Cue, temperament: Temperament, species?: SpeciesId): readonly [string, ...string[]] {
-  return (species === undefined ? undefined : SIGNATURE[species]?.[cue]) ?? FLAVOR[temperament]?.[cue] ?? PHRASES[cue];
+/** The phrases for a Cue: the Signature of the Species when it has one, else the Temperament's flavor. Replaced by `phrase` in the next task. */
+export function phrases(cue: Cue, temperament: Temperament, species?: SpeciesId): Phrases {
+  return (species === undefined ? undefined : SIGNATURE[species]?.[cue]) ?? FLAVOR[temperament][cue];
 }
 
 export function initialVoice(): Voice {

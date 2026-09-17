@@ -181,12 +181,13 @@ test("a bubble expires on the first tick at or after until", () => {
 test("phrases are picked in order and wrap around", () => {
   let state = replay([[{ type: "session_compacted" }, 0]]);
   const seen = [state.voice.bubble?.text];
-  const n = PHRASES.compacted.length;
+  const compactedPhrases = FLAVOR.stoic.compacted;
+  const n = compactedPhrases.length;
   for (let i = 1; i <= n; i++) {
     state = replay([[{ type: "session_compacted" }, i * (BUBBLE_MS + QUIET_MS)]], state);
     seen.push(state.voice.bubble?.text);
   }
-  assert.deepEqual(seen, [...PHRASES.compacted, PHRASES.compacted[0]]);
+  assert.deepEqual(seen, [...compactedPhrases, compactedPhrases[0]]);
 });
 
 test("an event that changes nothing returns the same Voice object", () => {
@@ -241,9 +242,9 @@ test("a flavored Cue speaks in the Temperament's words and rotates within them",
   assert.equal(second.voice.bubble?.text, FLAVOR.sarcastic?.permission?.[1]);
 });
 
-test("a Cue without flavor falls back to the neutral phrases", () => {
-  const woke = replay([[{ type: "prompt_sent" }, 0]], { voice: initialVoice(), session: { activity: "sleeping", since: 0, busy: false } }, "dreamy");
-  assert.equal(woke.voice.bubble?.text, PHRASES.woke[0]);
+test("without a Species, no Signature: the Temperament's flavor is always spoken", () => {
+  const asleep = { voice: initialVoice(), session: { activity: "sleeping", since: 0, busy: false } as Session };
+  assert.equal(replay([[{ type: "prompt_sent" }, 0]], asleep, "dreamy").voice.bubble?.text, FLAVOR.dreamy.woke[0]);
 });
 
 test("a Species with a Signature for the Cue speaks it, whatever the Temperament", () => {
@@ -254,18 +255,6 @@ test("a Species with a Signature for the Cue speaks it, whatever the Temperament
   assert.equal(stoicOwl.voice.bubble?.text, SIGNATURE.owl?.woke?.[0]);
 });
 
-test("without a Signature for the Cue, the Temperament speaks; without either, the neutral phrases", () => {
-  const owlAsks = replay([[{ type: "permission_asked" }, 0]], undefined, "sarcastic", MEDIAN, "owl");
-  assert.equal(owlAsks.voice.bubble?.text, FLAVOR.sarcastic?.permission?.[0], "the owl has no permission Signature");
-  const owlCompacts = replay([[{ type: "session_compacted" }, 0]], undefined, "sarcastic", MEDIAN, "owl");
-  assert.equal(owlCompacts.voice.bubble?.text, PHRASES.compacted[0], "nobody flavors compacted");
-});
-
-test("without a Species, no Signature: the Temperament and the neutral phrases as before", () => {
-  const asleep = { voice: initialVoice(), session: { activity: "sleeping", since: 0, busy: false } as Session };
-  assert.equal(replay([[{ type: "prompt_sent" }, 0]], asleep, "dreamy").voice.bubble?.text, PHRASES.woke[0]);
-});
-
 test("the Species speaks at the hatch and rotates within its Signature", () => {
   const first = replay([[{ type: "evolved", stage: "hatchling" }, 0]], undefined, "cheerful", MEDIAN, "dragon");
   assert.equal(first.voice.bubble?.text, SIGNATURE.dragon?.hatched?.[0]);
@@ -273,15 +262,15 @@ test("the Species speaks at the hatch and rotates within its Signature", () => {
   assert.equal(second.voice.bubble?.text, SIGNATURE.dragon?.hatched?.[1]);
 });
 
-test("every flavored phrase fits in MAX_TEXT and every Temperament flavors the same Cues", () => {
-  const cues = ["permission", "granted", "denied", "streak", "evolved", "hatched"] as const;
+test("every Temperament flavors every Cue with at least two phrases that fit in MAX_TEXT, in printable ASCII", () => {
   for (const temperament of TEMPERAMENTS) {
-    const flavor = FLAVOR[temperament];
-    assert.ok(flavor, temperament);
-    for (const cue of cues) {
-      const phrases = flavor[cue];
-      assert.ok(phrases && phrases.length >= 2, `${temperament}/${cue}`);
-      for (const text of phrases) assert.ok(text.length <= MAX_TEXT, `${temperament}/${cue}: ${JSON.stringify(text)}`);
+    for (const cue of Object.keys(CUES) as Cue[]) {
+      const phrases = FLAVOR[temperament][cue];
+      assert.ok(phrases.length >= 2, `${temperament}/${cue}`);
+      for (const text of phrases) {
+        assert.ok(text.length <= MAX_TEXT, `${temperament}/${cue}: ${JSON.stringify(text)}`);
+        assert.match(text, /^[\x20-\x7e]+$/, `${temperament}/${cue}: ${JSON.stringify(text)}`);
+      }
     }
   }
 });
