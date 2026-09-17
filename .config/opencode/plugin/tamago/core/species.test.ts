@@ -1,16 +1,34 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { RARITIES, RARITY, REFERENCE, SPECIES, hatch, pace, species, type Species } from "./species.ts";
+import { weightsAt } from "./luck.ts";
+import { RARITIES, RARITY, REFERENCE, SPECIES, hatch, pace, species, type Rarity, type Species } from "./species.ts";
 import { MODIFIERS_SUM_MAX, MODIFIER_MAX } from "./sheet.ts";
 
 /** One Species per Rarity, so every tier can be drawn. */
 const full: readonly Species[] = RARITIES.map((rarity) => ({ id: `s-${rarity}`, label: rarity, rarity }));
 
-test("RARITY weights are positive and paces decrease from common at 1", () => {
+/** The table and the weights of the commit that shipped the draw, frozen: the pin below is about the formula, never about the data. */
+const ORIGINAL: readonly Species[] = [
+  { id: "cat", label: "cat", rarity: "common" },
+  { id: "owl", label: "owl", rarity: "common" },
+  { id: "dragon", label: "dragon", rarity: "legendary" },
+];
+const ORIGINAL_WEIGHTS: Record<Rarity, number> = { common: 60, uncommon: 25, rare: 10, epic: 4, legendary: 1 };
+
+/** The Rarity counts of ten thousand hatch dates against `table` at `weights`. */
+function tally(table: readonly Species[], weights: Record<Rarity, number>): Record<string, number> {
+  const counts: Record<string, number> = {};
+  for (let i = 0; i < 10_000; i++) {
+    const rarity = species(hatch(1_789_000_000_000 + i * 1000, table, weights), table).rarity;
+    counts[rarity] = (counts[rarity] ?? 0) + 1;
+  }
+  return counts;
+}
+
+test("paces decrease from common at 1", () => {
   assert.equal(RARITY.common.pace, 1);
   for (let i = 0; i < RARITIES.length; i++) {
     const rarity = RARITIES[i]!;
-    assert.ok(RARITY[rarity].weight > 0, `${rarity} weight`);
     assert.ok(RARITY[rarity].pace > 0 && RARITY[rarity].pace <= 1, `${rarity} pace`);
     if (i > 0) assert.ok(RARITY[rarity].pace < RARITY[RARITIES[i - 1]!].pace, `${rarity} slower than the one before`);
   }
@@ -41,33 +59,46 @@ test("hatch always returns the reference when the table holds only it", () => {
 });
 
 test("hatch falls back to the next less rare Rarity when the drawn one is empty", () => {
-  // With one Species per Rarity, find a hatch date that draws legendary; then remove legendary and epic and expect rare.
+  // With one Species per Rarity and the original weights, find a date that draws legendary; then remove legendary and epic and expect rare.
   let legendary: number | undefined;
-  for (let t = 0; t < 100_000 && legendary === undefined; t++) if (hatch(t, full) === "s-legendary") legendary = t;
+  for (let t = 0; t < 100_000 && legendary === undefined; t++) if (hatch(t, full, ORIGINAL_WEIGHTS) === "s-legendary") legendary = t;
   assert.notEqual(legendary, undefined, "some date in 100k draws legendary at 1%");
   const withoutTop = full.filter((entry) => entry.rarity !== "legendary" && entry.rarity !== "epic");
-  assert.equal(hatch(legendary!, withoutTop), "s-rare");
+  assert.equal(hatch(legendary!, withoutTop, ORIGINAL_WEIGHTS), "s-rare");
 });
 
-test("hatch lands on each Rarity within a loose band of its weight over ten thousand dates", () => {
-  const counts: Record<string, number> = {};
-  for (let i = 0; i < 10_000; i++) {
-    const rarity = species(hatch(1_789_000_000_000 + i * 1000, full), full).rarity;
-    counts[rarity] = (counts[rarity] ?? 0) + 1;
+test("hatch lands on each Rarity within a loose band of its weight, at three Lucks, over ten thousand dates", () => {
+  for (const luck of [0, 3, 11]) {
+    const weights = weightsAt(luck);
+    const counts = tally(full, weights);
+    const total = RARITIES.reduce((sum, rarity) => sum + weights[rarity], 0);
+    for (const rarity of RARITIES) {
+      const expected = (10_000 * weights[rarity]) / total;
+      const seen = counts[rarity] ?? 0;
+      if (expected === 0) assert.equal(seen, 0, `Luck ${luck}/${rarity}: a zero weight never lands`);
+      else assert.ok(seen > expected * 0.5 && seen < expected * 1.5 + 30, `Luck ${luck}/${rarity}: ${seen} for ${expected} expected`);
+    }
   }
-  const total = RARITIES.reduce((sum, rarity) => sum + RARITY[rarity].weight, 0);
-  for (const rarity of RARITIES) {
-    const expected = (10_000 * RARITY[rarity].weight) / total;
-    const seen = counts[rarity] ?? 0;
-    assert.ok(seen > expected * 0.5 && seen < expected * 1.5 + 30, `${rarity}: ${seen} for ${expected} expected`);
-  }
+});
+
+test("the default weights are those of Luck 0: no epic, no legendary on a first egg", () => {
+  const counts = tally(full, weightsAt(0));
+  assert.equal(counts.epic ?? 0, 0);
+  assert.equal(counts.legendary ?? 0, 0);
+  for (let t = 0; t < 2000; t++) assert.equal(hatch(t * 4093, full), hatch(t * 4093, full, weightsAt(0)));
+});
+
+test("at LUCK_MAX every Species of the table is drawn over ten thousand dates", () => {
+  const seen = new Set<string>();
+  for (let i = 0; i < 10_000; i++) seen.add(hatch(1_789_000_000_000 + i * 1000, SPECIES, weightsAt(11.25)));
+  for (const entry of SPECIES) assert.ok(seen.has(entry.id), `${entry.id} never hatched`);
 });
 
 test("hatch is pinned: the owner's hatch date always gives the same Species", () => {
-  // Values computed once at the commit that shipped the draw. Never update them to make a new formula pass.
-  assert.equal(hatch(1789113932488), "cat");
-  assert.equal(hatch(1789113932489), "owl");
-  assert.equal(hatch(1789113932549), "dragon");
+  // Values computed once at the commit that shipped the draw, against the table and the weights of that commit. Never update them to make a new formula pass.
+  assert.equal(hatch(1789113932488, ORIGINAL, ORIGINAL_WEIGHTS), "cat");
+  assert.equal(hatch(1789113932489, ORIGINAL, ORIGINAL_WEIGHTS), "owl");
+  assert.equal(hatch(1789113932549, ORIGINAL, ORIGINAL_WEIGHTS), "dragon");
 });
 
 test("Modifiers stay within bounds on every Species, and the reference has none", () => {

@@ -1,3 +1,4 @@
+import { weightsAt } from "./luck.ts";
 import { generator, seed } from "./random.ts";
 import type { Modifiers } from "./sheet.ts";
 
@@ -5,13 +6,13 @@ export type Rarity = "common" | "uncommon" | "rare" | "epic" | "legendary";
 /** From the most common to the rarest; the draw falls back along this order. */
 export const RARITIES: readonly Rarity[] = ["common", "uncommon", "rare", "epic", "legendary"];
 
-/** Tune here, never in code paths. First guess, like STAGES: adjust after real use. Paces have round reciprocals so raw thresholds stay readable. */
-export const RARITY: Record<Rarity, { weight: number; pace: number }> = {
-  common: { weight: 60, pace: 1 },
-  uncommon: { weight: 25, pace: 0.8 },
-  rare: { weight: 10, pace: 0.5 },
-  epic: { weight: 4, pace: 0.4 },
-  legendary: { weight: 1, pace: 0.25 },
+/** Tune here, never in code paths. Paces have round reciprocals so raw thresholds stay readable. The weights of the draw live in luck.ts: they move with the Luck. */
+export const RARITY: Record<Rarity, { pace: number }> = {
+  common: { pace: 1 },
+  uncommon: { pace: 0.8 },
+  rare: { pace: 0.5 },
+  epic: { pace: 0.4 },
+  legendary: { pace: 0.25 },
 };
 
 export type SpeciesId = string;
@@ -50,12 +51,12 @@ export function pace(id: SpeciesId, table: readonly Species[] = SPECIES): number
   return found === undefined ? 1 : RARITY[found.rarity].pace;
 }
 
-/** The Rarity a number in [0, 1) lands on, by cumulative weight in RARITIES order. */
-function rarityAt(roll: number): Rarity {
-  const total = RARITIES.reduce((sum, rarity) => sum + RARITY[rarity].weight, 0);
+/** The Rarity a number in [0, 1) lands on, by cumulative weight in RARITIES order. A zero weight never lands. */
+function rarityAt(roll: number, weights: Record<Rarity, number>): Rarity {
+  const total = RARITIES.reduce((sum, rarity) => sum + weights[rarity], 0);
   let cumulative = 0;
   for (const rarity of RARITIES) {
-    cumulative += RARITY[rarity].weight / total;
+    cumulative += weights[rarity] / total;
     if (roll < cumulative) return rarity;
   }
   return RARITIES[RARITIES.length - 1] ?? "common";
@@ -63,15 +64,17 @@ function rarityAt(roll: number): Rarity {
 
 /**
  * The Species a Tamago hatching at `hatchedAt` is: the same in every window of
- * this machine. Two draws, always both: the Rarity by weight, then a Species
- * uniform within it. An empty Rarity falls back to the next less rare one that
- * has a Species; common always holds the reference.
+ * this machine. Two draws, always both: the Rarity by `weights`, then a
+ * Species uniform within it. An empty Rarity falls back to the next less rare
+ * one that has a Species; common always holds the reference. The weights
+ * default to those of a first egg; `store.hatch` passes those of the Roster's
+ * Luck. The formula is pinned by a test: never change it once shipped.
  */
-export function hatch(hatchedAt: number, table: readonly Species[] = SPECIES): SpeciesId {
+export function hatch(hatchedAt: number, table: readonly Species[] = SPECIES, weights: Record<Rarity, number> = weightsAt(0)): SpeciesId {
   const random = generator(seed(hatchedAt, DOMAIN));
   const roll = random();
   const pick = random();
-  for (let index = RARITIES.indexOf(rarityAt(roll)); index >= 0; index--) {
+  for (let index = RARITIES.indexOf(rarityAt(roll, weights)); index >= 0; index--) {
     const pool = table.filter((entry) => entry.rarity === RARITIES[index]);
     if (pool.length > 0) return pool[Math.floor(pick * pool.length)]?.id ?? REFERENCE;
   }
