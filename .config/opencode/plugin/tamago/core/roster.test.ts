@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { DAY_MS } from "./card.ts";
-import { blocked, blockers, entry, growing, idOf, stepsIn, switchable, type Roster } from "./roster.ts";
+import { blocked, blockers, entry, growing, idOf, luck, stepsIn, switchable, type Roster } from "./roster.ts";
 import { freshCareer, type Career } from "./state.ts";
 
 const T0 = 1_700_000_000_000;
@@ -50,4 +50,16 @@ test("stepsIn announces a new egg or the Tamago that comes to the front", () => 
   assert.equal(stepsIn(egg(T0), "Tamago"), "A new egg.");
   assert.equal(stepsIn(elder(T0, { name: { value: "Momo", at: 1 } }), "Tamago"), "Momo steps in.");
   assert.equal(stepsIn(elder(T0), "Tamago"), "Tamago steps in.");
+});
+
+test("luck sums the points of the elders, whatever their place, and ignores whoever still grows", () => {
+  assert.equal(luck([]), 0);
+  assert.equal(luck([elder(T0)]), 1, "one common elder");
+  assert.equal(luck([elder(T0), elder(T0 - 1, { species: "owl" })]), 2, "two common elders");
+  assert.equal(luck([egg(T0), elder(T0 - 1)]), 1, "an egg weighs nothing");
+  // 20,000 XP is 5,000 growth for a dragon: still growing. 80,000 XP is elder.
+  assert.equal(luck([elder(T0, { species: "dragon" })]), 0);
+  assert.equal(luck([elder(T0, { species: "dragon", sessions: 8_000 })]), 5);
+  assert.equal(luck([elder(T0), elder(T0 - 1), elder(T0 - 2, { species: "dragon", sessions: 8_000 })]), 7);
+  assert.equal(luck([elder(T0, { species: "nope" })]), 1, "an unknown Species counts as the reference");
 });

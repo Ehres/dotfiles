@@ -1,6 +1,8 @@
 import { age, speciesLine } from "./card.ts";
 import { stage } from "./stage.ts";
 import type { Career } from "./state.ts";
+import { LUCK_POINTS } from "./luck.ts";
+import { species } from "./species.ts";
 
 /** Every Career of the machine: the active one, then the resting ones. */
 export type Roster = { active: Career; resting: readonly Career[] };
@@ -25,6 +27,16 @@ export function blockers(roster: Roster): Career[] {
 /** The Careers a Switch may bring to the front: the resting ones, by hatch date. */
 export function switchable(roster: Roster): Career[] {
   return [...roster.resting].sort((a, b) => a.hatchedAt - b.hatchedAt);
+}
+
+/**
+ * The Luck of a Hatch: the points of every `elder` among `careers`, by
+ * Rarity. At a Hatch the whole Roster is elder by the gate, so this is the
+ * list of Species raised to the end; the filter keeps the function true on
+ * its own. Recomputed at every Hatch from the disk, never stored.
+ */
+export function luck(careers: readonly Career[]): number {
+  return careers.filter((career) => !growing(career)).reduce((sum, career) => sum + LUCK_POINTS[species(career.species).rarity], 0);
 }
 
 /** The Name shown for a Career; `fallback` is the plugin's default Name. */
