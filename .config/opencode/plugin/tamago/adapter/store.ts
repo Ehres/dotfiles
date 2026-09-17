@@ -3,7 +3,8 @@ import { randomUUID } from "node:crypto";
 import { join } from "node:path";
 import { decideLock } from "../core/lock.ts";
 import { merge } from "../core/merge.ts";
-import type { CareerId, Roster } from "../core/roster.ts";
+import { weightsAt } from "../core/luck.ts";
+import { luck, type CareerId, type Roster } from "../core/roster.ts";
 import { CAREER_KEYS, freshCareer, hydrate, type Career, type Delta } from "../core/state.ts";
 
 export const CAREER_FILE = "career.json";
@@ -251,9 +252,12 @@ export function createStore(dir: string, now: () => number = Date.now): Store {
       if (!acquire()) return { outcome: "busy" };
       try {
         const current = readAt(file);
+        // The Luck is read before the active Career rests, so it counts once. A corrupt active file weighs nothing.
+        const elders = [...(current !== undefined && !current.corrupt ? [current.career] : []), ...resting()];
+        const chance = luck(elders);
         if (current?.corrupt) setAside(file);
         else if (current !== undefined && !rest(current)) return { outcome: "busy" };
-        const egg = freshCareer(at);
+        const egg = freshCareer(at, weightsAt(chance));
         if (!write(file, { ...egg })) return { outcome: "busy" };
         return { outcome: "written", career: egg };
       } finally {

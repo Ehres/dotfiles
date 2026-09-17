@@ -1,6 +1,7 @@
 import { latest, type Rename } from "./name.ts";
 import { firstPicks, hydratePicks, samePicks, type Picks } from "./pick.ts";
-import { REFERENCE, hatch, type SpeciesId } from "./species.ts";
+import { weightsAt } from "./luck.ts";
+import { REFERENCE, SPECIES, hatch, type Rarity, type SpeciesId } from "./species.ts";
 
 export type Activity = "idle" | "thinking" | "working" | "waiting" | "hurt" | "sleeping";
 export type ToolKind = "read" | "edit" | "bash" | "other";
@@ -51,8 +52,9 @@ export function initialSession(now: number): Session {
   return { activity: "idle", since: now, busy: false };
 }
 
-export function freshCareer(now: number): Career {
-  return { ...EMPTY_DELTA, tools: { ...EMPTY_DELTA.tools }, hatchedAt: now, species: hatch(now), picks: {} };
+/** A new egg at `now`: its Species drawn once, at `weights`, those of a first egg unless the store passes the Roster's Luck. */
+export function freshCareer(now: number, weights: Record<Rarity, number> = weightsAt(0)): Career {
+  return { ...EMPTY_DELTA, tools: { ...EMPTY_DELTA.tools }, hatchedAt: now, species: hatch(now, SPECIES, weights), picks: {} };
 }
 
 export function isEmpty(delta: Delta): boolean {

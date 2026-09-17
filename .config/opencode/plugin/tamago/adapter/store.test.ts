@@ -5,7 +5,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { LOCK_STALE_MS } from "../core/lock.ts";
 import { EMPTY_DELTA, freshCareer, type Delta } from "../core/state.ts";
-import { REFERENCE, hatch } from "../core/species.ts";
+import { weightsAt } from "../core/luck.ts";
+import { REFERENCE, SPECIES, hatch } from "../core/species.ts";
 import { CAREER_FILE, LOCK_DIR, LOCK_OWNER_FILE, ROSTER_DIR, createStore, type Store } from "./store.ts";
 
 const scratch = () => mkdtempSync(join(tmpdir(), "tamago-store-"));
@@ -470,4 +471,31 @@ test("switch and hatch are busy while another instance holds the lock", () => {
   assert.equal(store.switch(3).outcome, "busy");
   assert.equal(store.hatch(9).outcome, "busy");
   assert.equal(store.load().career.hatchedAt, 7);
+});
+
+test("hatch weighs the new egg by the Luck of the elders on disk, active and resting", () => {
+  const dir = scratch();
+  const store = createStore(dir, () => 1);
+  // Four common elders resting and one active: Luck 5. 2,000 sessions weigh 20,000 XP, elder for a cat.
+  mkdirSync(join(dir, ROSTER_DIR), { recursive: true });
+  for (let i = 1; i <= 4; i++) writeFileSync(join(dir, ROSTER_DIR, `${i}.json`), JSON.stringify({ ...freshCareer(i), species: "cat", sessions: 2_000 }));
+  writeFileSync(join(dir, CAREER_FILE), JSON.stringify({ ...freshCareer(5), species: "cat", sessions: 2_000 }));
+  // A hatch date where Luck 5 changes the draw: the first one past 1,000, found rather than pinned.
+  let at = 1_000;
+  while (at < 1_000_000 && hatch(at, SPECIES, weightsAt(0)) === hatch(at, SPECIES, weightsAt(5))) at++;
+  assert.ok(at < 1_000_000, "some date within a million draws differently at Luck 5");
+  const result = store.hatch(at);
+  assert.equal(result.outcome, "written");
+  assert.equal(result.career?.species, hatch(at, SPECIES, weightsAt(5)));
+  assert.notEqual(result.career?.species, hatch(at), "a first egg would have drawn otherwise");
+  assert.equal(JSON.parse(readFileSync(join(dir, CAREER_FILE), "utf8")).species, hatch(at, SPECIES, weightsAt(5)));
+  assert.equal(readdirSync(join(dir, ROSTER_DIR)).length, 5, "the former active Career rests, counted once");
+});
+
+test("hatch on an empty directory lays a first egg: no epic, no legendary", () => {
+  const dir = scratch();
+  const store = createStore(dir, () => 1);
+  const result = store.hatch(77);
+  assert.equal(result.outcome, "written");
+  assert.equal(result.career?.species, hatch(77, SPECIES, weightsAt(0)));
 });
