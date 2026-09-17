@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { DAY_MS, age, progress, reveal, speciesLine } from "./card.ts";
+import { DAY_MS, STATS_HIDDEN, age, progress, reveal, sheetLines, speciesLine } from "./card.ts";
 import { REFERENCE } from "./species.ts";
 import { freshCareer, type Career } from "./state.ts";
 
@@ -50,4 +50,29 @@ test("speciesLine hides the species while still an egg, then names it with its r
 test("reveal names the species with the right article", () => {
   assert.equal(reveal("Tamago", { ...career, species: "owl" }), "Tamago hatched: an owl, common!");
   assert.equal(reveal("Momo", { ...career, species: "dragon" }), "Momo hatched: a dragon, legendary!");
+});
+
+test("sheetLines hides the stats while still an egg, then draws one bar per behavior Stat, aligned", () => {
+  assert.deepEqual(sheetLines(freshCareer(0)), [STATS_HIDDEN]);
+  const hatched: Career = { ...career, hatchedAt: 1789113932488, species: "cat" }; // draw: energy 5, chatter 9, sensitivity 1, patience 6
+  assert.deepEqual(sheetLines(hatched), [
+    "energy      [#####-----] 5",
+    "chatter     [#########-] 9",
+    "sensitivity [#---------] 1",
+    "patience    [######----] 6",
+  ]);
+});
+
+test("sheetLines shows the Stats after the Modifiers of the Species", () => {
+  const hatched: Career = { ...career, hatchedAt: 1789113932488, species: "owl" }; // energy −2, chatter −1, patience +2
+  assert.deepEqual(sheetLines(hatched), [
+    "energy      [###-------] 3",
+    "chatter     [########--] 8",
+    "sensitivity [#---------] 1",
+    "patience    [########--] 8",
+  ]);
+  const dragon: Career = { ...career, hatchedAt: 1789113932549, species: "dragon" }; // draw: energy 10, sensitivity 0; +2 and −2 clamp
+  const lines = sheetLines(dragon);
+  assert.equal(lines[0], "energy      [##########] 10");
+  assert.equal(lines[2], "sensitivity [----------] 0");
 });

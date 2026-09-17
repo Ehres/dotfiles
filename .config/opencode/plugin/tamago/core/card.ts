@@ -1,10 +1,17 @@
 import { bar, fmt } from "./format.ts";
+import { BEHAVIOR_STATS, SCALE, sheet } from "./sheet.ts";
 import { species } from "./species.ts";
 import { next, stage, xp } from "./stage.ts";
 import type { Career } from "./state.ts";
 
 export const DAY_MS = 86_400_000;
 export const BAR_WIDTH = 20;
+/** One cell per point of the scale, so a bar reads without its number. */
+export const STAT_BAR_WIDTH = SCALE.max - SCALE.min;
+/** Shown at egg instead of the bars: the Sheet, like the Species, waits for the hatch. */
+export const STATS_HIDDEN = "stats show at hatching";
+/** Labels are padded to the longest behavior Stat so the bars line up. */
+const LABEL_WIDTH = Math.max(...BEHAVIOR_STATS.map((stat) => stat.length));
 
 /** Whole days since hatching, in words. */
 export function age(hatchedAt: number, now: number): string {
@@ -36,4 +43,11 @@ function article(label: string): string {
 export function reveal(name: string, career: Career): string {
   const { label, rarity } = species(career.species);
   return `${name} hatched: ${article(label)} ${label}, ${rarity}!`;
+}
+
+/** One line per behavior Stat, in BEHAVIOR_STATS order: label, bar, value after the Modifiers of the Species. At egg the single STATS_HIDDEN line. */
+export function sheetLines(career: Career): string[] {
+  if (stage(career) === "egg") return [STATS_HIDDEN];
+  const stats = sheet(career.hatchedAt, career.species);
+  return BEHAVIOR_STATS.map((stat) => `${stat.padEnd(LABEL_WIDTH)} ${bar((stats[stat] - SCALE.min) / (SCALE.max - SCALE.min), STAT_BAR_WIDTH)} ${stats[stat]}`);
 }

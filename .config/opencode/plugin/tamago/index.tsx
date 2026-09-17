@@ -298,7 +298,7 @@ const tui: TuiPlugin = async (api, options) => {
           {
             name: "tamago.card",
             title: `${PALETTE}: show card`,
-            description: `Who ${who} is: species, stage, XP, age`,
+            description: `Who ${who} is: species, stage, XP, age, stats`,
             category: PALETTE,
             namespace: "palette",
             run: guard(showCard),
