@@ -1,13 +1,15 @@
+import { sheet, temperamentOf, type Temperament } from "./sheet.ts";
+import { REFERENCE, SPECIES, type Species, type SpeciesId } from "./species.ts";
 import { WEIGHTS, stage, stageIndex, type Paced } from "./stage.ts";
 import type { Career, Counters } from "./state.ts";
 
-export type Temperament = "cheerful" | "sarcastic" | "stoic" | "dreamy";
+/** The Temperament lives in sheet.ts with the Stats; it is re-exported here so the Voice, the Sprites and the views keep one import. */
+export type { Temperament } from "./sheet.ts";
+export { TEMPERAMENTS } from "./sheet.ts";
 export type Craft = "scribe" | "shell" | "sage";
 export type Stance = "prudent" | "bold";
 export type Vocation = { craft: Craft; stance: Stance };
 export type Character = { temperament: Temperament; vocation?: Vocation };
-
-export const TEMPERAMENTS: readonly Temperament[] = ["cheerful", "sarcastic", "stoic", "dreamy"];
 
 /** Counters a Craft may weigh. `other` tools belong to no Craft. */
 type CraftInput = "read" | "edit" | "bash" | "filesEdited";
@@ -29,15 +31,12 @@ export const STANCE = { questions: 20, prompts: 1 };
 const VOCATION_FROM = stageIndex("young");
 
 /**
- * A fixed mix of the hatch timestamp. Never change these constants once
- * shipped: every Tamago on every machine would change Temperament.
+ * The Temperament of a Tamago: the highest Temperament Stat of its Sheet.
+ * Without a Species, the reference one, which has no Modifier: the hatch date
+ * alone decides, exactly as before the Sheet existed.
  */
-export function temperament(hatchedAt: number): Temperament {
-  let h = Math.floor(hatchedAt) >>> 0;
-  h = Math.imul(h ^ (h >>> 16), 0x45d9f3b) >>> 0;
-  h = Math.imul(h ^ (h >>> 16), 0x45d9f3b) >>> 0;
-  h = (h ^ (h >>> 16)) >>> 0;
-  return TEMPERAMENTS[h % TEMPERAMENTS.length] ?? "cheerful";
+export function temperament(hatchedAt: number, id: SpeciesId = REFERENCE, table: readonly Species[] = SPECIES): Temperament {
+  return temperamentOf(sheet(hatchedAt, id, table));
 }
 
 function input(counters: Counters, key: CraftInput): number {
@@ -70,7 +69,7 @@ export function vocation(paced: Paced): Vocation | undefined {
 
 export function character(career: Career): Character {
   const found = vocation(career);
-  return { temperament: temperament(career.hatchedAt), ...(found === undefined ? {} : { vocation: found }) };
+  return { temperament: temperament(career.hatchedAt, career.species), ...(found === undefined ? {} : { vocation: found }) };
 }
 
 /** "sarcastic · prudent shell", or the Temperament alone before young. */

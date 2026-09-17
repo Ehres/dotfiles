@@ -18,11 +18,20 @@ export type SpeciesId = string;
 /** `sheet` holds the Modifiers this Species adds to the Sheet; absent for none. */
 export type Species = { id: SpeciesId; label: string; rarity: Rarity; sheet?: Modifiers };
 
-/** Every Species that can hatch. Order within a Rarity is the order of the draw. */
+/**
+ * Every Species that can hatch. Order within a Rarity is the order of the
+ * draw. `sheet` holds the Modifiers, absent for none; a test bounds each to
+ * ±MODIFIER_MAX and their sum to MODIFIERS_SUM_MAX. Tune a line before that
+ * Species has hatched anywhere: the Sheet is derived, so changing it changes
+ * the Temperament and Behavior of every Tamago of that Species already alive.
+ * Once one lives, leave its line alone and add a sibling Species instead. The
+ * reference entry has no Modifier and never will: that is what keeps every
+ * Career from before the Sheet unchanged.
+ */
 export const SPECIES: readonly Species[] = [
   { id: "cat", label: "cat", rarity: "common" },
-  { id: "owl", label: "owl", rarity: "common" },
-  { id: "dragon", label: "dragon", rarity: "legendary" },
+  { id: "owl", label: "owl", rarity: "common", sheet: { stoic: 2, cheerful: -1, energy: -2, chatter: -1, patience: 2 } },
+  { id: "dragon", label: "dragon", rarity: "legendary", sheet: { sarcastic: 3, sensitivity: -2, energy: 2 } },
 ];
 /** The Species of a Career that recorded none: the creature drawn before Species existed. */
 export const REFERENCE: SpeciesId = "cat";
