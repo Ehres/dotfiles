@@ -255,7 +255,8 @@ _Avoid_: choice, selection, decision
 A durable mark on the Tamago granted by a Pick: a family of phrases for the
 Voice, a Cue it reacts to, a mark or a form on the Sprite. Computed from the
 Picks, never stored. A Trait is what the user chose; a Temperament is what the
-hatch date decided. A Trait adds to the Temperament, it never replaces it.
+hatch date and the Species decided. A Trait adds to the Temperament, it never
+replaces it.
 _Avoid_: perk, upgrade, buff, card
 
 ### Appearance

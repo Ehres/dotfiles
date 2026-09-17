@@ -179,10 +179,11 @@ half and double; 5 is exactly the plugin's old constants.
 The species weighs on the sheet without deciding it: an owl adds stoic +2,
 cheerful −1, energy −2, chatter −1, patience +2; a dragon sarcastic +3,
 sensitivity −2, energy +2; a cat nothing, so every creature from before the
-sheet keeps its temperament. About one owl in four is stoic because of its
-species rather than its draw. The modifiers live in `core/species.ts`; tune a
-species before one has hatched, since changing its line changes every living
-one. The card shows the four behavior stats as bars from `hatchling` on.
+sheet keeps its temperament. About one owl in six, and one dragon in four, takes
+its species' temperament rather than its draw. The modifiers live in
+`core/species.ts`; tune a species before one has hatched, since changing its
+line changes every living one. The card shows the four behavior stats as bars
+from `hatchling` on.
 
 From the `young` stage, the counters add a vocation: a craft, scribe, shell or
 sage, whichever weighted score is highest, and a stance, prudent from five
