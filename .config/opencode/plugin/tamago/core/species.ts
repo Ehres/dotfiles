@@ -1,4 +1,5 @@
 import { generator, seed } from "./random.ts";
+import type { Modifiers } from "./sheet.ts";
 
 export type Rarity = "common" | "uncommon" | "rare" | "epic" | "legendary";
 /** From the most common to the rarest; the draw falls back along this order. */
@@ -14,7 +15,8 @@ export const RARITY: Record<Rarity, { weight: number; pace: number }> = {
 };
 
 export type SpeciesId = string;
-export type Species = { id: SpeciesId; label: string; rarity: Rarity };
+/** `sheet` holds the Modifiers this Species adds to the Sheet; absent for none. */
+export type Species = { id: SpeciesId; label: string; rarity: Rarity; sheet?: Modifiers };
 
 /** Every Species that can hatch. Order within a Rarity is the order of the draw. */
 export const SPECIES: readonly Species[] = [
