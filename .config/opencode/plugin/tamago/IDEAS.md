@@ -322,9 +322,18 @@ Quatre lots :
    sensitivity −2, energy +2 ; cat : aucun). À Modifiers nuls, la Sheet
    redonne le Temperament historique. La carte montre les quatre Stats de
    comportement en barres.
-4. **Enrichissements.** Phrases signature par Species mêlées à celles du
-   Temperament, dessin des Species suivantes jusqu'à la vingtaine, vue de
-   collection, œuf teinté par Rarity.
+4. **Enrichissements**, en quatre sous-lots :
+   - 4a **Signature par Species**, **fait le 2026-09-17**. Chaque Species
+     possède ses phrases pour au plus trois Cues, `hatched` toujours incluse
+     (`core/signature.ts`). Cascade : la Signature de la Species si elle
+     couvre la Cue, sinon le Temperament, sinon les phrases neutres. À
+     l'éclosion, c'est la Species qui parle. Le cat a la sienne comme les
+     autres.
+   - 4b dessin des Species suivantes jusqu'à la vingtaine, pour peupler
+     uncommon, rare et epic, avec leurs Modifiers et leur Signature.
+   - 4c vue de collection : tous les Tamago de la machine, l'actif et ceux
+     au repos.
+   - 4d œuf teinté par Rarity ; à trancher contre « l'œuf ne révèle rien ».
 
 Contraintes qui tiennent : aucune Species n'est une punition, pas de lecture
 de contenu, merge commutatif, pas de re-roll, jamais de retrait sur la Career,

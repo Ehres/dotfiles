@@ -86,6 +86,13 @@ The 5 s of a bubble, the 10 s between two, the 5 min of a long work and the
 3 failures of a streak are those of a median sheet; a chatty creature speaks
 sooner and longer, a sensitive one complains earlier.
 
+Each species also has a signature: its own phrases for three cues, always
+including the hatch. A cat purrs when the todos are done and grumbles when
+woken, an owl comments on long nights and early dawns, a dragon shrugs off
+error streaks and brags at each evolution. Where the species has a signature
+it speaks it, whatever the temperament; elsewhere the temperament speaks.
+The table lives in `core/signature.ts`, one entry per species.
+
 ## Commands
 
 Six commands in the palette, always under `Tamago` so they stay easy to find

@@ -159,6 +159,12 @@ Bubble, the last Cue spoken, recent failures. One per Session, forgotten
 with it.
 _Avoid_: cooldown state, history
 
+**Signature**:
+The phrases a Species owns for at most three Cues, `hatched` always among
+them. Where the Species has a Signature for a Cue it speaks it, whatever the
+Temperament; elsewhere the Temperament speaks, then the neutral phrases.
+_Avoid_: species flavor, catchphrase, override
+
 ### Over a lifetime
 
 **Career**:
@@ -337,6 +343,9 @@ _Avoid_: card, widget
 - A **Character** is read, never written; two windows always show the same
 - The **Voice** speaks with the **Temperament**; the **Face** of a pet wears
   it; the card states the whole **Character**
+- The **Voice** speaks the **Signature** of the **Species** over the
+  **Temperament**, for the few **Cues** the Signature covers; at the hatch it
+  is always the Species that speaks
 - A **Career** holds zero or one **Pick** per **Milestone**
 - A **Milestone** is reached when the counters of the **Career** satisfy its
   rule; reaching it is a fact about the counters, not an event
