@@ -1,7 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { DAY_MS } from "./card.ts";
-import { ROSTER_KEYS, blocked, blockers, entry, growing, idOf, line, luck, ordered, rosterAction, stepsIn, step, switchable, type Roster } from "./roster.ts";
+import { ROSTER_KEYS, blocked, blockers, growing, idOf, line, luck, ordered, rosterAction, stepsIn, step, switchable, type Roster } from "./roster.ts";
 import { freshCareer, type Career } from "./state.ts";
 
 const T0 = 1_700_000_000_000;
@@ -32,13 +31,6 @@ test("switchable is the resting Careers by hatch date, never the active one", ()
   const roster: Roster = { active: elder(T0), resting: [elder(T0 - 1), elder(T0 - 3), elder(T0 - 2)] };
   assert.deepEqual(switchable(roster).map(idOf), [T0 - 3, T0 - 2, T0 - 1]);
   assert.deepEqual(switchable({ active: elder(T0), resting: [] }), []);
-});
-
-test("entry names the Tamago, its species and rarity, its stage and its age; an egg keeps its secret", () => {
-  const momo = elder(T0, { species: "owl", name: { value: "Momo", at: 1 } });
-  assert.equal(entry(momo, "Tamago", T0 + 12 * DAY_MS), "Momo · owl · common · elder · 12 days old");
-  assert.equal(entry(elder(T0), "Tamago", T0), "Tamago · cat · common · elder · hatched today");
-  assert.equal(entry(egg(T0), "Tamago", T0 + DAY_MS), "Tamago · still an egg · 1 day old");
 });
 
 test("blocked names who is still growing and what to wait for", () => {

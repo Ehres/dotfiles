@@ -1,5 +1,5 @@
 /** @jsxImportSource @opentui/solid */
-import type { TuiDialogSelectOption, TuiPlugin, TuiPluginModule } from "@opencode-ai/plugin/tui";
+import type { TuiPlugin, TuiPluginModule } from "@opencode-ai/plugin/tui";
 import type { Event } from "@opencode-ai/sdk/v2";
 import { homedir } from "node:os";
 import { join } from "node:path";
@@ -27,9 +27,10 @@ import {
   type Step,
   type Window,
 } from "./core/window.ts";
-import { blocked, blockers, entry, idOf, stepsIn, switchable } from "./core/roster.ts";
+import { blocked, blockers, idOf, line, ordered, stepsIn } from "./core/roster.ts";
 import { CardView } from "./view/card.tsx";
 import { HomeView } from "./view/home.tsx";
+import { RosterView } from "./view/roster.tsx";
 import { SidebarView, type FooterInfo } from "./view/sidebar.tsx";
 
 const id = "opencode-tamago";
@@ -211,26 +212,26 @@ const tui: TuiPlugin = async (api, options) => {
       else api.ui.toast({ variant: "warning", title: name(), message: BUSY });
     };
 
-    const askSwitch = () => {
+    /** The roster dialog: every Tamago of the machine, the highlighted one's card underneath; Enter on a resting one is a Switch. */
+    const showRoster = () => {
       const { roster, corrupt } = store.roster();
       if (corrupt) {
         warnCorrupt();
         return;
       }
-      const others = switchable(roster);
-      if (others.length === 0) {
-        api.ui.toast({ variant: "info", title: name(), message: "Nobody else in the roster yet." });
-        return;
-      }
-      const now = Date.now();
-      const options: TuiDialogSelectOption<number>[] = others.map((other) => ({ title: entry(other, defaultName, now), value: idOf(other) }));
+      const careers = ordered(roster);
+      const activeId = idOf(roster.active);
+      const lines = careers.map((one) => line(one, defaultName, activeId));
       api.ui.dialog.replace(() => (
-        <api.ui.DialogSelect
-          title="Switch Tamago"
-          options={options}
-          onSelect={guard((option: TuiDialogSelectOption<number>) => {
+        <RosterView
+          theme={() => api.theme.current}
+          careers={careers}
+          lines={lines}
+          clock={clock}
+          now={Date.now}
+          onSelect={guard((chosen: Career) => {
             api.ui.dialog.clear();
-            switchTo(option.value);
+            if (idOf(chosen) !== activeId) switchTo(idOf(chosen));
           })}
         />
       ));
@@ -317,12 +318,12 @@ const tui: TuiPlugin = async (api, options) => {
             run: guard(askHatch),
           },
           {
-            name: "tamago.switch",
-            title: `${PALETTE}: switch`,
-            description: "Bring another Tamago of this machine to the front",
+            name: "tamago.roster",
+            title: `${PALETTE}: roster`,
+            description: "Every Tamago of this machine; pick one to bring it to the front",
             category: PALETTE,
             namespace: "palette",
-            run: guard(askSwitch),
+            run: guard(showRoster),
           },
         ],
       });

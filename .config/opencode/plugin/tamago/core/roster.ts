@@ -1,4 +1,3 @@
-import { age, speciesLine } from "./card.ts";
 import { LUCK_POINTS } from "./luck.ts";
 import { species } from "./species.ts";
 import { stage } from "./stage.ts";
@@ -42,14 +41,6 @@ export function luck(careers: readonly Career[]): number {
 /** The Name shown for a Career; `fallback` is the plugin's default Name. */
 function nameOf(career: Career, fallback: string): string {
   return career.name?.value ?? fallback;
-}
-
-/** One line of the switch dialog. An egg does not tell its Species, so its line skips the Stage too. */
-export function entry(career: Career, fallback: string, now: number): string {
-  const who = nameOf(career, fallback);
-  const when = age(career.hatchedAt, now);
-  if (stage(career) === "egg") return `${who} · ${speciesLine(career)} · ${when}`;
-  return `${who} · ${speciesLine(career)} · ${stage(career)} · ${when}`;
 }
 
 /** The refusal when a Hatch is blocked. */
