@@ -480,14 +480,19 @@ test("hatch weighs the new egg by the Luck of the elders on disk, active and res
   mkdirSync(join(dir, ROSTER_DIR), { recursive: true });
   for (let i = 1; i <= 4; i++) writeFileSync(join(dir, ROSTER_DIR, `${i}.json`), JSON.stringify({ ...freshCareer(i), species: "cat", sessions: 2_000 }));
   writeFileSync(join(dir, CAREER_FILE), JSON.stringify({ ...freshCareer(5), species: "cat", sessions: 2_000 }));
-  // A hatch date where Luck 5 changes the draw: the first one past 1,000, found rather than pinned.
+  // A hatch date where Luck 5 changes the draw, and where Luck 6 would change it again: found rather than pinned.
   let at = 1_000;
-  while (at < 1_000_000 && hatch(at, SPECIES, weightsAt(0)) === hatch(at, SPECIES, weightsAt(5))) at++;
-  assert.ok(at < 1_000_000, "some date within a million draws differently at Luck 5");
+  while (
+    at < 1_000_000 &&
+    (hatch(at, SPECIES, weightsAt(0)) === hatch(at, SPECIES, weightsAt(5)) || hatch(at, SPECIES, weightsAt(5)) === hatch(at, SPECIES, weightsAt(6)))
+  )
+    at++;
+  assert.ok(at < 1_000_000, "some date within a million draws differently at Luck 0, 5 and 6");
   const result = store.hatch(at);
   assert.equal(result.outcome, "written");
   assert.equal(result.career?.species, hatch(at, SPECIES, weightsAt(5)));
   assert.notEqual(result.career?.species, hatch(at), "a first egg would have drawn otherwise");
+  assert.notEqual(result.career?.species, hatch(at, SPECIES, weightsAt(6)), "the active Career is counted once, not twice");
   assert.equal(JSON.parse(readFileSync(join(dir, CAREER_FILE), "utf8")).species, hatch(at, SPECIES, weightsAt(5)));
   assert.equal(readdirSync(join(dir, ROSTER_DIR)).length, 5, "the former active Career rests, counted once");
 });

@@ -1,5 +1,96 @@
 import type { Bodies } from "../bodies.ts";
 import type { SpeciesId } from "../species.ts";
 
-/** The epic Species: the myth. Filled one Species at a time; a test fails while a Species of the table has no body. */
-export const EPIC: Record<SpeciesId, Bodies> = {};
+/** The epic Species: the myth. */
+export const EPIC: Record<SpeciesId, Bodies> = {
+  phoenix: {
+    hatchling: (e, m) => [
+      `   ) ( )  ${m}`,
+      `  ( ${e} )`,
+      "   \\ v /",
+      "    '-'",
+      "",
+    ],
+    young: (e, m) => [
+      `  ) ( ) ( ${m}`,
+      `  ( ${e} )`,
+      "  \\\\ v //",
+      "   \\___/",
+      "    / \\",
+    ],
+    adult: (e, m) => [
+      `  ) ( ) ( ${m}`,
+      `  ( ${e} )`,
+      " \\\\\\ v ///",
+      "  \\_____/",
+      "   /   \\",
+    ],
+    elder: (e, m) => [
+      ` )( ( ) )(${m}`,
+      `  ( ${e} )`,
+      " \\\\\\~v~///",
+      "  \\_____/",
+      "  ~/   \\~",
+    ],
+  },
+  kraken: {
+    hatchling: (e, m) => [
+      `  _.-^-._ ${m}`,
+      `  ( ${e} )`,
+      "  }{}{}{}{",
+      "   ~ ~ ~",
+      "",
+    ],
+    young: (e, m) => [
+      `  _.-^-._ ${m}`,
+      `  ( ${e} )`,
+      " }{}{}{}{}{",
+      "  { } { }",
+      "   ~ ~ ~",
+    ],
+    adult: (e, m) => [
+      ` _.--^--._${m}`,
+      `  ( ${e} )`,
+      "}{}{}{}{}{}",
+      " { } { } {",
+      "  ~ ~ ~ ~",
+    ],
+    elder: (e, m) => [
+      ` _.--^--._${m}`,
+      `  ( ${e} )`,
+      "}{}{~^~}{}{",
+      " { } { } {",
+      " ~~~~~~~~~",
+    ],
+  },
+  unicorn: {
+    hatchling: (e, m) => [
+      `   ,-|    ${m}`,
+      `  ( ${e} )`,
+      "   \\ u /",
+      "    '-'",
+      "",
+    ],
+    young: (e, m) => [
+      `   ,-|    ${m}`,
+      `  ( ${e} )`,
+      " ,-| u |",
+      "  ,|___|",
+      "   /   \\",
+    ],
+    adult: (e, m) => [
+      `  ,,-|    ${m}`,
+      `  ( ${e} )`,
+      ",,-|  u  |",
+      " ,-|_____|",
+      "  /|   |\\",
+    ],
+    elder: (e, m) => [
+      `  ,,-|    ${m}`,
+      `  ( ${e} )`,
+      ",,-|~~u~~|",
+      " ,-|_____|",
+      "  */|   |\\*",
+    ],
+  },
+};

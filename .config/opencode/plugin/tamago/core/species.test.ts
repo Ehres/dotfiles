@@ -129,6 +129,9 @@ const MODIFIERS: Record<string, Modifiers | undefined> = {
   ghost: { dreamy: 3, chatter: -2, energy: -1 },
   jellyfish: { dreamy: 2, sensitivity: 2, energy: -1 },
   chameleon: { sarcastic: 2, patience: 2, chatter: -1 },
+  phoenix: { cheerful: 3, sensitivity: -3, energy: 1 },
+  kraken: { sarcastic: 2, stoic: 2, sensitivity: 2, patience: -1 },
+  unicorn: { dreamy: 3, cheerful: 2, chatter: 1 },
   dragon: { sarcastic: 3, sensitivity: -2, energy: 2 },
 };
 

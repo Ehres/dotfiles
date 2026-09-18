@@ -46,6 +46,9 @@ export const SPECIES: readonly Species[] = [
   { id: "ghost", label: "ghost", rarity: "rare", sheet: { dreamy: 3, chatter: -2, energy: -1 } },
   { id: "jellyfish", label: "jellyfish", rarity: "rare", sheet: { dreamy: 2, sensitivity: 2, energy: -1 } },
   { id: "chameleon", label: "chameleon", rarity: "rare", sheet: { sarcastic: 2, patience: 2, chatter: -1 } },
+  { id: "phoenix", label: "phoenix", rarity: "epic", sheet: { cheerful: 3, sensitivity: -3, energy: 1 } },
+  { id: "kraken", label: "kraken", rarity: "epic", sheet: { sarcastic: 2, stoic: 2, sensitivity: 2, patience: -1 } },
+  { id: "unicorn", label: "unicorn", rarity: "epic", sheet: { dreamy: 3, cheerful: 2, chatter: 1 } },
   { id: "dragon", label: "dragon", rarity: "legendary", sheet: { sarcastic: 3, sensitivity: -2, energy: 2 } },
 ];
 /** The Species of a Career that recorded none: the creature drawn before Species existed. */
