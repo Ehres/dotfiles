@@ -6,7 +6,7 @@ import { HURT_MS, SLEEP_MS } from "./events.ts";
 import { speakerOf } from "./sheet.ts";
 import { STAGES, WEIGHTS } from "./stage.ts";
 import { EMPTY_DELTA, freshCareer, isEmpty, type Career } from "./state.ts";
-import { BUBBLE_MS, phrase } from "./voice.ts";
+import { phrase } from "./voice.ts";
 import { adopt, flushed, freshWindow, receive, rename, setMuted, tick, type Window } from "./window.ts";
 
 const T0 = 1_000_000;
@@ -14,9 +14,12 @@ const to = (id: string, event: Addressed["event"]): Addressed => ({ target: { ty
 const every = (event: Addressed["event"]): Addressed => ({ target: { type: "every" }, event });
 const none = (event: Addressed["event"]): Addressed => ({ target: { type: "none" }, event });
 
+/** Career of the reference cat at a given hatch date. */
+const cat = (at: number): Career => ({ ...freshCareer(at), species: "cat" });
+
 /** A Window with two Sessions already moving, so "every" has someone to reach. */
 function twoSessions(): Window {
-  let w = freshWindow(freshCareer(T0));
+  let w = freshWindow(cat(T0));
   w = receive(w, to("a", { type: "prompt_sent" }), T0).window;
   w = receive(w, to("b", { type: "prompt_sent" }), T0).window;
   return w;
@@ -25,7 +28,7 @@ function twoSessions(): Window {
 /** Sessions worth exactly the XP of `stage`, so one more prompt crosses into it. */
 function careerJustBelow(stage: (typeof STAGES)[number]["id"]): Career {
   const threshold = STAGES.find((entry) => entry.id === stage)?.xp ?? 0;
-  return { ...freshCareer(T0), sessions: (threshold - WEIGHTS.prompts) / WEIGHTS.sessions };
+  return { ...cat(T0), sessions: (threshold - WEIGHTS.prompts) / WEIGHTS.sessions };
 }
 
 test("an event addressed to a Session moves that Session only and counts once", () => {
@@ -71,7 +74,8 @@ test("a tick lets a Bubble expire and a hurt Session recover", () => {
   let w = twoSessions();
   w = receive(w, to("a", { type: "permission_asked" }), T0).window;
   w = receive(w, to("b", { type: "tool_failed" }), T0).window;
-  const later = tick(w, T0 + BUBBLE_MS + 3_000);
+  const bubbleMs = behavior(w.career).bubbleMs;
+  const later = tick(w, T0 + bubbleMs + 3_000);
   assert.equal(later.voices.a?.bubble, undefined);
   assert.equal(later.sessions.b?.activity, "working");
 });
@@ -142,9 +146,9 @@ test("renaming to the Name already shown, even the plugin default that the Caree
 });
 
 test("adopting a Career hatched at another time is a Switch: no Evolution, no Bubble, the Session stays", () => {
-  let w = freshWindow(freshCareer(T0));
+  let w = freshWindow(cat(T0));
   w = receive(w, to("a", { type: "session_busy" }), T0).window; // idle → thinking, counts nothing
-  const elder: Career = { ...freshCareer(T0 + 1), sessions: 2_000, name: { value: "Momo", at: 1 } }; // 20,000 xp
+  const elder: Career = { ...cat(T0 + 1), sessions: 2_000, name: { value: "Momo", at: 1 } }; // 20,000 xp
   const step = adopt(w, elder, T0 + 2);
   assert.deepEqual(step.effects, [{ type: "switched" }]);
   assert.equal(step.window.career, elder);
@@ -153,16 +157,16 @@ test("adopting a Career hatched at another time is a Switch: no Evolution, no Bu
 });
 
 test("a Switch that changes the Name reports switched alone, not renamed", () => {
-  const w = freshWindow({ ...freshCareer(T0), name: { value: "Pixel", at: 1 } });
-  const step = adopt(w, { ...freshCareer(T0 + 1), name: { value: "Momo", at: 2 } }, T0 + 3);
+  const w = freshWindow({ ...cat(T0), name: { value: "Pixel", at: 1 } });
+  const step = adopt(w, { ...cat(T0 + 1), name: { value: "Momo", at: 2 } }, T0 + 3);
   assert.deepEqual(step.effects, [{ type: "switched" }]);
 });
 
 test("flushed with another active Career is a Switch and forgets the pending Delta", () => {
-  let w = freshWindow(freshCareer(T0));
+  let w = freshWindow(cat(T0));
   w = receive(w, to("a", { type: "prompt_sent" }), T0).window;
   assert.equal(isEmpty(w.pending), false);
-  const step = flushed(w, freshCareer(T0 + 5), T0 + 6);
+  const step = flushed(w, cat(T0 + 5), T0 + 6);
   assert.deepEqual(step.effects, [{ type: "switched" }]);
   assert.equal(isEmpty(step.window.pending), true);
   assert.equal(step.window.career.hatchedAt, T0 + 5);
@@ -210,7 +214,8 @@ test("the Voice speaks as the Career's Speaker: the phrase of its Species, Tempe
   w = receive(w, to("a", { type: "session_idle" }), T0 + 1).window;
   w = tick(w, T0 + 1 + SLEEP_MS);
   assert.equal(w.sessions.a?.activity, "sleeping");
-  w = receive(w, to("a", { type: "prompt_sent" }), T0 + 2 + SLEEP_MS + BUBBLE_MS + 10_000).window;
+  const bubbleMs = behavior(career).bubbleMs;
+  w = receive(w, to("a", { type: "prompt_sent" }), T0 + 2 + SLEEP_MS + bubbleMs + 10_000).window;
   assert.equal(w.voices.a?.bubble?.cue, "woke");
   assert.equal(w.voices.a?.bubble?.text, phrase("woke", speakerOf(career), 0));
 });

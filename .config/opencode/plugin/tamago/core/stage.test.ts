@@ -116,7 +116,7 @@ test("next reports the raw xp threshold and the same progress for two species at
 });
 
 test("evolution across a species change is undefined when the stage does not rise", () => {
-  const cat = { ...freshCareer(0), sessions: 20 }; // 200 xp, hatchling
+  const cat = { ...freshCareer(0), species: "cat", sessions: 20 }; // 200 xp, hatchling
   const dragon = { ...cat, species: "dragon" }; // 50 growth, egg
   assert.equal(evolution(cat, dragon), undefined);
   assert.equal(evolution(dragon, cat), "hatchling");

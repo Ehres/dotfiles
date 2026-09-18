@@ -64,7 +64,7 @@ test("character and describe", () => {
   assert.equal(full.temperament, temperament(owner.hatchedAt));
   assert.deepEqual(full.vocation, { craft: "shell", stance: "bold" });
   assert.equal(describe(full), `${full.temperament} · bold shell`);
-  const egg = character(freshCareer(owner.hatchedAt));
+  const egg = character({ ...freshCareer(owner.hatchedAt), species: "cat" });
   assert.equal(describe(egg), full.temperament);
 });
 

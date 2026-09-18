@@ -26,7 +26,7 @@ test("age counts whole days since hatching", () => {
 
 test("progress shows the bar towards the next stage", () => {
   assert.equal(progress(career, 10), "[#---------] 2,147 / 6,000 xp → adult");
-  assert.equal(progress(freshCareer(0), 4), "[----] 0 / 200 xp → hatchling");
+  assert.equal(progress({ ...freshCareer(0), species: "cat" }, 4), "[----] 0 / 200 xp → hatchling");
 });
 
 test("an elder has reached its final form", () => {
