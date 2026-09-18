@@ -125,6 +125,10 @@ const MODIFIERS: Record<string, Modifiers | undefined> = {
   bat: { energy: 2, chatter: -2, sensitivity: 1 },
   hedgehog: { sensitivity: 2, chatter: -1, stoic: 1 },
   axolotl: { cheerful: 1, sensitivity: -2, patience: 1 },
+  robot: { stoic: 3, sensitivity: -2, energy: 1 },
+  ghost: { dreamy: 3, chatter: -2, energy: -1 },
+  jellyfish: { dreamy: 2, sensitivity: 2, energy: -1 },
+  chameleon: { sarcastic: 2, patience: 2, chatter: -1 },
   dragon: { sarcastic: 3, sensitivity: -2, energy: 2 },
 };
 

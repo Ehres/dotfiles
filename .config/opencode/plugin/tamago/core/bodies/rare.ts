@@ -1,5 +1,126 @@
 import type { Bodies } from "../bodies.ts";
 import type { SpeciesId } from "../species.ts";
 
-/** The rare Species: creatures past the ordinary living. Filled one Species at a time; a test fails while a Species of the table has no body. */
-export const RARE: Record<SpeciesId, Bodies> = {};
+/** The rare Species: creatures past the ordinary living. */
+export const RARE: Record<SpeciesId, Bodies> = {
+  robot: {
+    hatchling: (e, m) => [
+      `    _|_   ${m}`,
+      `  [ ${e} ]`,
+      "   |===|",
+      "    '-'",
+      "",
+    ],
+    young: (e, m) => [
+      `    _|_   ${m}`,
+      `  [ ${e} ]`,
+      "  [|===|]",
+      "   |___|",
+      "   d   b",
+    ],
+    adult: (e, m) => [
+      `   ._|_.  ${m}`,
+      `  [ ${e} ]`,
+      " [[|===|]]",
+      "  |_____|",
+      "  d|   |b",
+    ],
+    elder: (e, m) => [
+      `   ._|_.  ${m}`,
+      `  [ ${e} ]`,
+      " [[|=~=|]]",
+      "  |_____|",
+      "  d|~~~|b",
+    ],
+  },
+  ghost: {
+    hatchling: (e, m) => [
+      `   .-~-.  ${m}`,
+      `  ( ${e} )`,
+      "   (   )",
+      "   ~~~~",
+      "",
+    ],
+    young: (e, m) => [
+      `   .-~-.  ${m}`,
+      `  ( ${e} )`,
+      "  (  o  )",
+      "  (     )",
+      "  ~~~~~~~",
+    ],
+    adult: (e, m) => [
+      `  .--~--. ${m}`,
+      `  ( ${e} )`,
+      " (   o   )",
+      " (       )",
+      " ~~~~~~~~~",
+    ],
+    elder: (e, m) => [
+      `  .--~--. ${m}`,
+      `  ( ${e} )`,
+      " (  ~o~  )",
+      " (       )",
+      "~~~~~~~~~~~",
+    ],
+  },
+  jellyfish: {
+    hatchling: (e, m) => [
+      `   .-=-.  ${m}`,
+      `  ( ${e} )`,
+      "   '-.-'",
+      "    ; ;",
+      "",
+    ],
+    young: (e, m) => [
+      `   .-=-.  ${m}`,
+      `  ( ${e} )`,
+      "  '-----'",
+      "   ; ; ;",
+      "   ; ; ;",
+    ],
+    adult: (e, m) => [
+      `  .--=--. ${m}`,
+      `  ( ${e} )`,
+      " '-------'",
+      "  ; ; ; ;",
+      "  ; ; ; ;",
+    ],
+    elder: (e, m) => [
+      `  .--=--. ${m}`,
+      `  ( ${e} )`,
+      " '-~-~-~-'",
+      "  ; ; ; ;",
+      " ; ; ; ; ;",
+    ],
+  },
+  chameleon: {
+    hatchling: (e, m) => [
+      `   /|/|   ${m}`,
+      `  ( ${e} )`,
+      "   \\_~_/",
+      "    '@'",
+      "",
+    ],
+    young: (e, m) => [
+      `   /|/|   ${m}`,
+      `  ( ${e} )`,
+      "  /|_~_|\\",
+      "   |___|@",
+      "   /   \\",
+    ],
+    adult: (e, m) => [
+      `  //|/|\\  ${m}`,
+      `  ( ${e} )`,
+      " /|__~__|\\",
+      "  |_____|@",
+      "  /|   |\\",
+    ],
+    elder: (e, m) => [
+      `  //|/|\\  ${m}`,
+      `  ( ${e} )`,
+      " /|~~~~~|\\",
+      "  |_____|@",
+      "  /|   |\\",
+    ],
+  },
+};
