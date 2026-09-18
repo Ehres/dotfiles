@@ -10,7 +10,7 @@ AGENTS.md. Vocabulary lives in `CONTEXT.md`; use those terms.
   the only module that touches `api.*` and timers. Views take accessors and
   return JSX.
 - A dialog of our own reads its keys with `useKeyboard` from `@opentui/solid`;
-  the key → action table lives in `core/` (`ROSTER_KEYS`), tested, so a key
+  the key → action table lives in `core/roster/` (`ROSTER_KEYS`), tested, so a key
   taken by OpenCode is a one-line change there, never in the view.
 - Moving a Session (`transition`) and counting XP (`count`) are separate pure
   functions; an event may move several Sessions but is counted once.
@@ -39,23 +39,23 @@ AGENTS.md. Vocabulary lives in `CONTEXT.md`; use those terms.
   `roster/<hatchedAt>.json`, one lock for all. A Delta is flushed to the
   Career it was earned under, the active one when that Career is not on disk.
   The Roster never shrinks: the plugin never deletes a Career file.
-- Weights and thresholds are tuned in the `stage.ts` tables, not in code paths.
+- Weights and thresholds are tuned in the `core/career/stage.ts` tables, not in code paths.
 - Timings and counts that a Stat sets are read from a `Behavior`, never from
   a constant, in `transition`, `speak` and `cadence`; `MEDIAN` in
-  `core/behavior.ts` holds the values, and every function that takes a
+  `core/creature/behavior.ts` holds the values, and every function that takes a
   Behavior defaults to it. The Sheet is derived like the Stage: never
   stored, never cached in the Window.
 - A new Species is one line in `SPECIES` (with its Modifiers), four bodies in
-  `core/bodies/<rarity>.ts` and a full Signature in
-  `core/signatures/<rarity>.ts`. The tests fail at the first table that lacks
-  it. The rarity weights live in `core/luck.ts`, never in `species.ts`.
+  `core/appearance/bodies/<rarity>.ts` and a full Signature in
+  `core/speech/signatures/<rarity>.ts`. The tests fail at the first table that lacks
+  it. The rarity weights live in `core/creature/luck.ts`, never in `species.ts`.
 - The voice never picks a phrase by rotation or by `Math.random`: `phrase`
   seeds from the hatch date, the Cue and its count, so every window agrees for
   the same occurrence of the Cue.
 
 ## Verify
 
-`node --test "core/*.test.ts" "adapter/*.test.ts"` and
+`node --test "core/**/__tests__/*.test.ts" "adapter/__tests__/*.test.ts"` and
 `./node_modules/.bin/tsc --noEmit`, then launch OpenCode for views. Two
 instances side by side for persistence changes.
 

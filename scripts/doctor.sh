@@ -230,10 +230,10 @@ section "opencode-tamago"
 if [[ -d .config/opencode/plugin/tamago/core ]]; then
   if ! command -v node >/dev/null; then
     warn "node not on PATH -- cannot run the opencode-tamago tests"
-  elif (cd .config/opencode/plugin/tamago && node --test "core/*.test.ts" "adapter/*.test.ts" >/dev/null 2>&1); then
+  elif (cd .config/opencode/plugin/tamago && node --test "core/**/__tests__/*.test.ts" "adapter/__tests__/*.test.ts" >/dev/null 2>&1); then
     ok "opencode-tamago tests pass"
   else
-    fail "opencode-tamago tests fail -- run: (cd .config/opencode/plugin/tamago && node --test \"core/*.test.ts\" \"adapter/*.test.ts\")"
+    fail "opencode-tamago tests fail -- run: (cd .config/opencode/plugin/tamago && node --test \"core/**/__tests__/*.test.ts\" \"adapter/__tests__/*.test.ts\")"
   fi
 
   if [[ -x .config/opencode/plugin/tamago/node_modules/.bin/tsc ]]; then

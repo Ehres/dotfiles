@@ -2,7 +2,7 @@
 import type { RGBA } from "@opentui/core";
 import type { JSX } from "@opentui/solid";
 import { Index, Show, createMemo } from "solid-js";
-import type { Frame } from "../core/sprites.ts";
+import type { Frame } from "../core/appearance/sprites.ts";
 
 /** A drawn Bubble: borders in `border`, the phrase in `ink`. */
 export type BubbleView = { top: string; text: string; bottom: string; border: RGBA; ink: RGBA };

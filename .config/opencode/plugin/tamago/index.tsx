@@ -5,18 +5,18 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import { createSignal } from "solid-js";
 import { createErrorLog } from "./adapter/log.ts";
-import { behavior } from "./core/behavior.ts";
-import { tickInterval } from "./core/cadence.ts";
-import { character } from "./core/character.ts";
+import { behavior } from "./core/creature/behavior.ts";
+import { tickInterval } from "./core/moment/cadence.ts";
+import { character } from "./core/creature/character.ts";
 import { createStore, type Loaded } from "./adapter/store.ts";
 import { SUBSCRIBED, createTranslator } from "./adapter/translate.ts";
-import { reveal } from "./core/card.ts";
-import { footerPath } from "./core/footer.ts";
-import { WARN_AFTER, backoff } from "./core/retry.ts";
-import { PET_MS } from "./core/sprites.ts";
-import type { Voice } from "./core/voice.ts";
-import { freshCareer, isEmpty, sameCareer, type Career } from "./core/career.ts";
-import { initialSession, type Session } from "./core/session.ts";
+import { reveal } from "./core/appearance/card.ts";
+import { footerPath } from "./core/appearance/footer.ts";
+import { WARN_AFTER, backoff } from "./core/store/retry.ts";
+import { PET_MS } from "./core/appearance/sprites.ts";
+import type { Voice } from "./core/speech/voice.ts";
+import { freshCareer, isEmpty, sameCareer, type Career } from "./core/career/career.ts";
+import { initialSession, type Session } from "./core/moment/session.ts";
 import {
   adopt,
   flushed,
@@ -28,7 +28,7 @@ import {
   type Step,
   type Window,
 } from "./core/window.ts";
-import { blocked, blockers, idOf, line, ordered, stepsIn } from "./core/roster.ts";
+import { blocked, blockers, idOf, line, ordered, stepsIn } from "./core/roster/roster.ts";
 import { CardView } from "./view/card.tsx";
 import { HomeView } from "./view/home.tsx";
 import { RosterView } from "./view/roster.tsx";

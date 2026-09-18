@@ -3,17 +3,17 @@ import type { TuiThemeCurrent } from "@opencode-ai/plugin/tui";
 import type { RGBA } from "@opentui/core";
 import type { JSX } from "@opentui/solid";
 import { createMemo } from "solid-js";
-import type { Behavior } from "../core/behavior.ts";
-import { bubbleBorders } from "../core/bubble.ts";
-import { frameIndex } from "../core/cadence.ts";
-import type { Temperament } from "../core/sheet.ts";
-import { fmt } from "../core/format.ts";
-import type { SpeciesId } from "../core/species.ts";
-import { frameAt, heartFrame } from "../core/sprites.ts";
-import type { Career } from "../core/career.ts";
-import type { Activity, Session } from "../core/session.ts";
-import { stage, xp } from "../core/stage.ts";
-import type { Bubble } from "../core/voice.ts";
+import type { Behavior } from "../core/creature/behavior.ts";
+import { bubbleBorders } from "../core/speech/bubble.ts";
+import { frameIndex } from "../core/moment/cadence.ts";
+import type { Temperament } from "../core/creature/sheet.ts";
+import { fmt } from "../core/appearance/format.ts";
+import type { SpeciesId } from "../core/creature/species.ts";
+import { frameAt, heartFrame } from "../core/appearance/sprites.ts";
+import type { Career } from "../core/career/career.ts";
+import type { Activity, Session } from "../core/moment/session.ts";
+import { stage, xp } from "../core/career/stage.ts";
+import type { Bubble } from "../core/speech/voice.ts";
 import { Portrait, type BubbleView } from "./portrait.tsx";
 
 export const MOOD: Record<Activity, string> = {

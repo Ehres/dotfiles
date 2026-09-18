@@ -2,14 +2,14 @@
 import type { TuiThemeCurrent } from "@opencode-ai/plugin/tui";
 import type { JSX } from "@opentui/solid";
 import { Index, createMemo } from "solid-js";
-import { behavior } from "../core/behavior.ts";
-import { frameIndex } from "../core/cadence.ts";
-import { age, progress, sheetLines, speciesLine } from "../core/card.ts";
-import { character, describe } from "../core/character.ts";
-import { fmt } from "../core/format.ts";
-import { frameAt, heartFrame } from "../core/sprites.ts";
-import { stage, xp } from "../core/stage.ts";
-import type { Career } from "../core/career.ts";
+import { behavior } from "../core/creature/behavior.ts";
+import { frameIndex } from "../core/moment/cadence.ts";
+import { age, progress, sheetLines, speciesLine } from "../core/appearance/card.ts";
+import { character, describe } from "../core/creature/character.ts";
+import { fmt } from "../core/appearance/format.ts";
+import { frameAt, heartFrame } from "../core/appearance/sprites.ts";
+import { stage, xp } from "../core/career/stage.ts";
+import type { Career } from "../core/career/career.ts";
 
 /**
  * Everything a card shows under its title row, for any Career: the idle

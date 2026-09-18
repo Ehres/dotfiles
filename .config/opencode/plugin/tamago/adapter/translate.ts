@@ -1,6 +1,6 @@
 import type { Event } from "@opencode-ai/sdk/v2";
-import type { Addressed, TamagoEvent, Target } from "../core/events.ts";
-import type { ToolKind } from "../core/career.ts";
+import type { Addressed, TamagoEvent, Target } from "../core/moment/events.ts";
+import type { ToolKind } from "../core/career/career.ts";
 
 /** Every SDK event type the translator handles. index.tsx subscribes to exactly this list. */
 export const SUBSCRIBED = [

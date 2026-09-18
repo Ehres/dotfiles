@@ -2,14 +2,14 @@
 import type { TuiThemeCurrent } from "@opencode-ai/plugin/tui";
 import type { JSX } from "@opentui/solid";
 import { createMemo } from "solid-js";
-import type { Behavior } from "../core/behavior.ts";
-import { frameIndex } from "../core/cadence.ts";
-import { progress } from "../core/card.ts";
-import type { Temperament } from "../core/sheet.ts";
-import type { SpeciesId } from "../core/species.ts";
-import { frameAt, heartFrame } from "../core/sprites.ts";
-import { stage } from "../core/stage.ts";
-import type { Career } from "../core/career.ts";
+import type { Behavior } from "../core/creature/behavior.ts";
+import { frameIndex } from "../core/moment/cadence.ts";
+import { progress } from "../core/appearance/card.ts";
+import type { Temperament } from "../core/creature/sheet.ts";
+import type { SpeciesId } from "../core/creature/species.ts";
+import { frameAt, heartFrame } from "../core/appearance/sprites.ts";
+import { stage } from "../core/career/stage.ts";
+import type { Career } from "../core/career/career.ts";
 import { Portrait } from "./portrait.tsx";
 
 /** Rendered in the additive home_bottom slot, under the prompt: sprite on the left, name and progress on the right. */

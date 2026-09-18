@@ -1,13 +1,13 @@
-import { behavior } from "./behavior.ts";
-import type { Addressed, TamagoEvent } from "./events.ts";
-import { count } from "./count.ts";
-import { EMPTY_DELTA, addDelta, isEmpty, merge, sameCareer, type Career, type Delta } from "./career.ts";
-import { cleanName } from "./name.ts";
-import { initialSession, type Session } from "./session.ts";
-import { speakerOf } from "./sheet.ts";
-import { evolution, type StageId } from "./stage.ts";
-import { transition } from "./transition.ts";
-import { initialVoice, speak, type Voice } from "./voice.ts";
+import { behavior } from "./creature/behavior.ts";
+import type { Addressed, TamagoEvent } from "./moment/events.ts";
+import { count } from "./career/count.ts";
+import { EMPTY_DELTA, addDelta, isEmpty, merge, sameCareer, type Career, type Delta } from "./career/career.ts";
+import { cleanName } from "./career/name.ts";
+import { initialSession, type Session } from "./moment/session.ts";
+import { speakerOf } from "./creature/sheet.ts";
+import { evolution, type StageId } from "./career/stage.ts";
+import { transition } from "./moment/transition.ts";
+import { initialVoice, speak, type Voice } from "./speech/voice.ts";
 
 /**
  * Everything one OpenCode window holds in memory about the Tamago: the

@@ -8,20 +8,20 @@ avant implémentation.
 
 Ce que Tamago fait aujourd'hui :
 
-- Sprite ASCII 11×5 par Species et par Stage (`core/sprites.ts`), 5 stades
-  pilotés par le Growth, l'XP fois le Pace de la Species (`core/stage.ts`) :
+- Sprite ASCII 11×5 par Species et par Stage (`core/appearance/sprites.ts`), 5 stades
+  pilotés par le Growth, l'XP fois le Pace de la Species (`core/career/stage.ts`) :
   egg → hatchling → young → adult → elder.
-- 6 activités de session (`core/state.ts`) : idle, thinking, working, waiting,
+- 6 activités de session (`core/career/career.ts`) : idle, thinking, working, waiting,
   hurt, sleeping. Animation des yeux et d'une "marque" à côté de la tête.
-- Transitions et comptage purs (`core/transition.ts`, `core/count.ts`), translator SDK → événements internes ciblés par session
+- Transitions et comptage purs (`core/moment/transition.ts`, `core/career/count.ts`), translator SDK → événements internes ciblés par session
   (`adapter/translate.ts`), persistance multi-instances avec lock et rename
-  atomique (`adapter/store.ts`, `core/merge.ts`).
+  atomique (`adapter/store.ts`, `core/career/career.ts`).
 - Deux vues Solid : sidebar (`view/sidebar.tsx`, slot `sidebar_footer`) et
   home (`view/home.tsx`, slot `home_bottom`). Un toast à chaque évolution.
-- Species tirée à l'éclosion et stockée (`core/species.ts`) : cat et owl en
+- Species tirée à l'éclosion et stockée (`core/creature/species.ts`) : cat et owl en
   common, dragon en legendary ; le Pace de la Rarity ralentit le Growth
-  (`core/stage.ts`) ; un corps par Species et par Stage, œuf commun
-  (`core/sprites.ts`) ; Cue `hatched` et toast de révélation.
+  (`core/career/stage.ts`) ; un corps par Species et par Stage, œuf commun
+  (`core/appearance/sprites.ts`) ; Cue `hatched` et toast de révélation.
 
 Compteurs persistés dans `Career` : sessions, prompts, tools par kind
 (read/edit/bash/other), filesEdited, errors, hatchedAt, species.
@@ -105,7 +105,7 @@ sur `once`/`always`, `denied` (« Oh. Okay. », « Fair enough. ») sur `reject`
 - Deux Cues de priorité 2 pour remplacer la bulle « May I? » malgré la
   fenêtre de silence ; sans question posée récemment, aucune réponse, donc pas
   de bulle à chaque permission.
-- Touche `core/events.ts`, `core/voice.ts`, `adapter/translate.ts` et leurs
+- Touche `core/moment/events.ts`, `core/speech/voice.ts`, `adapter/translate.ts` et leurs
   tests ; rien dans `index.tsx` ni les vues.
 
 ### 2. Personnalité et nom
@@ -149,7 +149,7 @@ marque actuelle.
 Préalable posé le 2026-09-15 (audit) : la ligne 0 porte déjà la marque
 d'Activity et le cœur du pet, et une `Frame` est une liste de chaînes
 monochromes. Avant les accessoires, passer la `Frame` en segments typés (corps,
-yeux, marque, accessoire) dans `core/sprites.ts`, rendus par `view/portrait.tsx`
+yeux, marque, accessoire) dans `core/appearance/sprites.ts`, rendus par `view/portrait.tsx`
 et `view/card.tsx`. Refactor différé : rien ne le demande tant que 4 ou 10 n'est
 pas retenu.
 
@@ -173,7 +173,7 @@ Candidats :
 - "Phénix" : 10 erreurs dans une session puis session idle sans erreur
 - "Tool master" : tous les kinds utilisés
 
-Attention : `core/merge.ts` doit gérer l'union des achievements et le max des
+Attention : `core/career/career.ts` doit gérer l'union des achievements et le max des
 streaks lors du merge multi-instances, ce qu'il ne fait pas aujourd'hui.
 
 Référence : l'issue Claude Code #59081 propose streaks quotidiens, badges,
@@ -260,12 +260,12 @@ Tamago sur une machine.
 **Fondations faites le 2026-09-15**, tables vides, runtime inchangé :
 
 - `Career.picks` : un Pick par Milestone, `{ trait, at }`, le plus ancien gagne
-  au merge (`core/pick.ts`, miroir inversé de `latest()`).
-- `core/milestone.ts` : Milestones calculés depuis les compteurs, par Stage ou
+  au merge (`core/career/pick.ts`, miroir inversé de `latest()`).
+- `core/choices/milestone.ts` : Milestones calculés depuis les compteurs, par Stage ou
   par mesure (sessions, prompts, filesEdited, questions, tools, xp ; jamais
   errors).
-- `core/trait.ts` : Traits tenus et éligibles, synergies par `needs`.
-- `core/draw.ts` : Draw déterministe (FNV-1a sur `hatchedAt:milestone`,
+- `core/choices/trait.ts` : Traits tenus et éligibles, synergies par `needs`.
+- `core/choices/draw.ts` : Draw déterministe (FNV-1a sur `hatchedAt:milestone`,
   mulberry32, Fisher-Yates), `pending` pour la file des Milestones à offrir.
 
 **Reste à faire**, dans cet ordre :
@@ -312,20 +312,20 @@ Quatre lots :
    la Rarity.
 3. **Feuille de caractère**, **fait le 2026-09-17**, voir
    `docs/superpowers/specs/2026-09-17-tamago-character-sheet-design.md`. Huit
-   Stats de 0 à 10 tirées depuis `hatchedAt` (`core/sheet.ts`) : quatre Stats
+   Stats de 0 à 10 tirées depuis `hatchedAt` (`core/creature/sheet.ts`) : quatre Stats
    Temperament lues au maximum, quatre Stats de comportement lues en valeur,
    energy (`sleepMs`, `fastMs` / `slowMs`), chatter (`quietMs`, `bubbleMs`),
    sensitivity (`hurtMs`, `streakCount`), patience (`longWorkMs`), par un
    facteur 2^((v − 5) / 5) : moitié à 0, double à 10, `MEDIAN` à 5
-   (`core/behavior.ts`). La Species ajoute ses Modifiers (owl : stoic +2,
+   (`core/creature/behavior.ts`). La Species ajoute ses Modifiers (owl : stoic +2,
    cheerful −1, energy −2, chatter −1, patience +2 ; dragon : sarcastic +3,
    sensitivity −2, energy +2 ; cat : aucun). À Modifiers nuls, la Sheet
    redonne le Temperament historique. La carte montre les quatre Stats de
    comportement en barres.
 4. **Enrichissements**, en quatre sous-lots :
    - 4a **Signature par Species**, **fait le 2026-09-17**. Chaque Species
-     possède ses phrases (`core/signature.ts`, un fichier par Rarity sous
-     `core/signatures/`). Depuis 4b, la Signature couvre les douze Cues et
+     possède ses phrases (`core/speech/signature.ts`, un fichier par Rarity sous
+     `core/speech/signatures/`). Depuis 4b, la Signature couvre les douze Cues et
      la voix tire un registre à chaque Cue : la Species 70 %, un Temperament
      au poids de sa Stat 25 %, le neutre 5 % ; à l'éclosion, c'est la Species
      qui parle.
@@ -333,7 +333,7 @@ Quatre lots :
      `docs/superpowers/specs/2026-09-17-tamago-bestiary-design.md`. Vingt
      Species en 6/6/4/3/1 avec Modifiers, corps et Signature complète. Luck :
      les elders du Roster pèsent sur la Rarity du prochain œuf
-     (`core/luck.ts`), un premier œuf ne donne ni epic ni legendary.
+     (`core/creature/luck.ts`), un premier œuf ne donne ni epic ni legendary.
    - 4c **vue du Roster**, **fait le 2026-09-18**, voir
      `docs/superpowers/specs/2026-09-18-tamago-roster-view-design.md`. La
      commande `roster` remplace `switch` : tous les Tamago de la machine,

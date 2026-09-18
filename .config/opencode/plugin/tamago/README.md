@@ -80,16 +80,16 @@ messages, todo texts or diffs, only their counts.
 At most one bubble every 10 s; a rarer cue (an evolution, a streak) may
 interrupt a common one. `granted` and `denied` only answer a `permission` the
 creature actually voiced, within 30 s and once per question. Which phrase is
-spoken is drawn, never rotated. Tuning lives in `core/voice.ts`.
+spoken is drawn, never rotated. Tuning lives in `core/speech/voice.ts`.
 
 The 5 s of a bubble, the 10 s between two, the 5 min of a long work and the
 3 failures of a streak are those of a median sheet; a chatty creature speaks
 sooner and longer, a sensitive one complains earlier.
 
 Three registers share the phrases. Each species has a signature: its own
-phrases for every cue, in `core/signature.ts` and one file per rarity under
-`core/signatures/`. Each temperament has its flavor for every cue, in
-`core/voice.ts`, next to the neutral phrases. Which register speaks is drawn
+phrases for every cue, in `core/speech/signature.ts` and one file per rarity under
+`core/speech/signatures/`. Each temperament has its flavor for every cue, in
+`core/speech/voice.ts`, next to the neutral phrases. Which register speaks is drawn
 at each cue, 70 % the species, 25 % a temperament, 5 % neutral; within the
 temperament share, each of the four speaks at the weight of its stat, so a
 sarcastic 9 with a dreamy 3 drifts off now and then. The draw is seeded from
@@ -131,8 +131,8 @@ with the career. Twenty species, by rarity:
 The egg looks the same for every species; the creature shows at
 `hatchling`, with a toast and a bubble. A species never changes: the only way
 to meet another one is a new egg. Two eggs may hatch the same species: the
-draw has no memory. Bodies live in `core/bodies/<rarity>.ts`, signatures in
-`core/signatures/<rarity>.ts`.
+draw has no memory. Bodies live in `core/appearance/bodies/<rarity>.ts`, signatures in
+`core/speech/signatures/<rarity>.ts`.
 
 | Rarity      | First egg | After one common elder | Cap    | Pace |
 | ----------- | --------- | ---------------------- | ------ | ---- |
@@ -148,13 +148,13 @@ common, 2 an uncommon, 3 a rare, 4 an epic, 5 a legendary, and each point
 moves 4 % out of common toward the rarer tiers until common rests at 20 %.
 Luck is read from the roster at the hatch and never stored or shown; the
 species drawn is stored, so later luck changes nothing for a living creature.
-The curve lives in `core/luck.ts`.
+The curve lives in `core/creature/luck.ts`.
 
 The pace scales how fast XP turns into growth: a legendary creature needs four
 times the XP of a common one for every stage, and the card shows its farther
 thresholds. Rarer is slower, never faster, so the common creature is never the
 slow one. Careers saved before species existed are the `cat`. Tables live in
-`core/species.ts`.
+`core/creature/species.ts`.
 
 ## Several creatures
 
@@ -192,7 +192,7 @@ xp = prompts × 2
 Thresholds are for a common species; a rarer one divides its pace out of
 them. The stage is never stored. It is recomputed from the counters and the
 species, so it cannot drift. A `success` toast fires in each open OpenCode
-window when the stage changes. Weights and thresholds live in `core/stage.ts`
+window when the stage changes. Weights and thresholds live in `core/career/stage.ts`
 and are meant to be tuned after real use.
 
 ## Who it is
@@ -215,14 +215,14 @@ sheet keeps its temperament. Every other species has its own line, from a
 frog's stoic +1 to a phoenix's cheerful +3 and a kraken's cold anger, sarcastic
 +2, stoic +2, sensitivity +2. About one owl in six, and one dragon in four,
 takes its species' temperament rather than its draw. The modifiers live in
-`core/species.ts`; tune a species before one has hatched, since changing its
+`core/creature/species.ts`; tune a species before one has hatched, since changing its
 line changes every living one. The card shows the four behavior stats as bars
 from `hatchling` on.
 
 From the `young` stage, the counters add a vocation: a craft, scribe, shell or
 sage, whichever weighted score is highest, and a stance, prudent from five
 questions asked per hundred prompts, bold below. Weights and the threshold
-live in `core/character.ts`. The card states the whole character:
+live in `core/creature/character.ts`. The card states the whole character:
 `sarcastic · prudent shell`.
 
 ## Data
@@ -264,7 +264,7 @@ manager in `.config/opencode` itself: it breaks the LSPs.
 
 ```sh
 pnpm install --ignore-workspace   # types for the editor and tsc, nothing at runtime
-node --test "core/*.test.ts" "adapter/*.test.ts"
+node --test "core/**/__tests__/*.test.ts" "adapter/__tests__/*.test.ts"
 ./node_modules/.bin/tsc --noEmit
 ```
 
@@ -275,12 +275,21 @@ run some tools in one, and watch the other's XP follow.
 Layout:
 
 ```
-index.tsx      the only module that touches api.* and timers; wires the layers
-core/          pure data and strings; knows nothing about OpenCode or Solid
-core/window.ts what one window does with an event, a tick, a flush or a command
-adapter/       the only layer touching SDK event shapes and the disk
-view/          Solid components fed with accessors, returning JSX
+index.tsx           the only module that touches api.* and timers; wires the layers
+core/window.ts      what one window does with an event, a tick, a flush or a command
+core/creature/      what a Tamago is at hatch: Species, Luck, Sheet, Behavior, Character
+core/career/        what it has lived: Career, Delta, merge, hydrate, Stage, count
+core/moment/        what it is doing now: Session, events, transition, cadence
+core/speech/        what it says: Voice, Signatures, Bubble
+core/choices/       Milestones, Draws and Traits
+core/roster/        every Career of the machine
+core/appearance/    Sprites, bodies, card text, formatting
+core/store/         the pure decisions of the store: lock, retry
+adapter/            the only layer touching SDK event shapes and the disk
+view/               Solid components fed with accessors, returning JSX
 ```
+
+Each folder's tests sit in its `__tests__/`.
 
 `AGENTS.md` holds the rules for changing the plugin, `CONTEXT.md` the
 vocabulary, and `IDEAS.md` the backlog of things it could do next.

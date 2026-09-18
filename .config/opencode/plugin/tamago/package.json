@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test \"core/*.test.ts\" \"adapter/*.test.ts\"",
+    "test": "node --test \"core/**/__tests__/*.test.ts\" \"adapter/__tests__/*.test.ts\"",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
