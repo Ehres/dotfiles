@@ -324,16 +324,24 @@ Quatre lots :
    comportement en barres.
 4. **Enrichissements**, en quatre sous-lots :
    - 4a **Signature par Species**, **fait le 2026-09-17**. Chaque Species
-     possède ses phrases pour au plus trois Cues, `hatched` toujours incluse
-     (`core/signature.ts`). Cascade : la Signature de la Species si elle
-     couvre la Cue, sinon le Temperament, sinon les phrases neutres. À
-     l'éclosion, c'est la Species qui parle. Le cat a la sienne comme les
-     autres.
-   - 4b dessin des Species suivantes jusqu'à la vingtaine, pour peupler
-     uncommon, rare et epic, avec leurs Modifiers et leur Signature.
+     possède ses phrases (`core/signature.ts`, un fichier par Rarity sous
+     `core/signatures/`). Depuis 4b, la Signature couvre les douze Cues et
+     la voix tire un registre à chaque Cue : la Species 70 %, un Temperament
+     au poids de sa Stat 25 %, le neutre 5 % ; à l'éclosion, c'est la Species
+     qui parle.
+   - 4b **Bestiaire, Luck et registres**, **fait le 2026-09-18**, voir
+     `docs/superpowers/specs/2026-09-17-tamago-bestiary-design.md`. Vingt
+     Species en 6/6/4/3/1 avec Modifiers, corps et Signature complète. Luck :
+     les elders du Roster pèsent sur la Rarity du prochain œuf
+     (`core/luck.ts`), un premier œuf ne donne ni epic ni legendary.
    - 4c vue de collection : tous les Tamago de la machine, l'actif et ceux
      au repos.
    - 4d œuf teinté par Rarity ; à trancher contre « l'œuf ne révèle rien ».
+   - Gardées pour plus tard, dictées le 2026-09-17 : revoir les sprites et
+     leur affichage dans la barre latérale, dimensions comprises ; du loot et
+     des accessoires (lunettes, chapeau, baguette, badges) gagnés puis portés
+     par le sprite, sur la Frame en segments, ce qui suppose une tête à place
+     fixe dans toutes les Species, déjà le cas.
 
 Contraintes qui tiennent : aucune Species n'est une punition, pas de lecture
 de contenu, merge commutatif, pas de re-roll, jamais de retrait sur la Career,

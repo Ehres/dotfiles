@@ -118,10 +118,21 @@ two in a few, where the top line overflows by one column while it shows.
 ## What it is
 
 Every egg hatches into a species, drawn once from the hatch date and stored
-with the career: a `cat` or an `owl` most of the time, a `dragon` only once
-the roster has earned it. The egg looks the same for every species; the
-creature shows at `hatchling`, with a toast and a bubble. A species never
-changes: the only way to meet another one is a new egg.
+with the career. Twenty species, by rarity:
+
+| Rarity      | Species                                       |
+| ----------- | --------------------------------------------- |
+| `common`    | cat, owl, frog, duck, hamster, snail          |
+| `uncommon`  | fox, penguin, octopus, bat, hedgehog, axolotl |
+| `rare`      | robot, ghost, jellyfish, chameleon            |
+| `epic`      | phoenix, kraken, unicorn                      |
+| `legendary` | dragon                                        |
+
+The egg looks the same for every species; the creature shows at
+`hatchling`, with a toast and a bubble. A species never changes: the only way
+to meet another one is a new egg. Two eggs may hatch the same species: the
+draw has no memory. Bodies live in `core/bodies/<rarity>.ts`, signatures in
+`core/signatures/<rarity>.ts`.
 
 | Rarity      | First egg | After one common elder | Cap    | Pace |
 | ----------- | --------- | ---------------------- | ------ | ---- |
@@ -198,8 +209,10 @@ half and double; 5 is exactly the plugin's old constants.
 The species weighs on the sheet without deciding it: an owl adds stoic +2,
 cheerful −1, energy −2, chatter −1, patience +2; a dragon sarcastic +3,
 sensitivity −2, energy +2; a cat nothing, so every creature from before the
-sheet keeps its temperament. About one owl in six, and one dragon in four, takes
-its species' temperament rather than its draw. The modifiers live in
+sheet keeps its temperament. Every other species has its own line, from a
+frog's stoic +1 to a phoenix's cheerful +3 and a kraken's cold anger, sarcastic
++2, stoic +2, sensitivity +2. About one owl in six, and one dragon in four,
+takes its species' temperament rather than its draw. The modifiers live in
 `core/species.ts`; tune a species before one has hatched, since changing its
 line changes every living one. The card shows the four behavior stats as bars
 from `hatchling` on.
