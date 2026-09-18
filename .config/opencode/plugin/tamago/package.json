@@ -4,6 +4,8 @@
   "type": "module",
   "scripts": {
     "test": "node --test \"core/**/__tests__/*.test.ts\" \"adapter/__tests__/*.test.ts\"",
+    "test:view": "bun test view shell",
+    "test:all": "pnpm test && pnpm test:view",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
@@ -12,6 +14,7 @@
     "@opentui/core": "0.4.5",
     "@opentui/keymap": "0.4.5",
     "@opentui/solid": "0.4.5",
+    "@types/bun": "1.4.2",
     "@types/node": "^24",
     "solid-js": "1.9.10",
     "typescript": "^5.9.3"

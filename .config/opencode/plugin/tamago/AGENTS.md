@@ -58,9 +58,12 @@ AGENTS.md. Vocabulary lives in `CONTEXT.md`; use those terms.
 
 ## Verify
 
-`node --test "core/**/__tests__/*.test.ts" "adapter/__tests__/*.test.ts"` and
-`./node_modules/.bin/tsc --noEmit`, then launch OpenCode for views. Two
-instances side by side for persistence changes.
+`node --test "core/**/__tests__/*.test.ts" "adapter/__tests__/*.test.ts"` for the
+core and the adapter, `bun test view shell` for the views and the shell (Bun
+compiles the Solid JSX; the frames are snapshots under `__snapshots__/`, and a
+changed snapshot is named in the commit), and `./node_modules/.bin/tsc --noEmit`.
+Then launch OpenCode once for anything the snapshots cannot see: colors, the
+dialog stack, two instances side by side for persistence changes.
 
 ## Scope
 

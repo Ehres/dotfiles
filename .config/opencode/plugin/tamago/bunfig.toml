@@ -1,0 +1,4 @@
+# bun test compiles the Solid JSX of the views the way OpenCode does at load;
+# node --test cannot. Only view/ and shell/ run here: `bun test view shell`.
+[test]
+preload = ["@opentui/solid/preload"]

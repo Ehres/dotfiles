@@ -1,0 +1,40 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`idle adult: sprite, name, stage and xp, mood, footer 1`] = `
+"  /\\   /\\
+  ( o o )    Tamago
+ /| ^^^ |\\   adult · 9,166 xp
+  |_____|    chilling
+  /|   |\\
+
+~/projects/dotfiles:master
+
+• OpenCode 1.18.31"
+`;
+
+exports[`hurt egg says ouch and draws the egg 1`] = `
+"   .---.  *
+  /     \\    Egg
+ |  x x  |   egg · 0 xp
+  \\     /    ouch
+   '---'
+
+~/projects/dotfiles:master
+
+• OpenCode 1.18.31"
+`;
+
+exports[`a Bubble sits above the sprite, the heart replaces the eyes 1`] = `
+" .------.
+( May I? )
+ '---o--'
+  /\\   /\\ ♥
+  ( ^ ^ )    Tamago
+ /| ^^^ |\\   adult · 9,166 xp
+  |_____|    needs you
+  /|   |\\
+
+~/projects/dotfiles:master
+
+• OpenCode 1.18.31"
+`;

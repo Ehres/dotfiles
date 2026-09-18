@@ -1,0 +1,10 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`home: sprite left, name and stage, xp bar 1`] = `
+"
+  /\\   /\\
+  ( o o )    Tamago · adult
+ /| ^^^ |\\   [#####---------------] 9,166 / 20,000 xp → elder
+  |_____|
+  /|   |\\"
+`;

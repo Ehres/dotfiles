@@ -265,12 +265,14 @@ manager in `.config/opencode` itself: it breaks the LSPs.
 ```sh
 pnpm install --ignore-workspace   # types for the editor and tsc, nothing at runtime
 node --test "core/**/__tests__/*.test.ts" "adapter/__tests__/*.test.ts"
+bun test view shell               # view snapshots (Bun compiles the Solid JSX)
 ./node_modules/.bin/tsc --noEmit
 ```
 
-`scripts/doctor.sh` at the repository root runs both checks. The views and the
-adapter are verified by launching OpenCode: open two instances side by side,
-run some tools in one, and watch the other's XP follow.
+`scripts/doctor.sh` at the repository root runs both checks. The views are
+snapshot-tested headless under Bun; the adapter and the colors are verified by
+launching OpenCode: open two instances side by side, run some tools in one,
+and watch the other's XP follow.
 
 Layout:
 

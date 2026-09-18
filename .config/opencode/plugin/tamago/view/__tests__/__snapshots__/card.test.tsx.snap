@@ -1,0 +1,36 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`the card of an adult: title row, species, age, character, four bars, xp bar 1`] = `
+"  Tamago                                               esc
+
+    /\\   /\\
+    ( o o )    cat · common
+   /| ^^^ |\\   adult · 9,166 xp
+    |_____|    12 days old
+    /|   |\\
+
+  cheerful · bold shell
+
+  energy      [#####-----] 5
+  chatter     [#########-] 9
+  sensitivity [#---------] 1
+  patience    [######----] 6
+
+  [#####---------------] 9,166 / 20,000 xp → elder"
+`;
+
+exports[`the card of an egg hides the species and the stats 1`] = `
+"  Egg                                                  esc
+
+     .---.
+    /     \\    still an egg
+   |  o o  |   egg · 0 xp
+    \\     /    hatched today
+     '---'
+
+  cheerful
+
+  stats show at hatching
+
+  [--------------------] 0 / 200 xp → hatchling"
+`;

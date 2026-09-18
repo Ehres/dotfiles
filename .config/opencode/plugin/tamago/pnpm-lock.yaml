@@ -23,6 +23,9 @@ importers:
       '@opentui/solid':
         specifier: 0.4.5
         version: 0.4.5(solid-js@1.9.10)(typescript@5.9.3)(web-tree-sitter@0.25.10)
+      '@types/bun':
+        specifier: 1.4.2
+        version: 1.4.2
       '@types/node':
         specifier: ^24
         version: 24.13.4
@@ -308,6 +311,9 @@ packages:
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
 
+  '@types/bun@1.4.2':
+    resolution: {integrity: sha512-GimotNn7+ZV0uVArItBbriZsR1oNf0+WTzPkdcFrzShI7k2norL0uzEaJT8T33dWr7O/c9ZDuAFQrctKCi72oQ==}
+
   '@types/node@24.13.4':
     resolution: {integrity: sha512-YJ7EqCstVTzIr0fMr7qul/977en+pQHrfmuKIo6Zr9i75Be21dr3MovcfvGtyvi2HAUrRerWps5sMO9I7WaxDw==}
 
@@ -352,6 +358,9 @@ packages:
     resolution: {integrity: sha512-AJzsqoVFs1KBbJbWHIYrVZLDC3NhTqqh25awRXqzoLzmBAKr5oqk6+CwuYHAekKx+VBCYVohBoKuRq40dV+TYg==}
     peerDependencies:
       typescript: ^5
+
+  bun-types@1.4.2:
+    resolution: {integrity: sha512-bxV1FgK7yBIzjRe5zBozIM4Bem11ZJcCXSrjWRG3YWLt8yFDePu4cLjpebO8OvPeIE9trbyPF4fuj3Cia4Fj3w==}
 
   caniuse-lite@1.0.30001810:
     resolution: {integrity: sha512-TITQPUkaz+aVk5GL6NhOdwk1aEaNTSDPsGFWrTuhKGtjTF70jL/Oht2W4c6rXUe5fu7Ie19VIahAXHIIiWWNeg==}
@@ -979,6 +988,10 @@ snapshots:
 
   '@standard-schema/spec@1.1.0': {}
 
+  '@types/bun@1.4.2':
+    dependencies:
+      bun-types: 1.4.2
+
   '@types/node@24.13.4':
     dependencies:
       undici-types: 7.18.2
@@ -1028,6 +1041,10 @@ snapshots:
   bun-ffi-structs@0.2.4(typescript@5.9.3):
     dependencies:
       typescript: 5.9.3
+
+  bun-types@1.4.2:
+    dependencies:
+      '@types/node': 24.13.4
 
   caniuse-lite@1.0.30001810: {}
 

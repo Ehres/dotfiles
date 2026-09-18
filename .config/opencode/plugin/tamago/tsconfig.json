@@ -12,7 +12,7 @@
     "skipLibCheck": true,
     "jsx": "preserve",
     "jsxImportSource": "@opentui/solid",
-    "types": ["node"]
+    "types": ["node", "bun"]
   },
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules"]

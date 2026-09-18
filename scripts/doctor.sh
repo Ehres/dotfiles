@@ -236,6 +236,16 @@ if [[ -d .config/opencode/plugin/tamago/core ]]; then
     fail "opencode-tamago tests fail -- run: (cd .config/opencode/plugin/tamago && node --test \"core/**/__tests__/*.test.ts\" \"adapter/__tests__/*.test.ts\")"
   fi
 
+  # The views are Solid JSX that only Bun compiles; their frame snapshots are the
+  # only check of what the plugin draws short of launching OpenCode.
+  if ! command -v bun >/dev/null; then
+    warn "bun not on PATH -- cannot run the opencode-tamago view tests"
+  elif (cd .config/opencode/plugin/tamago && bun test view shell >/dev/null 2>&1); then
+    ok "opencode-tamago view tests pass"
+  else
+    fail "opencode-tamago view tests fail -- run: (cd .config/opencode/plugin/tamago && bun test view shell)"
+  fi
+
   if [[ -x .config/opencode/plugin/tamago/node_modules/.bin/tsc ]]; then
     if (cd .config/opencode/plugin/tamago && ./node_modules/.bin/tsc --noEmit >/dev/null 2>&1); then
       ok "opencode-tamago typechecks"
