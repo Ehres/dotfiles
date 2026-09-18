@@ -340,7 +340,9 @@ Quatre lots :
      l'actif d'abord, la carte du surligné dessous, Entrée sur un Tamago au
      repos le fait passer devant. « Collection » est évité : le glossaire
      réserve Roster.
-   - 4d œuf teinté par Rarity ; à trancher contre « l'œuf ne révèle rien ».
+   - 4d œuf teinté par Rarity : **abandonné le 2026-09-18**. La Rarity
+     s'apprend à l'éclosion, seulement ; l'œuf ne révèle rien, et c'est une
+     règle, pas un manque.
    - Gardées pour plus tard, dictées le 2026-09-17 : revoir les sprites et
      leur affichage dans la barre latérale, dimensions comprises ; du loot et
      des accessoires (lunettes, chapeau, baguette, badges) gagnés puis portés
