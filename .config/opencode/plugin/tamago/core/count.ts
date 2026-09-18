@@ -1,5 +1,5 @@
 import type { TamagoEvent } from "./events.ts";
-import { EMPTY_DELTA, type Delta } from "./state.ts";
+import { EMPTY_DELTA, type Delta } from "./career.ts";
 
 /** What an event adds to the Career. Independent of any Session. */
 export function count(event: TamagoEvent): Delta {

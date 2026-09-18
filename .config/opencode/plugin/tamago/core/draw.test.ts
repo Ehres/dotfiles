@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { DRAW_SIZE, draw, pending } from "./draw.ts";
 import { seed } from "./random.ts";
 import type { Milestone } from "./milestone.ts";
-import { freshCareer, type Career } from "./state.ts";
+import { freshCareer, type Career } from "./career.ts";
 import { eligible, type Trait } from "./trait.ts";
 
 /** Eight starter Traits: a pool large enough that two Milestones almost surely shuffle it differently. */

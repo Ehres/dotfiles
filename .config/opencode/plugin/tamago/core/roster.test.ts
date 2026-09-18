@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { ROSTER_KEYS, blocked, blockers, growing, idOf, line, luck, ordered, rosterAction, stepsIn, step, switchable, type Roster } from "./roster.ts";
-import { freshCareer, type Career } from "./state.ts";
+import { freshCareer, type Career } from "./career.ts";
 
 const T0 = 1_700_000_000_000;
 /** 2,000 sessions weigh 20,000 XP: elder for a cat. */

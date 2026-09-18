@@ -1,11 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { CAREER_KEYS, EMPTY_DELTA, addDelta, freshCareer, hydrate, initialSession, isEmpty, sameCareer } from "./state.ts";
+import { CAREER_KEYS, EMPTY_DELTA, addDelta, freshCareer, isEmpty, merge, sameCareer, type Delta } from "./career.ts";
+import { hydrate } from "./hydrate.ts";
 import { REFERENCE, hatch } from "./species.ts";
-
-test("initialSession starts idle and not busy", () => {
-  assert.deepEqual(initialSession(42), { activity: "idle", since: 42, busy: false });
-});
 
 test("freshCareer is all zeros hatched now", () => {
   const career = freshCareer(1000);
@@ -39,35 +36,6 @@ test("addDelta does not mutate its inputs", () => {
   assert.deepEqual(a, EMPTY_DELTA);
 });
 
-test("hydrate fills missing fields with defaults and is not corrupt", () => {
-  const { career, corrupt } = hydrate({ prompts: 7, tools: { edit: 3 } }, 500);
-  assert.equal(corrupt, false);
-  assert.equal(career.prompts, 7);
-  assert.equal(career.tools.edit, 3);
-  assert.equal(career.tools.read, 0);
-  assert.equal(career.sessions, 0);
-  assert.equal(career.hatchedAt, 500);
-});
-
-test("hydrate keeps hatchedAt when present", () => {
-  assert.equal(hydrate({ hatchedAt: 123 }, 500).career.hatchedAt, 123);
-});
-
-test("hydrate rejects non-object input as corrupt with a fresh career", () => {
-  for (const raw of [null, undefined, "x", 3, []]) {
-    const { career, corrupt } = hydrate(raw, 9);
-    assert.equal(corrupt, true, `raw=${JSON.stringify(raw)}`);
-    assert.deepEqual(career, freshCareer(9));
-  }
-});
-
-test("hydrate ignores non-finite numbers", () => {
-  const { career } = hydrate({ prompts: "12", errors: Number.NaN, tools: { bash: Number.POSITIVE_INFINITY } }, 1);
-  assert.equal(career.prompts, 0);
-  assert.equal(career.errors, 0);
-  assert.equal(career.tools.bash, 0);
-});
-
 test("sameCareer compares every counter and the hatch date", () => {
   const a = { ...freshCareer(1), prompts: 3, tools: { read: 1, edit: 2, bash: 0, other: 0 } };
   assert.equal(sameCareer(a, { ...a, tools: { ...a.tools } }), true, "structurally equal copies are the same");
@@ -83,14 +51,6 @@ test("a rename alone makes a delta non-empty, and addDelta keeps the latest one"
   assert.deepEqual(addDelta(rename, later).rename, { value: "Mochi", at: 20 });
   assert.deepEqual(addDelta(later, rename).rename, { value: "Mochi", at: 20 });
   assert.equal(addDelta(EMPTY_DELTA, EMPTY_DELTA).rename, undefined);
-});
-
-test("hydrate reads a well-formed name and ignores a malformed one", () => {
-  assert.deepEqual(hydrate({ name: { value: "Pixel", at: 3 } }, 0).career.name, { value: "Pixel", at: 3 });
-  assert.equal(hydrate({ name: "Pixel" }, 0).career.name, undefined);
-  assert.equal(hydrate({ name: { value: "", at: 3 } }, 0).career.name, undefined);
-  assert.equal(hydrate({ name: { value: "Pixel", at: "3" } }, 0).career.name, undefined);
-  assert.equal(hydrate({}, 0).career.name, undefined);
 });
 
 test("sameCareer compares the name", () => {
@@ -132,15 +92,6 @@ test("addDelta merges picks first-wins and omits the key when there is none", ()
   assert.equal(addDelta(early, { ...EMPTY_DELTA, prompts: 1 }).prompts, 1, "counters still add up beside picks");
 });
 
-test("hydrate reads well-formed picks and gives {} otherwise", () => {
-  assert.deepEqual(hydrate({}, 0).career.picks, {}, "today's career.json has no picks field");
-  assert.deepEqual(hydrate({ picks: "x" }, 0).career.picks, {});
-  assert.deepEqual(hydrate({ picks: [] }, 0).career.picks, {});
-  const { career, corrupt } = hydrate({ picks: { m: { trait: "x", at: 1 }, bad: { trait: "", at: 1 } } }, 0);
-  assert.equal(corrupt, false);
-  assert.deepEqual(career.picks, { m: { trait: "x", at: 1 } });
-});
-
 test("sameCareer compares the picks", () => {
   const a = { ...freshCareer(1), picks: { m: { trait: "x", at: 1 } } };
   assert.equal(sameCareer(a, { ...a, picks: { m: { trait: "x", at: 1 } } }), true);
@@ -167,17 +118,80 @@ test("CAREER_KEYS lists species", () => {
   assert.ok(CAREER_KEYS.includes("species"));
 });
 
-test("hydrate reads a species string, keeps an unknown one verbatim, and defaults to the reference", () => {
-  assert.equal(hydrate({}, 0).career.species, REFERENCE, "a file written before Species existed");
-  assert.equal(hydrate({ species: "owl" }, 0).career.species, "owl");
-  assert.equal(hydrate({ species: "from-a-newer-build" }, 0).career.species, "from-a-newer-build");
-  assert.equal(hydrate({ species: "" }, 0).career.species, REFERENCE);
-  assert.equal(hydrate({ species: 3 }, 0).career.species, REFERENCE);
-  assert.equal(hydrate({ species: 3 }, 0).corrupt, false);
-});
-
 test("sameCareer compares the species", () => {
   const a = freshCareer(1);
   assert.equal(sameCareer(a, { ...a }), true);
   assert.equal(sameCareer(a, { ...a, species: "some-other" }), false);
+});
+
+const d1: Delta = { ...EMPTY_DELTA, prompts: 1, tools: { read: 2, edit: 0, bash: 0, other: 0 } };
+const d2: Delta = { ...EMPTY_DELTA, sessions: 1, tools: { read: 0, edit: 0, bash: 5, other: 1 } };
+const d3: Delta = { ...EMPTY_DELTA, filesEdited: 3, errors: 2 };
+
+test("merge adds counters and preserves hatchedAt", () => {
+  const career = merge(freshCareer(777), d1);
+  assert.equal(career.hatchedAt, 777);
+  assert.equal(career.prompts, 1);
+  assert.equal(career.tools.read, 2);
+});
+
+test("merge is commutative over deltas", () => {
+  const base = freshCareer(1);
+  assert.deepEqual(merge(merge(base, d1), d2), merge(merge(base, d2), d1));
+});
+
+test("merge is associative over deltas", () => {
+  const base = freshCareer(1);
+  const left = merge(merge(merge(base, d1), d2), d3);
+  const right = merge(merge(merge(base, d3), d1), d2);
+  assert.deepEqual(left, right);
+});
+
+test("merging the empty delta is the identity", () => {
+  const career = merge(freshCareer(5), d2);
+  assert.deepEqual(merge(career, EMPTY_DELTA), career);
+});
+
+const r1: Delta = { ...EMPTY_DELTA, rename: { value: "Pixel", at: 10 } };
+const r2: Delta = { ...EMPTY_DELTA, rename: { value: "Mochi", at: 20 } };
+
+test("the latest rename wins whatever the merge order, and an older one never overrides", () => {
+  const base = freshCareer(1);
+  assert.deepEqual(merge(merge(base, r1), r2), merge(merge(base, r2), r1));
+  assert.deepEqual(merge(merge(base, r2), r1).name, { value: "Mochi", at: 20 });
+  assert.deepEqual(merge(merge(base, r1), d1).name, { value: "Pixel", at: 10 }, "counters leave the name alone");
+});
+
+const k1: Delta = { ...EMPTY_DELTA, picks: { "evolution:hatchling": { trait: "sarcastic", at: 10 } } };
+const k2: Delta = { ...EMPTY_DELTA, picks: { "evolution:hatchling": { trait: "stoic", at: 20 }, "sessions:100": { trait: "hat", at: 30 } } };
+
+test("the earliest pick wins whatever the merge order, and a later one never overrides", () => {
+  const base = freshCareer(1);
+  assert.deepEqual(merge(merge(base, k1), k2), merge(merge(base, k2), k1));
+  assert.deepEqual(merge(merge(base, k2), k1).picks, {
+    "evolution:hatchling": { trait: "sarcastic", at: 10 },
+    "sessions:100": { trait: "hat", at: 30 },
+  });
+});
+
+test("counters leave the picks alone and picks leave the name alone", () => {
+  const base = freshCareer(1);
+  assert.deepEqual(merge(merge(base, k1), d1).picks, k1.picks);
+  assert.deepEqual(merge(merge(base, r1), k1).name, { value: "Pixel", at: 10 });
+  assert.equal("rename" in merge(base, k1), false, "a Career never carries a pending rename");
+});
+
+test("merging a delta without picks keeps the very same picks object", () => {
+  const career = merge(freshCareer(1), k1);
+  assert.equal(merge(career, d1).picks, career.picks);
+});
+
+test("a fresh career merged with the empty delta has empty picks", () => {
+  assert.deepEqual(merge(freshCareer(1), EMPTY_DELTA).picks, {});
+});
+
+test("merge keeps the species of the career whatever the delta", () => {
+  const career = { ...freshCareer(777), species: "dragon" };
+  assert.equal(merge(career, d1).species, "dragon");
+  assert.equal(merge(career, EMPTY_DELTA).species, "dragon");
 });

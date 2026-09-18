@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { STAGES, WEIGHTS, growth, next, stage, stageIndex, xp, evolution, type Paced } from "./stage.ts";
-import { EMPTY_DELTA, freshCareer, type Counters } from "./state.ts";
+import { EMPTY_DELTA, freshCareer, type Counters } from "./career.ts";
 import { RARITY, REFERENCE } from "./species.ts";
 
 const counters = (patch: Partial<Counters>, species = REFERENCE): Paced => ({ ...EMPTY_DELTA, tools: { ...EMPTY_DELTA.tools }, species, ...patch });

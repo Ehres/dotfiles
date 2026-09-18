@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { count } from "./count.ts";
-import { EMPTY_DELTA, isEmpty } from "./state.ts";
+import { EMPTY_DELTA, isEmpty } from "./career.ts";
 import type { TamagoEvent } from "./events.ts";
 
 test("prompts, sessions, files and errors each count once", () => {

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { ACTIVITIES } from "./state.ts";
+import { ACTIVITIES } from "./session.ts";
 import { CADENCE, frameIndex, tickInterval } from "./cadence.ts";
 import { MEDIAN, type Behavior } from "./behavior.ts";
 

@@ -1,5 +1,5 @@
 import { MEDIAN, type Behavior } from "./behavior.ts";
-import type { Activity } from "./state.ts";
+import type { Activity } from "./session.ts";
 
 /** Which of the two periods of a Behavior an animation alternates on; undefined never animates. */
 export type FramePace = "fast" | "slow" | undefined;

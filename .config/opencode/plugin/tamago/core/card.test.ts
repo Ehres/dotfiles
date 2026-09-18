@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { DAY_MS, STATS_HIDDEN, age, progress, reveal, sheetLines, speciesLine } from "./card.ts";
 import { REFERENCE } from "./species.ts";
-import { freshCareer, type Career } from "./state.ts";
+import { freshCareer, type Career } from "./career.ts";
 
 const career: Career = {
   sessions: 12,

@@ -4,7 +4,7 @@ import type { KeyEvent } from "@opentui/core";
 import { useKeyboard, type JSX } from "@opentui/solid";
 import { Index, Show, createSignal } from "solid-js";
 import { rosterAction, step } from "../core/roster.ts";
-import type { Career } from "../core/state.ts";
+import type { Career } from "../core/career.ts";
 import { CardBody } from "./card.tsx";
 
 /** The gutter of the highlighted line, and the blank one of the others, so the Names stay aligned. */

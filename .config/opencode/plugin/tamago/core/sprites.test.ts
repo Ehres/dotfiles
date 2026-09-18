@@ -4,7 +4,7 @@ import { TEMPERAMENTS } from "./sheet.ts";
 import { REFERENCE, SPECIES } from "./species.ts";
 import { EYES, HEART, SPRITE_HEIGHT, SPRITE_WIDTH, frameAt, frames, heartFrame } from "./sprites.ts";
 import { STAGES } from "./stage.ts";
-import { ACTIVITIES } from "./state.ts";
+import { ACTIVITIES } from "./session.ts";
 
 const ids = SPECIES.map((entry) => entry.id);
 

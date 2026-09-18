@@ -1,6 +1,6 @@
 import { MEDIAN, type Behavior } from "./behavior.ts";
 import type { TamagoEvent } from "./events.ts";
-import type { Activity, Session } from "./state.ts";
+import type { Activity, Session } from "./session.ts";
 
 function at(session: Session, activity: Activity, now: number): Session {
   return session.activity === activity ? session : { ...session, activity, since: now };

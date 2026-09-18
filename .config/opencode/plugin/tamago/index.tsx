@@ -15,7 +15,8 @@ import { footerPath } from "./core/footer.ts";
 import { WARN_AFTER, backoff } from "./core/retry.ts";
 import { PET_MS } from "./core/sprites.ts";
 import type { Voice } from "./core/voice.ts";
-import { freshCareer, initialSession, isEmpty, sameCareer, type Career, type Session } from "./core/state.ts";
+import { freshCareer, isEmpty, sameCareer, type Career } from "./core/career.ts";
+import { initialSession, type Session } from "./core/session.ts";
 import {
   adopt,
   flushed,

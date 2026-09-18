@@ -1,7 +1,7 @@
 import { sheet, temperamentOf, type Temperament } from "./sheet.ts";
 import { REFERENCE, SPECIES, type Species, type SpeciesId } from "./species.ts";
 import { WEIGHTS, stage, stageIndex, type Paced } from "./stage.ts";
-import type { Career, Counters } from "./state.ts";
+import type { Career, Counters } from "./career.ts";
 
 export type Craft = "scribe" | "shell" | "sage";
 export type Stance = "prudent" | "bold";

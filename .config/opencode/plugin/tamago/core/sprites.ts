@@ -2,7 +2,7 @@ import { BODIES, type Body } from "./bodies.ts";
 import type { Temperament } from "./sheet.ts";
 import { REFERENCE, type SpeciesId } from "./species.ts";
 import type { StageId } from "./stage.ts";
-import type { Activity } from "./state.ts";
+import type { Activity } from "./session.ts";
 
 export const SPRITE_WIDTH = 11;
 export const SPRITE_HEIGHT = 5;

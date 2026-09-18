@@ -1,17 +1,9 @@
 import { weightsAt } from "./luck.ts";
 import { latest, type Rename } from "./name.ts";
-import { firstPicks, hydratePicks, samePicks, type Picks } from "./pick.ts";
-import { REFERENCE, SPECIES, hatch, type Rarity, type SpeciesId } from "./species.ts";
+import { firstPicks, samePicks, type Picks } from "./pick.ts";
+import { SPECIES, hatch, type Rarity, type SpeciesId } from "./species.ts";
 
-export type Activity = "idle" | "thinking" | "working" | "waiting" | "hurt" | "sleeping";
 export type ToolKind = "read" | "edit" | "bash" | "other";
-
-export type Session = {
-  activity: Activity;
-  since: number;
-  /** Whether the OpenCode session is busy, per its own status. */
-  busy: boolean;
-};
 
 export type Counters = {
   sessions: number;
@@ -27,7 +19,6 @@ export type Career = Counters & { hatchedAt: number; species: SpeciesId; name?: 
 /** `rename` and `picks` are Deltas like any other: they wait for the flush; the latest rename wins, the earliest Pick wins. */
 export type Delta = Counters & { rename?: Rename; picks?: Picks };
 
-export const ACTIVITIES: readonly Activity[] = ["idle", "thinking", "working", "waiting", "hurt", "sleeping"];
 export const TOOL_KINDS: readonly ToolKind[] = ["read", "edit", "bash", "other"];
 
 /** Every plain numeric counter. Adding one to `Counters` without listing it here is a type error, and listing it is all it takes. */
@@ -47,10 +38,6 @@ export const EMPTY_DELTA: Delta = {
   errors: 0,
   questions: 0,
 };
-
-export function initialSession(now: number): Session {
-  return { activity: "idle", since: now, busy: false };
-}
 
 /** A new egg at `now`: its Species drawn once, at `weights`, those of a first egg unless the store passes the Roster's Luck. */
 export function freshCareer(now: number, weights: Record<Rarity, number> = weightsAt(0)): Career {
@@ -85,6 +72,13 @@ export function addDelta(a: Delta, b: Delta): Delta {
   };
 }
 
+/** Counters add up, hatchedAt and species are kept, the latest rename wins, the earliest Pick per Milestone wins; a Career never carries a pending `rename`. */
+export function merge(career: Career, delta: Delta): Career {
+  const { rename: _pending, picks = career.picks, ...counters } = addDelta(career, delta);
+  const name = latest(career.name, delta.rename);
+  return { ...counters, hatchedAt: career.hatchedAt, species: career.species, picks, ...(name === undefined ? {} : { name }) };
+}
+
 /** Structural equality, so a re-read of unchanged disk state does not notify anyone. */
 export function sameCareer(a: Career, b: Career): boolean {
   return (
@@ -96,39 +90,4 @@ export function sameCareer(a: Career, b: Career): boolean {
     TOOL_KINDS.every((kind) => a.tools[kind] === b.tools[kind]) &&
     samePicks(a.picks, b.picks)
   );
-}
-
-function num(value: unknown, fallback: number): number {
-  return typeof value === "number" && Number.isFinite(value) ? value : fallback;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-export function hydrate(raw: unknown, now: number): { career: Career; corrupt: boolean } {
-  if (!isRecord(raw)) return { career: freshCareer(now), corrupt: true };
-  const rawTools = isRecord(raw.tools) ? raw.tools : {};
-  const tools = { ...EMPTY_DELTA.tools };
-  for (const kind of TOOL_KINDS) tools[kind] = num(rawTools[kind], 0);
-  const name = rename(raw.name);
-  const species = typeof raw.species === "string" && raw.species.length > 0 ? raw.species : REFERENCE;
-  const career: Career = {
-    ...EMPTY_DELTA,
-    tools,
-    hatchedAt: num(raw.hatchedAt, now),
-    species,
-    picks: hydratePicks(raw.picks),
-    ...(name === undefined ? {} : { name }),
-  };
-  for (const key of COUNTER_KEYS) career[key] = num(raw[key], 0);
-  return { corrupt: false, career };
-}
-
-/** A stored name, only when both parts are well-formed. */
-function rename(value: unknown): Rename | undefined {
-  if (!isRecord(value)) return undefined;
-  if (typeof value.value !== "string" || value.value.length === 0) return undefined;
-  if (typeof value.at !== "number" || !Number.isFinite(value.at)) return undefined;
-  return { value: value.value, at: value.at };
 }

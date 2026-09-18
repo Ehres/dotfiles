@@ -1,5 +1,5 @@
 import type { TraitId } from "./pick.ts";
-import type { Career } from "./state.ts";
+import type { Career } from "./career.ts";
 
 export type Trait = {
   id: TraitId;

@@ -16,7 +16,7 @@ import {
   type Sheet,
 } from "./sheet.ts";
 import type { Species } from "./species.ts";
-import { freshCareer } from "./state.ts";
+import { freshCareer } from "./career.ts";
 
 /** Ten thousand hatch dates a second apart, the range the Temperament test always used. */
 const DATES = Array.from({ length: 10_000 }, (_, i) => 1_789_000_000_000 + i * 1_000);

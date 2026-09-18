@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { first, firstPicks, hydratePicks, samePicks, type Pick, type Picks } from "./pick.ts";
+import { first, firstPicks, samePicks, type Pick, type Picks } from "./pick.ts";
 
 const early: Pick = { trait: "sarcastic", at: 10 };
 const late: Pick = { trait: "stoic", at: 20 };
@@ -66,28 +66,4 @@ test("samePicks compares keys, trait and at", () => {
   assert.equal(samePicks(p1, { "evolution:hatchling": { trait: "stoic", at: 10 } }), false, "different trait");
   assert.equal(samePicks(p1, { "evolution:hatchling": { trait: "sarcastic", at: 11 } }), false, "different at");
   assert.equal(samePicks(p1, { "sessions:100": early }), false, "same size, different keys");
-});
-
-test("hydratePicks gives {} for a missing, non-record or empty value", () => {
-  for (const raw of [undefined, null, "x", 3, [], {}]) assert.deepEqual(hydratePicks(raw), {}, `raw=${JSON.stringify(raw)}`);
-});
-
-test("hydratePicks keeps well-formed entries and drops the rest silently", () => {
-  const raw = {
-    "evolution:hatchling": { trait: "sarcastic", at: 10 },
-    "": { trait: "orphan", at: 1 },
-    "bad-trait": { trait: "", at: 2 },
-    "bad-type": { trait: 4, at: 3 },
-    "bad-at": { trait: "stoic", at: "4" },
-    "nan-at": { trait: "stoic", at: Number.NaN },
-    "not-a-record": "stoic",
-  };
-  assert.deepEqual(hydratePicks(raw), { "evolution:hatchling": { trait: "sarcastic", at: 10 } });
-});
-
-test("hydratePicks drops a __proto__ key instead of setting the prototype", () => {
-  const picks = hydratePicks(JSON.parse('{"__proto__":{"trait":"evil","at":1},"m":{"trait":"ok","at":2}}'));
-  assert.deepEqual(picks, { m: { trait: "ok", at: 2 } });
-  assert.equal(Object.getPrototypeOf(picks), Object.prototype);
-  assert.equal((picks as Record<string, unknown>)["trait"], undefined);
 });

@@ -1,6 +1,6 @@
 import { MILESTONES, reached, type Milestone } from "./milestone.ts";
 import type { MilestoneId, TraitId } from "./pick.ts";
-import type { Career } from "./state.ts";
+import type { Career } from "./career.ts";
 import { TRAITS, eligible, type Trait } from "./trait.ts";
 import { generator, seed } from "./random.ts";
 

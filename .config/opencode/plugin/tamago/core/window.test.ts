@@ -4,7 +4,7 @@ import { MEDIAN, behavior } from "./behavior.ts";
 import type { Addressed } from "./events.ts";
 import { speakerOf } from "./sheet.ts";
 import { STAGES, WEIGHTS } from "./stage.ts";
-import { EMPTY_DELTA, freshCareer, isEmpty, type Career } from "./state.ts";
+import { EMPTY_DELTA, freshCareer, isEmpty, type Career } from "./career.ts";
 import { phrase } from "./voice.ts";
 import { adopt, flushed, freshWindow, receive, rename, setMuted, tick, type Window } from "./window.ts";
 

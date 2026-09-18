@@ -1,6 +1,6 @@
 import { generator, seed } from "./random.ts";
 import { SPECIES, species, type Species, type SpeciesId } from "./species.ts";
-import type { Career } from "./state.ts";
+import type { Career } from "./career.ts";
 
 export type Temperament = "cheerful" | "sarcastic" | "stoic" | "dreamy";
 /** The four Temperament Stats, read at the maximum. Order matters: ties go to the first one. Never reorder once shipped. */

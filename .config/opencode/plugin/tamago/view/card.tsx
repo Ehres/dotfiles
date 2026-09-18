@@ -9,7 +9,7 @@ import { character, describe } from "../core/character.ts";
 import { fmt } from "../core/format.ts";
 import { frameAt, heartFrame } from "../core/sprites.ts";
 import { stage, xp } from "../core/stage.ts";
-import type { Career } from "../core/state.ts";
+import type { Career } from "../core/career.ts";
 
 /**
  * Everything a card shows under its title row, for any Career: the idle

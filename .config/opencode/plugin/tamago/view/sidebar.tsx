@@ -10,8 +10,9 @@ import type { Temperament } from "../core/sheet.ts";
 import { fmt } from "../core/format.ts";
 import type { SpeciesId } from "../core/species.ts";
 import { frameAt, heartFrame } from "../core/sprites.ts";
+import type { Career } from "../core/career.ts";
+import type { Activity, Session } from "../core/session.ts";
 import { stage, xp } from "../core/stage.ts";
-import type { Activity, Career, Session } from "../core/state.ts";
 import type { Bubble } from "../core/voice.ts";
 import { Portrait, type BubbleView } from "./portrait.tsx";
 

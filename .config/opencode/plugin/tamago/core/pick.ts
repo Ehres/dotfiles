@@ -38,27 +38,3 @@ export function samePicks(a: Picks, b: Picks): boolean {
     return x !== undefined && y !== undefined && x.trait === y.trait && x.at === y.at;
   });
 }
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-/** A stored Pick, only when both parts are well-formed. */
-function pick(value: unknown): Pick | undefined {
-  if (!isRecord(value)) return undefined;
-  if (typeof value.trait !== "string" || value.trait.length === 0) return undefined;
-  if (typeof value.at !== "number" || !Number.isFinite(value.at)) return undefined;
-  return { trait: value.trait, at: value.at };
-}
-
-/** The well-formed entries of a stored `picks`; anything else is dropped silently, never a corruption. */
-export function hydratePicks(raw: unknown): Picks {
-  if (!isRecord(raw)) return {};
-  const out: Picks = {};
-  for (const [milestone, value] of Object.entries(raw)) {
-    if (milestone.length === 0 || milestone === "__proto__") continue;
-    const kept = pick(value);
-    if (kept !== undefined) out[milestone] = kept;
-  }
-  return out;
-}

@@ -1,6 +1,6 @@
 import { factor, sheet, type Sheet } from "./sheet.ts";
 import { SPECIES, type Species } from "./species.ts";
-import type { Career } from "./state.ts";
+import type { Career } from "./career.ts";
 
 /** The durations and the count the behavior Stats of a Sheet set for one Tamago. Computed, never stored. */
 export type Behavior = {

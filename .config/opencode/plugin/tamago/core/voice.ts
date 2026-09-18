@@ -3,7 +3,7 @@ import type { TamagoEvent } from "./events.ts";
 import { generator, seed } from "./random.ts";
 import { TEMPERAMENTS, temperamentOf, type Speaker, type Temperament } from "./sheet.ts";
 import { SIGNATURE } from "./signature.ts";
-import type { Session } from "./state.ts";
+import type { Session } from "./session.ts";
 
 /** Why the Tamago speaks. Born from events and transitions, never from content. */
 export type Cue =

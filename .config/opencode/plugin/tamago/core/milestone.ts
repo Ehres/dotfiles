@@ -1,6 +1,6 @@
 import type { MilestoneId } from "./pick.ts";
 import { growth, stage, stageIndex, type Paced, type StageId } from "./stage.ts";
-import { TOOL_KINDS } from "./state.ts";
+import { TOOL_KINDS } from "./career.ts";
 
 /** What a Milestone measures. Errors are deliberately absent: they never count. */
 export type Measure = "sessions" | "prompts" | "filesEdited" | "questions" | "tools" | "xp";

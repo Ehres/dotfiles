@@ -1,5 +1,5 @@
 import { pace, type SpeciesId } from "./species.ts";
-import { TOOL_KINDS, type Counters, type ToolKind } from "./state.ts";
+import { TOOL_KINDS, type Counters, type ToolKind } from "./career.ts";
 
 /** What the Stage is decided by: the counters, and the Species that sets their pace. Every Career is one. */
 export type Paced = Counters & { species: SpeciesId };

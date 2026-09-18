@@ -4,7 +4,7 @@ import { chmodSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync, utimesS
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { LOCK_STALE_MS } from "../core/lock.ts";
-import { EMPTY_DELTA, freshCareer, type Delta } from "../core/state.ts";
+import { EMPTY_DELTA, freshCareer, type Delta } from "../core/career.ts";
 import { weightsAt } from "../core/luck.ts";
 import { REFERENCE, SPECIES, hatch } from "../core/species.ts";
 import { CAREER_FILE, LOCK_DIR, LOCK_OWNER_FILE, ROSTER_DIR, createStore, type Store } from "./store.ts";

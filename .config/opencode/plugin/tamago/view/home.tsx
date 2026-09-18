@@ -9,7 +9,7 @@ import type { Temperament } from "../core/sheet.ts";
 import type { SpeciesId } from "../core/species.ts";
 import { frameAt, heartFrame } from "../core/sprites.ts";
 import { stage } from "../core/stage.ts";
-import type { Career } from "../core/state.ts";
+import type { Career } from "../core/career.ts";
 import { Portrait } from "./portrait.tsx";
 
 /** Rendered in the additive home_bottom slot, under the prompt: sprite on the left, name and progress on the right. */

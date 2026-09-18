@@ -2,7 +2,7 @@ import { bar, fmt } from "./format.ts";
 import { BEHAVIOR_STATS, SCALE, sheet } from "./sheet.ts";
 import { species } from "./species.ts";
 import { next, stage, xp } from "./stage.ts";
-import type { Career } from "./state.ts";
+import type { Career } from "./career.ts";
 
 export const DAY_MS = 86_400_000;
 export const BAR_WIDTH = 20;

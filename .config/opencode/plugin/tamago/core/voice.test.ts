@@ -5,7 +5,7 @@ import { MAX_TEXT } from "./bubble.ts";
 import type { TamagoEvent } from "./events.ts";
 import { TEMPERAMENTS, type Sheet, type Speaker, type Temperament } from "./sheet.ts";
 import { SIGNATURE } from "./signature.ts";
-import { initialSession, type Session } from "./state.ts";
+import { initialSession, type Session } from "./session.ts";
 import { transition } from "./transition.ts";
 import {
   BIG_DIFF_FILES,

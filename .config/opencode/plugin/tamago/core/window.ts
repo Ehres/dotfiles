@@ -1,11 +1,11 @@
 import { behavior } from "./behavior.ts";
 import type { Addressed, TamagoEvent } from "./events.ts";
 import { count } from "./count.ts";
-import { merge } from "./merge.ts";
+import { EMPTY_DELTA, addDelta, isEmpty, merge, sameCareer, type Career, type Delta } from "./career.ts";
 import { cleanName } from "./name.ts";
+import { initialSession, type Session } from "./session.ts";
 import { speakerOf } from "./sheet.ts";
 import { evolution, type StageId } from "./stage.ts";
-import { EMPTY_DELTA, addDelta, initialSession, isEmpty, sameCareer, type Career, type Delta, type Session } from "./state.ts";
 import { transition } from "./transition.ts";
 import { initialVoice, speak, type Voice } from "./voice.ts";
 

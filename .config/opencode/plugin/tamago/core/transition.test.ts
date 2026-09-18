@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { TamagoEvent } from "./events.ts";
 import { transition } from "./transition.ts";
-import { initialSession, type Session } from "./state.ts";
+import { initialSession, type Session } from "./session.ts";
 import { MEDIAN, type Behavior } from "./behavior.ts";
 
 const HURT_MS = MEDIAN.hurtMs;

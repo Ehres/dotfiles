@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { freshCareer, type Career } from "./state.ts";
+import { freshCareer, type Career } from "./career.ts";
 import { TRAITS, eligible, traits, type Trait } from "./trait.ts";
 
 const table: readonly Trait[] = [

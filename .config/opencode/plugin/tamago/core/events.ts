@@ -1,4 +1,4 @@
-import type { ToolKind } from "./state.ts";
+import type { ToolKind } from "./career.ts";
 import type { StageId } from "./stage.ts";
 
 export type TamagoEvent =
