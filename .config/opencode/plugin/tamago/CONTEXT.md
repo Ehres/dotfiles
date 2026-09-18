@@ -301,8 +301,8 @@ _Avoid_: card, widget
   exactly one **Growth**, its XP times the **Pace** of its **Species**
 - A **Career** has exactly one **Species**, drawn at hatch, stored, kept on
   merge like the hatch date
-- A **Species** has exactly one **Rarity**; a **Rarity** has one draw weight
-  and one **Pace**
+- A **Species** has exactly one **Rarity**; a **Rarity** has one **Pace**;
+  its draw weight moves with the **Luck**
 - A machine has exactly one **Roster**; a **Roster** has exactly one
   **active** Career and zero or more **resting** ones; every OpenCode window
   shares them
