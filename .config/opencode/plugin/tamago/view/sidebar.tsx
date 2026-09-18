@@ -6,7 +6,7 @@ import { createMemo } from "solid-js";
 import type { Behavior } from "../core/behavior.ts";
 import { bubbleBorders } from "../core/bubble.ts";
 import { frameIndex } from "../core/cadence.ts";
-import type { Temperament } from "../core/character.ts";
+import type { Temperament } from "../core/sheet.ts";
 import { fmt } from "../core/format.ts";
 import type { SpeciesId } from "../core/species.ts";
 import { frameAt, heartFrame } from "../core/sprites.ts";

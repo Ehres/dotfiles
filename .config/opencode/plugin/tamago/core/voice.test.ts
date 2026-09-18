@@ -9,12 +9,9 @@ import { initialSession, type Session } from "./state.ts";
 import { transition } from "./transition.ts";
 import {
   BIG_DIFF_FILES,
-  BUBBLE_MS,
   CUES,
   FLAVOR,
-  LONG_WORK_MS,
   PHRASES,
-  QUIET_MS,
   REGISTER,
   REPLY_MS,
   STREAK_MS,
@@ -24,6 +21,10 @@ import {
   type Cue,
   type Voice,
 } from "./voice.ts";
+
+const BUBBLE_MS = MEDIAN.bubbleMs;
+const QUIET_MS = MEDIAN.quietMs;
+const LONG_WORK_MS = MEDIAN.longWorkMs;
 
 /** A Sheet at the median everywhere but where `patch` says. */
 const sheetOf = (patch: Partial<Sheet>): Sheet => ({ cheerful: 0, sarcastic: 0, stoic: 0, dreamy: 0, energy: 5, chatter: 5, sensitivity: 5, patience: 5, ...patch });

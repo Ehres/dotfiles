@@ -42,9 +42,9 @@ AGENTS.md. Vocabulary lives in `CONTEXT.md`; use those terms.
 - Weights and thresholds are tuned in the `stage.ts` tables, not in code paths.
 - Timings and counts that a Stat sets are read from a `Behavior`, never from
   a constant, in `transition`, `speak` and `cadence`; `MEDIAN` in
-  `core/behavior.ts` holds the values, the old constants re-export its
-  fields, and every function that takes a Behavior defaults to it. The Sheet
-  is derived like the Stage: never stored, never cached in the Window.
+  `core/behavior.ts` holds the values, and every function that takes a
+  Behavior defaults to it. The Sheet is derived like the Stage: never
+  stored, never cached in the Window.
 - A new Species is one line in `SPECIES` (with its Modifiers), four bodies in
   `core/bodies/<rarity>.ts` and a full Signature in
   `core/signatures/<rarity>.ts`. The tests fail at the first table that lacks

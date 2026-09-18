@@ -1,8 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { CRAFTS, STANCE, TEMPERAMENTS, character, craft, describe, stance, temperament, vocation } from "./character.ts";
+import { CRAFTS, STANCE, character, craft, describe, stance, temperament, vocation } from "./character.ts";
 import { EMPTY_DELTA, freshCareer, type Career, type Counters } from "./state.ts";
-import { historical } from "./sheet.ts";
+import { TEMPERAMENTS, historical } from "./sheet.ts";
 import { RARITY, REFERENCE, type Species } from "./species.ts";
 import { STAGES, type Paced } from "./stage.ts";
 

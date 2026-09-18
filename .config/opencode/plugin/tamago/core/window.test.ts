@@ -1,13 +1,16 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { behavior } from "./behavior.ts";
+import { MEDIAN, behavior } from "./behavior.ts";
 import type { Addressed } from "./events.ts";
-import { HURT_MS, SLEEP_MS } from "./events.ts";
 import { speakerOf } from "./sheet.ts";
 import { STAGES, WEIGHTS } from "./stage.ts";
 import { EMPTY_DELTA, freshCareer, isEmpty, type Career } from "./state.ts";
-import { BUBBLE_MS, phrase } from "./voice.ts";
+import { phrase } from "./voice.ts";
 import { adopt, flushed, freshWindow, receive, rename, setMuted, tick, type Window } from "./window.ts";
+
+const HURT_MS = MEDIAN.hurtMs;
+const SLEEP_MS = MEDIAN.sleepMs;
+const BUBBLE_MS = MEDIAN.bubbleMs;
 
 const T0 = 1_000_000;
 const to = (id: string, event: Addressed["event"]): Addressed => ({ target: { type: "session", id }, event });

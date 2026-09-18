@@ -1,8 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { ACTIVITIES } from "./state.ts";
-import { CADENCE, FAST_MS, SLOW_MS, frameIndex, tickInterval } from "./cadence.ts";
+import { CADENCE, frameIndex, tickInterval } from "./cadence.ts";
 import { MEDIAN, type Behavior } from "./behavior.ts";
+
+const FAST_MS = MEDIAN.fastMs;
+const SLOW_MS = MEDIAN.slowMs;
 
 test("fast activities advance one frame every FAST_MS of elapsed time", () => {
   assert.equal(frameIndex("working", 0), 0);

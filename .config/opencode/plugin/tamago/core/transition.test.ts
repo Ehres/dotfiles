@@ -1,9 +1,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { HURT_MS, SLEEP_MS, type TamagoEvent } from "./events.ts";
+import type { TamagoEvent } from "./events.ts";
 import { transition } from "./transition.ts";
 import { initialSession, type Session } from "./state.ts";
 import { MEDIAN, type Behavior } from "./behavior.ts";
+
+const HURT_MS = MEDIAN.hurtMs;
+const SLEEP_MS = MEDIAN.sleepMs;
 
 function replay(events: Array<[TamagoEvent, number]>, start: Session = initialSession(0)): Session {
   let session = start;

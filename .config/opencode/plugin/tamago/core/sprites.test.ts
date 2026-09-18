@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { TEMPERAMENTS } from "./character.ts";
+import { TEMPERAMENTS } from "./sheet.ts";
 import { REFERENCE, SPECIES } from "./species.ts";
 import { EYES, HEART, SPRITE_HEIGHT, SPRITE_WIDTH, frameAt, frames, heartFrame } from "./sprites.ts";
 import { STAGES } from "./stage.ts";

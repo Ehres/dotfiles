@@ -3,9 +3,6 @@ import { REFERENCE, SPECIES, type Species, type SpeciesId } from "./species.ts";
 import { WEIGHTS, stage, stageIndex, type Paced } from "./stage.ts";
 import type { Career, Counters } from "./state.ts";
 
-/** The Temperament lives in sheet.ts with the Stats; it is re-exported here so the Voice, the Sprites and the views keep one import. */
-export type { Temperament } from "./sheet.ts";
-export { TEMPERAMENTS } from "./sheet.ts";
 export type Craft = "scribe" | "shell" | "sage";
 export type Stance = "prudent" | "bold";
 export type Vocation = { craft: Craft; stance: Stance };

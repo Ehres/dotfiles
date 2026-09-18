@@ -1,11 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { MEDIAN, SLOW_PER_FAST, STREAK_MIN, behavior, behaviorOf } from "./behavior.ts";
-import { FAST_MS, SLOW_MS } from "./cadence.ts";
-import { HURT_MS, SLEEP_MS } from "./events.ts";
 import { SCALE, draw, type Sheet } from "./sheet.ts";
 import type { Species } from "./species.ts";
-import { BUBBLE_MS, LONG_WORK_MS, QUIET_MS, STREAK_COUNT } from "./voice.ts";
 
 /** A Sheet with every Stat at `value`. */
 const flat = (value: number): Sheet => ({ cheerful: value, sarcastic: value, stoic: value, dreamy: value, energy: value, chatter: value, sensitivity: value, patience: value });
@@ -13,17 +10,6 @@ const flat = (value: number): Sheet => ({ cheerful: value, sarcastic: value, sto
 test("a median Sheet gives MEDIAN, the constants the plugin had before the Sheet", () => {
   assert.deepEqual(MEDIAN, { sleepMs: 120_000, fastMs: 500, slowMs: 2_000, quietMs: 10_000, bubbleMs: 5_000, hurtMs: 3_000, streakCount: 3, longWorkMs: 300_000 });
   assert.deepEqual(behaviorOf(flat(SCALE.median)), MEDIAN);
-});
-
-test("the old constants are MEDIAN's fields", () => {
-  assert.equal(SLEEP_MS, MEDIAN.sleepMs);
-  assert.equal(HURT_MS, MEDIAN.hurtMs);
-  assert.equal(FAST_MS, MEDIAN.fastMs);
-  assert.equal(SLOW_MS, MEDIAN.slowMs);
-  assert.equal(QUIET_MS, MEDIAN.quietMs);
-  assert.equal(BUBBLE_MS, MEDIAN.bubbleMs);
-  assert.equal(LONG_WORK_MS, MEDIAN.longWorkMs);
-  assert.equal(STREAK_COUNT, MEDIAN.streakCount);
 });
 
 test("min and max halve or double every field in the direction of its Stat", () => {

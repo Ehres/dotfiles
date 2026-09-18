@@ -25,9 +25,7 @@ export type Behavior = {
 /**
  * The Behavior of a median Sheet: the values the plugin used as constants
  * before the Sheet existed. Tune here, never in code paths. The default of
- * every function that takes a Behavior; events.ts, cadence.ts and voice.ts
- * re-export its fields under their old names, so this module imports none of
- * them and no import cycle exists.
+ * every function that takes a Behavior.
  */
 export const MEDIAN: Behavior = {
   sleepMs: 120_000,
