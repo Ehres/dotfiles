@@ -250,7 +250,7 @@ _Avoid_: in progress, unfinished, young (that is a Stage)
 
 **Switch**:
 Bringing a resting Career to the front; the active one goes to rest. Nothing
-is earned or lost.
+is earned or lost. Done from the roster view, which lists the whole Roster.
 _Avoid_: load, select, swap
 
 ### Choices
