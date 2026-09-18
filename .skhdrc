@@ -97,7 +97,7 @@ app < d : "$HOME/scripts/yabai-focus-app" Discord; skhd -k escape
 app < a : "$HOME/scripts/yabai-focus-app" Arc; skhd -k escape
 app < l : "$HOME/scripts/yabai-focus-app" Linear; skhd -k escape
 app < f : "$HOME/scripts/yabai-focus-app" Figma; skhd -k escape
-app < c : "$HOME/scripts/yabai-focus-app" Chrome; skhd -k escape
+app < c : "$HOME/scripts/yabai-focus-app" "Google Chrome"; skhd -k escape
 app < g : "$HOME/scripts/yabai-focus-app" Signal; skhd -k escape
 app < escape ; default
 
