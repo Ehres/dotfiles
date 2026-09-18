@@ -10,11 +10,11 @@ test("every Species of the table has a Signature, and every Signature names a Sp
   for (const id of Object.keys(SIGNATURE)) assert.ok(SPECIES.some((entry) => entry.id === id), `${id} is not a Species`);
 });
 
-test("a Signature covers every Cue with at least two phrases that fit in MAX_TEXT, in printable ASCII", () => {
+test("a Signature covers every Cue with at least three phrases that fit in MAX_TEXT, in printable ASCII", () => {
   for (const [id, signature] of Object.entries(SIGNATURE)) {
     for (const cue of Object.keys(CUES) as Cue[]) {
       const phrases = signature?.[cue];
-      assert.ok(phrases && phrases.length >= 2, `${id}/${cue}`);
+      assert.ok(phrases && phrases.length >= 3, `${id}/${cue}`);
       for (const text of phrases ?? []) {
         assert.ok(text.length <= MAX_TEXT, `${id}/${cue}: ${JSON.stringify(text)}`);
         assert.match(text, /^[\x20-\x7e]+$/, `${id}/${cue}: ${JSON.stringify(text)}`);

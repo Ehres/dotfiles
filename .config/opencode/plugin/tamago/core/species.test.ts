@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { weightsAt } from "./luck.ts";
+import { LUCK_MAX, weightsAt } from "./luck.ts";
 import { RARITIES, RARITY, REFERENCE, SPECIES, hatch, pace, species, type Rarity, type Species } from "./species.ts";
 import { MODIFIERS_SUM_MAX, MODIFIER_MAX, type Modifiers } from "./sheet.ts";
 
@@ -90,7 +90,7 @@ test("the default weights are those of Luck 0: no epic, no legendary on a first 
 
 test("at LUCK_MAX every Species of the table is drawn over ten thousand dates", () => {
   const seen = new Set<string>();
-  for (let i = 0; i < 10_000; i++) seen.add(hatch(1_789_000_000_000 + i * 1000, SPECIES, weightsAt(11.25)));
+  for (let i = 0; i < 10_000; i++) seen.add(hatch(1_789_000_000_000 + i * 1000, SPECIES, weightsAt(LUCK_MAX)));
   for (const entry of SPECIES) assert.ok(seen.has(entry.id), `${entry.id} never hatched`);
 });
 

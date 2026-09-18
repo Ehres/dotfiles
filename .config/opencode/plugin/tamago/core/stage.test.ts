@@ -69,7 +69,7 @@ test("next is undefined at the final stage", () => {
 });
 
 test("evolution names the stage reached when the career crosses a threshold upward", () => {
-  const egg = freshCareer(0);
+  const egg = { ...freshCareer(0), species: "cat" };
   const hatched = { ...egg, sessions: 20 }; // 200 xp
   const young = { ...egg, sessions: 150 }; // 1,500 xp
   assert.equal(evolution(egg, hatched), "hatchling");
@@ -77,7 +77,7 @@ test("evolution names the stage reached when the career crosses a threshold upwa
 });
 
 test("evolution is silent when the stage is unchanged or goes down, as after a reset", () => {
-  const egg = freshCareer(0);
+  const egg = { ...freshCareer(0), species: "cat" };
   const young = { ...egg, sessions: 150 };
   assert.equal(evolution(egg, { ...egg, sessions: 1 }), undefined);
   assert.equal(evolution(young, { ...young, prompts: 1 }), undefined);

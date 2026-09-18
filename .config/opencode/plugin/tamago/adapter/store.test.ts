@@ -410,8 +410,12 @@ test("hatch lays a fresh egg as the active Career and rests the previous one", (
   store.flush(d({ sessions: 2_000 }), 7);
   const result = store.hatch(9);
   assert.equal(result.outcome, "written");
-  assert.deepEqual(result.career, freshCareer(9));
-  assert.deepEqual(store.load().career, freshCareer(9));
+  // hatchedAt 7 draws jellyfish (rare, pace 0.5); 2_000 sessions is 20_000 raw XP, 10_000
+  // Growth: adult, not elder, so it contributes 0 Luck to this Hatch (weightsAt(0), same
+  // as freshCareer's default, but named explicitly here instead of left implicit).
+  const expected = freshCareer(9, weightsAt(0));
+  assert.deepEqual(result.career, expected);
+  assert.deepEqual(store.load().career, expected);
   assert.equal(JSON.parse(readFileSync(join(dir, ROSTER_DIR, "7.json"), "utf8")).sessions, 2_000);
   assert.ok(!existsSync(join(dir, LOCK_DIR)), "lock released");
 });

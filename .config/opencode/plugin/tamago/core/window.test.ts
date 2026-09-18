@@ -19,6 +19,7 @@ const cat = (at: number): Career => ({ ...freshCareer(at), species: "cat" });
 
 /** A Window with two Sessions already moving, so "every" has someone to reach. */
 function twoSessions(): Window {
+  // 2_000_000: a hatch date whose Sheet reads chatter 5, so BUBBLE_MS and QUIET_MS hold exactly for its cat.
   let w = freshWindow(cat(2_000_000));
   w = receive(w, to("a", { type: "prompt_sent" }), T0).window;
   w = receive(w, to("b", { type: "prompt_sent" }), T0).window;
