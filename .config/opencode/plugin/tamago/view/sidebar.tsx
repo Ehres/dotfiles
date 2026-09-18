@@ -3,16 +3,12 @@ import type { TuiThemeCurrent } from "@opencode-ai/plugin/tui";
 import type { RGBA } from "@opentui/core";
 import type { JSX } from "@opentui/solid";
 import { createMemo } from "solid-js";
-import type { Behavior } from "../core/creature/behavior.ts";
 import { bubbleBorders } from "../core/speech/bubble.ts";
 import { frameIndex } from "../core/moment/cadence.ts";
-import type { Temperament } from "../core/creature/sheet.ts";
 import { fmt } from "../core/appearance/format.ts";
-import type { SpeciesId } from "../core/creature/species.ts";
 import { frameAt, heartFrame } from "../core/appearance/sprites.ts";
-import type { Career } from "../core/career/career.ts";
 import type { Activity, Session } from "../core/moment/session.ts";
-import { stage, xp } from "../core/career/stage.ts";
+import type { Tamago } from "../core/tamago.ts";
 import type { Bubble } from "../core/speech/voice.ts";
 import { Portrait, type BubbleView } from "./portrait.tsx";
 
@@ -45,22 +41,19 @@ export function SidebarView(props: {
   name: string;
   theme: () => TuiThemeCurrent;
   session: () => Session;
-  career: () => Career;
-  species: () => SpeciesId;
+  tamago: () => Tamago;
   clock: () => number;
   footer: () => FooterInfo;
   bubble: () => Bubble | undefined;
   heart: () => boolean;
-  temperament: () => Temperament;
-  behavior: () => Behavior;
 }): JSX.Element {
   const activity = createMemo(() => props.session().activity);
-  const current = createMemo(() => stage(props.career()));
-  const total = createMemo(() => xp(props.career()));
-  const lines = () =>
-    props.heart()
-      ? heartFrame(props.species(), current(), props.temperament())
-      : frameAt(props.species(), current(), activity(), frameIndex(activity(), props.clock(), props.behavior()));
+  const lines = () => {
+    const t = props.tamago();
+    return props.heart()
+      ? heartFrame(t.species.id, t.stage, t.temperament)
+      : frameAt(t.species.id, t.stage, activity(), frameIndex(activity(), props.clock(), t.behavior));
+  };
   const color = () => spriteColor(props.theme(), activity());
   const bubble = createMemo((): BubbleView | undefined => {
     const current = props.bubble();
@@ -76,7 +69,7 @@ export function SidebarView(props: {
           <b>{props.name}</b>
         </text>
         <text fg={props.theme().textMuted}>
-          {current()} · {fmt(total())} xp
+          {props.tamago().stage} · {fmt(props.tamago().xp)} xp
         </text>
         <text fg={props.theme().textMuted}>{MOOD[activity()]}</text>
       </Portrait>

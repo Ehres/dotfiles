@@ -1,8 +1,7 @@
+import { next } from "../career/stage.ts";
+import { BEHAVIOR_STATS, SCALE } from "../creature/sheet.ts";
+import type { Tamago } from "../tamago.ts";
 import { bar, fmt } from "./format.ts";
-import { BEHAVIOR_STATS, SCALE, sheet } from "../creature/sheet.ts";
-import { species } from "../creature/species.ts";
-import { next, stage, xp } from "../career/stage.ts";
-import type { Career } from "../career/career.ts";
 
 export const DAY_MS = 86_400_000;
 export const BAR_WIDTH = 20;
@@ -21,17 +20,16 @@ export function age(hatchedAt: number, now: number): string {
 }
 
 /** The XP bar towards the next Stage, or a full bar once there is none. */
-export function progress(career: Career, width = BAR_WIDTH): string {
-  const coming = next(career);
-  if (coming === undefined) return `${bar(1, width)} ${fmt(xp(career))} xp · final form`;
-  return `${bar(coming.progress, width)} ${fmt(xp(career))} / ${fmt(coming.threshold)} xp → ${coming.stage}`;
+export function progress(tamago: Tamago, width = BAR_WIDTH): string {
+  const coming = next(tamago.career);
+  if (coming === undefined) return `${bar(1, width)} ${fmt(tamago.xp)} xp · final form`;
+  return `${bar(coming.progress, width)} ${fmt(tamago.xp)} / ${fmt(coming.threshold)} xp → ${coming.stage}`;
 }
 
 /** The Species and its Rarity from hatchling on; before that the egg keeps its secret. */
-export function speciesLine(career: Career): string {
-  if (stage(career) === "egg") return "still an egg";
-  const { label, rarity } = species(career.species);
-  return `${label} · ${rarity}`;
+export function speciesLine(tamago: Tamago): string {
+  if (tamago.stage === "egg") return "still an egg";
+  return `${tamago.species.label} · ${tamago.species.rarity}`;
 }
 
 /** "a" or "an", by the first letter of the label. */
@@ -40,14 +38,15 @@ function article(label: string): string {
 }
 
 /** The hatch toast: the Species revealed, with its Rarity. */
-export function reveal(name: string, career: Career): string {
-  const { label, rarity } = species(career.species);
+export function reveal(name: string, tamago: Tamago): string {
+  const { label, rarity } = tamago.species;
   return `${name} hatched: ${article(label)} ${label}, ${rarity}!`;
 }
 
 /** One line per behavior Stat, in BEHAVIOR_STATS order: label, bar, value after the Modifiers of the Species. At egg the single STATS_HIDDEN line. */
-export function sheetLines(career: Career): string[] {
-  if (stage(career) === "egg") return [STATS_HIDDEN];
-  const stats = sheet(career.hatchedAt, career.species);
-  return BEHAVIOR_STATS.map((stat) => `${stat.padEnd(LABEL_WIDTH)} ${bar((stats[stat] - SCALE.min) / (SCALE.max - SCALE.min), STAT_BAR_WIDTH)} ${stats[stat]}`);
+export function sheetLines(tamago: Tamago): string[] {
+  if (tamago.stage === "egg") return [STATS_HIDDEN];
+  return BEHAVIOR_STATS.map(
+    (stat) => `${stat.padEnd(LABEL_WIDTH)} ${bar((tamago.sheet[stat] - SCALE.min) / (SCALE.max - SCALE.min), STAT_BAR_WIDTH)} ${tamago.sheet[stat]}`,
+  );
 }

@@ -45,6 +45,9 @@ AGENTS.md. Vocabulary lives in `CONTEXT.md`; use those terms.
   `core/creature/behavior.ts` holds the values, and every function that takes a
   Behavior defaults to it. The Sheet is derived like the Stage: never
   stored, never cached in the Window.
+- Views read a `Tamago` (`core/tamago.ts`), never a bare Career: everything
+  derived from a Career is derived there, once, and passed down as one
+  accessor. A new derived attribute is a new field of `Tamago`.
 - A new Species is one line in `SPECIES` (with its Modifiers), four bodies in
   `core/appearance/bodies/<rarity>.ts` and a full Signature in
   `core/speech/signatures/<rarity>.ts`. The tests fail at the first table that lacks

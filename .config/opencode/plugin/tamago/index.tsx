@@ -3,11 +3,10 @@ import type { TuiPlugin, TuiPluginModule } from "@opencode-ai/plugin/tui";
 import type { Event } from "@opencode-ai/sdk/v2";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { createSignal } from "solid-js";
+import { createMemo, createSignal } from "solid-js";
 import { createErrorLog } from "./adapter/log.ts";
 import { behavior } from "./core/creature/behavior.ts";
 import { tickInterval } from "./core/moment/cadence.ts";
-import { character } from "./core/creature/character.ts";
 import { createStore, type Loaded } from "./adapter/store.ts";
 import { SUBSCRIBED, createTranslator } from "./adapter/translate.ts";
 import { reveal } from "./core/appearance/card.ts";
@@ -16,6 +15,7 @@ import { WARN_AFTER, backoff } from "./core/store/retry.ts";
 import { PET_MS } from "./core/appearance/sprites.ts";
 import type { Voice } from "./core/speech/voice.ts";
 import { freshCareer, isEmpty, sameCareer, type Career } from "./core/career/career.ts";
+import { tamago, type Tamago } from "./core/tamago.ts";
 import { initialSession, type Session } from "./core/moment/session.ts";
 import {
   adopt,
@@ -76,10 +76,8 @@ const tui: TuiPlugin = async (api, options) => {
     const [muted, setMuted] = createSignal(window.muted);
     /** The Name lives in the Career, so a rename in one window reaches the others on flush. */
     const name = (): string => career().name?.value ?? defaultName;
-    /** Computed from the Career like the Stage: never stored, identical in every window. */
-    const persona = () => character(career());
-    /** The Behavior of the active Career: how fast it animates, how long it stays hurt. Derived like the Character. */
-    const conduct = () => behavior(career());
+    /** The active Tamago, read from the Career once per change: Stage, Sheet, Behavior, Character. Derived, never stored; every window computes the same. */
+    const active = createMemo(() => tamago(career()));
     /** True while the sprite wears the heart after a pet. Per window, like the sprite itself. */
     const [heart, setHeart] = createSignal(false);
     /** Milliseconds since the plugin started; drives animation frames. */
@@ -126,7 +124,7 @@ const tui: TuiPlugin = async (api, options) => {
         else if (effect.type === "switched") {
           registerCommands();
           api.ui.toast({ variant: "info", title: name(), message: stepsIn(career(), defaultName) });
-        } else if (effect.stage === "hatchling") api.ui.toast({ variant: "success", title: name(), message: reveal(name(), career()) });
+        } else if (effect.stage === "hatchling") api.ui.toast({ variant: "success", title: name(), message: reveal(name(), active()) });
         else api.ui.toast({ variant: "success", title: name(), message: `${name()} evolved: ${effect.stage}!` });
       }
     };
@@ -158,7 +156,7 @@ const tui: TuiPlugin = async (api, options) => {
     /** The dialog stack wraps the card in OpenCode's own centered Dialog; nothing to position here. */
     const showCard = () => {
       api.ui.dialog.replace(() => (
-        <CardView name={name()} theme={() => api.theme.current} career={career} clock={clock} heart={heart} now={Date.now} />
+        <CardView name={name()} theme={() => api.theme.current} tamago={active} clock={clock} heart={heart} now={Date.now} />
       ));
     };
 
@@ -221,18 +219,19 @@ const tui: TuiPlugin = async (api, options) => {
         return;
       }
       const careers = ordered(roster);
+      const shown = careers.map((one) => tamago(one));
       const activeId = idOf(roster.active);
       const lines = careers.map((one) => line(one, defaultName, activeId));
       api.ui.dialog.replace(() => (
         <RosterView
           theme={() => api.theme.current}
-          careers={careers}
+          tamagos={shown}
           lines={lines}
           clock={clock}
           now={Date.now}
-          onSelect={guard((chosen: Career) => {
+          onSelect={guard((chosen: Tamago) => {
             api.ui.dialog.clear();
-            if (idOf(chosen) !== activeId) switchTo(idOf(chosen));
+            if (idOf(chosen.career) !== activeId) switchTo(idOf(chosen.career));
           })}
         />
       ));
@@ -398,14 +397,11 @@ const tui: TuiPlugin = async (api, options) => {
               name={name()}
               theme={() => ctx.theme.current}
               session={sessionOf(props.session_id)}
-              career={career}
-              species={() => career().species}
+              tamago={active}
               clock={clock}
               footer={footer(props.session_id)}
               bubble={() => voices()[props.session_id]?.bubble}
               heart={heart}
-              temperament={() => persona().temperament}
-              behavior={conduct}
             />
           );
         },
@@ -420,12 +416,9 @@ const tui: TuiPlugin = async (api, options) => {
             <HomeView
               name={name()}
               theme={() => ctx.theme.current}
-              career={career}
-              species={() => career().species}
+              tamago={active}
               clock={clock}
               heart={heart}
-              temperament={() => persona().temperament}
-              behavior={conduct}
             />
           );
         },

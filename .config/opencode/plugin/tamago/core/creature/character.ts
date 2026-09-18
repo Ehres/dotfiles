@@ -1,7 +1,7 @@
 import { sheet, temperamentOf, type Temperament } from "./sheet.ts";
 import { REFERENCE, SPECIES, type Species, type SpeciesId } from "./species.ts";
 import { WEIGHTS, stage, stageIndex, type Paced } from "../career/stage.ts";
-import type { Career, Counters } from "../career/career.ts";
+import type { Counters } from "../career/career.ts";
 
 export type Craft = "scribe" | "shell" | "sage";
 export type Stance = "prudent" | "bold";
@@ -62,11 +62,6 @@ export function stance(counters: Counters): Stance {
 export function vocation(paced: Paced): Vocation | undefined {
   if (stageIndex(stage(paced)) < VOCATION_FROM) return undefined;
   return { craft: craft(paced), stance: stance(paced) };
-}
-
-export function character(career: Career): Character {
-  const found = vocation(career);
-  return { temperament: temperament(career.hatchedAt, career.species), ...(found === undefined ? {} : { vocation: found }) };
 }
 
 /** "sarcastic · prudent shell", or the Temperament alone before young. */

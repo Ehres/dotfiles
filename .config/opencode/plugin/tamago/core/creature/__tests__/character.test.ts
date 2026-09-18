@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { CRAFTS, STANCE, character, craft, describe, stance, temperament, vocation } from "../character.ts";
+import { CRAFTS, STANCE, craft, stance, temperament, vocation } from "../character.ts";
 import { EMPTY_DELTA, freshCareer, type Career, type Counters } from "../../career/career.ts";
 import { TEMPERAMENTS, historical } from "../sheet.ts";
 import { RARITY, REFERENCE, type Species } from "../species.ts";
@@ -59,15 +59,6 @@ test("no vocation before young, one from young on", () => {
   assert.deepEqual(vocation(counters({ prompts: young.xp / 2 - 1 })), undefined);
 });
 
-test("character and describe", () => {
-  const full = character(owner);
-  assert.equal(full.temperament, temperament(owner.hatchedAt));
-  assert.deepEqual(full.vocation, { craft: "shell", stance: "bold" });
-  assert.equal(describe(full), `${full.temperament} · bold shell`);
-  const egg = character({ ...freshCareer(owner.hatchedAt), species: "cat" });
-  assert.equal(describe(egg), full.temperament);
-});
-
 test("vocation waits for young in growth, so a rare species gets it later", () => {
   const young = STAGES.find((entry) => entry.id === "young")!;
   assert.notEqual(vocation(counters({ prompts: young.xp / 2 })), undefined, "a cat is young");
@@ -76,7 +67,7 @@ test("vocation waits for young in growth, so a rare species gets it later", () =
 });
 
 test("the owner's Tamago keeps its Temperament through the Sheet; the same hatch date as an owl or a dragon reads its Species", () => {
-  assert.equal(character(owner).temperament, "cheerful");
+  assert.equal(temperament(owner.hatchedAt, owner.species), "cheerful");
   assert.equal(temperament(owner.hatchedAt, "owl"), "stoic", "stoic 7 + 2 beats cheerful 8 − 1");
   assert.equal(temperament(owner.hatchedAt, "dragon"), "cheerful", "sarcastic 5 + 3 ties cheerful 8: order wins");
 });

@@ -354,6 +354,10 @@ _Avoid_: card, widget
   `frameIndex` take them as parameters and hold none as a constant
 - A **Career** at `young` or above has exactly one **Vocation**; below, none
 - A **Character** is read, never written; two windows always show the same
+- The shell reads a **Tamago** from the active **Career** once per change:
+  its **Species**, **Stage**, **XP**, **Growth**, **Sheet**, **Temperament**,
+  **Behavior**, **Character** and Speaker together; the views receive that
+  and derive nothing themselves
 - The **Voice** speaks with the **Temperament**; the **Face** of a pet wears
   it; the card states the whole **Character**
 - The **Voice** draws a **Register** for each **Cue** it speaks: the

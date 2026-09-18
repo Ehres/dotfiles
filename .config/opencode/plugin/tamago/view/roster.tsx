@@ -4,7 +4,7 @@ import type { KeyEvent } from "@opentui/core";
 import { useKeyboard, type JSX } from "@opentui/solid";
 import { Index, Show, createSignal } from "solid-js";
 import { rosterAction, step } from "../core/roster/roster.ts";
-import type { Career } from "../core/career/career.ts";
+import type { Tamago } from "../core/tamago.ts";
 import { CardBody } from "./card.tsx";
 
 /** The gutter of the highlighted line, and the blank one of the others, so the Names stay aligned. */
@@ -15,18 +15,18 @@ const BLANK = "  ";
  * The roster dialog: every Career of the machine as a line, the highlighted
  * one's CardBody underneath. OpenCode's Dialog wraps it and handles esc; the
  * moves and the select come from useKeyboard through the ROSTER_KEYS table in
- * core/roster.ts. `careers` and `lines` are frozen at opening, index for index.
+ * core/roster.ts. `tamagos` and `lines` are frozen at opening, index for index.
  */
 export function RosterView(props: {
   theme: () => TuiThemeCurrent;
-  careers: readonly Career[];
+  tamagos: readonly Tamago[];
   lines: readonly string[];
   clock: () => number;
   now: () => number;
-  onSelect: (career: Career) => void;
+  onSelect: (tamago: Tamago) => void;
 }): JSX.Element {
   const [cursor, setCursor] = createSignal(0);
-  const highlighted = (): Career | undefined => props.careers[cursor()];
+  const highlighted = (): Tamago | undefined => props.tamagos[cursor()];
   useKeyboard((key: KeyEvent) => {
     const action = rosterAction(key.name);
     if (action === undefined) return;
@@ -35,7 +35,7 @@ export function RosterView(props: {
       if (chosen !== undefined) props.onSelect(chosen);
       return;
     }
-    setCursor((at) => step(at, action, props.careers.length));
+    setCursor((at) => step(at, action, props.tamagos.length));
   });
   return (
     <box paddingLeft={2} paddingRight={2} paddingBottom={1} gap={1}>
@@ -56,7 +56,7 @@ export function RosterView(props: {
         </Index>
       </box>
       <Show when={highlighted()}>
-        {(career) => <CardBody theme={props.theme} career={career} clock={props.clock} heart={() => false} now={props.now} />}
+        {(one) => <CardBody theme={props.theme} tamago={one} clock={props.clock} heart={() => false} now={props.now} />}
       </Show>
     </box>
   );
