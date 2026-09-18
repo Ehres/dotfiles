@@ -156,18 +156,7 @@ const tui: TuiPlugin = async (api, options) => {
     /** The dialog stack wraps the card in OpenCode's own centered Dialog; nothing to position here. */
     const showCard = () => {
       api.ui.dialog.replace(() => (
-        <CardView
-          name={name()}
-          theme={() => api.theme.current}
-          career={career}
-          species={() => career().species}
-          clock={clock}
-          heart={heart}
-          temperament={() => persona().temperament}
-          behavior={conduct}
-          character={persona}
-          now={Date.now}
-        />
+        <CardView name={name()} theme={() => api.theme.current} career={career} clock={clock} heart={heart} now={Date.now} />
       ));
     };
 
