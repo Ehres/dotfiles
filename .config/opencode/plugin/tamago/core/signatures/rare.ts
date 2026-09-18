@@ -36,7 +36,7 @@ export const RARE: Record<SpeciesId, Signature> = {
     granted: ["Drifting in...", "Pulsing forward.", "Glow on. Go."],
     denied: ["Drifting back...", "Current says no.", "Floating still."],
     woke: ["Tide turned? Up.", "Was I drifting?", "Glow... returning."],
-    long_work: ["Long drift. Done.", "Current carried us.", "Tide came in."],
+    long_work: ["Long drift. Ashore.", "Current carried us.", "Tide came in."],
     big_diff: ["Whole sea stirred.", "Every current moved.", "Big wave, that."],
     streak: ["Sting. Sting. Ow.", "Stung myself.", "Tangled tentacles."],
     compacted: ["Current cleared.", "Glow reset.", "Fresh tide."],

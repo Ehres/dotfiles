@@ -13,7 +13,7 @@ export const EPIC: Record<SpeciesId, Signature> = {
     streak: ["Ash. Ash. Rising.", "Burned. Reborn.", "Fell. Flew again."],
     compacted: ["Ashes cleared.", "Fresh fire.", "Reborn. Again."],
     retried: ["Rise again!", "One more blaze.", "From ash, retry."],
-    todos_done: ["Sky is clear!", "Every ember placed.", "Done. Glowing."],
+    todos_done: ["Sky is clear!", "Every ember placed.", "Done. Still burning."],
     evolved: ["Brighter flames!", "Reborn, grander.", "Wings of fire now."],
     hatched: ["A phoenix! Bright.", "Born of fire. Hi!", "Warm already. Hello."],
   },

@@ -22,3 +22,18 @@ test("a Signature covers every Cue with at least three phrases that fit in MAX_T
     }
   }
 });
+
+test("a phrase belongs to one Species only", () => {
+  const owner = new Map<string, string>();
+  const collisions: string[] = [];
+  for (const [id, signature] of Object.entries(SIGNATURE)) {
+    for (const cue of Object.keys(CUES) as Cue[]) {
+      for (const text of signature?.[cue] ?? []) {
+        const existing = owner.get(text);
+        if (existing !== undefined && existing !== id) collisions.push(`"${text}" is said by both ${existing} and ${id}`);
+        else owner.set(text, id);
+      }
+    }
+  }
+  assert.deepEqual(collisions, []);
+});
