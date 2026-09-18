@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { DAY_MS } from "./card.ts";
-import { blocked, blockers, entry, growing, idOf, luck, stepsIn, switchable, type Roster } from "./roster.ts";
+import { ROSTER_KEYS, blocked, blockers, entry, growing, idOf, line, luck, ordered, rosterAction, stepsIn, step, switchable, type Roster } from "./roster.ts";
 import { freshCareer, type Career } from "./state.ts";
 
 const T0 = 1_700_000_000_000;
@@ -62,4 +62,38 @@ test("luck sums the points of the elders, whatever their place, and ignores whoe
   assert.equal(luck([elder(T0, { species: "dragon", sessions: 8_000 })]), 5);
   assert.equal(luck([elder(T0), elder(T0 - 1), elder(T0 - 2, { species: "dragon", sessions: 8_000 })]), 7);
   assert.equal(luck([elder(T0, { species: "nope" })]), 1, "an unknown Species counts as the reference");
+});
+
+test("ordered lists the active Career first, then the resting ones by hatch date", () => {
+  const roster: Roster = { active: elder(T0), resting: [elder(T0 - 1), elder(T0 - 3), elder(T0 - 2)] };
+  assert.deepEqual(ordered(roster).map(idOf), [T0, T0 - 3, T0 - 2, T0 - 1]);
+  assert.deepEqual(ordered({ active: elder(T0), resting: [] }).map(idOf), [T0]);
+});
+
+test("line names the Tamago, its species and stage, marks the active one, and shows an egg by its stage alone", () => {
+  const momo = elder(T0, { species: "owl", name: { value: "Momo", at: 1 } });
+  assert.equal(line(momo, "Tamago", T0), "Momo · owl · elder · active");
+  assert.equal(line(momo, "Tamago", T0 - 1), "Momo · owl · elder");
+  assert.equal(line(egg(T0), "Tamago", T0 - 1), "Tamago · egg");
+  assert.equal(line(egg(T0), "Tamago", T0), "Tamago · egg · active");
+});
+
+test("rosterAction maps the arrow and vim keys to a move, return to select, and anything else to nothing", () => {
+  assert.equal(rosterAction("up"), "up");
+  assert.equal(rosterAction("k"), "up");
+  assert.equal(rosterAction("down"), "down");
+  assert.equal(rosterAction("j"), "down");
+  assert.equal(rosterAction("return"), "select");
+  assert.equal(rosterAction("escape"), undefined);
+  assert.equal(rosterAction("x"), undefined);
+  assert.deepEqual(Object.keys(ROSTER_KEYS).sort(), ["down", "j", "k", "return", "up"]);
+});
+
+test("step moves the cursor by one and stops at both ends", () => {
+  assert.equal(step(0, "up", 3), 0);
+  assert.equal(step(1, "up", 3), 0);
+  assert.equal(step(1, "down", 3), 2);
+  assert.equal(step(2, "down", 3), 2);
+  assert.equal(step(0, "down", 1), 0);
+  assert.equal(step(0, "up", 1), 0);
 });

@@ -65,3 +65,38 @@ export function blocked(first: Career, fallback: string): string {
 export function stepsIn(career: Career, fallback: string): string {
   return stage(career) === "egg" ? "A new egg." : `${nameOf(career, fallback)} steps in.`;
 }
+
+/** Every Career of the Roster in display order: the active one, then the resting ones by hatch date. */
+export function ordered(roster: Roster): Career[] {
+  return [roster.active, ...switchable(roster)];
+}
+
+/** One line of the roster view: Name, Species label and Stage; an egg shows its Stage alone; the active one says so. */
+export function line(career: Career, fallback: string, activeId: CareerId): string {
+  const who = nameOf(career, fallback);
+  const stageOf = stage(career);
+  const parts = stageOf === "egg" ? [who, stageOf] : [who, species(career.species).label, stageOf];
+  if (idOf(career) === activeId) parts.push("active");
+  return parts.join(" · ");
+}
+
+export type RosterAction = "up" | "down" | "select";
+
+/** The keys of the roster view by opentui key name. Changing a key means changing this table, never the view. */
+export const ROSTER_KEYS: Readonly<Record<string, RosterAction>> = {
+  up: "up",
+  k: "up",
+  down: "down",
+  j: "down",
+  return: "select",
+};
+
+export function rosterAction(key: string): RosterAction | undefined {
+  return ROSTER_KEYS[key];
+}
+
+/** The cursor after a move, kept inside [0, count − 1]; it never wraps. */
+export function step(cursor: number, action: "up" | "down", count: number): number {
+  const moved = action === "up" ? cursor - 1 : cursor + 1;
+  return Math.min(Math.max(moved, 0), Math.max(count - 1, 0));
+}
