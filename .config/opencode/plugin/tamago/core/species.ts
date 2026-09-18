@@ -36,6 +36,12 @@ export const SPECIES: readonly Species[] = [
   { id: "duck", label: "duck", rarity: "common", sheet: { cheerful: 2, chatter: 1 } },
   { id: "hamster", label: "hamster", rarity: "common", sheet: { energy: 2, patience: -1 } },
   { id: "snail", label: "snail", rarity: "common", sheet: { dreamy: 1, energy: -2, patience: 2 } },
+  { id: "fox", label: "fox", rarity: "uncommon", sheet: { sarcastic: 2, energy: 1, sensitivity: 1 } },
+  { id: "penguin", label: "penguin", rarity: "uncommon", sheet: { stoic: 2, chatter: 1 } },
+  { id: "octopus", label: "octopus", rarity: "uncommon", sheet: { dreamy: 2, chatter: 1, sensitivity: -1 } },
+  { id: "bat", label: "bat", rarity: "uncommon", sheet: { energy: 2, chatter: -2, sensitivity: 1 } },
+  { id: "hedgehog", label: "hedgehog", rarity: "uncommon", sheet: { sensitivity: 2, chatter: -1, stoic: 1 } },
+  { id: "axolotl", label: "axolotl", rarity: "uncommon", sheet: { cheerful: 1, sensitivity: -2, patience: 1 } },
   { id: "dragon", label: "dragon", rarity: "legendary", sheet: { sarcastic: 3, sensitivity: -2, energy: 2 } },
 ];
 /** The Species of a Career that recorded none: the creature drawn before Species existed. */

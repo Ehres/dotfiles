@@ -119,6 +119,12 @@ const MODIFIERS: Record<string, Modifiers | undefined> = {
   duck: { cheerful: 2, chatter: 1 },
   hamster: { energy: 2, patience: -1 },
   snail: { dreamy: 1, energy: -2, patience: 2 },
+  fox: { sarcastic: 2, energy: 1, sensitivity: 1 },
+  penguin: { stoic: 2, chatter: 1 },
+  octopus: { dreamy: 2, chatter: 1, sensitivity: -1 },
+  bat: { energy: 2, chatter: -2, sensitivity: 1 },
+  hedgehog: { sensitivity: 2, chatter: -1, stoic: 1 },
+  axolotl: { cheerful: 1, sensitivity: -2, patience: 1 },
   dragon: { sarcastic: 3, sensitivity: -2, energy: 2 },
 };
 
