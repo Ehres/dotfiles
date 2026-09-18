@@ -11,7 +11,7 @@ Ce que Tamago fait aujourd'hui :
 - Sprite ASCII 11×5 par Species et par Stage (`core/appearance/sprites.ts`), 5 stades
   pilotés par le Growth, l'XP fois le Pace de la Species (`core/career/stage.ts`) :
   egg → hatchling → young → adult → elder.
-- 6 activités de session (`core/career/career.ts`) : idle, thinking, working, waiting,
+- 6 activités de session (`core/moment/session.ts`) : idle, thinking, working, waiting,
   hurt, sleeping. Animation des yeux et d'une "marque" à côté de la tête.
 - Transitions et comptage purs (`core/moment/transition.ts`, `core/career/count.ts`), translator SDK → événements internes ciblés par session
   (`adapter/translate.ts`), persistance multi-instances avec lock et rename

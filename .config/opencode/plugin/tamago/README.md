@@ -277,6 +277,7 @@ Layout:
 ```
 index.tsx           the only module that touches api.* and timers; wires the layers
 core/window.ts      what one window does with an event, a tick, a flush or a command
+core/tamago.ts      the Tamago read from a Career once: Species, Stage, XP, Sheet, Behavior, Character
 core/creature/      what a Tamago is at hatch: Species, Luck, Sheet, Behavior, Character
 core/career/        what it has lived: Career, Delta, merge, hydrate, Stage, count
 core/moment/        what it is doing now: Session, events, transition, cadence

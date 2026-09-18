@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { CAREER_KEYS, EMPTY_DELTA, addDelta, freshCareer, isEmpty, merge, sameCareer, type Delta } from "../career.ts";
 import { hydrate } from "../hydrate.ts";
-import { REFERENCE, hatch } from "../../creature/species.ts";
+import { hatch } from "../../creature/species.ts";
 
 test("freshCareer is all zeros hatched now", () => {
   const career = freshCareer(1000);

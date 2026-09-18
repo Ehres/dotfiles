@@ -15,7 +15,7 @@ const BLANK = "  ";
  * The roster dialog: every Career of the machine as a line, the highlighted
  * one's CardBody underneath. OpenCode's Dialog wraps it and handles esc; the
  * moves and the select come from useKeyboard through the ROSTER_KEYS table in
- * core/roster.ts. `tamagos` and `lines` are frozen at opening, index for index.
+ * core/roster/roster.ts. `tamagos` and `lines` are frozen at opening, index for index.
  */
 export function RosterView(props: {
   theme: () => TuiThemeCurrent;
