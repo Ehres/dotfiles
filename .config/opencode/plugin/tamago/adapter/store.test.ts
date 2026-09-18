@@ -407,15 +407,18 @@ test("switch to a corrupt resting file sets it aside and reports missing", () =>
 test("hatch lays a fresh egg as the active Career and rests the previous one", () => {
   const dir = scratch();
   const store = createStore(dir, () => 7);
-  store.flush(d({ sessions: 2_000 }), 7);
-  const result = store.hatch(9);
+  writeFileSync(join(dir, CAREER_FILE), JSON.stringify({ ...freshCareer(7), species: "cat", sessions: 2_000 }));
+  // The resting cat is elder: Luck 1. Pinned, so no later Species changes what date 7 draws.
+  // A hatch date, at or after 9, where Luck 1 changes the draw from a first egg's: found rather than pinned.
+  let at = 9;
+  while (at < 1_000_000 && hatch(at, SPECIES, weightsAt(0)) === hatch(at, SPECIES, weightsAt(1))) at++;
+  assert.ok(at < 1_000_000, "some date at or after 9 draws differently at Luck 0 and Luck 1");
+  const result = store.hatch(at);
   assert.equal(result.outcome, "written");
-  // hatchedAt 7 draws jellyfish (rare, pace 0.5); 2_000 sessions is 20_000 raw XP, 10_000
-  // Growth: adult, not elder, so it contributes 0 Luck to this Hatch (weightsAt(0), same
-  // as freshCareer's default, but named explicitly here instead of left implicit).
-  const expected = freshCareer(9, weightsAt(0));
+  const expected = freshCareer(at, weightsAt(1));
   assert.deepEqual(result.career, expected);
   assert.deepEqual(store.load().career, expected);
+  assert.notEqual(expected.species, freshCareer(at).species, "a Luck-1 egg draws otherwise than a first egg at this date");
   assert.equal(JSON.parse(readFileSync(join(dir, ROSTER_DIR, "7.json"), "utf8")).sessions, 2_000);
   assert.ok(!existsSync(join(dir, LOCK_DIR)), "lock released");
 });
