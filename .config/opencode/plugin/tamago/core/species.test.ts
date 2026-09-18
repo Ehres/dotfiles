@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { weightsAt } from "./luck.ts";
 import { RARITIES, RARITY, REFERENCE, SPECIES, hatch, pace, species, type Rarity, type Species } from "./species.ts";
-import { MODIFIERS_SUM_MAX, MODIFIER_MAX } from "./sheet.ts";
+import { MODIFIERS_SUM_MAX, MODIFIER_MAX, type Modifiers } from "./sheet.ts";
 
 /** One Species per Rarity, so every tier can be drawn. */
 const full: readonly Species[] = RARITIES.map((rarity) => ({ id: `s-${rarity}`, label: rarity, rarity }));
@@ -111,7 +111,18 @@ test("Modifiers stay within bounds on every Species, and the reference has none"
   assert.equal(species(REFERENCE).sheet, undefined, "the reference never weighs: every Career from before the Sheet stays as it was");
 });
 
-test("owl and dragon carry the Modifiers of the spec", () => {
-  assert.deepEqual(species("owl").sheet, { stoic: 2, cheerful: -1, energy: -2, chatter: -1, patience: 2 });
-  assert.deepEqual(species("dragon").sheet, { sarcastic: 3, sensitivity: -2, energy: 2 });
+/** The Modifiers of the spec, pinned per Species. Once a Species has hatched anywhere, its line here and in SPECIES must never change. */
+const MODIFIERS: Record<string, Modifiers | undefined> = {
+  cat: undefined,
+  owl: { stoic: 2, cheerful: -1, energy: -2, chatter: -1, patience: 2 },
+  frog: { stoic: 1, energy: -1, patience: 1 },
+  duck: { cheerful: 2, chatter: 1 },
+  hamster: { energy: 2, patience: -1 },
+  snail: { dreamy: 1, energy: -2, patience: 2 },
+  dragon: { sarcastic: 3, sensitivity: -2, energy: 2 },
+};
+
+test("every Species carries the Modifiers of the spec, and the spec names every Species of the table", () => {
+  assert.deepEqual(Object.keys(MODIFIERS).sort(), SPECIES.map((entry) => entry.id).sort());
+  for (const entry of SPECIES) assert.deepEqual(entry.sheet, MODIFIERS[entry.id], entry.id);
 });

@@ -17,3 +17,20 @@ test("every body draws every Stage past the egg", () => {
     }
   }
 });
+
+test("no two Species share a body at any Stage, and no Species draws two Stages alike", () => {
+  const seen = new Map<string, string>();
+  for (const [id, bodies] of Object.entries(BODIES)) {
+    const own = new Set<string>();
+    for (const { id: stage } of STAGES) {
+      if (stage === "egg") continue;
+      const frame = bodies[stage]("o o", " ").join("\n");
+      assert.ok(!own.has(frame), `${id} draws two Stages alike (${stage})`);
+      own.add(frame);
+      const key = `${stage}\n${frame}`;
+      const other = seen.get(key);
+      assert.equal(other, undefined, `${id} and ${other} share the ${stage} body`);
+      seen.set(key, id);
+    }
+  }
+});

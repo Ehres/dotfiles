@@ -32,6 +32,10 @@ export type Species = { id: SpeciesId; label: string; rarity: Rarity; sheet?: Mo
 export const SPECIES: readonly Species[] = [
   { id: "cat", label: "cat", rarity: "common" },
   { id: "owl", label: "owl", rarity: "common", sheet: { stoic: 2, cheerful: -1, energy: -2, chatter: -1, patience: 2 } },
+  { id: "frog", label: "frog", rarity: "common", sheet: { stoic: 1, energy: -1, patience: 1 } },
+  { id: "duck", label: "duck", rarity: "common", sheet: { cheerful: 2, chatter: 1 } },
+  { id: "hamster", label: "hamster", rarity: "common", sheet: { energy: 2, patience: -1 } },
+  { id: "snail", label: "snail", rarity: "common", sheet: { dreamy: 1, energy: -2, patience: 2 } },
   { id: "dragon", label: "dragon", rarity: "legendary", sheet: { sarcastic: 3, sensitivity: -2, energy: 2 } },
 ];
 /** The Species of a Career that recorded none: the creature drawn before Species existed. */
