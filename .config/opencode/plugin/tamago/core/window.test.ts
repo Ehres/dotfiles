@@ -6,7 +6,7 @@ import { HURT_MS, SLEEP_MS } from "./events.ts";
 import { speakerOf } from "./sheet.ts";
 import { STAGES, WEIGHTS } from "./stage.ts";
 import { EMPTY_DELTA, freshCareer, isEmpty, type Career } from "./state.ts";
-import { phrase } from "./voice.ts";
+import { BUBBLE_MS, phrase } from "./voice.ts";
 import { adopt, flushed, freshWindow, receive, rename, setMuted, tick, type Window } from "./window.ts";
 
 const T0 = 1_000_000;
@@ -19,7 +19,7 @@ const cat = (at: number): Career => ({ ...freshCareer(at), species: "cat" });
 
 /** A Window with two Sessions already moving, so "every" has someone to reach. */
 function twoSessions(): Window {
-  let w = freshWindow(cat(T0));
+  let w = freshWindow(cat(2_000_000));
   w = receive(w, to("a", { type: "prompt_sent" }), T0).window;
   w = receive(w, to("b", { type: "prompt_sent" }), T0).window;
   return w;
@@ -74,8 +74,7 @@ test("a tick lets a Bubble expire and a hurt Session recover", () => {
   let w = twoSessions();
   w = receive(w, to("a", { type: "permission_asked" }), T0).window;
   w = receive(w, to("b", { type: "tool_failed" }), T0).window;
-  const bubbleMs = behavior(w.career).bubbleMs;
-  const later = tick(w, T0 + bubbleMs + 3_000);
+  const later = tick(w, T0 + BUBBLE_MS + 3_000);
   assert.equal(later.voices.a?.bubble, undefined);
   assert.equal(later.sessions.b?.activity, "working");
 });
@@ -214,8 +213,7 @@ test("the Voice speaks as the Career's Speaker: the phrase of its Species, Tempe
   w = receive(w, to("a", { type: "session_idle" }), T0 + 1).window;
   w = tick(w, T0 + 1 + SLEEP_MS);
   assert.equal(w.sessions.a?.activity, "sleeping");
-  const bubbleMs = behavior(career).bubbleMs;
-  w = receive(w, to("a", { type: "prompt_sent" }), T0 + 2 + SLEEP_MS + bubbleMs + 10_000).window;
+  w = receive(w, to("a", { type: "prompt_sent" }), T0 + 2 + SLEEP_MS + BUBBLE_MS + 10_000).window;
   assert.equal(w.voices.a?.bubble?.cue, "woke");
   assert.equal(w.voices.a?.bubble?.text, phrase("woke", speakerOf(career), 0));
 });
