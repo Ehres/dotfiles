@@ -102,14 +102,14 @@ At the hatch the species always speaks.
 Six commands in the palette, always under `Tamago` so they stay easy to find
 whatever the creature is called; its Name only appears in their descriptions:
 
-| Command           | What it does                                                                                 |
-| ----------------- | -------------------------------------------------------------------------------------------- |
+| Command           | What it does                                                                                      |
+| ----------------- | -------------------------------------------------------------------------------------------------- |
 | `toggle bubbles`  | mutes and unmutes; the choice is remembered across launches                                  |
 | `show card`       | opens a dialog with the sprite, species and rarity, stage, XP, age, character, stats and bar |
 | `pet`             | the sprite wears a `♥` and its temperament's eyes for 2 s                                    |
 | `rename`          | asks for a new name, 16 characters at most; empty keeps the old                              |
 | `hatch a new egg` | lays a fresh egg once every creature on the machine is `elder`                               |
-| `switch`          | brings another creature of this machine to the front                                         |
+| `roster`          | lists every creature of this machine with its card; Enter on a resting one brings it to the front |
 
 Petting counts nothing and changes nothing in the career. The heart is the
 only non-ASCII character in a sprite: it takes one column in most terminals,
@@ -162,8 +162,9 @@ A machine can hold several creatures. One is active: it is drawn, it earns
 XP, it talks. The others rest in `roster/`, whole, with their name, species
 and picks. `hatch a new egg` lays a fresh egg and makes it active, but only
 once every creature on the machine is `elder`: a new egg costs a whole career.
-`switch` brings a resting creature back to the front; nothing is earned or
-lost. A window opened before a switch keeps crediting the creature it shows
+`roster` lists every creature of the machine, the active one first, with the
+highlighted one's card underneath; Enter on a resting creature brings it back
+to the front, and nothing is earned or lost. A window opened before a switch keeps crediting the creature it shows
 until its next flush, then follows the new active one. A window still running
 an older build knows only `career.json`, so its gains go to whichever
 creature is active when it flushes.

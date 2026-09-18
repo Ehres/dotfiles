@@ -334,8 +334,12 @@ Quatre lots :
      Species en 6/6/4/3/1 avec Modifiers, corps et Signature complète. Luck :
      les elders du Roster pèsent sur la Rarity du prochain œuf
      (`core/luck.ts`), un premier œuf ne donne ni epic ni legendary.
-   - 4c vue de collection : tous les Tamago de la machine, l'actif et ceux
-     au repos.
+   - 4c **vue du Roster**, **fait le 2026-09-18**, voir
+     `docs/superpowers/specs/2026-09-18-tamago-roster-view-design.md`. La
+     commande `roster` remplace `switch` : tous les Tamago de la machine,
+     l'actif d'abord, la carte du surligné dessous, Entrée sur un Tamago au
+     repos le fait passer devant. « Collection » est évité : le glossaire
+     réserve Roster.
    - 4d œuf teinté par Rarity ; à trancher contre « l'œuf ne révèle rien ».
    - Gardées pour plus tard, dictées le 2026-09-17 : revoir les sprites et
      leur affichage dans la barre latérale, dimensions comprises ; du loot et

@@ -9,6 +9,9 @@ AGENTS.md. Vocabulary lives in `CONTEXT.md`; use those terms.
   only layer that reads SDK event shapes or touches the disk. `index.tsx` is
   the only module that touches `api.*` and timers. Views take accessors and
   return JSX.
+- A dialog of our own reads its keys with `useKeyboard` from `@opentui/solid`;
+  the key → action table lives in `core/` (`ROSTER_KEYS`), tested, so a key
+  taken by OpenCode is a one-line change there, never in the view.
 - Moving a Session (`transition`) and counting XP (`count`) are separate pure
   functions; an event may move several Sessions but is counted once.
 - What an event, a tick, a flush or a palette command does to the Window is a
