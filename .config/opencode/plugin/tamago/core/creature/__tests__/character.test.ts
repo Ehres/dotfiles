@@ -3,7 +3,8 @@ import assert from "node:assert/strict";
 import { CRAFTS, STANCE, craft, stance, temperament, vocation } from "../character.ts";
 import { EMPTY_DELTA, freshCareer, type Career, type Counters } from "../../career/career.ts";
 import { TEMPERAMENTS, historical } from "../sheet.ts";
-import { RARITY, REFERENCE, type Species } from "../species.ts";
+import { REFERENCE } from "../catalog.ts";
+import { RARITY, type Species } from "../species.ts";
 import { STAGES, type Paced } from "../../career/stage.ts";
 
 /** The owner's real career on 2026-09-15, plus questions. */

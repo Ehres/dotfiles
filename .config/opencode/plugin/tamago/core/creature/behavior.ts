@@ -1,5 +1,6 @@
+import { SPECIES } from "./catalog.ts";
 import { factor, sheet, type Sheet } from "./sheet.ts";
-import { SPECIES, type Species } from "./species.ts";
+import type { Species } from "./species.ts";
 import type { Career } from "../career/career.ts";
 
 /** The durations and the count the behavior Stats of a Sheet set for one Tamago. Computed, never stored. */

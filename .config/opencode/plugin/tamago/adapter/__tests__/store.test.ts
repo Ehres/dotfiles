@@ -6,7 +6,8 @@ import { join } from "node:path";
 import { LOCK_STALE_MS } from "../../core/store/lock.ts";
 import { EMPTY_DELTA, freshCareer, type Delta } from "../../core/career/career.ts";
 import { weightsAt } from "../../core/creature/luck.ts";
-import { REFERENCE, SPECIES, hatch } from "../../core/creature/species.ts";
+import { REFERENCE, SPECIES } from "../../core/creature/catalog.ts";
+import { hatch } from "../../core/creature/species.ts";
 import { CAREER_FILE, LOCK_DIR, LOCK_OWNER_FILE, ROSTER_DIR, createStore, type Store } from "../store.ts";
 
 const scratch = () => mkdtempSync(join(tmpdir(), "tamago-store-"));

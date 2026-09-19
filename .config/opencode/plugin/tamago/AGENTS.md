@@ -50,10 +50,11 @@ AGENTS.md. Vocabulary lives in `CONTEXT.md`; use those terms.
 - Views read a `Tamago` (`core/tamago.ts`), never a bare Career: everything
   derived from a Career is derived there, once, and passed down as one
   prop. A new derived attribute is a new field of `Tamago`.
-- A new Species is one line in `SPECIES` (with its Modifiers), four bodies in
-  `core/appearance/bodies/<rarity>.ts` and a full Signature in
-  `core/speech/signatures/<rarity>.ts`. The tests fail at the first table that lacks
-  it. The rarity weights live in `core/creature/luck.ts`, never in `species.ts`.
+- A new Species is one entry in `core/creature/species/<rarity>.ts`: id, label,
+  Rarity, Modifiers, four bodies and a full Signature. A missing body or
+  Signature does not compile; the order of the entries is the draw order and
+  never changes once shipped. The rarity weights live in
+  `core/creature/luck.ts`, never in the Species files.
 - The voice never picks a phrase by rotation or by `Math.random`: `phrase`
   seeds from the hatch date, the Cue and its count, so every window agrees for
   the same occurrence of the Cue.

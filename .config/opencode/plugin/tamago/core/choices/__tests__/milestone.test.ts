@@ -3,7 +3,8 @@ import assert from "node:assert/strict";
 import { MILESTONES, isReached, measure, reached, type Milestone } from "../milestone.ts";
 import { STAGES, growth, type Paced } from "../../career/stage.ts";
 import { EMPTY_DELTA, type Counters } from "../../career/career.ts";
-import { RARITY, REFERENCE } from "../../creature/species.ts";
+import { REFERENCE } from "../../creature/catalog.ts";
+import { RARITY } from "../../creature/species.ts";
 
 const counters = (patch: Partial<Counters>, species = REFERENCE): Paced => ({ ...EMPTY_DELTA, tools: { ...EMPTY_DELTA.tools }, species, ...patch });
 

@@ -88,16 +88,15 @@ The 5 s of a bubble, the 10 s between two, the 5 min of a long work and the
 sooner and longer, a sensitive one complains earlier.
 
 Three registers share the phrases. Each species has a signature: its own
-phrases for every cue, in `core/speech/signature.ts` and one file per rarity under
-`core/speech/signatures/`. Each temperament has its flavor for every cue, in
-`core/speech/phrases.ts`, next to the neutral phrases; which register speaks is
-drawn in `core/speech/register.ts`. Which register speaks is drawn
-at each cue, 70 % the species, 25 % a temperament, 5 % neutral; within the
-temperament share, each of the four speaks at the weight of its stat, so a
-sarcastic 9 with a dreamy 3 drifts off now and then. The draw is seeded from
-the hatch date, the cue and its count: every window hears the same phrase for
-the same occurrence of the cue, and the same creature does not repeat itself.
-At the hatch the species always speaks.
+phrases for every cue, in its entry of `core/creature/species/<rarity>.ts`.
+Each temperament has its flavor for every cue, in `core/speech/phrases.ts`,
+next to the neutral phrases. Which register speaks is drawn in
+`core/speech/register.ts`: at each cue, 70 % the species, 25 % a temperament,
+5 % neutral; within the temperament share, each of the four speaks at the
+weight of its stat, so a sarcastic 9 with a dreamy 3 drifts off now and then.
+The draw is seeded from the hatch date, the cue and its count: every window
+hears the same phrase for the same occurrence of the cue, and the same
+creature does not repeat itself. At the hatch the species always speaks.
 
 ## Commands
 
@@ -133,8 +132,8 @@ with the career. Twenty species, by rarity:
 The egg looks the same for every species; the creature shows at
 `hatchling`, with a toast and a bubble. A species never changes: the only way
 to meet another one is a new egg. Two eggs may hatch the same species: the
-draw has no memory. Bodies live in `core/appearance/bodies/<rarity>.ts`, signatures in
-`core/speech/signatures/<rarity>.ts`.
+draw has no memory. Each species lives whole, body and signature, in
+`core/creature/species/<rarity>.ts`.
 
 | Rarity      | First egg | After one common elder | Cap    | Pace |
 | ----------- | --------- | ---------------------- | ------ | ---- |
@@ -217,8 +216,8 @@ sheet keeps its temperament. Every other species has its own line, from a
 frog's stoic +1 to a phoenix's cheerful +3 and a kraken's cold anger, sarcastic
 +2, stoic +2, sensitivity +2. About one owl in six, and one dragon in four,
 takes its species' temperament rather than its draw. The modifiers live in
-`core/creature/species.ts`; tune a species before one has hatched, since changing its
-line changes every living one. The card shows the four behavior stats as bars
+`core/creature/species/<rarity>.ts`; tune a species before one has hatched,
+since changing its entry changes every living one. The card shows the four behavior stats as bars
 from `hatchling` on.
 
 From the `young` stage, the counters add a vocation: a craft, scribe, shell or
@@ -283,7 +282,7 @@ index.tsx           wires the layers
 shell/              the only layer touching api.* and timers: Window mirror, tick and flush loops, actions, dialogs, palette, slots
 core/window.ts      what one window does with an event, a tick, a flush or a command
 core/tamago.ts      the Tamago read from a Career once: Species, Stage, XP, Sheet, Behavior, Character
-core/creature/      what a Tamago is at hatch: Species, Luck, Sheet, Behavior, Character
+core/creature/      what a Tamago is at hatch: the Species catalog, Luck, Sheet, Behavior, Character
 core/career/        what it has lived: Career, Delta, merge, hydrate, Stage, count
 core/moment/        what it is doing now: Session, events, transition, cadence
 core/speech/        what it says: Voice, Signatures, Bubble

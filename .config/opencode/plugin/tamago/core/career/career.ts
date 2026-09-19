@@ -1,7 +1,8 @@
+import { SPECIES } from "../creature/catalog.ts";
 import { weightsAt } from "../creature/luck.ts";
+import { hatch, type Rarity, type SpeciesId } from "../creature/species.ts";
 import { latest, type Rename } from "./name.ts";
 import { firstPicks, samePicks, type Picks } from "./pick.ts";
-import { SPECIES, hatch, type Rarity, type SpeciesId } from "../creature/species.ts";
 
 export type ToolKind = "read" | "edit" | "bash" | "other";
 

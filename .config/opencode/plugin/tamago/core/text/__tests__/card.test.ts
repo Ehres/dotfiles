@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { DAY_MS, STATS_HIDDEN, age, progress, reveal, sheetLines, speciesLine } from "../card.ts";
-import { REFERENCE } from "../../creature/species.ts";
+import { REFERENCE } from "../../creature/catalog.ts";
 import { freshCareer, type Career } from "../../career/career.ts";
 import { tamago } from "../../tamago.ts";
 

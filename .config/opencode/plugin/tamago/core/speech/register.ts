@@ -1,8 +1,8 @@
+import { signatureOf } from "../creature/catalog.ts";
 import { generator, seed, weighted } from "../creature/random.ts";
 import { TEMPERAMENTS, temperamentOf, type Speaker, type Temperament } from "../creature/sheet.ts";
 import type { Cue, Phrases } from "./cue.ts";
 import { FLAVOR, PHRASES } from "./phrases.ts";
-import { SIGNATURE } from "./signature.ts";
 
 /** Who speaks a Cue: the Species, one of the four Temperaments, or nobody in particular. */
 export type Register = "species" | "temperament" | "neutral";
@@ -14,7 +14,7 @@ const REGISTERS: readonly Register[] = ["species", "temperament", "neutral"];
 function pool(cue: Cue, speaker: Speaker, register: Register, r: number): Phrases {
   switch (register) {
     case "species":
-      return SIGNATURE[speaker.species]?.[cue] ?? FLAVOR[temperamentOf(speaker.sheet)][cue];
+      return signatureOf(speaker.species)?.[cue] ?? FLAVOR[temperamentOf(speaker.sheet)][cue];
     case "temperament": {
       // A Temperament Stat may sit below zero after a Modifier: it weighs nothing. All four at zero cannot happen with a drawn Sheet; the Temperament speaks then.
       const stat = (temperament: Temperament): number => Math.max(0, speaker.sheet[temperament]);

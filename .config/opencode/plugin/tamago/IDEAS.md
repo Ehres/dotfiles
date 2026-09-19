@@ -324,11 +324,10 @@ Quatre lots :
    comportement en barres.
 4. **Enrichissements**, en quatre sous-lots :
    - 4a **Signature par Species**, **fait le 2026-09-17**. Chaque Species
-     possède ses phrases (`core/speech/signature.ts`, un fichier par Rarity sous
-     `core/speech/signatures/`). Depuis 4b, la Signature couvre les douze Cues et
-     la voix tire un registre à chaque Cue : la Species 70 %, un Temperament
-     au poids de sa Stat 25 %, le neutre 5 % ; à l'éclosion, c'est la Species
-     qui parle.
+     possède ses phrases (`core/creature/species/<rarity>.ts`). Depuis 4b, la
+     Signature couvre les douze Cues et la voix tire un registre à chaque
+     Cue : la Species 70 %, un Temperament au poids de sa Stat 25 %, le
+     neutre 5 % ; à l'éclosion, c'est la Species qui parle.
    - 4b **Bestiaire, Luck et registres**, **fait le 2026-09-18**, voir
      `docs/superpowers/specs/2026-09-17-tamago-bestiary-design.md`. Vingt
      Species en 6/6/4/3/1 avec Modifiers, corps et Signature complète. Luck :

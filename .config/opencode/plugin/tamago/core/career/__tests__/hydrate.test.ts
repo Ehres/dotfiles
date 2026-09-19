@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { freshCareer } from "../career.ts";
 import { hydrate, hydratePicks } from "../hydrate.ts";
-import { REFERENCE } from "../../creature/species.ts";
+import { REFERENCE } from "../../creature/catalog.ts";
 
 test("hydrate fills missing fields with defaults and is not corrupt", () => {
   const { career, corrupt } = hydrate({ prompts: 7, tools: { edit: 3 } }, 500);

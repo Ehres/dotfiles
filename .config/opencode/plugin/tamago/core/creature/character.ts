@@ -1,5 +1,6 @@
+import { REFERENCE, SPECIES } from "./catalog.ts";
 import { sheet, temperamentOf, type Temperament } from "./sheet.ts";
-import { REFERENCE, SPECIES, type Species, type SpeciesId } from "./species.ts";
+import type { Species, SpeciesId } from "./species.ts";
 import { WEIGHTS, stage, stageIndex, type Paced } from "../career/stage.ts";
 import type { Counters } from "../career/career.ts";
 

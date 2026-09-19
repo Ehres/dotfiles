@@ -1,6 +1,7 @@
-import { BODIES, type Body } from "./bodies.ts";
+import { REFERENCE, bodiesOf, known } from "../creature/catalog.ts";
+import type { Body } from "./bodies.ts";
 import type { Temperament } from "../creature/sheet.ts";
-import { REFERENCE, type SpeciesId } from "../creature/species.ts";
+import type { SpeciesId } from "../creature/species.ts";
 import type { StageId } from "../career/stage.ts";
 import type { Activity } from "../moment/session.ts";
 
@@ -25,15 +26,10 @@ const EGG: Body = (e, m) => [
   "   '---'",
 ];
 
-/** Whether this build draws that Species itself; anything else draws as the reference. */
-function known(species: SpeciesId): boolean {
-  return Object.hasOwn(BODIES, species);
-}
-
 /** The body to draw: the common egg, else the Species' body, else the reference's for a Species this build does not know. */
 function body(species: SpeciesId, stage: StageId): Body {
   if (stage === "egg") return EGG;
-  return BODIES[known(species) ? species : REFERENCE]![stage];
+  return bodiesOf(species)[stage];
 }
 
 /** The cache key: every egg shares one entry so identity holds across Species; an unknown Species shares the reference's. */

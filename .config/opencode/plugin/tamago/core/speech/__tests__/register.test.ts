@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { TEMPERAMENTS, type Sheet, type Speaker, type Temperament } from "../../creature/sheet.ts";
-import { SIGNATURE } from "../signature.ts";
+import { signatureOf } from "../../creature/catalog.ts";
 import { REGISTER, phrase } from "../register.ts";
 import { FLAVOR, PHRASES } from "../phrases.ts";
 import type { Cue } from "../cue.ts";
@@ -14,7 +14,7 @@ const DRAGON: Speaker = { hatchedAt: 3, species: "dragon", sheet: sheetOf({ chee
 
 /** Which Register a text of `cue` belongs to, for a Speaker whose pools are pairwise disjoint. */
 function registerOf(text: string, cue: Cue, species: string): "species" | Temperament | "neutral" | undefined {
-  if (SIGNATURE[species]?.[cue].includes(text)) return "species";
+  if (signatureOf(species)?.[cue].includes(text)) return "species";
   for (const temperament of TEMPERAMENTS) if (FLAVOR[temperament][cue].includes(text)) return temperament;
   if (PHRASES[cue].includes(text)) return "neutral";
   return undefined;
@@ -22,7 +22,7 @@ function registerOf(text: string, cue: Cue, species: string): "species" | Temper
 
 /** Fails unless the Species, the four Temperaments and the neutral phrases share no text for `cue`: the tests below classify by membership. */
 function assertDisjoint(cue: Cue, species: string): void {
-  const pools = [SIGNATURE[species]?.[cue] ?? [], ...TEMPERAMENTS.map((temperament) => FLAVOR[temperament][cue]), PHRASES[cue]];
+  const pools = [signatureOf(species)?.[cue] ?? [], ...TEMPERAMENTS.map((temperament) => FLAVOR[temperament][cue]), PHRASES[cue]];
   const all = pools.flat();
   assert.equal(new Set(all).size, all.length, `${species}/${cue}: the pools overlap, pick another Cue for this test`);
 }
@@ -75,7 +75,7 @@ test("at the hatch the Species always speaks, and the phrase still varies", () =
   const seen = new Set<string>();
   for (let times = 0; times < 50; times++) {
     const text = phrase("hatched", DRAGON, times);
-    assert.ok(SIGNATURE.dragon?.hatched.includes(text), text);
+    assert.ok(signatureOf("dragon")?.hatched.includes(text), text);
     seen.add(text);
   }
   assert.ok(seen.size >= 2);

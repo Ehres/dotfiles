@@ -1,3 +1,6 @@
+import type { Bodies } from "../appearance/bodies.ts";
+import type { Signature } from "../speech/signature.ts";
+import { REFERENCE, SPECIES } from "./catalog.ts";
 import { weightsAt } from "./luck.ts";
 import { generator, seed, weighted } from "./random.ts";
 import type { Modifiers } from "./sheet.ts";
@@ -19,40 +22,8 @@ export type SpeciesId = string;
 /** `sheet` holds the Modifiers this Species adds to the Sheet; absent for none. */
 export type Species = { id: SpeciesId; label: string; rarity: Rarity; sheet?: Modifiers };
 
-/**
- * Every Species that can hatch. Order within a Rarity is the order of the
- * draw. `sheet` holds the Modifiers, absent for none; a test bounds each to
- * ±MODIFIER_MAX and their sum to MODIFIERS_SUM_MAX. Tune a line before that
- * Species has hatched anywhere: the Sheet is derived, so changing it changes
- * the Temperament and Behavior of every Tamago of that Species already alive.
- * Once one lives, leave its line alone and add a sibling Species instead. The
- * reference entry has no Modifier and never will: that is what keeps every
- * Career from before the Sheet unchanged.
- */
-export const SPECIES: readonly Species[] = [
-  { id: "cat", label: "cat", rarity: "common" },
-  { id: "owl", label: "owl", rarity: "common", sheet: { stoic: 2, cheerful: -1, energy: -2, chatter: -1, patience: 2 } },
-  { id: "frog", label: "frog", rarity: "common", sheet: { stoic: 1, energy: -1, patience: 1 } },
-  { id: "duck", label: "duck", rarity: "common", sheet: { cheerful: 2, chatter: 1 } },
-  { id: "hamster", label: "hamster", rarity: "common", sheet: { energy: 2, patience: -1 } },
-  { id: "snail", label: "snail", rarity: "common", sheet: { dreamy: 1, energy: -2, patience: 2 } },
-  { id: "fox", label: "fox", rarity: "uncommon", sheet: { sarcastic: 2, energy: 1, sensitivity: 1 } },
-  { id: "penguin", label: "penguin", rarity: "uncommon", sheet: { stoic: 2, chatter: 1 } },
-  { id: "octopus", label: "octopus", rarity: "uncommon", sheet: { dreamy: 2, chatter: 1, sensitivity: -1 } },
-  { id: "bat", label: "bat", rarity: "uncommon", sheet: { energy: 2, chatter: -2, sensitivity: 1 } },
-  { id: "hedgehog", label: "hedgehog", rarity: "uncommon", sheet: { sensitivity: 2, chatter: -1, stoic: 1 } },
-  { id: "axolotl", label: "axolotl", rarity: "uncommon", sheet: { cheerful: 1, sensitivity: -2, patience: 1 } },
-  { id: "robot", label: "robot", rarity: "rare", sheet: { stoic: 3, sensitivity: -2, energy: 1 } },
-  { id: "ghost", label: "ghost", rarity: "rare", sheet: { dreamy: 3, chatter: -2, energy: -1 } },
-  { id: "jellyfish", label: "jellyfish", rarity: "rare", sheet: { dreamy: 2, sensitivity: 2, energy: -1 } },
-  { id: "chameleon", label: "chameleon", rarity: "rare", sheet: { sarcastic: 2, patience: 2, chatter: -1 } },
-  { id: "phoenix", label: "phoenix", rarity: "epic", sheet: { cheerful: 3, sensitivity: -3, energy: 1 } },
-  { id: "kraken", label: "kraken", rarity: "epic", sheet: { sarcastic: 2, stoic: 2, sensitivity: 2, patience: -1 } },
-  { id: "unicorn", label: "unicorn", rarity: "epic", sheet: { dreamy: 3, cheerful: 2, chatter: 1 } },
-  { id: "dragon", label: "dragon", rarity: "legendary", sheet: { sarcastic: 3, sensitivity: -2, energy: 2 } },
-];
-/** The Species of a Career that recorded none: the creature drawn before Species existed. */
-export const REFERENCE: SpeciesId = "cat";
+/** A catalog entry: the Species plus what it draws and what it says. Missing either is a compile error. */
+export type SpeciesDef = Species & { bodies: Bodies; signature: Signature };
 
 /** The domain mixed into the hatch seed. No Milestone id is ever this string. */
 const DOMAIN = "species";

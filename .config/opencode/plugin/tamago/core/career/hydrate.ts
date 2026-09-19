@@ -1,7 +1,7 @@
 import { COUNTER_KEYS, EMPTY_DELTA, TOOL_KINDS, freshCareer, type Career } from "./career.ts";
 import type { Rename } from "./name.ts";
 import type { Pick, Picks } from "./pick.ts";
-import { REFERENCE } from "../creature/species.ts";
+import { REFERENCE } from "../creature/catalog.ts";
 
 export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);

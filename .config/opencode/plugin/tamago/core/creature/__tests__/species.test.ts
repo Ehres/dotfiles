@@ -1,7 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { LUCK_MAX, weightsAt } from "../luck.ts";
-import { RARITIES, RARITY, REFERENCE, SPECIES, hatch, pace, species, type Rarity, type Species } from "../species.ts";
+import { REFERENCE, SPECIES } from "../catalog.ts";
+import { RARITIES, RARITY, hatch, pace, species, type Rarity, type Species } from "../species.ts";
 import { MODIFIERS_SUM_MAX, MODIFIER_MAX, type Modifiers } from "../sheet.ts";
 
 /** One Species per Rarity, so every tier can be drawn. */

@@ -1,5 +1,6 @@
+import { SPECIES } from "./catalog.ts";
 import { generator, seed } from "./random.ts";
-import { SPECIES, species, type Species, type SpeciesId } from "./species.ts";
+import { species, type Species, type SpeciesId } from "./species.ts";
 import type { Career } from "../career/career.ts";
 
 export type Temperament = "cheerful" | "sarcastic" | "stoic" | "dreamy";

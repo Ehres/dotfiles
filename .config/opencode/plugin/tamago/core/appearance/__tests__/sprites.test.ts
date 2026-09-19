@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { TEMPERAMENTS } from "../../creature/sheet.ts";
-import { REFERENCE, SPECIES } from "../../creature/species.ts";
+import { REFERENCE, SPECIES } from "../../creature/catalog.ts";
 import { EYES, HEART, SPRITE_HEIGHT, SPRITE_WIDTH, frameAt, frames, heartFrame } from "../sprites.ts";
 import { STAGES } from "../../career/stage.ts";
 import { ACTIVITIES } from "../../moment/session.ts";

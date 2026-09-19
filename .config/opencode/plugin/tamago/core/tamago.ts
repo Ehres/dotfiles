@@ -2,8 +2,9 @@ import type { Career } from "./career/career.ts";
 import { growth, stage, xp, type StageId } from "./career/stage.ts";
 import { behaviorOf, type Behavior } from "./creature/behavior.ts";
 import { vocation, type Character } from "./creature/character.ts";
+import { SPECIES } from "./creature/catalog.ts";
 import { sheet as sheetOf, temperamentOf, type Sheet, type Speaker, type Temperament } from "./creature/sheet.ts";
-import { SPECIES, species as speciesOf, type Species } from "./creature/species.ts";
+import { species as speciesOf, type Species } from "./creature/species.ts";
 
 /**
  * Everything the shell and the views read about a Tamago, derived from its
