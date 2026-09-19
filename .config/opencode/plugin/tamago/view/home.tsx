@@ -8,28 +8,22 @@ import type { Tamago } from "../core/tamago.ts";
 import { Portrait } from "./portrait.tsx";
 
 /** Rendered in the additive home_bottom slot, under the prompt: sprite on the left, name and progress on the right. */
-export function HomeView(props: {
-  name: string;
-  theme: () => TuiThemeCurrent;
-  tamago: () => Tamago;
-  clock: () => number;
-  heart: () => boolean;
-}): JSX.Element {
+export function HomeView(props: { name: string; theme: TuiThemeCurrent; tamago: Tamago; clock: number; heart: boolean }): JSX.Element {
   const lines = () => {
-    const t = props.tamago();
-    return props.heart()
+    const t = props.tamago;
+    return props.heart
       ? heartFrame(t.species.id, t.stage, t.temperament)
-      : frameAt(t.species.id, t.stage, "idle", frameIndex("idle", props.clock(), t.behavior));
+      : frameAt(t.species.id, t.stage, "idle", frameIndex("idle", props.clock, t.behavior));
   };
 
   return (
     <box paddingTop={1}>
-      <Portrait lines={lines} color={() => props.theme().accent} bubble={() => undefined}>
-        <text fg={props.theme().text}>
+      <Portrait lines={lines()} color={props.theme.accent}>
+        <text fg={props.theme.text}>
           <b>{props.name}</b>
-          <span style={{ fg: props.theme().textMuted }}> · {props.tamago().stage}</span>
+          <span style={{ fg: props.theme.textMuted }}> · {props.tamago.stage}</span>
         </text>
-        <text fg={props.theme().textMuted}>{progress(props.tamago())}</text>
+        <text fg={props.theme.textMuted}>{progress(props.tamago)}</text>
       </Portrait>
     </box>
   );

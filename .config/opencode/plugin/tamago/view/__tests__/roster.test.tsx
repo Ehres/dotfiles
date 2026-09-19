@@ -11,7 +11,7 @@ test("the roster highlights the first line, moves with the arrows, selects with 
   const lines = ["Tamago · cat · adult · active", "Egg · egg"];
   let chosen: Tamago | undefined;
   const { frame, mockInput } = await mount(() => (
-    <RosterView theme={() => THEME} tamagos={shown} lines={lines} clock={() => 0} now={() => 0} onSelect={(one) => (chosen = one)} />
+    <RosterView theme={THEME} tamagos={shown} lines={lines} clock={0} now={0} onSelect={(one) => (chosen = one)} />
   ));
   const first = trim(await frame());
   expect(first).toContain("> Tamago · cat · adult · active");

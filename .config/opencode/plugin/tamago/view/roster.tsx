@@ -18,11 +18,11 @@ const BLANK = "  ";
  * core/roster/roster.ts. `tamagos` and `lines` are frozen at opening, index for index.
  */
 export function RosterView(props: {
-  theme: () => TuiThemeCurrent;
+  theme: TuiThemeCurrent;
   tamagos: readonly Tamago[];
   lines: readonly string[];
-  clock: () => number;
-  now: () => number;
+  clock: number;
+  now: number;
   onSelect: (tamago: Tamago) => void;
 }): JSX.Element {
   const [cursor, setCursor] = createSignal(0);
@@ -40,15 +40,15 @@ export function RosterView(props: {
   return (
     <box paddingLeft={2} paddingRight={2} paddingBottom={1} gap={1}>
       <box flexDirection="row" justifyContent="space-between">
-        <text fg={props.theme().text}>
+        <text fg={props.theme.text}>
           <b>Tamago: roster</b>
         </text>
-        <text fg={props.theme().textMuted}>esc</text>
+        <text fg={props.theme.textMuted}>esc</text>
       </box>
       <box flexDirection="column">
         <Index each={props.lines}>
           {(text, index) => (
-            <text fg={index === cursor() ? props.theme().text : props.theme().textMuted}>
+            <text fg={index === cursor() ? props.theme.text : props.theme.textMuted}>
               {index === cursor() ? CURSOR : BLANK}
               {text()}
             </text>
@@ -56,7 +56,7 @@ export function RosterView(props: {
         </Index>
       </box>
       <Show when={highlighted()}>
-        {(one) => <CardBody theme={props.theme} tamago={one} clock={props.clock} heart={() => false} now={props.now} />}
+        {(one) => <CardBody theme={props.theme} tamago={one()} clock={props.clock} heart={false} now={props.now} />}
       </Show>
     </box>
   );

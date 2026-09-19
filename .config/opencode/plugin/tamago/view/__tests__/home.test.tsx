@@ -8,7 +8,7 @@ import { THEME } from "./theme.ts";
 
 test("home: sprite left, name and stage, xp bar", async () => {
   const shown = await frame(
-    () => <HomeView name="Tamago" theme={() => THEME} tamago={() => tamago(OWNER)} clock={() => 0} heart={() => false} />,
+    () => <HomeView name="Tamago" theme={THEME} tamago={tamago(OWNER)} clock={0} heart={false} />,
     HOME,
   );
   expect(shown).toContain("Tamago · adult");

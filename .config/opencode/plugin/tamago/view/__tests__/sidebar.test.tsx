@@ -13,16 +13,7 @@ const egg = tamago(EGG);
 test("idle adult: sprite, name, stage and xp, mood, footer", async () => {
   const shown = await frame(
     () => (
-      <SidebarView
-        name="Tamago"
-        theme={() => THEME}
-        session={() => session("idle")}
-        tamago={() => adult}
-        clock={() => 0}
-        footer={() => FOOTER}
-        bubble={() => undefined}
-        heart={() => false}
-      />
+      <SidebarView name="Tamago" theme={THEME} session={session("idle")} tamago={adult} clock={0} footer={FOOTER} heart={false} />
     ),
     SIDEBAR,
   );
@@ -36,16 +27,7 @@ test("idle adult: sprite, name, stage and xp, mood, footer", async () => {
 test("hurt egg says ouch and draws the egg", async () => {
   const shown = await frame(
     () => (
-      <SidebarView
-        name="Egg"
-        theme={() => THEME}
-        session={() => session("hurt")}
-        tamago={() => egg}
-        clock={() => 0}
-        footer={() => FOOTER}
-        bubble={() => undefined}
-        heart={() => false}
-      />
+      <SidebarView name="Egg" theme={THEME} session={session("hurt")} tamago={egg} clock={0} footer={FOOTER} heart={false} />
     ),
     SIDEBAR,
   );
@@ -60,13 +42,13 @@ test("a Bubble sits above the sprite, the heart replaces the eyes", async () => 
     () => (
       <SidebarView
         name="Tamago"
-        theme={() => THEME}
-        session={() => session("waiting")}
-        tamago={() => adult}
-        clock={() => 0}
-        footer={() => FOOTER}
-        bubble={() => bubble}
-        heart={() => true}
+        theme={THEME}
+        session={session("waiting")}
+        tamago={adult}
+        clock={0}
+        footer={FOOTER}
+        bubble={bubble}
+        heart={true}
       />
     ),
     SIDEBAR,

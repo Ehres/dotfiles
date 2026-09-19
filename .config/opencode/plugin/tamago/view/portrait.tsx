@@ -14,16 +14,11 @@ export type BubbleView = { top: string; text: string; bottom: string; border: RG
  * their content changes. Without a Bubble the block does not exist, so the
  * footer keeps today's height.
  */
-export function Portrait(props: {
-  lines: () => Frame;
-  color: () => RGBA;
-  bubble: () => BubbleView | undefined;
-  children: JSX.Element;
-}): JSX.Element {
-  const lines = createMemo(() => props.lines());
+export function Portrait(props: { lines: Frame; color: RGBA; bubble?: BubbleView; children: JSX.Element }): JSX.Element {
+  const lines = createMemo(() => props.lines);
   return (
     <box flexDirection="column">
-      <Show when={props.bubble()}>
+      <Show when={props.bubble}>
         {(bubble) => (
           <box flexDirection="column">
             <text fg={bubble().border}>{bubble().top}</text>
@@ -36,7 +31,7 @@ export function Portrait(props: {
       </Show>
       <box flexDirection="row" gap={2}>
         <box flexDirection="column" flexShrink={0}>
-          <Index each={lines()}>{(line) => <text fg={props.color()}>{line()}</text>}</Index>
+          <Index each={lines()}>{(line) => <text fg={props.color}>{line()}</text>}</Index>
         </box>
         <box flexDirection="column" justifyContent="center">
           {props.children}

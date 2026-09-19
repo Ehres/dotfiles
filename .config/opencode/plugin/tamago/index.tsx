@@ -156,7 +156,7 @@ const tui: TuiPlugin = async (api, options) => {
     /** The dialog stack wraps the card in OpenCode's own centered Dialog; nothing to position here. */
     const showCard = () => {
       api.ui.dialog.replace(() => (
-        <CardView name={name()} theme={() => api.theme.current} tamago={active} clock={clock} heart={heart} now={Date.now} />
+        <CardView name={name()} theme={api.theme.current} tamago={active()} clock={clock()} heart={heart()} now={started + clock()} />
       ));
     };
 
@@ -224,11 +224,11 @@ const tui: TuiPlugin = async (api, options) => {
       const lines = careers.map((one) => line(one, defaultName, activeId));
       api.ui.dialog.replace(() => (
         <RosterView
-          theme={() => api.theme.current}
+          theme={api.theme.current}
           tamagos={shown}
           lines={lines}
-          clock={clock}
-          now={Date.now}
+          clock={clock()}
+          now={started + clock()}
           onSelect={guard((chosen: Tamago) => {
             api.ui.dialog.clear();
             if (idOf(chosen.career) !== activeId) switchTo(idOf(chosen.career));
@@ -379,9 +379,7 @@ const tui: TuiPlugin = async (api, options) => {
       }),
     );
 
-    const sessionOf = (id: string) => () => sessions()[id] ?? initialSession(0);
-
-    const footer = (sessionID: string) => (): FooterInfo => {
+    const footer = (sessionID: string): FooterInfo => {
       const info = api.state.session.get(sessionID);
       const dir = info?.directory || api.state.path.directory;
       const branch = info?.directory === api.state.path.directory ? api.state.vcs?.branch : undefined;
@@ -395,13 +393,13 @@ const tui: TuiPlugin = async (api, options) => {
           return (
             <SidebarView
               name={name()}
-              theme={() => ctx.theme.current}
-              session={sessionOf(props.session_id)}
-              tamago={active}
-              clock={clock}
+              theme={ctx.theme.current}
+              session={sessions()[props.session_id] ?? initialSession(0)}
+              tamago={active()}
+              clock={clock()}
               footer={footer(props.session_id)}
-              bubble={() => voices()[props.session_id]?.bubble}
-              heart={heart}
+              bubble={voices()[props.session_id]?.bubble}
+              heart={heart()}
             />
           );
         },
@@ -412,15 +410,7 @@ const tui: TuiPlugin = async (api, options) => {
       order: HOME_BOTTOM_ORDER,
       slots: {
         home_bottom(ctx) {
-          return (
-            <HomeView
-              name={name()}
-              theme={() => ctx.theme.current}
-              tamago={active}
-              clock={clock}
-              heart={heart}
-            />
-          );
+          return <HomeView name={name()} theme={ctx.theme.current} tamago={active()} clock={clock()} heart={heart()} />;
         },
       },
     });
