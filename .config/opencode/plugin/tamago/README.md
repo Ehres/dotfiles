@@ -154,7 +154,9 @@ The curve lives in `core/creature/luck.ts`.
 The pace scales how fast XP turns into growth: a legendary creature needs four
 times the XP of a common one for every stage, and the card shows its farther
 thresholds. Rarer is slower, never faster, so the common creature is never the
-slow one. Careers saved before species existed are the `cat`. Tables live in
+slow one. Careers saved before species existed are the `cat`. Each species
+lives whole in `core/creature/species/<rarity>.ts`, gathered by
+`core/creature/catalog.ts`; the paces and the draw live in
 `core/creature/species.ts`.
 
 ## Several creatures
@@ -217,8 +219,8 @@ frog's stoic +1 to a phoenix's cheerful +3 and a kraken's cold anger, sarcastic
 +2, stoic +2, sensitivity +2. About one owl in six, and one dragon in four,
 takes its species' temperament rather than its draw. The modifiers live in
 `core/creature/species/<rarity>.ts`; tune a species before one has hatched,
-since changing its entry changes every living one. The card shows the four behavior stats as bars
-from `hatchling` on.
+since changing its entry changes every living one. The card shows the four
+behavior stats as bars from `hatchling` on.
 
 From the `young` stage, the counters add a vocation: a craft, scribe, shell or
 sage, whichever weighted score is highest, and a stance, prudent from five
@@ -285,10 +287,10 @@ core/tamago.ts      the Tamago read from a Career once: Species, Stage, XP, Shee
 core/creature/      what a Tamago is at hatch: the Species catalog, Luck, Sheet, Behavior, Character
 core/career/        what it has lived: Career, Delta, merge, hydrate, Stage, count
 core/moment/        what it is doing now: Session, events, transition, cadence
-core/speech/        what it says: Voice, Signatures, Bubble
+core/speech/        what it says: Cues, phrases, Registers, the Voice, Bubbles
 core/choices/       Milestones, Draws and Traits
 core/roster/        every Career of the machine
-core/appearance/    Sprites, bodies, formatting
+core/appearance/    how it is drawn: Sprite assembly, frames, formatting
 core/text/          every phrase the user reads: card, roster lines, toasts, dialogs, palette commands, Moods
 core/store/         the pure decisions of the store: lock, retry
 adapter/            the only layer touching SDK event shapes and the disk

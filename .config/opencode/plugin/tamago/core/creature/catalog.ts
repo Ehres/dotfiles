@@ -9,13 +9,14 @@ import { UNCOMMON } from "./species/uncommon.ts";
 
 /**
  * Every Species that can hatch, one file per Rarity, each entry complete:
- * Modifiers, bodies and Signature. Order within a Rarity is the order of the
- * draw: never reorder once shipped. Tune a `sheet` line before that Species
- * has hatched anywhere: the Sheet is derived, so changing it changes the
- * Temperament and Behavior of every Tamago of that Species already alive.
- * Once one lives, leave its line alone and add a sibling Species instead. The
- * reference entry has no Modifier and never will: that is what keeps every
- * Career from before the Sheet unchanged.
+ * Modifiers, bodies and Signature. A test bounds each Modifier to
+ * ±MODIFIER_MAX and their sum to MODIFIERS_SUM_MAX. Order within a Rarity is
+ * the order of the draw: never reorder once shipped. Tune a `sheet` line
+ * before that Species has hatched anywhere: the Sheet is derived, so
+ * changing it changes the Temperament and Behavior of every Tamago of that
+ * Species already alive. Once one lives, leave its line alone and add a
+ * sibling Species instead. The reference entry has no Modifier and never
+ * will: that is what keeps every Career from before the Sheet unchanged.
  */
 export const SPECIES: readonly SpeciesDef[] = [...COMMON, ...UNCOMMON, ...RARE, ...EPIC, ...LEGENDARY];
 
