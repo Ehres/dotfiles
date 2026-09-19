@@ -2,13 +2,18 @@
 import { expect, test } from "bun:test";
 import { tamago } from "../../core/tamago.ts";
 import { HomeView } from "../home.tsx";
+import { ThemeProvider } from "../theme.tsx";
 import { OWNER } from "./fixtures.ts";
 import { HOME, frame } from "./render.tsx";
-import { THEME } from "./theme.ts";
+import { TUI_THEME } from "./theme.ts";
 
 test("home: sprite left, name and stage, xp bar", async () => {
   const shown = await frame(
-    () => <HomeView name="Tamago" theme={THEME} tamago={tamago(OWNER)} clock={0} heart={false} />,
+    () => (
+      <ThemeProvider theme={TUI_THEME}>
+        <HomeView name="Tamago" tamago={tamago(OWNER)} clock={0} heart={false} />
+      </ThemeProvider>
+    ),
     HOME,
   );
   expect(shown).toContain("Tamago · adult");

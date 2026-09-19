@@ -1,11 +1,11 @@
 /** @jsxImportSource @opentui/solid */
-import type { TuiThemeCurrent } from "@opencode-ai/plugin/tui";
 import type { KeyEvent } from "@opentui/core";
 import { useKeyboard, type JSX } from "@opentui/solid";
 import { Index, Show, createSignal } from "solid-js";
 import { rosterAction, step } from "../core/roster/roster.ts";
 import type { Tamago } from "../core/tamago.ts";
 import { CardBody } from "./card.tsx";
+import { useTheme } from "./theme.tsx";
 
 /** The gutter of the highlighted line, and the blank one of the others, so the Names stay aligned. */
 const CURSOR = "> ";
@@ -18,13 +18,13 @@ const BLANK = "  ";
  * core/roster/roster.ts. `tamagos` and `lines` are frozen at opening, index for index.
  */
 export function RosterView(props: {
-  theme: TuiThemeCurrent;
   tamagos: readonly Tamago[];
   lines: readonly string[];
   clock: number;
   now: number;
   onSelect: (tamago: Tamago) => void;
 }): JSX.Element {
+  const theme = useTheme();
   const [cursor, setCursor] = createSignal(0);
   const highlighted = (): Tamago | undefined => props.tamagos[cursor()];
   useKeyboard((key: KeyEvent) => {
@@ -40,15 +40,15 @@ export function RosterView(props: {
   return (
     <box paddingLeft={2} paddingRight={2} paddingBottom={1} gap={1}>
       <box flexDirection="row" justifyContent="space-between">
-        <text fg={props.theme.text}>
+        <text fg={theme.current.text}>
           <b>Tamago: roster</b>
         </text>
-        <text fg={props.theme.textMuted}>esc</text>
+        <text fg={theme.current.textMuted}>esc</text>
       </box>
       <box flexDirection="column">
         <Index each={props.lines}>
           {(text, index) => (
-            <text fg={index === cursor() ? props.theme.text : props.theme.textMuted}>
+            <text fg={index === cursor() ? theme.current.text : theme.current.textMuted}>
               {index === cursor() ? CURSOR : BLANK}
               {text()}
             </text>
@@ -56,7 +56,7 @@ export function RosterView(props: {
         </Index>
       </box>
       <Show when={highlighted()}>
-        {(one) => <CardBody theme={props.theme} tamago={one()} clock={props.clock} heart={false} now={props.now} />}
+        {(one) => <CardBody tamago={one()} clock={props.clock} heart={false} now={props.now} />}
       </Show>
     </box>
   );

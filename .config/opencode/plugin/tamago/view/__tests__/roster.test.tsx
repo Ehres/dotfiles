@@ -2,16 +2,19 @@
 import { expect, test } from "bun:test";
 import { tamago, type Tamago } from "../../core/tamago.ts";
 import { RosterView } from "../roster.tsx";
+import { ThemeProvider } from "../theme.tsx";
 import { EGG, OWNER } from "./fixtures.ts";
 import { mount, trim } from "./render.tsx";
-import { THEME } from "./theme.ts";
+import { TUI_THEME } from "./theme.ts";
 
 test("the roster highlights the first line, moves with the arrows, selects with return", async () => {
   const shown = [tamago(OWNER), tamago(EGG)];
   const lines = ["Tamago · cat · adult · active", "Egg · egg"];
   let chosen: Tamago | undefined;
   const { frame, mockInput } = await mount(() => (
-    <RosterView theme={THEME} tamagos={shown} lines={lines} clock={0} now={0} onSelect={(one) => (chosen = one)} />
+    <ThemeProvider theme={TUI_THEME}>
+      <RosterView tamagos={shown} lines={lines} clock={0} now={0} onSelect={(one) => (chosen = one)} />
+    </ThemeProvider>
   ));
   const first = trim(await frame());
   expect(first).toContain("> Tamago · cat · adult · active");

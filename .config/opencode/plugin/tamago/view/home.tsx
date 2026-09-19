@@ -1,14 +1,15 @@
 /** @jsxImportSource @opentui/solid */
-import type { TuiThemeCurrent } from "@opencode-ai/plugin/tui";
 import type { JSX } from "@opentui/solid";
 import { frameIndex } from "../core/moment/cadence.ts";
 import { progress } from "../core/appearance/card.ts";
 import { frameAt, heartFrame } from "../core/appearance/sprites.ts";
 import type { Tamago } from "../core/tamago.ts";
 import { Portrait } from "./portrait.tsx";
+import { useTheme } from "./theme.tsx";
 
 /** Rendered in the additive home_bottom slot, under the prompt: sprite on the left, name and progress on the right. */
-export function HomeView(props: { name: string; theme: TuiThemeCurrent; tamago: Tamago; clock: number; heart: boolean }): JSX.Element {
+export function HomeView(props: { name: string; tamago: Tamago; clock: number; heart: boolean }): JSX.Element {
+  const theme = useTheme();
   const lines = () => {
     const t = props.tamago;
     return props.heart
@@ -18,12 +19,12 @@ export function HomeView(props: { name: string; theme: TuiThemeCurrent; tamago: 
 
   return (
     <box paddingTop={1}>
-      <Portrait lines={lines()} color={props.theme.accent}>
-        <text fg={props.theme.text}>
+      <Portrait lines={lines()} color={theme.current.accent}>
+        <text fg={theme.current.text}>
           <b>{props.name}</b>
-          <span style={{ fg: props.theme.textMuted }}> · {props.tamago.stage}</span>
+          <span style={{ fg: theme.current.textMuted }}> · {props.tamago.stage}</span>
         </text>
-        <text fg={props.theme.textMuted}>{progress(props.tamago)}</text>
+        <text fg={theme.current.textMuted}>{progress(props.tamago)}</text>
       </Portrait>
     </box>
   );

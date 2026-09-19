@@ -2,6 +2,7 @@
 import type { TuiThemeCurrent } from "@opencode-ai/plugin/tui";
 import type { RGBA } from "@opentui/core";
 import type { JSX } from "@opentui/solid";
+import { createMemo } from "solid-js";
 import { bubbleBorders } from "../core/speech/bubble.ts";
 import { frameIndex } from "../core/moment/cadence.ts";
 import { fmt } from "../core/appearance/format.ts";
@@ -11,6 +12,7 @@ import type { Activity, Session } from "../core/moment/session.ts";
 import type { Tamago } from "../core/tamago.ts";
 import type { Bubble } from "../core/speech/voice.ts";
 import { Portrait, type BubbleView } from "./portrait.tsx";
+import { useTheme } from "./theme.tsx";
 
 export const MOOD: Record<Activity, string> = {
   idle: "chilling",
@@ -39,7 +41,6 @@ export type FooterInfo = { parent: string; name: string; version: string };
 
 export function SidebarView(props: {
   name: string;
-  theme: TuiThemeCurrent;
   session: Session;
   tamago: Tamago;
   clock: number;
@@ -47,6 +48,7 @@ export function SidebarView(props: {
   bubble?: Bubble;
   heart: boolean;
 }): JSX.Element {
+  const theme = useTheme();
   const activity = () => props.session.activity;
   const lines = (): Frame => {
     const t = props.tamago;
@@ -54,31 +56,31 @@ export function SidebarView(props: {
       ? heartFrame(t.species.id, t.stage, t.temperament)
       : frameAt(t.species.id, t.stage, activity(), frameIndex(activity(), props.clock, t.behavior));
   };
-  const bubble = (): BubbleView | undefined => {
+  const bubble = createMemo((): BubbleView | undefined => {
     const current = props.bubble;
     if (current === undefined) return undefined;
     const { top, bottom } = bubbleBorders(current.text);
-    return { top, text: current.text, bottom, border: props.theme.textMuted, ink: props.theme.text };
-  };
+    return { top, text: current.text, bottom, border: theme.current.textMuted, ink: theme.current.text };
+  });
 
   return (
     <box flexDirection="column" gap={1}>
-      <Portrait lines={lines()} color={spriteColor(props.theme, activity())} bubble={bubble()}>
-        <text fg={props.theme.text}>
+      <Portrait lines={lines()} color={spriteColor(theme.current, activity())} bubble={bubble()}>
+        <text fg={theme.current.text}>
           <b>{props.name}</b>
         </text>
-        <text fg={props.theme.textMuted}>
+        <text fg={theme.current.textMuted}>
           {props.tamago.stage} · {fmt(props.tamago.xp)} xp
         </text>
-        <text fg={props.theme.textMuted}>{MOOD[activity()]}</text>
+        <text fg={theme.current.textMuted}>{MOOD[activity()]}</text>
       </Portrait>
       <text>
-        <span style={{ fg: props.theme.textMuted }}>{props.footer.parent}/</span>
-        <span style={{ fg: props.theme.text }}>{props.footer.name}</span>
+        <span style={{ fg: theme.current.textMuted }}>{props.footer.parent}/</span>
+        <span style={{ fg: theme.current.text }}>{props.footer.name}</span>
       </text>
-      <text fg={props.theme.textMuted}>
-        <span style={{ fg: props.theme.success }}>•</span> <b>Open</b>
-        <span style={{ fg: props.theme.text }}>
+      <text fg={theme.current.textMuted}>
+        <span style={{ fg: theme.current.success }}>•</span> <b>Open</b>
+        <span style={{ fg: theme.current.text }}>
           <b>Code</b>
         </span>{" "}
         <span>{props.footer.version}</span>

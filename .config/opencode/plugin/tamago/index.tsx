@@ -33,6 +33,7 @@ import { CardView } from "./view/card.tsx";
 import { HomeView } from "./view/home.tsx";
 import { RosterView } from "./view/roster.tsx";
 import { SidebarView, type FooterInfo } from "./view/sidebar.tsx";
+import { ThemeProvider } from "./view/theme.tsx";
 
 const id = "opencode-tamago";
 const DATA_DIR = join(homedir(), ".local", "share", "opencode-tamago");
@@ -156,7 +157,9 @@ const tui: TuiPlugin = async (api, options) => {
     /** The dialog stack wraps the card in OpenCode's own centered Dialog; nothing to position here. */
     const showCard = () => {
       api.ui.dialog.replace(() => (
-        <CardView name={name()} theme={api.theme.current} tamago={active()} clock={clock()} heart={heart()} now={started + clock()} />
+        <ThemeProvider theme={api.theme}>
+          <CardView name={name()} tamago={active()} clock={clock()} heart={heart()} now={started + clock()} />
+        </ThemeProvider>
       ));
     };
 
@@ -223,17 +226,18 @@ const tui: TuiPlugin = async (api, options) => {
       const activeId = idOf(roster.active);
       const lines = careers.map((one) => line(one, defaultName, activeId));
       api.ui.dialog.replace(() => (
-        <RosterView
-          theme={api.theme.current}
-          tamagos={shown}
-          lines={lines}
-          clock={clock()}
-          now={started + clock()}
-          onSelect={guard((chosen: Tamago) => {
-            api.ui.dialog.clear();
-            if (idOf(chosen.career) !== activeId) switchTo(idOf(chosen.career));
-          })}
-        />
+        <ThemeProvider theme={api.theme}>
+          <RosterView
+            tamagos={shown}
+            lines={lines}
+            clock={clock()}
+            now={started + clock()}
+            onSelect={guard((chosen: Tamago) => {
+              api.ui.dialog.clear();
+              if (idOf(chosen.career) !== activeId) switchTo(idOf(chosen.career));
+            })}
+          />
+        </ThemeProvider>
       ));
     };
 
@@ -391,16 +395,17 @@ const tui: TuiPlugin = async (api, options) => {
       slots: {
         sidebar_footer(ctx, props) {
           return (
-            <SidebarView
-              name={name()}
-              theme={ctx.theme.current}
-              session={sessions()[props.session_id] ?? initialSession(0)}
-              tamago={active()}
-              clock={clock()}
-              footer={footer(props.session_id)}
-              bubble={voices()[props.session_id]?.bubble}
-              heart={heart()}
-            />
+            <ThemeProvider theme={ctx.theme}>
+              <SidebarView
+                name={name()}
+                session={sessions()[props.session_id] ?? initialSession(0)}
+                tamago={active()}
+                clock={clock()}
+                footer={footer(props.session_id)}
+                bubble={voices()[props.session_id]?.bubble}
+                heart={heart()}
+              />
+            </ThemeProvider>
           );
         },
       },
@@ -410,7 +415,11 @@ const tui: TuiPlugin = async (api, options) => {
       order: HOME_BOTTOM_ORDER,
       slots: {
         home_bottom(ctx) {
-          return <HomeView name={name()} theme={ctx.theme.current} tamago={active()} clock={clock()} heart={heart()} />;
+          return (
+            <ThemeProvider theme={ctx.theme}>
+              <HomeView name={name()} tamago={active()} clock={clock()} heart={heart()} />
+            </ThemeProvider>
+          );
         },
       },
     });
