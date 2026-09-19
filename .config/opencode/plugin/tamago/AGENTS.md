@@ -9,7 +9,8 @@ AGENTS.md. Vocabulary lives in `CONTEXT.md`; use those terms.
   only layer that reads SDK event shapes or touches the disk. `shell/` is the
   only layer that touches `api.*` and timers, one module per loop or surface
   (`mirror`, `tick`, `flush`, `actions`, `dialogs`, `palette`, `slots`);
-  `index.tsx` only wires them. Views take accessors and return JSX.
+  `index.tsx` only wires them. Views take plain props (the Solid compiler
+  makes each a getter, so `props.x` read in JSX is reactive) and return JSX.
 - A dialog of our own reads its keys with `useKeyboard` from `@opentui/solid`;
   the key → action table lives in `core/roster/` (`ROSTER_KEYS`), tested, so a key
   taken by OpenCode is a one-line change there, never in the view.
@@ -48,7 +49,7 @@ AGENTS.md. Vocabulary lives in `CONTEXT.md`; use those terms.
   stored, never cached in the Window.
 - Views read a `Tamago` (`core/tamago.ts`), never a bare Career: everything
   derived from a Career is derived there, once, and passed down as one
-  accessor. A new derived attribute is a new field of `Tamago`.
+  prop. A new derived attribute is a new field of `Tamago`.
 - A new Species is one line in `SPECIES` (with its Modifiers), four bodies in
   `core/appearance/bodies/<rarity>.ts` and a full Signature in
   `core/speech/signatures/<rarity>.ts`. The tests fail at the first table that lacks
@@ -56,9 +57,9 @@ AGENTS.md. Vocabulary lives in `CONTEXT.md`; use those terms.
 - The voice never picks a phrase by rotation or by `Math.random`: `phrase`
   seeds from the hatch date, the Cue and its count, so every window agrees for
   the same occurrence of the Cue.
-- Every string the user reads lives in core/text/, by surface, tested; a view
-  or the shell never holds a literal phrase. The palette titles never carry
-  the Name.
+- Every phrase the user reads lives in core/text/, by surface, tested; a view
+  or the shell never holds a literal phrase or sentence (a key name or the
+  OpenCode brand mark is not one). The palette titles never carry the Name.
 
 ## Verify
 

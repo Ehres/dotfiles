@@ -1,5 +1,6 @@
 /** @jsxImportSource @opentui/solid */
 import type { JSX } from "@opentui/solid";
+import { ESC_HINT } from "../core/text/dialogs.ts";
 import { useTheme } from "./theme.tsx";
 
 /** The inside of one of our dialogs: OpenCode's Dialog wraps and centers it and handles esc; this draws the title row with the esc hint above `children`. */
@@ -11,7 +12,7 @@ export function DialogFrame(props: { title: string; children: JSX.Element }): JS
         <text fg={theme.current.text}>
           <b>{props.title}</b>
         </text>
-        <text fg={theme.current.textMuted}>esc</text>
+        <text fg={theme.current.textMuted}>{ESC_HINT}</text>
       </box>
       {props.children}
     </box>

@@ -269,7 +269,7 @@ bun test view shell               # view snapshots (Bun compiles the Solid JSX)
 ./node_modules/.bin/tsc --noEmit
 ```
 
-`scripts/doctor.sh` at the repository root runs both checks. The views are
+`scripts/doctor.sh` at the repository root runs all three checks. The views are
 snapshot-tested headless under Bun; the adapter and the colors are verified by
 launching OpenCode: open two instances side by side, run some tools in one,
 and watch the other's XP follow.
@@ -291,7 +291,7 @@ core/appearance/    Sprites, bodies, formatting
 core/text/          every phrase the user reads: card, roster lines, toasts, dialogs, palette commands, Moods
 core/store/         the pure decisions of the store: lock, retry
 adapter/            the only layer touching SDK event shapes and the disk
-view/               Solid components fed with accessors, returning JSX
+view/               Solid components taking plain props, returning JSX
 ```
 
 Each folder's tests sit in its `__tests__/`.

@@ -92,11 +92,11 @@ export function createDialogs(deps: {
       api.ui.toast({ variant: "warning", title: mirror.name(), message: blocked(first, defaultName) });
       return;
     }
-    const confirm = hatchConfirm(mirror.name());
+    const confirm = () => hatchConfirm(mirror.name());
     api.ui.dialog.replace(() => (
       <api.ui.DialogConfirm
-        title={confirm.title}
-        message={confirm.message}
+        title={confirm().title}
+        message={confirm().message}
         onConfirm={guard(() => {
           api.ui.dialog.clear();
           actions.lay();
