@@ -3,7 +3,7 @@ import { expect, test } from "bun:test";
 import { tamago } from "../../core/tamago.ts";
 import { CardView } from "../card.tsx";
 import { ThemeProvider } from "../theme.tsx";
-import { DAY_MS } from "../../core/appearance/card.ts";
+import { DAY_MS } from "../../core/text/card.ts";
 import { EGG, OWNER } from "./fixtures.ts";
 import { frame } from "./render.tsx";
 import { TUI_THEME } from "./theme.ts";

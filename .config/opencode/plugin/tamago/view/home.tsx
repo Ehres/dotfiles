@@ -1,6 +1,6 @@
 /** @jsxImportSource @opentui/solid */
 import type { JSX } from "@opentui/solid";
-import { progress } from "../core/appearance/card.ts";
+import { progress } from "../core/text/card.ts";
 import type { Tamago } from "../core/tamago.ts";
 import { Portrait } from "./portrait.tsx";
 import { useTheme } from "./theme.tsx";

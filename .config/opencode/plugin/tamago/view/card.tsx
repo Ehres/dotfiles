@@ -1,7 +1,7 @@
 /** @jsxImportSource @opentui/solid */
 import type { JSX } from "@opentui/solid";
 import { Index } from "solid-js";
-import { age, progress, sheetLines, speciesLine } from "../core/appearance/card.ts";
+import { age, progress, sheetLines, speciesLine } from "../core/text/card.ts";
 import { fmt } from "../core/appearance/format.ts";
 import { describe } from "../core/creature/character.ts";
 import type { Tamago } from "../core/tamago.ts";

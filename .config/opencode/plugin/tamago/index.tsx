@@ -9,7 +9,7 @@ import { behavior } from "./core/creature/behavior.ts";
 import { tickInterval } from "./core/moment/cadence.ts";
 import { createStore, type Loaded } from "./adapter/store.ts";
 import { SUBSCRIBED, createTranslator } from "./adapter/translate.ts";
-import { reveal } from "./core/appearance/card.ts";
+import { reveal } from "./core/text/card.ts";
 import { footerPath } from "./core/appearance/footer.ts";
 import { WARN_AFTER, backoff } from "./core/store/retry.ts";
 import { PET_MS } from "./core/appearance/sprites.ts";
@@ -28,7 +28,11 @@ import {
   type Step,
   type Window,
 } from "./core/window.ts";
-import { blocked, blockers, idOf, line, ordered, stepsIn } from "./core/roster/roster.ts";
+import { blockers, idOf, ordered } from "./core/roster/roster.ts";
+import { COMMAND_IDS, PALETTE, command, type CommandId } from "./core/text/commands.ts";
+import { RENAME, hatchConfirm } from "./core/text/dialogs.ts";
+import { blocked, line, stepsIn } from "./core/text/roster.ts";
+import { BUSY, CORRUPT, GONE, cannotSave, evolved } from "./core/text/toasts.ts";
 import { CardView } from "./view/card.tsx";
 import { HomeView } from "./view/home.tsx";
 import { RosterView } from "./view/roster.tsx";
@@ -44,8 +48,6 @@ const FLUSH_MAX_MS = 60_000;
 const FOOTER_ORDER = 50;
 /** home_bottom is additive: below 100 renders above the built-in tips, keeping the OpenCode logo intact. */
 const HOME_BOTTOM_ORDER = 50;
-/** What the palette commands are filed under. Fixed on purpose: the user searches for the plugin, not for a Name they may change. */
-const PALETTE = "Tamago";
 
 const tui: TuiPlugin = async (api, options) => {
   /** The plugin option: the Name until the user renames the creature. */
@@ -92,7 +94,7 @@ const tui: TuiPlugin = async (api, options) => {
       api.ui.toast({
         variant: "warning",
         title: name(),
-        message: "Saved progress was unreadable. It is kept aside as career.json.corrupt-*; starting from a fresh egg.",
+        message: CORRUPT,
       });
     };
     if (loaded.corrupt) warnCorrupt();
@@ -126,7 +128,7 @@ const tui: TuiPlugin = async (api, options) => {
           registerCommands();
           api.ui.toast({ variant: "info", title: name(), message: stepsIn(career(), defaultName) });
         } else if (effect.stage === "hatchling") api.ui.toast({ variant: "success", title: name(), message: reveal(name(), active()) });
-        else api.ui.toast({ variant: "success", title: name(), message: `${name()} evolved: ${effect.stage}!` });
+        else api.ui.toast({ variant: "success", title: name(), message: evolved(name(), effect.stage) });
       }
     };
 
@@ -183,8 +185,8 @@ const tui: TuiPlugin = async (api, options) => {
     const askName = () => {
       api.ui.dialog.replace(() => (
         <api.ui.DialogPrompt
-          title="Rename"
-          placeholder="A name for the creature"
+          title={RENAME.title}
+          placeholder={RENAME.placeholder}
           value={name()}
           onConfirm={guard((value: string) => {
             api.ui.dialog.clear();
@@ -194,8 +196,6 @@ const tui: TuiPlugin = async (api, options) => {
         />
       ));
     };
-
-    const BUSY = "Another window is writing. Try again.";
 
     /** The Delta must reach its own Career before the active one changes. False, with a toast, when the disk is busy; disk errors throw and `guard` logs them. */
     const settle = (): boolean => {
@@ -209,7 +209,7 @@ const tui: TuiPlugin = async (api, options) => {
       if (id === window.career.hatchedAt) return; // another window brought it to the front while we flushed
       const result = store.switch(id);
       if (result.outcome === "written") run(flushed(window, result.career, Date.now()));
-      else if (result.outcome === "missing") api.ui.toast({ variant: "warning", title: name(), message: "That Tamago is gone from the roster." });
+      else if (result.outcome === "missing") api.ui.toast({ variant: "warning", title: name(), message: GONE });
       else if (result.outcome === "corrupt") warnCorrupt();
       else api.ui.toast({ variant: "warning", title: name(), message: BUSY });
     };
@@ -261,10 +261,11 @@ const tui: TuiPlugin = async (api, options) => {
         api.ui.toast({ variant: "warning", title: name(), message: blocked(first, defaultName) });
         return;
       }
+      const confirm = hatchConfirm(name());
       api.ui.dialog.replace(() => (
         <api.ui.DialogConfirm
-          title="Hatch a new egg?"
-          message={`${name()} rests in the roster; switch back anytime.`}
+          title={confirm.title}
+          message={confirm.message}
           onConfirm={guard(() => {
             api.ui.dialog.clear();
             lay();
@@ -274,62 +275,27 @@ const tui: TuiPlugin = async (api, options) => {
       ));
     };
 
+    const RUN: Record<CommandId, () => void> = {
+      mute: () => setMute(!muted()),
+      card: showCard,
+      pet,
+      rename: askName,
+      hatch: askHatch,
+      roster: showRoster,
+    };
+
     let unregisterCommands: (() => void) | undefined;
     function registerCommands(): void {
       unregisterCommands?.();
       const who = name();
       unregisterCommands = api.keymap.registerLayer({
-        commands: [
-          {
-            name: "tamago.mute",
-            title: `${PALETTE}: toggle bubbles`,
-            description: `Mute or unmute what ${who} says`,
-            category: PALETTE,
-            /** What lists a command in the palette; OpenCode's own commands carry it. */
-            namespace: "palette",
-            run: guard(() => setMute(!muted())),
-          },
-          {
-            name: "tamago.card",
-            title: `${PALETTE}: show card`,
-            description: `Who ${who} is: species, stage, XP, age, stats`,
-            category: PALETTE,
-            namespace: "palette",
-            run: guard(showCard),
-          },
-          {
-            name: "tamago.pet",
-            title: `${PALETTE}: pet`,
-            description: `Give ${who} a pat`,
-            category: PALETTE,
-            namespace: "palette",
-            run: guard(pet),
-          },
-          {
-            name: "tamago.rename",
-            title: `${PALETTE}: rename`,
-            description: `Give ${who} a new name, shared by every window`,
-            category: PALETTE,
-            namespace: "palette",
-            run: guard(askName),
-          },
-          {
-            name: "tamago.hatch",
-            title: `${PALETTE}: hatch a new egg`,
-            description: "Hatch a new egg once every Tamago is elder",
-            category: PALETTE,
-            namespace: "palette",
-            run: guard(askHatch),
-          },
-          {
-            name: "tamago.roster",
-            title: `${PALETTE}: roster`,
-            description: "Every Tamago of this machine; pick one to bring it to the front",
-            category: PALETTE,
-            namespace: "palette",
-            run: guard(showRoster),
-          },
-        ],
+        commands: COMMAND_IDS.map((id) => ({
+          ...command(id, who),
+          category: PALETTE,
+          /** What lists a command in the palette; OpenCode's own commands carry it. */
+          namespace: "palette",
+          run: guard(RUN[id]),
+        })),
       });
     }
     registerCommands();
@@ -368,7 +334,7 @@ const tui: TuiPlugin = async (api, options) => {
         logError(err);
         failures += 1;
         if (failures === WARN_AFTER) {
-          api.ui.toast({ variant: "error", title: name(), message: `${name()} cannot save its progress. See ${DATA_DIR}/error.log.` });
+          api.ui.toast({ variant: "error", title: name(), message: cannotSave(name(), DATA_DIR) });
         }
       }
       schedule();

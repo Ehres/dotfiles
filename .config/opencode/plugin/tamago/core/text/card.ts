@@ -1,7 +1,7 @@
 import { next } from "../career/stage.ts";
 import { BEHAVIOR_STATS, SCALE } from "../creature/sheet.ts";
 import type { Tamago } from "../tamago.ts";
-import { bar, fmt } from "./format.ts";
+import { bar, fmt } from "../appearance/format.ts";
 
 export const DAY_MS = 86_400_000;
 export const BAR_WIDTH = 20;

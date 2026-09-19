@@ -5,20 +5,12 @@ import type { JSX } from "@opentui/solid";
 import { createMemo } from "solid-js";
 import { bubbleBorders } from "../core/speech/bubble.ts";
 import { fmt } from "../core/appearance/format.ts";
+import { MOOD } from "../core/text/mood.ts";
 import type { Activity, Session } from "../core/moment/session.ts";
 import type { Tamago } from "../core/tamago.ts";
 import type { Bubble } from "../core/speech/voice.ts";
 import { Portrait, type BubbleView } from "./portrait.tsx";
 import { useTheme } from "./theme.tsx";
-
-export const MOOD: Record<Activity, string> = {
-  idle: "chilling",
-  thinking: "thinking...",
-  working: "working",
-  waiting: "needs you",
-  hurt: "ouch",
-  sleeping: "zzz",
-};
 
 /** Which theme color paints the sprite in each Activity. One row per Activity: a new one cannot fall back to the accent unnoticed. */
 export const TONE: Record<Activity, "accent" | "error" | "warning" | "textMuted"> = {

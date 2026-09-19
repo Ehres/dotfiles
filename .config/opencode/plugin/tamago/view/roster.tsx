@@ -3,6 +3,7 @@ import type { KeyEvent } from "@opentui/core";
 import { useKeyboard, type JSX } from "@opentui/solid";
 import { Index, Show, createSignal } from "solid-js";
 import { rosterAction, step } from "../core/roster/roster.ts";
+import { ROSTER_TITLE } from "../core/text/dialogs.ts";
 import type { Tamago } from "../core/tamago.ts";
 import { CardBody } from "./card.tsx";
 import { DialogFrame } from "./dialog.tsx";
@@ -39,7 +40,7 @@ export function RosterView(props: {
     setCursor((at) => step(at, action, props.tamagos.length));
   });
   return (
-    <DialogFrame title="Tamago: roster">
+    <DialogFrame title={ROSTER_TITLE}>
       <box flexDirection="column">
         <Index each={props.lines}>
           {(text, index) => (

@@ -286,7 +286,8 @@ core/moment/        what it is doing now: Session, events, transition, cadence
 core/speech/        what it says: Voice, Signatures, Bubble
 core/choices/       Milestones, Draws and Traits
 core/roster/        every Career of the machine
-core/appearance/    Sprites, bodies, card text, formatting
+core/appearance/    Sprites, bodies, formatting
+core/text/          every phrase the user reads: card, roster lines, toasts, dialogs, palette commands, Moods
 core/store/         the pure decisions of the store: lock, retry
 adapter/            the only layer touching SDK event shapes and the disk
 view/               Solid components fed with accessors, returning JSX

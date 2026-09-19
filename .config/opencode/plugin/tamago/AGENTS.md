@@ -55,6 +55,9 @@ AGENTS.md. Vocabulary lives in `CONTEXT.md`; use those terms.
 - The voice never picks a phrase by rotation or by `Math.random`: `phrase`
   seeds from the hatch date, the Cue and its count, so every window agrees for
   the same occurrence of the Cue.
+- Every string the user reads lives in core/text/, by surface, tested; a view
+  or the shell never holds a literal phrase. The palette titles never carry
+  the Name.
 
 ## Verify
 
