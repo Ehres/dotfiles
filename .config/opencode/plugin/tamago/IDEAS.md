@@ -6,47 +6,68 @@ avant implémentation.
 
 ## État des lieux
 
-Ce que Tamago fait aujourd'hui :
+Ce que Tamago fait aujourd'hui, relu le 2026-09-19 :
 
-- Sprite ASCII 11×5 par Species et par Stage (`core/appearance/sprites.ts`), 5 stades
-  pilotés par le Growth, l'XP fois le Pace de la Species (`core/career/stage.ts`) :
-  egg → hatchling → young → adult → elder.
-- 6 activités de session (`core/moment/session.ts`) : idle, thinking, working, waiting,
-  hurt, sleeping. Animation des yeux et d'une "marque" à côté de la tête.
-- Transitions et comptage purs (`core/moment/transition.ts`, `core/career/count.ts`), translator SDK → événements internes ciblés par session
-  (`adapter/translate.ts`), persistance multi-instances avec lock et rename
-  atomique (`adapter/store.ts`, `core/career/career.ts`).
-- Deux vues Solid : sidebar (`view/sidebar.tsx`, slot `sidebar_footer`) et
-  home (`view/home.tsx`, slot `home_bottom`). Un toast à chaque évolution.
-- Species tirée à l'éclosion et stockée (`core/creature/species.ts`) : cat et owl en
-  common, dragon en legendary ; le Pace de la Rarity ralentit le Growth
-  (`core/career/stage.ts`) ; un corps par Species et par Stage, œuf commun
-  (`core/appearance/sprites.ts`) ; Cue `hatched` et toast de révélation.
+- Sprite ASCII 11×5 par Species et par Stage (`core/appearance/sprites.ts`),
+  5 stades pilotés par le Growth, l'XP fois le Pace de la Species
+  (`core/career/stage.ts`) : egg → hatchling → young → adult → elder.
+- 6 activités de session (`core/moment/session.ts`) : idle, thinking, working,
+  waiting, hurt, sleeping. Animation des yeux et d'une "marque" à côté de la
+  tête.
+- Transitions et comptage purs (`core/moment/transition.ts`,
+  `core/career/count.ts`), translator SDK → événements internes ciblés par
+  session (`adapter/translate.ts`), persistance multi-instances avec lock et
+  rename atomique (`adapter/store.ts`, `core/career/career.ts`).
+- Quatre surfaces Solid : sidebar (`view/sidebar.tsx`, slot `sidebar_footer`),
+  home (`view/home.tsx`, slot `home_bottom`), carte et roster en dialogues
+  (`view/card.tsx`, `view/roster.tsx`), sur les composants partagés
+  `view/sprite.tsx`, `view/portrait.tsx`, `view/dialog.tsx` et le thème en
+  contexte (`view/theme.tsx`). Un toast à chaque évolution.
+- Le shell ne fait que câbler (`index.tsx`) : miroir Window → signaux,
+  boucles de tick et de flush, actions, dialogues, palette et slots vivent
+  dans `shell/`, seule couche qui touche `api.*` et les timers.
+- 20 Species tirées à l'éclosion et stockées, chacune entière (Modifiers,
+  quatre corps, Signature) dans `core/creature/species/<rarity>.ts`, réunies
+  par `core/creature/catalog.ts` ; le Pace de la Rarity ralentit le Growth
+  (`core/career/stage.ts`) ; œuf commun à toutes ; Cue `hatched` et toast de
+  révélation. La Luck des elders du Roster penche le tirage
+  (`core/creature/luck.ts`).
+- Feuille de huit Stats dérivée de `hatchedAt` et de la Species
+  (`core/creature/sheet.ts`), qui donne le Temperament et le Behavior ;
+  Vocation à partir de `young` (`core/creature/character.ts`).
+- Roster de plusieurs Careers sur la machine, une active, Switch et hatch
+  depuis la palette (`core/roster/roster.ts`, `adapter/store.ts`).
+- Toutes les phrases lues par l'utilisateur vivent dans `core/text/` ; les
+  vues et le shell n'en tiennent aucune.
 
 Compteurs persistés dans `Career` : sessions, prompts, tools par kind
-(read/edit/bash/other), filesEdited, errors, hatchedAt, species.
+(read/edit/bash/other), filesEdited, errors, questions, plus hatchedAt,
+species, name (avec sa date) et picks (vide tant qu'aucun Milestone n'existe).
 
 ## Ce que l'API OpenCode 1.18 offre et qu'on n'utilise pas
 
-Source : `@opencode-ai/plugin/dist/tui.d.ts` et `@opencode-ai/sdk` v2.
+Source : `@opencode-ai/plugin/dist/tui.d.ts` et `@opencode-ai/sdk` v2. Relu le
+2026-09-19 : ce qui a servi depuis a quitté la liste.
 
 - `api.state.session` : `todo(id)`, `diff(id)` (fichiers modifiés avec
   additions/deletions), `status(id)`, `permission(id)`, `question(id)`,
   `messages(id)`. Permet de réagir à l'état de session sans lire le contenu
-  des prompts.
-- `api.keymap.registerLayer({ commands, bindings })` : commandes dans la
-  palette et raccourcis clavier. `api.command` est déprécié.
-- `api.ui.DialogAlert`, `DialogConfirm`, `DialogPrompt`, `DialogSelect`,
-  `api.ui.dialog` (stack) : écrans modaux.
+  des prompts. Seul `get(id)` sert aujourd'hui, pour le parent d'une session
+  et le dossier du footer.
+- `api.ui.DialogAlert` et `DialogSelect` : écrans modaux encore inutilisés ;
+  `DialogConfirm` (hatch), `DialogPrompt` (rename) et la stack `api.ui.dialog`
+  servent déjà.
 - `api.attention.notify` et `api.attention.soundboard.registerPack` :
   notifications système et sons personnalisés.
-- `api.kv.get/set` : petites préférences persistées côté TUI (mute, nom).
+- `api.keymap.registerLayer` sert pour les commandes de la palette, mais
+  aucune liaison clavier (`bindings`) n'est posée.
 - Slots non utilisés : `session_prompt_right`, `home_prompt_right`,
   `sidebar_content`, `app_bottom`, `home_footer`.
-- Événements SDK intéressants non souscrits : `todo.updated`, `session.diff`,
-  `session.compacted`, `session.next.reasoning.started/ended`,
-  `session.next.retried`, `session.next.step.failed`, `question.asked`,
-  `vcs.branch.updated`, `lsp.updated`, `file.watcher.updated`.
+- Événements SDK intéressants non souscrits :
+  `session.next.reasoning.started/ended`, `session.next.step.failed`,
+  `vcs.branch.updated`, `lsp.updated`, `file.watcher.updated`. Les autres de
+  la liste d'origine (`todo.updated`, `session.diff`, `session.compacted`,
+  `session.next.retried`, `question.asked`) sont souscrits depuis.
 
 ## Idées
 
@@ -290,7 +311,9 @@ Brainstorm du 2026-09-15 et 2026-09-16. Une **Species** est ce qu'un Tamago
 est, décidée à l'éclosion, jamais changée : un corps par Stage à partir de
 hatchling (l'œuf est commun et ne révèle rien), une **Rarity** parmi common,
 uncommon, rare, epic, legendary qui fixe le poids de tirage (60 / 25 / 10 /
-4 / 1) et le **Pace** (1 / 0,8 / 0,5 / 0,4 / 0,25) : plus rare, plus lent à
+4 / 1 au brainstorm ; expédié en 65 / 25 / 10 / 0 / 0 sur un premier œuf, la
+Luck des elders ouvrant epic et legendary, voir `core/creature/luck.ts`)
+et le **Pace** (1 / 0,8 / 0,5 / 0,4 / 0,25) : plus rare, plus lent à
 grandir, jamais l'inverse, pour que le commun ne soit pas la punition de la
 majorité. La Species est stockée dans la Career pour qu'ajouter une Species
 ne réassigne jamais un Tamago existant ; une Career sans Species est le
