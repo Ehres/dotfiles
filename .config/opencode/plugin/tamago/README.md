@@ -277,7 +277,8 @@ and watch the other's XP follow.
 Layout:
 
 ```
-index.tsx           the only module that touches api.* and timers; wires the layers
+index.tsx           wires the layers
+shell/              the only layer touching api.* and timers: Window mirror, tick and flush loops, actions, dialogs, palette, slots
 core/window.ts      what one window does with an event, a tick, a flush or a command
 core/tamago.ts      the Tamago read from a Career once: Species, Stage, XP, Sheet, Behavior, Character
 core/creature/      what a Tamago is at hatch: Species, Luck, Sheet, Behavior, Character
