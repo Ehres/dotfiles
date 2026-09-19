@@ -1,12 +1,12 @@
 /** @jsxImportSource @opentui/solid */
 import type { JSX } from "@opentui/solid";
-import { Index, createMemo } from "solid-js";
+import { Index } from "solid-js";
 import { age, progress, sheetLines, speciesLine } from "../core/appearance/card.ts";
 import { fmt } from "../core/appearance/format.ts";
-import { frameAt, heartFrame } from "../core/appearance/sprites.ts";
 import { describe } from "../core/creature/character.ts";
-import { frameIndex } from "../core/moment/cadence.ts";
 import type { Tamago } from "../core/tamago.ts";
+import { DialogFrame } from "./dialog.tsx";
+import { Sprite } from "./sprite.tsx";
 import { useTheme } from "./theme.tsx";
 
 /**
@@ -18,18 +18,10 @@ import { useTheme } from "./theme.tsx";
  */
 export function CardBody(props: { tamago: Tamago; clock: number; heart: boolean; now: number }): JSX.Element {
   const theme = useTheme();
-  const lines = createMemo(() => {
-    const t = props.tamago;
-    return props.heart
-      ? heartFrame(t.species.id, t.stage, t.temperament)
-      : frameAt(t.species.id, t.stage, "idle", frameIndex("idle", props.clock, t.behavior));
-  });
   return (
     <box flexDirection="column" gap={1}>
       <box flexDirection="row" gap={2}>
-        <box flexDirection="column" flexShrink={0}>
-          <Index each={lines()}>{(line) => <text fg={theme.current.accent}>{line()}</text>}</Index>
-        </box>
+        <Sprite tamago={props.tamago} activity="idle" clock={props.clock} heart={props.heart} color={theme.current.accent} />
         <box flexDirection="column" justifyContent="center">
           <text fg={theme.current.textMuted}>{speciesLine(props.tamago)}</text>
           <text fg={theme.current.textMuted}>
@@ -59,16 +51,9 @@ export function CardView(props: {
   heart: boolean;
   now: number;
 }): JSX.Element {
-  const theme = useTheme();
   return (
-    <box paddingLeft={2} paddingRight={2} paddingBottom={1} gap={1}>
-      <box flexDirection="row" justifyContent="space-between">
-        <text fg={theme.current.text}>
-          <b>{props.name}</b>
-        </text>
-        <text fg={theme.current.textMuted}>esc</text>
-      </box>
+    <DialogFrame title={props.name}>
       <CardBody tamago={props.tamago} clock={props.clock} heart={props.heart} now={props.now} />
-    </box>
+    </DialogFrame>
   );
 }

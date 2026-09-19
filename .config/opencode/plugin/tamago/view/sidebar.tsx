@@ -4,10 +4,7 @@ import type { RGBA } from "@opentui/core";
 import type { JSX } from "@opentui/solid";
 import { createMemo } from "solid-js";
 import { bubbleBorders } from "../core/speech/bubble.ts";
-import { frameIndex } from "../core/moment/cadence.ts";
 import { fmt } from "../core/appearance/format.ts";
-import { frameAt, heartFrame } from "../core/appearance/sprites.ts";
-import type { Frame } from "../core/appearance/sprites.ts";
 import type { Activity, Session } from "../core/moment/session.ts";
 import type { Tamago } from "../core/tamago.ts";
 import type { Bubble } from "../core/speech/voice.ts";
@@ -50,12 +47,6 @@ export function SidebarView(props: {
 }): JSX.Element {
   const theme = useTheme();
   const activity = () => props.session.activity;
-  const lines = (): Frame => {
-    const t = props.tamago;
-    return props.heart
-      ? heartFrame(t.species.id, t.stage, t.temperament)
-      : frameAt(t.species.id, t.stage, activity(), frameIndex(activity(), props.clock, t.behavior));
-  };
   const bubble = createMemo((): BubbleView | undefined => {
     const current = props.bubble;
     if (current === undefined) return undefined;
@@ -65,7 +56,14 @@ export function SidebarView(props: {
 
   return (
     <box flexDirection="column" gap={1}>
-      <Portrait lines={lines()} color={spriteColor(theme.current, activity())} bubble={bubble()}>
+      <Portrait
+        tamago={props.tamago}
+        activity={activity()}
+        clock={props.clock}
+        heart={props.heart}
+        color={spriteColor(theme.current, activity())}
+        bubble={bubble()}
+      >
         <text fg={theme.current.text}>
           <b>{props.name}</b>
         </text>

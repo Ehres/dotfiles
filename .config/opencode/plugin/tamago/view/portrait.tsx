@@ -1,21 +1,28 @@
 /** @jsxImportSource @opentui/solid */
 import type { RGBA } from "@opentui/core";
 import type { JSX } from "@opentui/solid";
-import { Index, Show, createMemo } from "solid-js";
-import type { Frame } from "../core/appearance/sprites.ts";
+import { Show } from "solid-js";
+import type { Activity } from "../core/moment/session.ts";
+import type { Tamago } from "../core/tamago.ts";
+import { Sprite } from "./sprite.tsx";
 
 /** A drawn Bubble: borders in `border`, the phrase in `ink`. */
 export type BubbleView = { top: string; text: string; bottom: string; border: RGBA; ink: RGBA };
 
 /**
- * The Bubble, when there is one, above the sprite column and a caption
- * column. `lines` is memoised so a tick that lands on the same frame
- * re-renders nothing, and <Index> keeps the text nodes alive when only
- * their content changes. Without a Bubble the block does not exist, so the
- * footer keeps today's height.
+ * The Bubble, when there is one, above the Sprite and a caption column.
+ * Without a Bubble the block does not exist, so the footer keeps today's
+ * height.
  */
-export function Portrait(props: { lines: Frame; color: RGBA; bubble?: BubbleView; children: JSX.Element }): JSX.Element {
-  const lines = createMemo(() => props.lines);
+export function Portrait(props: {
+  tamago: Tamago;
+  activity: Activity;
+  clock: number;
+  heart: boolean;
+  color: RGBA;
+  bubble?: BubbleView;
+  children: JSX.Element;
+}): JSX.Element {
   return (
     <box flexDirection="column">
       <Show when={props.bubble}>
@@ -30,9 +37,7 @@ export function Portrait(props: { lines: Frame; color: RGBA; bubble?: BubbleView
         )}
       </Show>
       <box flexDirection="row" gap={2}>
-        <box flexDirection="column" flexShrink={0}>
-          <Index each={lines()}>{(line) => <text fg={props.color}>{line()}</text>}</Index>
-        </box>
+        <Sprite tamago={props.tamago} activity={props.activity} clock={props.clock} heart={props.heart} color={props.color} />
         <box flexDirection="column" justifyContent="center">
           {props.children}
         </box>

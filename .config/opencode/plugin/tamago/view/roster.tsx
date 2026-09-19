@@ -5,6 +5,7 @@ import { Index, Show, createSignal } from "solid-js";
 import { rosterAction, step } from "../core/roster/roster.ts";
 import type { Tamago } from "../core/tamago.ts";
 import { CardBody } from "./card.tsx";
+import { DialogFrame } from "./dialog.tsx";
 import { useTheme } from "./theme.tsx";
 
 /** The gutter of the highlighted line, and the blank one of the others, so the Names stay aligned. */
@@ -38,13 +39,7 @@ export function RosterView(props: {
     setCursor((at) => step(at, action, props.tamagos.length));
   });
   return (
-    <box paddingLeft={2} paddingRight={2} paddingBottom={1} gap={1}>
-      <box flexDirection="row" justifyContent="space-between">
-        <text fg={theme.current.text}>
-          <b>Tamago: roster</b>
-        </text>
-        <text fg={theme.current.textMuted}>esc</text>
-      </box>
+    <DialogFrame title="Tamago: roster">
       <box flexDirection="column">
         <Index each={props.lines}>
           {(text, index) => (
@@ -58,6 +53,6 @@ export function RosterView(props: {
       <Show when={highlighted()}>
         {(one) => <CardBody tamago={one()} clock={props.clock} heart={false} now={props.now} />}
       </Show>
-    </box>
+    </DialogFrame>
   );
 }
