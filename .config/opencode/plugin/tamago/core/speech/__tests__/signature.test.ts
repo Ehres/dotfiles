@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { MAX_TEXT } from "../bubble.ts";
 import { SIGNATURE } from "../signature.ts";
 import { SPECIES } from "../../creature/species.ts";
-import { CUES, type Cue } from "../voice.ts";
+import { CUES, type Cue } from "../cue.ts";
 
 test("every Species of the table has a Signature, and every Signature names a Species of the table", () => {
   for (const entry of SPECIES) assert.ok(SIGNATURE[entry.id], `${entry.id} has no Signature`);

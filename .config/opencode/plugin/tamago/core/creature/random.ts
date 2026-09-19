@@ -23,3 +23,14 @@ export function generator(state: number): () => number {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
+
+/** The key a number in [0, 1) lands on, by cumulative weight in `keys` order. Callers never pass all-zero weights. */
+export function weighted<K extends string>(r: number, keys: readonly K[], weight: (key: K) => number): K {
+  const total = keys.reduce((sum, key) => sum + weight(key), 0);
+  let cumulative = 0;
+  for (const key of keys) {
+    cumulative += weight(key) / total;
+    if (r < cumulative) return key;
+  }
+  return keys[keys.length - 1] as K;
+}

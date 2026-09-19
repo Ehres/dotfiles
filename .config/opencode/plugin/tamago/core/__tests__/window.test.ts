@@ -5,7 +5,7 @@ import type { Addressed } from "../moment/events.ts";
 import { speakerOf } from "../creature/sheet.ts";
 import { STAGES, WEIGHTS } from "../career/stage.ts";
 import { EMPTY_DELTA, freshCareer, isEmpty, type Career } from "../career/career.ts";
-import { phrase } from "../speech/voice.ts";
+import { phrase } from "../speech/register.ts";
 import { adopt, flushed, freshWindow, receive, rename, setMuted, tick, type Window } from "../window.ts";
 
 const HURT_MS = MEDIAN.hurtMs;

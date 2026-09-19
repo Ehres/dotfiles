@@ -80,7 +80,8 @@ messages, todo texts or diffs, only their counts.
 At most one bubble every 10 s; a rarer cue (an evolution, a streak) may
 interrupt a common one. `granted` and `denied` only answer a `permission` the
 creature actually voiced, within 30 s and once per question. Which phrase is
-spoken is drawn, never rotated. Tuning lives in `core/speech/voice.ts`.
+spoken is drawn, never rotated. Cue priorities and cooldowns live in
+`core/speech/cue.ts`, the Voice memory in `core/speech/voice.ts`.
 
 The 5 s of a bubble, the 10 s between two, the 5 min of a long work and the
 3 failures of a streak are those of a median sheet; a chatty creature speaks
@@ -89,7 +90,8 @@ sooner and longer, a sensitive one complains earlier.
 Three registers share the phrases. Each species has a signature: its own
 phrases for every cue, in `core/speech/signature.ts` and one file per rarity under
 `core/speech/signatures/`. Each temperament has its flavor for every cue, in
-`core/speech/voice.ts`, next to the neutral phrases. Which register speaks is drawn
+`core/speech/phrases.ts`, next to the neutral phrases; which register speaks is
+drawn in `core/speech/register.ts`. Which register speaks is drawn
 at each cue, 70 % the species, 25 % a temperament, 5 % neutral; within the
 temperament share, each of the four speaks at the weight of its stat, so a
 sarcastic 9 with a dreamy 3 drifts off now and then. The draw is seeded from

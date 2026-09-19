@@ -1,5 +1,5 @@
 import { weightsAt } from "./luck.ts";
-import { generator, seed } from "./random.ts";
+import { generator, seed, weighted } from "./random.ts";
 import type { Modifiers } from "./sheet.ts";
 
 export type Rarity = "common" | "uncommon" | "rare" | "epic" | "legendary";
@@ -70,13 +70,7 @@ export function pace(id: SpeciesId, table: readonly Species[] = SPECIES): number
 
 /** The Rarity a number in [0, 1) lands on, by cumulative weight in RARITIES order. A zero weight never lands. */
 function rarityAt(roll: number, weights: Record<Rarity, number>): Rarity {
-  const total = RARITIES.reduce((sum, rarity) => sum + weights[rarity], 0);
-  let cumulative = 0;
-  for (const rarity of RARITIES) {
-    cumulative += weights[rarity] / total;
-    if (roll < cumulative) return rarity;
-  }
-  return RARITIES[RARITIES.length - 1] ?? "common";
+  return weighted(roll, RARITIES, (rarity) => weights[rarity]);
 }
 
 /**
