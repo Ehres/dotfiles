@@ -1,5 +1,6 @@
 import { REFERENCE, bodiesOf, known } from "../creature/catalog.ts";
 import type { Body } from "./bodies.ts";
+import { MARK_COLUMN, MARK_LINE } from "./marks.ts";
 import type { Temperament } from "../creature/sheet.ts";
 import type { SpeciesId } from "../creature/species.ts";
 import type { StageId } from "../career/stage.ts";
@@ -77,6 +78,23 @@ export function frames(species: SpeciesId, stage: StageId, activity: Activity): 
   return built;
 }
 
+/** Writes `mark` over the overlay cell of a Frame. */
+function overlay(frame: Frame, mark: string): Frame {
+  return frame.map((line, index) => (index === MARK_LINE ? line.slice(0, MARK_COLUMN) + mark + line.slice(MARK_COLUMN + 1) : line));
+}
+
+const MARKED = new Map<string, readonly Frame[]>();
+
+/** The Frames of an Activity with a Trait mark written on them, cached like the bare ones so identity stays stable. */
+function markedFrames(species: SpeciesId, stage: StageId, activity: Activity, mark: string): readonly Frame[] {
+  const key = `${keyOf(species, stage)}/${activity}/${mark}`;
+  const hit = MARKED.get(key);
+  if (hit) return hit;
+  const built = frames(species, stage, activity).map((frame) => overlay(frame, mark));
+  MARKED.set(key, built);
+  return built;
+}
+
 /** How long the heart stays on the sprite after a pet. */
 export const PET_MS = 2_000;
 /** Not ASCII: one column in most terminals, two in a few, where line 0 overflows for PET_MS. */
@@ -92,17 +110,18 @@ export const EYES: Record<Temperament, string> = {
 const HEARTS = new Map<string, Frame>();
 
 /** The Sprite while petted, whatever the Activity: the Temperament's eyes and a heart for the mark. Cached, so identity is stable. */
-export function heartFrame(species: SpeciesId, stage: StageId, temperament: Temperament): Frame {
-  const key = `${keyOf(species, stage)}/${temperament}`;
+export function heartFrame(species: SpeciesId, stage: StageId, temperament: Temperament, mark?: string): Frame {
+  const key = `${keyOf(species, stage)}/${temperament}/${mark ?? ""}`;
   const hit = HEARTS.get(key);
   if (hit) return hit;
-  const built = fit(body(species, stage)(EYES[temperament], HEART));
+  const drawn = fit(body(species, stage)(EYES[temperament], HEART));
+  const built = mark === undefined || mark === "" ? drawn : overlay(drawn, mark);
   HEARTS.set(key, built);
   return built;
 }
 
-export function frameAt(species: SpeciesId, stage: StageId, activity: Activity, index: number): Frame {
-  const all = frames(species, stage, activity);
+export function frameAt(species: SpeciesId, stage: StageId, activity: Activity, index: number, mark?: string): Frame {
+  const all = mark === undefined || mark === "" ? frames(species, stage, activity) : markedFrames(species, stage, activity, mark);
   const frame = all[((index % all.length) + all.length) % all.length];
   return frame ?? fit([]);
 }

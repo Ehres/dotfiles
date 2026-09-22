@@ -1,5 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { MARK_COLUMN, MARK_LINE } from "../../appearance/marks.ts";
+import { frames } from "../../appearance/sprites.ts";
 import { STAGES } from "../../career/stage.ts";
 import { MAX_TEXT } from "../../speech/bubble.ts";
 import { CUES, type Cue } from "../../speech/cue.ts";
@@ -74,4 +76,14 @@ test("a phrase belongs to one Species only", () => {
     }
   }
   assert.deepEqual(collisions, []);
+});
+
+test("every Species leaves the overlay cell free at every Stage, so a Trait mark never covers a body", () => {
+  for (const one of SPECIES) {
+    for (const stage of ["egg", "hatchling", "young", "adult", "elder"] as const) {
+      for (const frame of frames(one.id, stage, "idle")) {
+        assert.equal((frame[MARK_LINE] ?? "")[MARK_COLUMN], " ", `${one.id}/${stage} fills the overlay cell`);
+      }
+    }
+  }
 });
