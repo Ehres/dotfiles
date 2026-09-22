@@ -33,6 +33,8 @@ test("a held Trait marks the sprite's top-left cell", async () => {
       <Sprite tamago={tamago(kept)} activity="idle" clock={0} heart={false} color={TUI_THEME.current.accent} />
     </ThemeProvider>
   ));
-  expect(shown).toContain(MARK.proud!);
+  const mark = MARK.proud;
+  if (mark === undefined) throw new Error('no mark for "proud" in MARK');
+  expect(shown).toContain(mark);
   expect(shown).toMatchSnapshot();
 });
