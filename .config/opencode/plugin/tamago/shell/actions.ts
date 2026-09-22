@@ -3,9 +3,10 @@ import { createSignal, type Accessor } from "solid-js";
 import type { Store } from "../adapter/store.ts";
 import { PET_MS } from "../core/appearance/sprites.ts";
 import { isEmpty } from "../core/career/career.ts";
+import type { MilestoneId, TraitId } from "../core/career/pick.ts";
 import type { CareerId } from "../core/roster/roster.ts";
 import { BUSY, GONE } from "../core/text/toasts.ts";
-import { adopt, flushed, rename as renameWindow, setMuted as muteWindow } from "../core/window.ts";
+import { adopt, flushed, pick as pickWindow, rename as renameWindow, setMuted as muteWindow } from "../core/window.ts";
 import type { Guard } from "./guard.ts";
 import type { Mirror } from "./mirror.ts";
 
@@ -17,6 +18,7 @@ export type Actions = {
   rename(input: string): void;
   setMute(value: boolean): void;
   pet(): void;
+  choose(milestone: MilestoneId, trait: TraitId): void;
   /** True while the sprite wears the heart after a pet. Per window, like the sprite itself. */
   heart: Accessor<boolean>;
   dispose(): void;
@@ -82,6 +84,9 @@ export function createActions(deps: {
   /** A rename is a Delta: shown at once here, flushed like the counters, latest wins across windows. */
   const rename = (input: string) => mirror.run(renameWindow(mirror.current(), input, now(), mirror.name()));
 
+  /** A Pick is a Delta, like a rename: shown at once, flushed with the counters, the earliest Pick wins across windows. */
+  const choose = (milestone: MilestoneId, trait: TraitId) => mirror.run(pickWindow(mirror.current(), milestone, trait, now()));
+
   const setMute = (value: boolean) => {
     mirror.commit(muteWindow(mirror.current(), value));
     api.kv.set("tamago.muted", value);
@@ -106,6 +111,7 @@ export function createActions(deps: {
     rename,
     setMute,
     pet,
+    choose,
     heart,
     dispose() {
       if (heartTimer !== undefined) clearTimeout(heartTimer);

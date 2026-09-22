@@ -22,6 +22,7 @@ export function createPalette(deps: {
     rename: dialogs.askName,
     hatch: dialogs.askHatch,
     roster: dialogs.showRoster,
+    choose: dialogs.askChoice,
   };
 
   let unregisterCommands: (() => void) | undefined;
@@ -31,7 +32,7 @@ export function createPalette(deps: {
       const who = mirror.name();
       unregisterCommands = api.keymap.registerLayer({
         commands: COMMAND_IDS.map((id) => ({
-          ...command(id, who),
+          ...command(id, who, mirror.active().choices.length),
           category: PALETTE,
           /** What lists a command in the palette; OpenCode's own commands carry it. */
           namespace: "palette",
