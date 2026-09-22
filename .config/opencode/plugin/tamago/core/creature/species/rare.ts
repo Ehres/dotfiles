@@ -50,6 +50,7 @@ export const RARE: readonly SpeciesDef[] = [
       todos_done: ["Queue empty.", "All tasks closed.", "Checklist: done."],
       evolved: ["Firmware updated.", "New chassis.", "Version bumped."],
       hatched: ["Boot complete.", "Unit online.", "Hello, operator."],
+      choice: ["Input required.", "Select an option.", "Awaiting your choice."],
     },
   },
   {
@@ -100,6 +101,7 @@ export const RARE: readonly SpeciesDef[] = [
       todos_done: ["House at rest.", "Every room quiet.", "Done. Fading."],
       evolved: ["Paler. Grander.", "More boo in me.", "Grown... somehow."],
       hatched: ["Boo. A ghost.", "Was I... born?", "Hello from beyond."],
+      choice: ["Choose... for me...", "Something stirs.", "A path, unchosen."],
     },
   },
   {
@@ -150,6 +152,7 @@ export const RARE: readonly SpeciesDef[] = [
       todos_done: ["Sea at rest.", "Every wave counted.", "Done. Glowing."],
       evolved: ["Longer tentacles.", "Brighter glow!", "Grown with the tide."],
       hatched: ["A jellyfish. Glow.", "Soft and here. Hi.", "Drifting in. Hello."],
+      choice: ["A current parts.", "Drift left, or right?", "Choose. Softly."],
     },
   },
   {
@@ -200,6 +203,7 @@ export const RARE: readonly SpeciesDef[] = [
       todos_done: ["Tree in order.", "Every fly caught.", "Done. Blending."],
       evolved: ["New colors!", "Longer tongue.", "Grown. Still hidden."],
       hatched: ["A chameleon. Spot me.", "Green today. Hello.", "Blending in. Hi."],
+      choice: ["I could change.", "Which colour today?", "Pick what I become."],
     },
   },
 ];

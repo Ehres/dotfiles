@@ -50,6 +50,7 @@ export const EPIC: readonly SpeciesDef[] = [
       todos_done: ["Sky is clear!", "Every ember placed.", "Done. Still burning."],
       evolved: ["Brighter flames!", "Reborn, grander.", "Wings of fire now."],
       hatched: ["A phoenix! Bright.", "Born of fire. Hi!", "Warm already. Hello."],
+      choice: ["Choose my next fire.", "A turning! Choose.", "Which flame?"],
     },
   },
   {
@@ -100,6 +101,7 @@ export const EPIC: readonly SpeciesDef[] = [
       todos_done: ["The sea is still.", "Every ship accounted.", "Done. Sinking."],
       evolved: ["Longer reach.", "Deeper. Grander.", "The sea grew."],
       hatched: ["A kraken. Beware.", "From the deep. Hello.", "The sea has eyes now."],
+      choice: ["Choose, small one.", "The deep offers two.", "Decide."],
     },
   },
   {
@@ -150,6 +152,7 @@ export const EPIC: readonly SpeciesDef[] = [
       todos_done: ["Meadow in bloom!", "Every star placed.", "Done. Perfect."],
       evolved: ["Longer horn!", "Brighter sparkle.", "Grown. Still magic."],
       hatched: ["A unicorn! Sparkle.", "Rare and here. Hi!", "Horn first. Hello."],
+      choice: ["A choice! Sparkle!", "Which gift, then?", "Choose beautifully."],
     },
   },
 ];

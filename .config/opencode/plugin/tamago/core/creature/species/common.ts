@@ -49,6 +49,7 @@ export const COMMON: readonly SpeciesDef[] = [
       todos_done: ["Purrfect.", "All boxed. Like me.", "Done. Nap time."],
       evolved: ["Bigger paws.", "Still a cat. More so.", "Sleek."],
       hatched: ["Mrow. Hello.", "A cat. Naturally.", "Feed me, human."],
+      choice: ["Two paths. Pick one.", "I could be more.", "Choose, human."],
     },
   },
   {
@@ -99,6 +100,7 @@ export const COMMON: readonly SpeciesDef[] = [
       todos_done: ["Every branch clear.", "All roosted.", "Hoot. Complete."],
       evolved: ["Feathers grew.", "Wiser, wider.", "New plumage."],
       hatched: ["Hoot. So I am.", "Wise from day one.", "An owl. Of course."],
+      choice: ["A choice awaits.", "Consider, then choose.", "Which branch?"],
     },
   },
   {
@@ -149,6 +151,7 @@ export const COMMON: readonly SpeciesDef[] = [
       todos_done: ["All flies caught.", "Pad is clear. Ribbit.", "Done. Sunning now."],
       evolved: ["Longer legs. Ribbit.", "Less tadpole today.", "Bigger croak in me."],
       hatched: ["Ribbit. A frog.", "Wet and green. Hi.", "Hop. Hello, human."],
+      choice: ["Ribbit. Which way?", "Two lily pads.", "Hop left or right?"],
     },
   },
   {
@@ -199,6 +202,7 @@ export const COMMON: readonly SpeciesDef[] = [
       todos_done: ["All ducks in a row!", "Quack! All done.", "Pond's tidy. Quack."],
       evolved: ["Bigger wings! Quack!", "Less fluff, more duck.", "Look at these feathers."],
       hatched: ["Quack! A duck!", "Fluffy and loud. Hi!", "Waddle waddle. Hello."],
+      choice: ["Ooh! A choice!", "Which one? Quack!", "Pick pick pick!"],
     },
   },
   {
@@ -249,6 +253,7 @@ export const COMMON: readonly SpeciesDef[] = [
       todos_done: ["Seeds all stashed!", "Wheel's done. Nap.", "Squeak! All sorted."],
       evolved: ["Bigger cheeks!", "Faster wheel, me.", "Fluffier. Squeak."],
       hatched: ["Squeak! Hamster!", "Tiny and quick. Hi!", "Where's the wheel?"],
+      choice: ["Squeak! Choose!", "Two seeds! Which?", "Pick one, quick!"],
     },
   },
   {
@@ -299,6 +304,7 @@ export const COMMON: readonly SpeciesDef[] = [
       todos_done: ["Every leaf eaten.", "Trail complete.", "Done. Shell time."],
       evolved: ["Bigger shell. Nice.", "One more spiral.", "Slower? No. Grander."],
       hatched: ["A snail. Hello...", "Shell and all. Hi.", "Slow start. Good one."],
+      choice: ["A fork. No rush.", "Choose... slowly.", "Two trails ahead."],
     },
   },
 ];

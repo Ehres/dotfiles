@@ -11,7 +11,8 @@ export type Cue =
   | "retried"
   | "todos_done"
   | "evolved"
-  | "hatched";
+  | "hatched"
+  | "choice";
 
 /** At least one phrase; a test bounds each to MAX_TEXT. */
 export type Phrases = readonly [string, ...string[]];
@@ -30,4 +31,5 @@ export const CUES: Record<Cue, { priority: number; cooldown: number }> = {
   todos_done: { priority: 2, cooldown: 0 },
   evolved: { priority: 3, cooldown: 0 },
   hatched: { priority: 3, cooldown: 0 },
+  choice: { priority: 2, cooldown: 3_600_000 },
 };

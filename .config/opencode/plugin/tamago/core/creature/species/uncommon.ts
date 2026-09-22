@@ -50,6 +50,7 @@ export const UNCOMMON: readonly SpeciesDef[] = [
       todos_done: ["Every hen counted.", "Den in order.", "Done. Tail curled."],
       evolved: ["Bushier tail.", "Sharper ears now.", "Sly and grown."],
       hatched: ["A fox. Naturally.", "Sly from the start.", "Ears up. Hello."],
+      choice: ["Choose cleverly.", "Two ways. Pick well.", "Your move, human."],
     },
   },
   {
@@ -100,6 +101,7 @@ export const UNCOMMON: readonly SpeciesDef[] = [
       todos_done: ["Colony in order.", "All eggs counted.", "Formation complete."],
       evolved: ["Sleeker feathers.", "Taller in the huddle.", "Grown. Formally."],
       hatched: ["A penguin. Formal.", "Tuxedo on. Hello.", "Cold outside. Hi."],
+      choice: ["A decision, please.", "Formal choice awaits.", "Select one."],
     },
   },
   {
@@ -150,6 +152,7 @@ export const UNCOMMON: readonly SpeciesDef[] = [
       todos_done: ["All arms free!", "Every shell opened.", "Done. Curling up."],
       evolved: ["Longer arms!", "More suckers. Nice.", "Grown. Eightfold."],
       hatched: ["An octopus. Curious.", "Eight arms. Hello!", "Ink? Later. Hi."],
+      choice: ["Ooh, options!", "Three arms, one pick.", "Which shall I be?"],
     },
   },
   {
@@ -200,6 +203,7 @@ export const UNCOMMON: readonly SpeciesDef[] = [
       todos_done: ["Cave in order.", "All echoes answered.", "Done. Hanging up."],
       evolved: ["Wider wings.", "Sharper ears.", "Grown in the dark."],
       hatched: ["A bat. Quietly.", "Wings and ears. Hi.", "Dark's fine. Hello."],
+      choice: ["Something waits.", "A choice, quietly.", "Listen. Then choose."],
     },
   },
   {
@@ -250,6 +254,7 @@ export const UNCOMMON: readonly SpeciesDef[] = [
       todos_done: ["Hedge in order.", "Every leaf turned.", "Done. Balling up."],
       evolved: ["More spines!", "Bigger ball. Nice.", "Grown. Prickly."],
       hatched: ["A hedgehog. Hello.", "Spiky already. Hi.", "Snuffle. It's me."],
+      choice: ["Snuffle. A choice.", "Which way, then?", "Two paths. Hmm."],
     },
   },
   {
@@ -300,6 +305,7 @@ export const UNCOMMON: readonly SpeciesDef[] = [
       todos_done: ["Tank tidy. Smile.", "All pebbles placed.", "Done. Floating."],
       evolved: ["Longer gills!", "Grown. Still smiling.", "Regrew bigger."],
       hatched: ["An axolotl. Hi!", "Gills and smile. Hello.", "Pink and here."],
+      choice: ["A choice! Smile.", "Which one? Hehe.", "Pick one for me!"],
     },
   },
 ];

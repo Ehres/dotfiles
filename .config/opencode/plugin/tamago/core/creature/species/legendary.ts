@@ -50,6 +50,7 @@ export const LEGENDARY: readonly SpeciesDef[] = [
       todos_done: ["The hoard is whole.", "All conquered.", "Nothing left. Good."],
       evolved: ["Wings feel bigger.", "More fire in me.", "Bow, if you like."],
       hatched: ["A dragon. Behold.", "Rare. As I should be.", "Smoke? Just me."],
+      choice: ["Choose. I allow it.", "Two futures. Pick.", "Decide, human."],
     },
   },
 ];

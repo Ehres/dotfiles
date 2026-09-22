@@ -15,6 +15,7 @@ export const PHRASES: Record<Cue, Phrases> = {
   todos_done: ["And that's a wrap.", "All ticked off."],
   evolved: ["I feel... different.", "Look at me now."],
   hatched: ["So this is what I am.", "Out at last!", "Hello, world."],
+  choice: ["Something to decide.", "A choice awaits.", "Your call."],
 };
 
 /** Phrases per Temperament for every Cue: the Temperament Register. English, at most MAX_TEXT characters each; a test enforces the coverage. */
@@ -32,6 +33,7 @@ export const FLAVOR: Record<Temperament, Record<Cue, Phrases>> = {
     todos_done: ["All done! Party!", "Every box! Yay!", "We rock!"],
     evolved: ["Look at me go!", "New me, who dis?", "Ta-da!"],
     hatched: ["I'm out! Hi!", "Look, it's me!", "Best day ever."],
+    choice: ["Ooh, a choice! Yay!", "Pick one! Any one!", "Choices! Fun!"],
   },
   sarcastic: {
     permission: ["Permission, boss?", "Mother, may I?", "Shall I wait more?"],
@@ -46,6 +48,7 @@ export const FLAVOR: Record<Temperament, Record<Cue, Phrases>> = {
     todos_done: ["Wow. Boxes ticked.", "A miracle. Truly.", "Don't strain yourself."],
     evolved: ["Finally.", "Took you long enough.", "Behold. Or don't."],
     hatched: ["Took long enough.", "Behold. Me.", "Well. Here I am."],
+    choice: ["A choice. Riveting.", "Decide, if you like.", "Take your time."],
   },
   stoic: {
     permission: ["Your call.", "Awaiting word.", "When ready."],
@@ -60,6 +63,7 @@ export const FLAVOR: Record<Temperament, Record<Cue, Phrases>> = {
     todos_done: ["Complete.", "All in order.", "Nothing remains."],
     evolved: ["So it goes.", "A new form.", "Onward."],
     hatched: ["I am here.", "It begins.", "So. This form."],
+    choice: ["A choice waits.", "Decide when ready.", "It can wait."],
   },
   dreamy: {
     permission: ["Hm? Oh. May I?", "If you like...", "Whenever..."],
@@ -74,5 +78,6 @@ export const FLAVOR: Record<Temperament, Record<Cue, Phrases>> = {
     todos_done: ["All done... lovely.", "Nothing left. Hm.", "Quiet now..."],
     evolved: ["Was that... me?", "Oh. I changed.", "How curious."],
     hatched: ["Oh... hello.", "Am I... out?", "What a soft light."],
+    choice: ["Two paths, drifting...", "Something to choose...", "Mmh... a choice."],
   },
 };
