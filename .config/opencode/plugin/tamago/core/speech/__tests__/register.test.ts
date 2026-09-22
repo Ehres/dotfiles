@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { TEMPERAMENTS, type Sheet, type Speaker, type Temperament } from "../../creature/sheet.ts";
 import { signatureOf } from "../../creature/catalog.ts";
 import { REGISTER, phrase } from "../register.ts";
+import { ACCENT } from "../accent.ts";
 import { FLAVOR, PHRASES } from "../phrases.ts";
 import type { Cue } from "../cue.ts";
 
@@ -100,4 +101,13 @@ test("a Temperament Stat pushed below zero by a Modifier weighs nothing, and a S
     const two = registerOf(phrase("compacted", flat, times), "compacted", "cat");
     assert.ok(two === "species" || two === "neutral" || two === "cheerful", `${times}: ${two}`);
   }
+});
+
+test("a Trait that takes a Cue silences the Species and the Temperament there", () => {
+  const plain = { ...STOIC, traits: [] };
+  const held = { ...STOIC, traits: ["hardy"] };
+  const said = new Set<string>();
+  for (let times = 0; times < 30; times++) said.add(phrase("streak", held, times));
+  for (const text of said) assert.ok(ACCENT.hardy?.phrases.streak?.includes(text), `${text} is not hardy's`);
+  assert.notDeepEqual(phrase("streak", plain, 0), phrase("streak", held, 0));
 });
