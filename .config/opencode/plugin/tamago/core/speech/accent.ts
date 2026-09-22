@@ -43,10 +43,10 @@ export const ACCENT: Record<TraitId, Accent> = {
 };
 
 /** The phrases of the most recently picked held Trait that takes this Cue; undefined when none does. `held` is oldest Pick first. */
-export function accentFor(cue: Cue, held: readonly TraitId[]): Phrases | undefined {
+export function accentFor(cue: Cue, held: readonly TraitId[], table: Record<TraitId, Accent> = ACCENT): Phrases | undefined {
   for (let i = held.length - 1; i >= 0; i--) {
     const id = held[i];
-    const found = id === undefined ? undefined : ACCENT[id];
+    const found = id === undefined ? undefined : table[id];
     if (found?.takes.includes(cue)) return found.phrases[cue];
   }
   return undefined;
