@@ -10,7 +10,7 @@ export type Trait = {
 /**
  * Tune here, never in code paths. Says what exists and what it needs; what a
  * Trait does on its surface (phrases, Cue, Sprite mark) belongs to that
- * surface's module. Empty until the first real Trait.
+ * surface's module. These are the shipped Traits; a new one is added here.
  */
 export const TRAITS: readonly Trait[] = [
   { id: "hardy", needs: [] },

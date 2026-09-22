@@ -13,8 +13,8 @@ export type Milestone =
 
 /**
  * Tune here, never in code paths. Table order is the order pending Milestones
- * are offered in. Empty until the first real Milestone; ids will follow
- * `evolution:<stage>` and `<measure>:<min>`, but nothing depends on it.
+ * are offered in. These are the shipped Milestones; a new one is added here,
+ * its id following `evolution:<stage>` or `<measure>:<min>`.
  */
 export const MILESTONES: readonly Milestone[] = [
   { id: "evolution:hatchling", stage: "hatchling" },
