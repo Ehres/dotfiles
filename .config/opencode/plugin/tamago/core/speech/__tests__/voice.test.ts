@@ -7,6 +7,8 @@ import { initialSession, type Session } from "../../moment/session.ts";
 import { transition } from "../../moment/transition.ts";
 import { CUES, type AnyCue } from "../cue.ts";
 import { phrase } from "../register.ts";
+import type { Accent } from "../accent.ts";
+import type { TraitId } from "../../career/pick.ts";
 import { BIG_DIFF_FILES, REPLY_MS, STREAK_MS, initialVoice, speak, type Voice } from "../voice.ts";
 
 const BUBBLE_MS = MEDIAN.bubbleMs;
@@ -280,4 +282,15 @@ test("restless speaks of files stirring only while the session is calm: our own 
   const busy = { ...initialSession(0), busy: true, activity: "working" as const };
   assert.equal(speak(initialVoice(), { type: "files_stirred" }, calm, calm, 10, restless, MEDIAN).bubble?.cue, "stir");
   assert.equal(speak(initialVoice(), { type: "files_stirred" }, busy, busy, 10, restless, MEDIAN).bubble, undefined);
+});
+
+test("speak raises no Bubble, and throws nothing, when a held Trait's table opens a Cue it owns no phrases for", () => {
+  const broken: Record<TraitId, Accent> = { watchful: { takes: [], opens: ["branch"], phrases: {} } };
+  const seer = { ...STOIC, traits: ["watchful"] };
+  const calm = initialSession(0);
+  const voice = initialVoice();
+  assert.doesNotThrow(() => speak(voice, { type: "branch_changed" }, calm, calm, 10, seer, MEDIAN, false, broken));
+  const after = speak(voice, { type: "branch_changed" }, calm, calm, 10, seer, MEDIAN, false, broken);
+  assert.equal(after.bubble, undefined);
+  assert.equal(after, voice, "the Voice is otherwise untouched");
 });

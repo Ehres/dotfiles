@@ -2,7 +2,8 @@ import { MEDIAN, type Behavior } from "../creature/behavior.ts";
 import type { Speaker } from "../creature/sheet.ts";
 import type { TamagoEvent } from "../moment/events.ts";
 import type { Session } from "../moment/session.ts";
-import { opensCue } from "./accent.ts";
+import type { TraitId } from "../career/pick.ts";
+import { ACCENT, opensCue, type Accent } from "./accent.ts";
 import { tuningOf, type AnyCue } from "./cue.ts";
 import { phrase } from "./register.ts";
 
@@ -47,6 +48,7 @@ function listen(
   speaker: Speaker,
   behavior: Behavior,
   awaits: boolean,
+  table: Record<TraitId, Accent>,
 ): { voice: Voice; cue?: AnyCue } {
   let next = voice;
   let cue: AnyCue | undefined;
@@ -90,14 +92,14 @@ function listen(
       cue = event.stage === "hatchling" ? "hatched" : "evolved";
       break;
     case "branch_changed":
-      if (opensCue(speaker.traits, "branch")) cue = "branch";
+      if (opensCue(speaker.traits, "branch", table)) cue = "branch";
       break;
     case "worktree_ready":
-      if (opensCue(speaker.traits, "worktree")) cue = "worktree";
+      if (opensCue(speaker.traits, "worktree", table)) cue = "worktree";
       break;
     case "files_stirred":
       // Our own edits are not news: a stirred file only speaks while the session is calm.
-      if (!after.busy && opensCue(speaker.traits, "stir")) cue = "stir";
+      if (!after.busy && opensCue(speaker.traits, "stir", table)) cue = "stir";
       break;
     default:
       break;
@@ -124,18 +126,22 @@ export function speak(
   behavior: Behavior = MEDIAN,
   /** Whether a Draw awaits a Pick. The Voice cannot see the Career, so the Window computes it. */
   awaits = false,
+  /** The Accent table, injectable for tests; production always uses `ACCENT`. */
+  table: Record<TraitId, Accent> = ACCENT,
 ): Voice {
   if (event.type === "tick") {
     return voice.bubble !== undefined && voice.bubble.until <= now ? { ...voice, bubble: undefined } : voice;
   }
-  const { voice: next, cue } = listen(voice, event, before, after, now, speaker, behavior, awaits);
+  const { voice: next, cue } = listen(voice, event, before, after, now, speaker, behavior, awaits, table);
   if (cue === undefined) return next;
   const { priority, cooldown } = tuningOf(cue);
   const said = next.spoken[cue];
   if (said !== undefined && now - said.at < cooldown) return next;
   if (next.last !== undefined && now - next.last.at < behavior.quietMs && priority <= next.last.priority) return next;
   const times = said?.times ?? 0;
-  const text = phrase(cue, speaker, times);
+  const text = phrase(cue, speaker, times, table);
+  // A Trait-opened Cue whose table owns no phrases for it says nothing: no Bubble, the Voice otherwise untouched.
+  if (text === undefined) return next;
   return {
     ...next,
     bubble: { cue, text, since: now, until: now + behavior.bubbleMs },

@@ -3,15 +3,23 @@ import assert from "node:assert/strict";
 import { TEMPERAMENTS, type Sheet, type Speaker, type Temperament } from "../../creature/sheet.ts";
 import { signatureOf } from "../../creature/catalog.ts";
 import { REGISTER, phrase } from "../register.ts";
-import { ACCENT } from "../accent.ts";
+import { ACCENT, type Accent } from "../accent.ts";
 import { FLAVOR, PHRASES } from "../phrases.ts";
 import type { Cue } from "../cue.ts";
+import type { TraitId } from "../../career/pick.ts";
 
 /** A Sheet at the median everywhere but where `patch` says. */
 const sheetOf = (patch: Partial<Sheet>): Sheet => ({ cheerful: 0, sarcastic: 0, stoic: 0, dreamy: 0, energy: 5, chatter: 5, sensitivity: 5, patience: 5, ...patch });
 /** A stoic cat, the default Speaker of these tests. */
 const STOIC: Speaker = { hatchedAt: 1, species: "cat", sheet: sheetOf({ stoic: 8 }), traits: [] };
 const DRAGON: Speaker = { hatchedAt: 3, species: "dragon", sheet: sheetOf({ cheerful: 7 }), traits: [] };
+
+/** `phrase`, asserted non-undefined: every Cue below is a plain Cue, never a Trait-opened one whose table owns no phrases for it. */
+function say(cue: Cue, speaker: Speaker, times: number): string {
+  const text = phrase(cue, speaker, times);
+  assert.ok(text !== undefined, `${cue} unexpectedly said nothing`);
+  return text;
+}
 
 /** Which Register a text of `cue` belongs to, for a Speaker whose pools are pairwise disjoint. */
 function registerOf(text: string, cue: Cue, species: string): "species" | Temperament | "neutral" | undefined {
@@ -33,10 +41,10 @@ test("REGISTER gives the Species the floor, the Temperament a nuance, the neutra
 });
 
 test("phrase is deterministic, comes from one of the three Registers, and varies with the count", () => {
-  assert.equal(phrase("compacted", STOIC, 3), phrase("compacted", STOIC, 3));
+  assert.equal(say("compacted", STOIC, 3), say("compacted", STOIC, 3));
   const seen = new Set<string>();
   for (let times = 0; times < 30; times++) {
-    const text = phrase("compacted", STOIC, times);
+    const text = say("compacted", STOIC, times);
     assert.notEqual(registerOf(text, "compacted", "cat"), undefined, text);
     seen.add(text);
   }
@@ -47,7 +55,7 @@ test("over a thousand occurrences the Species speaks about 70 %, the Temperament
   assertDisjoint("compacted", "cat");
   const counts = { species: 0, temperament: 0, neutral: 0 };
   for (let times = 0; times < 1000; times++) {
-    const register = registerOf(phrase("compacted", STOIC, times), "compacted", "cat");
+    const register = registerOf(say("compacted", STOIC, times), "compacted", "cat");
     if (register === "species" || register === "neutral") counts[register]++;
     else counts.temperament++;
   }
@@ -61,7 +69,7 @@ test("among the Temperament's phrases, each Temperament speaks at the weight of 
   const mixed: Speaker = { hatchedAt: 9, species: "cat", sheet: sheetOf({ sarcastic: 9, dreamy: 3 }), traits: [] };
   const counts: Record<string, number> = {};
   for (let times = 0; times < 4000; times++) {
-    const register = registerOf(phrase("compacted", mixed, times), "compacted", "cat");
+    const register = registerOf(say("compacted", mixed, times), "compacted", "cat");
     if (register !== undefined && register !== "species" && register !== "neutral") counts[register] = (counts[register] ?? 0) + 1;
   }
   const total = Object.values(counts).reduce((sum, count) => sum + count, 0);
@@ -75,7 +83,7 @@ test("among the Temperament's phrases, each Temperament speaks at the weight of 
 test("at the hatch the Species always speaks, and the phrase still varies", () => {
   const seen = new Set<string>();
   for (let times = 0; times < 50; times++) {
-    const text = phrase("hatched", DRAGON, times);
+    const text = say("hatched", DRAGON, times);
     assert.ok(signatureOf("dragon")?.hatched.includes(text), text);
     seen.add(text);
   }
@@ -86,7 +94,7 @@ test("a Species this build does not know speaks with its Temperament where the S
   assertDisjoint("compacted", "cat");
   const unknown: Speaker = { hatchedAt: 5, species: "nope", sheet: sheetOf({ dreamy: 8 }), traits: [] };
   for (let times = 0; times < 200; times++) {
-    const register = registerOf(phrase("compacted", unknown, times), "compacted", "cat");
+    const register = registerOf(say("compacted", unknown, times), "compacted", "cat");
     assert.ok(register === "dreamy" || register === "neutral", `${times}: ${register}`);
   }
 });
@@ -96,9 +104,9 @@ test("a Temperament Stat pushed below zero by a Modifier weighs nothing, and a S
   const negative: Speaker = { hatchedAt: 11, species: "cat", sheet: sheetOf({ stoic: 6, cheerful: -1 }), traits: [] };
   const flat: Speaker = { hatchedAt: 12, species: "cat", sheet: sheetOf({}), traits: [] };
   for (let times = 0; times < 300; times++) {
-    const one = registerOf(phrase("compacted", negative, times), "compacted", "cat");
+    const one = registerOf(say("compacted", negative, times), "compacted", "cat");
     assert.ok(one === "species" || one === "neutral" || one === "stoic", `${times}: ${one}`);
-    const two = registerOf(phrase("compacted", flat, times), "compacted", "cat");
+    const two = registerOf(say("compacted", flat, times), "compacted", "cat");
     assert.ok(two === "species" || two === "neutral" || two === "cheerful", `${times}: ${two}`);
   }
 });
@@ -107,7 +115,14 @@ test("a Trait that takes a Cue silences the Species and the Temperament there", 
   const plain = { ...STOIC, traits: [] };
   const held = { ...STOIC, traits: ["hardy"] };
   const said = new Set<string>();
-  for (let times = 0; times < 30; times++) said.add(phrase("streak", held, times));
+  for (let times = 0; times < 30; times++) said.add(say("streak", held, times));
   for (const text of said) assert.ok(ACCENT.hardy?.phrases.streak?.includes(text), `${text} is not hardy's`);
-  assert.notDeepEqual(phrase("streak", plain, 0), phrase("streak", held, 0));
+  assert.notDeepEqual(say("streak", plain, 0), say("streak", held, 0));
+});
+
+test("phrase says nothing, and never throws, when a held Trait's table opens a Cue it owns no phrases for", () => {
+  const broken: Record<TraitId, Accent> = { watchful: { takes: [], opens: ["branch"], phrases: {} } };
+  const seer = { ...STOIC, traits: ["watchful"] };
+  assert.doesNotThrow(() => phrase("branch", seer, 0, broken));
+  assert.equal(phrase("branch", seer, 0, broken), undefined);
 });

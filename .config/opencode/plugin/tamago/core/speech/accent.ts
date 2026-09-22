@@ -71,6 +71,6 @@ export function accentFor(cue: AnyCue, held: readonly TraitId[], table: Record<T
 }
 
 /** Whether any held Trait opens this Cue. */
-export function opensCue(held: readonly TraitId[], cue: TraitCue): boolean {
-  return held.some((id) => ACCENT[id]?.opens.includes(cue) === true);
+export function opensCue(held: readonly TraitId[], cue: TraitCue, table: Record<TraitId, Accent> = ACCENT): boolean {
+  return held.some((id) => table[id]?.opens.includes(cue) === true);
 }
