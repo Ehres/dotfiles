@@ -8,6 +8,8 @@ import { speakerOf } from "./creature/sheet.ts";
 import { evolution, type StageId } from "./career/stage.ts";
 import { transition } from "./moment/transition.ts";
 import { initialVoice, speak, type Voice } from "./speech/voice.ts";
+import { samePicks, type MilestoneId, type TraitId } from "./career/pick.ts";
+import { TRAITS, type Trait } from "./choices/trait.ts";
 
 /**
  * Everything one OpenCode window holds in memory about the Tamago: the
@@ -22,8 +24,8 @@ export type Window = {
   muted: boolean;
 };
 
-/** What the window must do beyond re-rendering: toast an Evolution, refresh palette titles after a rename, refresh them and say who steps in after a Switch. */
-export type Effect = { type: "evolved"; stage: StageId } | { type: "renamed" } | { type: "switched" };
+/** What the window must do beyond re-rendering: toast an Evolution, refresh palette titles after a rename, refresh them and say who steps in after a Switch, refresh the Draw after a Pick. */
+export type Effect = { type: "evolved"; stage: StageId } | { type: "renamed" } | { type: "switched" } | { type: "chosen" };
 
 export type Step = { window: Window; effects: Effect[] };
 
@@ -73,6 +75,7 @@ export function adopt(window: Window, career: Career, now: number): Step {
   const effects: Effect[] = [];
   const reached = evolution(window.career, career);
   if (window.career.name?.value !== career.name?.value) effects.push({ type: "renamed" });
+  if (!samePicks(window.career.picks, career.picks)) effects.push({ type: "chosen" });
   let next: Window = { ...window, career };
   if (reached !== undefined) {
     effects.push({ type: "evolved", stage: reached });
@@ -133,4 +136,16 @@ export function setMuted(window: Window, muted: boolean): Window {
 /** The pending Delta reached the disk: forget it and show what the disk holds. */
 export function flushed(window: Window, career: Career, now: number): Step {
   return adopt({ ...window, pending: EMPTY_DELTA }, career, now);
+}
+
+/**
+ * A Pick is a Delta, like a rename: shown at once here, flushed with the
+ * counters, and the earliest Pick per Milestone wins across windows. A
+ * Milestone already picked or a Trait this build does not know changes
+ * nothing, so a stale dialog can never overwrite a choice.
+ */
+export function pick(window: Window, milestone: MilestoneId, trait: TraitId, now: number, table: readonly Trait[] = TRAITS): Step {
+  if (window.career.picks[milestone] !== undefined) return { window, effects: [] };
+  if (!table.some((entry) => entry.id === trait)) return { window, effects: [] };
+  return earn(window, { ...EMPTY_DELTA, picks: { [milestone]: { trait, at: now } } }, now);
 }

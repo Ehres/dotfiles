@@ -60,6 +60,8 @@ const tui: TuiPlugin = async (api, options) => {
       else if (effect.type === "switched") {
         palette?.register();
         api.ui.toast({ variant: "info", title: name, message: stepsIn(mirror.career(), defaultName) });
+      } else if (effect.type === "chosen") {
+        // a Pick moved, here or in another window; Task 10 wires the palette's Draw to it
       } else if (effect.stage === "hatchling") api.ui.toast({ variant: "success", title: name, message: reveal(name, mirror.active()) });
       else api.ui.toast({ variant: "success", title: name, message: evolved(name, effect.stage) });
     });

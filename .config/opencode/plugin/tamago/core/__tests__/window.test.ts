@@ -6,7 +6,7 @@ import { speakerOf } from "../creature/sheet.ts";
 import { STAGES, WEIGHTS } from "../career/stage.ts";
 import { EMPTY_DELTA, freshCareer, isEmpty, type Career } from "../career/career.ts";
 import { phrase } from "../speech/register.ts";
-import { adopt, flushed, freshWindow, receive, rename, setMuted, tick, type Window } from "../window.ts";
+import { adopt, flushed, freshWindow, pick, receive, rename, setMuted, tick, type Window } from "../window.ts";
 
 const HURT_MS = MEDIAN.hurtMs;
 const SLEEP_MS = MEDIAN.sleepMs;
@@ -19,6 +19,9 @@ const none = (event: Addressed["event"]): Addressed => ({ target: { type: "none"
 
 /** Career of the reference cat at a given hatch date. */
 const cat = (at: number): Career => ({ ...freshCareer(at), species: "cat" });
+
+/** A fresh Career with no Pick yet, for the Pick tests. */
+const career: Career = cat(T0);
 
 /** A Window with two Sessions already moving, so "every" has someone to reach. */
 function twoSessions(): Window {
@@ -220,4 +223,25 @@ test("the Voice speaks as the Career's Speaker: the phrase of its Species, Tempe
   w = receive(w, to("a", { type: "prompt_sent" }), T0 + 2 + SLEEP_MS + BUBBLE_MS + 10_000).window;
   assert.equal(w.voices.a?.bubble?.cue, "woke");
   assert.equal(w.voices.a?.bubble?.text, phrase("woke", speakerOf(career), 0));
+});
+
+test("a Pick is shown at once, stays pending until the flush, and raises `chosen`", () => {
+  const start = freshWindow(career);
+  const { window: after, effects } = pick(start, "evolution:hatchling", "hardy", 5);
+  assert.deepEqual(after.career.picks, { "evolution:hatchling": { trait: "hardy", at: 5 } });
+  assert.deepEqual(after.pending.picks, { "evolution:hatchling": { trait: "hardy", at: 5 } });
+  assert.ok(effects.some((one) => one.type === "chosen"));
+});
+
+test("a Pick on a Milestone already picked, or of an unknown Trait, changes nothing", () => {
+  const { window: once } = pick(freshWindow(career), "evolution:hatchling", "hardy", 5);
+  assert.equal(pick(once, "evolution:hatchling", "proud", 9).window, once);
+  assert.equal(pick(freshWindow(career), "evolution:hatchling", "nonesuch", 5).window.career.picks["evolution:hatchling"], undefined);
+});
+
+test("a Pick made in another window arrives through adopt and raises `chosen`", () => {
+  const start = freshWindow(career);
+  const elsewhere = { ...career, picks: { "evolution:hatchling": { trait: "proud", at: 3 } } };
+  const { effects } = adopt(start, elsewhere, 10);
+  assert.ok(effects.some((one) => one.type === "chosen"));
 });
