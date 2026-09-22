@@ -4,7 +4,7 @@ import { freshCareer, type Career } from "../career/career.ts";
 import { growth, stage, xp } from "../career/stage.ts";
 import { behavior } from "../creature/behavior.ts";
 import { describe, temperament } from "../creature/character.ts";
-import { sheet, speakerOf, temperamentOf } from "../creature/sheet.ts";
+import { sheet, temperamentOf } from "../creature/sheet.ts";
 import { species } from "../creature/species.ts";
 import { tamago } from "../tamago.ts";
 
@@ -32,7 +32,6 @@ test("a Tamago is every derivation of its Career, each equal to the function it 
   assert.equal(t.temperament, temperamentOf(t.sheet));
   assert.equal(t.temperament, temperament(owner.hatchedAt, owner.species));
   assert.deepEqual(t.behavior, behavior(owner));
-  assert.deepEqual(t.speaker, speakerOf(owner));
 });
 
 test("character and describe", () => {

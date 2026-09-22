@@ -6,7 +6,7 @@ import { traits } from "./choices/trait.ts";
 import { behaviorOf, type Behavior } from "./creature/behavior.ts";
 import { vocation, type Character } from "./creature/character.ts";
 import { SPECIES } from "./creature/catalog.ts";
-import { sheet as sheetOf, temperamentOf, type Sheet, type Speaker, type Temperament } from "./creature/sheet.ts";
+import { sheet as sheetOf, temperamentOf, type Sheet, type Temperament } from "./creature/sheet.ts";
 import { species as speciesOf, type Species } from "./creature/species.ts";
 
 /**
@@ -26,7 +26,6 @@ export type Tamago = {
   temperament: Temperament;
   behavior: Behavior;
   character: Character;
-  speaker: Speaker;
   /** The Traits held, oldest Pick first. */
   traits: TraitId[];
   /** The Draws awaiting a Pick, in Milestone order; the first is the one the palette offers. */
@@ -48,7 +47,6 @@ export function tamago(career: Career, table: readonly Species[] = SPECIES): Tam
     temperament,
     behavior: behaviorOf(sheet),
     character: { temperament, ...(found === undefined ? {} : { vocation: found }) },
-    speaker: { hatchedAt: career.hatchedAt, species: career.species, sheet, traits: held },
     traits: held,
     choices: pending(career),
   };
