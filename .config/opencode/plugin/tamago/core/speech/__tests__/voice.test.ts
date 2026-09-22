@@ -47,6 +47,13 @@ test("waking from sleep speaks", () => {
   assert.equal(cueOf(voice), "woke");
 });
 
+test("waking from sleep still speaks woke over a pending Draw", () => {
+  const asleep: Session = { activity: "sleeping", since: 0, busy: false };
+  const awake: Session = { activity: "idle", since: 5, busy: false };
+  const voice = speak(initialVoice(), { type: "session_idle" }, asleep, awake, 5, STOIC, MEDIAN, true);
+  assert.equal(voice.bubble?.cue, "woke");
+});
+
 test("going idle after LONG_WORK_MS of busy speaks, a short job does not", () => {
   const long = replay([
     [{ type: "prompt_sent" }, 0],

@@ -61,7 +61,7 @@ function listen(
       break;
     case "session_idle":
       if (before.busy && next.busySince !== undefined && now - next.busySince >= behavior.longWorkMs) cue = "long_work";
-      else if (awaits) cue = "choice";
+      else if (awaits && before.activity !== "sleeping") cue = "choice";
       break;
     case "tool_failed": {
       const failures = [...next.failures.filter((at) => now - at < STREAK_MS), now];
