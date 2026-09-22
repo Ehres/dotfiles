@@ -52,9 +52,21 @@ test("a Trait with several needs waits for all of them", () => {
   assert.deepEqual(eligible(all, table), ["stoic", "pirate", "monocle"]);
 });
 
-test("the shipped table is empty for now", () => {
-  assert.deepEqual(TRAITS, []);
-  const career = withPicks({ m1: { trait: "hat", at: 1 } });
-  assert.deepEqual(traits(career), []);
-  assert.deepEqual(eligible(career), []);
+test("the shipped Traits are three families of two, the child needing its parent", () => {
+  assert.deepEqual(
+    TRAITS.map((one) => [one.id, [...one.needs]]),
+    [
+      ["hardy", []],
+      ["unshaken", ["hardy"]],
+      ["proud", []],
+      ["boastful", ["proud"]],
+      ["watchful", []],
+      ["restless", ["watchful"]],
+    ],
+  );
+});
+
+test("only the three parents are eligible before any Pick", () => {
+  const career = withPicks({});
+  assert.deepEqual(eligible(career), ["hardy", "proud", "watchful"]);
 });

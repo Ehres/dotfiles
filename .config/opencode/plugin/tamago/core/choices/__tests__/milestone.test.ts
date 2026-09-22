@@ -66,9 +66,17 @@ test("reached is empty on a fresh egg and on an empty table", () => {
   assert.deepEqual(reached(counters({ sessions: 10_000 }), []), []);
 });
 
-test("the shipped table is empty for now", () => {
-  assert.deepEqual(MILESTONES, []);
-  assert.deepEqual(reached(counters({ sessions: 10_000 })), []);
+test("the shipped Milestones are the four Evolutions, in Stage order", () => {
+  assert.deepEqual(
+    MILESTONES.map((one) => one.id),
+    ["evolution:hatchling", "evolution:young", "evolution:adult", "evolution:elder"],
+  );
+  assert.deepEqual(MILESTONES.map((one) => ("stage" in one ? one.stage : undefined)), ["hatchling", "young", "adult", "elder"]);
+});
+
+test("an egg has reached nothing; an elder has reached all four", () => {
+  assert.deepEqual(reached(counters({})), []);
+  assert.deepEqual(reached(counters({ sessions: 10_000 })).length, 4);
 });
 
 test("a stage Milestone comes later in raw xp for a rarer species", () => {

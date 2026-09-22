@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { DRAW_SIZE, draw, pending } from "../draw.ts";
 import { seed } from "../../creature/random.ts";
-import type { Milestone } from "../milestone.ts";
+import { MILESTONES, type Milestone } from "../milestone.ts";
 import { freshCareer, type Career } from "../../career/career.ts";
 import { eligible, type Trait } from "../trait.ts";
 
@@ -87,6 +87,24 @@ test("a Milestone whose Draw is empty is settled, not pending", () => {
   assert.deepEqual(pending(holdsIt, milestones, one), []);
 });
 
-test("with the shipped tables nothing is ever pending", () => {
-  assert.deepEqual(pending(career({ sessions: 100_000, prompts: 100_000 })), []);
+test("with the shipped tables, a heavily progressed egg gets every Evolution pending with a non-empty Draw", () => {
+  const result = pending(career({ sessions: 100_000, prompts: 100_000 }));
+  assert.deepEqual(
+    result.map((entry) => entry.milestone.id),
+    MILESTONES.map((one) => one.id),
+  );
+  for (const entry of result) assert.ok(entry.draw.length > 0, `${entry.milestone.id} offered an empty Draw`);
+});
+
+test("every line of four Picks keeps at least two candidates in every Draw", () => {
+  const ids = MILESTONES.map((one) => one.id);
+  const walk = (one: Career, depth: number): void => {
+    if (depth === ids.length) return;
+    const id = ids[depth];
+    if (id === undefined) return;
+    const offered = draw(one, id);
+    assert.ok(offered.length >= 2, `${id} after ${JSON.stringify(one.picks)} offered ${offered.length}`);
+    for (const trait of offered) walk({ ...one, picks: { ...one.picks, [id]: { trait, at: depth + 1 } } }, depth + 1);
+  };
+  walk(career(), 0);
 });

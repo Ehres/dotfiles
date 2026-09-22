@@ -12,7 +12,14 @@ export type Trait = {
  * Trait does on its surface (phrases, Cue, Sprite mark) belongs to that
  * surface's module. Empty until the first real Trait.
  */
-export const TRAITS: readonly Trait[] = [];
+export const TRAITS: readonly Trait[] = [
+  { id: "hardy", needs: [] },
+  { id: "unshaken", needs: ["hardy"] },
+  { id: "proud", needs: [] },
+  { id: "boastful", needs: ["proud"] },
+  { id: "watchful", needs: [] },
+  { id: "restless", needs: ["watchful"] },
+];
 
 /** Traits the Career holds, by Pick `at` then trait id, each once. A Pick naming an unknown Trait is ignored, never an error. */
 export function traits(career: Career, table: readonly Trait[] = TRAITS): TraitId[] {

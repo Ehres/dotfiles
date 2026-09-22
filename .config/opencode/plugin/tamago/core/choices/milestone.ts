@@ -16,7 +16,12 @@ export type Milestone =
  * are offered in. Empty until the first real Milestone; ids will follow
  * `evolution:<stage>` and `<measure>:<min>`, but nothing depends on it.
  */
-export const MILESTONES: readonly Milestone[] = [];
+export const MILESTONES: readonly Milestone[] = [
+  { id: "evolution:hatchling", stage: "hatchling" },
+  { id: "evolution:young", stage: "young" },
+  { id: "evolution:adult", stage: "adult" },
+  { id: "evolution:elder", stage: "elder" },
+];
 
 /** The value of a Measure: `tools` sums the four kinds, `xp` follows Growth so a Milestone comes at the same moment of every Species' life. */
 export function measure(paced: Paced, of: Measure): number {
