@@ -16,7 +16,7 @@ import type { Mirror } from "./mirror.ts";
 
 export type Dialogs = { showCard(): void; askName(): void; askHatch(): void; showRoster(): void; askChoice(): void };
 
-/** The four dialogs of the plugin. Each root posts the theme so no view threads it down. */
+/** The five dialogs of the plugin. Each root posts the theme so no view threads it down. */
 export function createDialogs(deps: {
   api: TuiPluginApi;
   store: Store;

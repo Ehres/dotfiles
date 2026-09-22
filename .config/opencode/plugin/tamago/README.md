@@ -126,8 +126,9 @@ two in a few, where the top line overflows by one column while it shows.
 At a milestone, today one per stage from `hatchling` on, the creature offers a
 draw of up to three traits and `choose a trait` keeps one; its description
 says how many choices are waiting, and a `★` after the Name is the same
-reminder in the sidebar and on the home screen. A trait is never a penalty:
-each one marks the sprite with a character, and either speaks cues the
+reminder in the sidebar and on the home screen. Like the heart, the badge
+takes one column in most terminals and two in a few. A trait is never a
+penalty: each one marks the sprite with a character, and either speaks cues the
 creature already had, so the species and the temperament stay quiet there, or
 opens a cue nothing else can speak. Traits held show on the card.
 

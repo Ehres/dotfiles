@@ -42,9 +42,10 @@ function domain(cue: AnyCue, times: number): string {
  * Seeded from the hatch date, the Cue and the count: every window agrees for
  * the same occurrence of the Cue, nothing is stored, and one hears a
  * different phrase from one time to the next. On a Cue a held Trait takes,
- * that Trait always speaks and the Register stays silent. A Cue a Trait
- * opens is spoken by that Trait alone: it never reaches the Register.
- * Otherwise the Register first, at REGISTER shares; then, for the
+ * that Trait speaks and the Register stays silent — unless its table entry
+ * for that Cue carries no phrases, when the normal draw takes over instead.
+ * A Cue a Trait opens is spoken by that Trait alone: it never reaches the
+ * Register. Otherwise the Register first, at REGISTER shares; then, for the
  * Temperament, which of the four at the weight of its Stat; then a phrase,
  * uniform. At `hatched` the Species always speaks: that is where it shows.
  */
