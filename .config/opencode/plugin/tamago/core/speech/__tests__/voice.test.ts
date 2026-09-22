@@ -16,7 +16,7 @@ const LONG_WORK_MS = MEDIAN.longWorkMs;
 /** A Sheet at the median everywhere but where `patch` says. */
 const sheetOf = (patch: Partial<Sheet>): Sheet => ({ cheerful: 0, sarcastic: 0, stoic: 0, dreamy: 0, energy: 5, chatter: 5, sensitivity: 5, patience: 5, ...patch });
 /** A stoic cat, the default Speaker of these tests. */
-const STOIC: Speaker = { hatchedAt: 1, species: "cat", sheet: sheetOf({ stoic: 8 }) };
+const STOIC: Speaker = { hatchedAt: 1, species: "cat", sheet: sheetOf({ stoic: 8 }), traits: [] };
 
 /** Runs events through transition and speak together, like core/window.ts does. */
 function replay(

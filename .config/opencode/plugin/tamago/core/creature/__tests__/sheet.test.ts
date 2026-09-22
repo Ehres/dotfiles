@@ -20,6 +20,8 @@ import { freshCareer } from "../../career/career.ts";
 
 /** Ten thousand hatch dates a second apart, the range the Temperament test always used. */
 const DATES = Array.from({ length: 10_000 }, (_, i) => 1_789_000_000_000 + i * 1_000);
+/** An owl, so a Species that weighs on the Sheet is exercised throughout this file. */
+const career = { ...freshCareer(1_789_113_932_488), species: "owl" };
 
 test("the scale and the bounds are what the spec says", () => {
   assert.deepEqual(SCALE, { min: 0, max: 10, median: 5, high: 6 });
@@ -119,10 +121,15 @@ test("factor halves at min, is 1 at median, doubles at max, and grows", () => {
 });
 
 test("speakerOf derives the Speaker of a Career: its hatch date, its Species and its Sheet with the Species' Modifiers", () => {
-  const career = { ...freshCareer(1_789_113_932_488), species: "owl" };
   const speaker = speakerOf(career);
   assert.equal(speaker.hatchedAt, career.hatchedAt);
   assert.equal(speaker.species, "owl");
   assert.deepEqual(speaker.sheet, sheet(career.hatchedAt, "owl"));
   assert.notDeepEqual(speaker.sheet, sheet(career.hatchedAt, "cat"), "the owl weighs on the Sheet");
+});
+
+test("the Speaker carries the held Traits, so the Voice never reads a Career", () => {
+  const held = speakerOf({ ...career, picks: { "evolution:hatchling": { trait: "proud", at: 1 } } });
+  assert.deepEqual(held.traits, ["proud"]);
+  assert.deepEqual(speakerOf(career).traits, []);
 });

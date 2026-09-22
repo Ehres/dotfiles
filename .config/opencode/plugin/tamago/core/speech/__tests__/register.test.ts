@@ -9,8 +9,8 @@ import type { Cue } from "../cue.ts";
 /** A Sheet at the median everywhere but where `patch` says. */
 const sheetOf = (patch: Partial<Sheet>): Sheet => ({ cheerful: 0, sarcastic: 0, stoic: 0, dreamy: 0, energy: 5, chatter: 5, sensitivity: 5, patience: 5, ...patch });
 /** A stoic cat, the default Speaker of these tests. */
-const STOIC: Speaker = { hatchedAt: 1, species: "cat", sheet: sheetOf({ stoic: 8 }) };
-const DRAGON: Speaker = { hatchedAt: 3, species: "dragon", sheet: sheetOf({ cheerful: 7 }) };
+const STOIC: Speaker = { hatchedAt: 1, species: "cat", sheet: sheetOf({ stoic: 8 }), traits: [] };
+const DRAGON: Speaker = { hatchedAt: 3, species: "dragon", sheet: sheetOf({ cheerful: 7 }), traits: [] };
 
 /** Which Register a text of `cue` belongs to, for a Speaker whose pools are pairwise disjoint. */
 function registerOf(text: string, cue: Cue, species: string): "species" | Temperament | "neutral" | undefined {
@@ -57,7 +57,7 @@ test("over a thousand occurrences the Species speaks about 70 %, the Temperament
 
 test("among the Temperament's phrases, each Temperament speaks at the weight of its Stat", () => {
   assertDisjoint("compacted", "cat");
-  const mixed: Speaker = { hatchedAt: 9, species: "cat", sheet: sheetOf({ sarcastic: 9, dreamy: 3 }) };
+  const mixed: Speaker = { hatchedAt: 9, species: "cat", sheet: sheetOf({ sarcastic: 9, dreamy: 3 }), traits: [] };
   const counts: Record<string, number> = {};
   for (let times = 0; times < 4000; times++) {
     const register = registerOf(phrase("compacted", mixed, times), "compacted", "cat");
@@ -83,7 +83,7 @@ test("at the hatch the Species always speaks, and the phrase still varies", () =
 
 test("a Species this build does not know speaks with its Temperament where the Species would", () => {
   assertDisjoint("compacted", "cat");
-  const unknown: Speaker = { hatchedAt: 5, species: "nope", sheet: sheetOf({ dreamy: 8 }) };
+  const unknown: Speaker = { hatchedAt: 5, species: "nope", sheet: sheetOf({ dreamy: 8 }), traits: [] };
   for (let times = 0; times < 200; times++) {
     const register = registerOf(phrase("compacted", unknown, times), "compacted", "cat");
     assert.ok(register === "dreamy" || register === "neutral", `${times}: ${register}`);
@@ -92,8 +92,8 @@ test("a Species this build does not know speaks with its Temperament where the S
 
 test("a Temperament Stat pushed below zero by a Modifier weighs nothing, and a Sheet with every Temperament at zero speaks its Temperament", () => {
   assertDisjoint("compacted", "cat");
-  const negative: Speaker = { hatchedAt: 11, species: "cat", sheet: sheetOf({ stoic: 6, cheerful: -1 }) };
-  const flat: Speaker = { hatchedAt: 12, species: "cat", sheet: sheetOf({}) };
+  const negative: Speaker = { hatchedAt: 11, species: "cat", sheet: sheetOf({ stoic: 6, cheerful: -1 }), traits: [] };
+  const flat: Speaker = { hatchedAt: 12, species: "cat", sheet: sheetOf({}), traits: [] };
   for (let times = 0; times < 300; times++) {
     const one = registerOf(phrase("compacted", negative, times), "compacted", "cat");
     assert.ok(one === "species" || one === "neutral" || one === "stoic", `${times}: ${one}`);

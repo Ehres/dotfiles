@@ -1,5 +1,8 @@
 import type { Career } from "./career/career.ts";
+import type { TraitId } from "./career/pick.ts";
 import { growth, stage, xp, type StageId } from "./career/stage.ts";
+import { pending, type Pending } from "./choices/draw.ts";
+import { traits } from "./choices/trait.ts";
 import { behaviorOf, type Behavior } from "./creature/behavior.ts";
 import { vocation, type Character } from "./creature/character.ts";
 import { SPECIES } from "./creature/catalog.ts";
@@ -24,12 +27,17 @@ export type Tamago = {
   behavior: Behavior;
   character: Character;
   speaker: Speaker;
+  /** The Traits held, oldest Pick first. */
+  traits: TraitId[];
+  /** The Draws awaiting a Pick, in Milestone order; the first is the one the palette offers. */
+  choices: Pending[];
 };
 
 export function tamago(career: Career, table: readonly Species[] = SPECIES): Tamago {
   const sheet = sheetOf(career.hatchedAt, career.species, table);
   const temperament = temperamentOf(sheet);
   const found = vocation(career);
+  const held = traits(career);
   return {
     career,
     species: speciesOf(career.species, table),
@@ -40,6 +48,8 @@ export function tamago(career: Career, table: readonly Species[] = SPECIES): Tam
     temperament,
     behavior: behaviorOf(sheet),
     character: { temperament, ...(found === undefined ? {} : { vocation: found }) },
-    speaker: { hatchedAt: career.hatchedAt, species: career.species, sheet },
+    speaker: { hatchedAt: career.hatchedAt, species: career.species, sheet, traits: held },
+    traits: held,
+    choices: pending(career),
   };
 }

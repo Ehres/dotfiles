@@ -51,3 +51,12 @@ test("an unknown Species reads as the reference: no Modifier, common, pace 1", (
   assert.deepEqual(t.sheet, sheet(owner.hatchedAt, "cat"));
   assert.equal(t.growth, t.xp);
 });
+
+test("a Tamago carries the Traits it holds and the Draws awaiting a Pick", () => {
+  const fresh = tamago(owner);
+  assert.deepEqual(fresh.traits, []);
+  assert.deepEqual(fresh.choices.map((one) => one.milestone.id), ["evolution:hatchling", "evolution:young", "evolution:adult"]);
+  const kept = tamago({ ...owner, picks: { "evolution:hatchling": { trait: "hardy", at: 1 } } });
+  assert.deepEqual(kept.traits, ["hardy"]);
+  assert.deepEqual(kept.choices.map((one) => one.milestone.id), ["evolution:young", "evolution:adult"]);
+});
