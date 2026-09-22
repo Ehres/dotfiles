@@ -62,20 +62,26 @@ seconds when something notable happens in the session on screen. Phrases are
 local templates: no model, no network, and nothing read from prompts,
 messages, todo texts or diffs, only their counts.
 
-| Cue          | When                                            |
-| ------------ | ----------------------------------------------- |
-| `permission` | OpenCode asks for a permission                  |
-| `granted`    | you allow the permission it just asked about    |
-| `denied`     | you refuse the permission it just asked about   |
-| `woke`       | the creature wakes from sleep                   |
-| `long_work`  | the session goes idle after 5 min of work       |
-| `big_diff`   | the session diff reaches 10 files, once         |
-| `streak`     | 3 tools fail within 30 s                        |
-| `compacted`  | the session is compacted                        |
-| `retried`    | OpenCode retries a step                         |
-| `todos_done` | every todo of the session is completed          |
-| `evolved`    | the creature reaches a new stage                |
-| `hatched`    | the egg hatches: the species is revealed        |
+| Cue          | When                                          |
+| ------------ | --------------------------------------------- |
+| `permission` | OpenCode asks for a permission                |
+| `granted`    | you allow the permission it just asked about  |
+| `denied`     | you refuse the permission it just asked about |
+| `woke`       | the creature wakes from sleep                 |
+| `long_work`  | the session goes idle after 5 min of work     |
+| `big_diff`   | the session diff reaches 10 files, once       |
+| `streak`     | 3 tools fail within 30 s                      |
+| `compacted`  | the session is compacted                      |
+| `retried`    | OpenCode retries a step                       |
+| `todos_done` | every todo of the session is completed        |
+| `evolved`    | the creature reaches a new stage              |
+| `hatched`    | the egg hatches: the species is revealed      |
+| `choice`     | a choice awaits a pick                        |
+
+Three more cues exist beyond this table, and are heard only by a creature
+holding the trait that opens them, nobody else ever speaks them: `branch`
+when the repository's branch changes, `worktree` when a worktree becomes
+ready, `stir` when files change outside the session.
 
 At most one bubble every 10 s; a rarer cue (an evolution, a streak) may
 interrupt a common one. `granted` and `denied` only answer a `permission` the
