@@ -10,6 +10,7 @@ import { transition } from "./moment/transition.ts";
 import { initialVoice, speak, type Voice } from "./speech/voice.ts";
 import { samePicks, type MilestoneId, type TraitId } from "./career/pick.ts";
 import { TRAITS, type Trait } from "./choices/trait.ts";
+import { pending } from "./choices/draw.ts";
 
 /**
  * Everything one OpenCode window holds in memory about the Tamago: the
@@ -37,6 +38,7 @@ export function freshWindow(career: Career, muted = false): Window {
 function move(window: Window, ids: readonly string[], event: TamagoEvent, now: number): Window {
   if (ids.length === 0) return window;
   const conduct = behavior(window.career);
+  const awaits = pending(window.career).length > 0;
   const before = window.sessions;
   const after: Record<string, Session> = { ...before };
   let moved = false;
@@ -53,7 +55,7 @@ function move(window: Window, ids: readonly string[], event: TamagoEvent, now: n
     let spoke = false;
     for (const id of ids) {
       const voice = voices[id] ?? initialVoice();
-      const heard = speak(voice, event, before[id] ?? initialSession(now), after[id] ?? initialSession(now), now, speaker, conduct);
+      const heard = speak(voice, event, before[id] ?? initialSession(now), after[id] ?? initialSession(now), now, speaker, conduct, awaits);
       next[id] = heard;
       if (heard !== voice) spoke = true;
     }

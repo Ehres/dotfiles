@@ -245,3 +245,11 @@ test("a Pick made in another window arrives through adopt and raises `chosen`", 
   const { effects } = adopt(start, elsewhere, 10);
   assert.ok(effects.some((one) => one.type === "chosen"));
 });
+
+test("the Window tells the Voice when a Draw awaits a Pick", () => {
+  const grown = { ...career, sessions: 10_000 }; // past every Milestone, so Draws are pending
+  const w = freshWindow(grown);
+  const busy = receive(w, { target: { type: "session", id: "a" }, event: { type: "session_busy" } }, 0).window;
+  const calm = receive(busy, { target: { type: "session", id: "a" }, event: { type: "session_idle" } }, 1_000).window;
+  assert.equal(calm.voices.a?.bubble?.cue, "choice");
+});

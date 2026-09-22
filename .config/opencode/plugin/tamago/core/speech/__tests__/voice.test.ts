@@ -237,3 +237,23 @@ test("speak says the phrase of the Cue's count: the first time phrase 0, the nex
   const second = replay([[{ type: "session_compacted" }, BUBBLE_MS + QUIET_MS]], first);
   assert.equal(second.voice.bubble?.text, phrase("compacted", STOIC, 1));
 });
+
+test("a pending Draw makes the Tamago speak at the first calm, not during the work", () => {
+  const busy = { ...initialSession(0), busy: true, activity: "working" as const };
+  const calm = { ...initialSession(0), busy: false, activity: "idle" as const };
+  const quiet = speak(initialVoice(), { type: "session_idle" }, busy, calm, 1_000, STOIC, MEDIAN, false);
+  assert.equal(quiet.bubble, undefined);
+  const said = speak(initialVoice(), { type: "session_idle" }, busy, calm, 1_000, STOIC, MEDIAN, true);
+  assert.equal(said.bubble?.cue, "choice");
+});
+
+test("the choice reminder repeats at most once an hour", () => {
+  const busy = { ...initialSession(0), busy: true, activity: "working" as const };
+  const calm = { ...initialSession(0), busy: false, activity: "idle" as const };
+  const first = speak(initialVoice(), { type: "session_idle" }, busy, calm, 1_000, STOIC, MEDIAN, true);
+  const soon = speak(first, { type: "session_idle" }, busy, calm, 1_000 + 600_000, STOIC, MEDIAN, true);
+  assert.equal(soon.bubble?.cue, first.bubble?.cue);
+  assert.equal(soon.spoken.choice?.times, 1);
+  const later = speak(first, { type: "session_idle" }, busy, calm, 1_000 + 3_600_001, STOIC, MEDIAN, true);
+  assert.equal(later.spoken.choice?.times, 2);
+});

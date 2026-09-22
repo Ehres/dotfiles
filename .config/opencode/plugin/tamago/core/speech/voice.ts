@@ -44,6 +44,7 @@ function listen(
   after: Session,
   now: number,
   behavior: Behavior,
+  awaits: boolean,
 ): { voice: Voice; cue?: Cue } {
   let next = voice;
   let cue: Cue | undefined;
@@ -60,6 +61,7 @@ function listen(
       break;
     case "session_idle":
       if (before.busy && next.busySince !== undefined && now - next.busySince >= behavior.longWorkMs) cue = "long_work";
+      else if (awaits) cue = "choice";
       break;
     case "tool_failed": {
       const failures = [...next.failures.filter((at) => now - at < STREAK_MS), now];
@@ -108,11 +110,13 @@ export function speak(
   now: number,
   speaker: Speaker,
   behavior: Behavior = MEDIAN,
+  /** Whether a Draw awaits a Pick. The Voice cannot see the Career, so the Window computes it. */
+  awaits = false,
 ): Voice {
   if (event.type === "tick") {
     return voice.bubble !== undefined && voice.bubble.until <= now ? { ...voice, bubble: undefined } : voice;
   }
-  const { voice: next, cue } = listen(voice, event, before, after, now, behavior);
+  const { voice: next, cue } = listen(voice, event, before, after, now, behavior, awaits);
   if (cue === undefined) return next;
   const { priority, cooldown } = CUES[cue];
   const said = next.spoken[cue];
