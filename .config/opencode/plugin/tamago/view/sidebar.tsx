@@ -2,10 +2,11 @@
 import type { TuiThemeCurrent } from "@opencode-ai/plugin/tui";
 import type { RGBA } from "@opentui/core";
 import type { JSX } from "@opentui/solid";
-import { createMemo } from "solid-js";
+import { Show, createMemo } from "solid-js";
 import { bubbleBorders } from "../core/speech/bubble.ts";
 import { fmt } from "../core/appearance/format.ts";
 import { MOOD } from "../core/text/mood.ts";
+import { CHOICE_BADGE } from "../core/text/traits.ts";
 import type { Activity, Session } from "../core/moment/session.ts";
 import type { Tamago } from "../core/tamago.ts";
 import type { Bubble } from "../core/speech/voice.ts";
@@ -58,6 +59,9 @@ export function SidebarView(props: {
       >
         <text fg={theme.current.text}>
           <b>{props.name}</b>
+          <Show when={props.tamago.choices.length > 0}>
+            <span style={{ fg: theme.current.warning }}> {CHOICE_BADGE}</span>
+          </Show>
         </text>
         <text fg={theme.current.textMuted}>
           {props.tamago.stage} · {fmt(props.tamago.xp)} xp

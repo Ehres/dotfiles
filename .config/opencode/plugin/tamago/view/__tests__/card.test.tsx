@@ -34,3 +34,14 @@ test("the card of an egg hides the species and the stats", async () => {
   expect(shown).toContain("hatched today");
   expect(shown).toMatchSnapshot();
 });
+
+test("the card lists the Traits held, with their marks", async () => {
+  const kept = { ...OWNER, picks: { "evolution:hatchling": { trait: "hardy", at: 1 } } };
+  const shown = await frame(() => (
+    <ThemeProvider theme={TUI_THEME}>
+      <CardView name="Tamago" tamago={tamago(kept)} clock={0} heart={false} now={OWNER.hatchedAt} />
+    </ThemeProvider>
+  ));
+  expect(shown).toContain("Hardy");
+  expect(shown).toMatchSnapshot();
+});

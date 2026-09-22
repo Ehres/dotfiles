@@ -2,7 +2,7 @@
 
 exports[`idle adult: sprite, name, stage and xp, mood, footer 1`] = `
 "  /\\   /\\
-  ( o o )    Tamago
+  ( o o )    Tamago ★
  /| ^^^ |\\   adult · 9,166 xp
   |_____|    chilling
   /|   |\\
@@ -29,9 +29,21 @@ exports[`a Bubble sits above the sprite, the heart replaces the eyes 1`] = `
 ( May I? )
  '---o--'
   /\\   /\\ ♥
-  ( ^ ^ )    Tamago
+  ( ^ ^ )    Tamago ★
  /| ^^^ |\\   adult · 9,166 xp
   |_____|    needs you
+  /|   |\\
+
+~/projects/dotfiles:master
+
+• OpenCode 1.18.31"
+`;
+
+exports[`a pending Draw puts a badge after the name; none without one 1`] = `
+"  \\|/ \\|/
+  ( o o )    Tamago ★
+ /|~^^^~|\\   elder · 108,866 xp
+  |_____|    chilling
   /|   |\\
 
 ~/projects/dotfiles:master

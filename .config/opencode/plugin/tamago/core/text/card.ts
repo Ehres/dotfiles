@@ -2,6 +2,8 @@ import { next } from "../career/stage.ts";
 import { BEHAVIOR_STATS, SCALE } from "../creature/sheet.ts";
 import type { Tamago } from "../tamago.ts";
 import { bar, fmt } from "../appearance/format.ts";
+import { MARK } from "../appearance/marks.ts";
+import { TRAIT_TEXT } from "./traits.ts";
 
 export const DAY_MS = 86_400_000;
 export const BAR_WIDTH = 20;
@@ -49,4 +51,9 @@ export function sheetLines(tamago: Tamago): string[] {
   return BEHAVIOR_STATS.map(
     (stat) => `${stat.padEnd(LABEL_WIDTH)} ${bar((tamago.sheet[stat] - SCALE.min) / (SCALE.max - SCALE.min), STAT_BAR_WIDTH)} ${tamago.sheet[stat]}`,
   );
+}
+
+/** One line per held Trait: its mark and its title. Empty when none is held, so the card shows nothing. */
+export function traitLines(tamago: Tamago): string[] {
+  return tamago.traits.map((id) => `${MARK[id] ?? " "} ${TRAIT_TEXT[id]?.title ?? id}`);
 }

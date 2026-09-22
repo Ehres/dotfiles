@@ -2,6 +2,7 @@
 import { expect, test } from "bun:test";
 import { tamago } from "../../core/tamago.ts";
 import type { Bubble } from "../../core/speech/voice.ts";
+import { CHOICE_BADGE } from "../../core/text/traits.ts";
 import { SidebarView } from "../sidebar.tsx";
 import { ThemeProvider } from "../theme.tsx";
 import { EGG, FOOTER, OWNER, session } from "./fixtures.ts";
@@ -62,5 +63,16 @@ test("a Bubble sits above the sprite, the heart replaces the eyes", async () => 
   expect(shown).toContain("( May I? )");
   expect(shown).toContain("♥");
   expect(shown).toContain("needs you");
+  expect(shown).toMatchSnapshot();
+});
+
+test("a pending Draw puts a badge after the name; none without one", async () => {
+  const waiting = { ...OWNER, sessions: 10_000 };
+  const shown = await frame(() => (
+    <ThemeProvider theme={TUI_THEME}>
+      <SidebarView name="Tamago" session={session("idle")} tamago={tamago(waiting)} clock={0} footer={FOOTER} heart={false} />
+    </ThemeProvider>
+  ));
+  expect(shown).toContain(`Tamago ${CHOICE_BADGE}`);
   expect(shown).toMatchSnapshot();
 });

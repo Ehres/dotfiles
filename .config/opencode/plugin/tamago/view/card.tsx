@@ -1,7 +1,7 @@
 /** @jsxImportSource @opentui/solid */
 import type { JSX } from "@opentui/solid";
-import { Index } from "solid-js";
-import { age, progress, sheetLines, speciesLine } from "../core/text/card.ts";
+import { Index, Show, createMemo } from "solid-js";
+import { age, progress, sheetLines, speciesLine, traitLines } from "../core/text/card.ts";
 import { fmt } from "../core/appearance/format.ts";
 import { describe } from "../core/creature/character.ts";
 import type { Tamago } from "../core/tamago.ts";
@@ -18,6 +18,7 @@ import { useTheme } from "./theme.tsx";
  */
 export function CardBody(props: { tamago: Tamago; clock: number; heart: boolean; now: number }): JSX.Element {
   const theme = useTheme();
+  const traits = createMemo(() => traitLines(props.tamago));
   return (
     <box flexDirection="column" gap={1}>
       <box flexDirection="row" gap={2}>
@@ -31,6 +32,11 @@ export function CardBody(props: { tamago: Tamago; clock: number; heart: boolean;
         </box>
       </box>
       <text fg={theme.current.textMuted}>{describe(props.tamago.character)}</text>
+      <Show when={traits().length > 0}>
+        <box flexDirection="column">
+          <Index each={traits()}>{(line) => <text fg={theme.current.textMuted}>{line()}</text>}</Index>
+        </box>
+      </Show>
       <box flexDirection="column">
         <Index each={sheetLines(props.tamago)}>{(line) => <text fg={theme.current.textMuted}>{line()}</text>}</Index>
       </box>

@@ -3,6 +3,7 @@ import type { RGBA } from "@opentui/core";
 import type { JSX } from "@opentui/solid";
 import { Index, createMemo } from "solid-js";
 import { frameAt, heartFrame, type Frame } from "../core/appearance/sprites.ts";
+import { markOf } from "../core/appearance/marks.ts";
 import { frameIndex } from "../core/moment/cadence.ts";
 import type { Activity } from "../core/moment/session.ts";
 import type { Tamago } from "../core/tamago.ts";
@@ -16,9 +17,10 @@ import type { Tamago } from "../core/tamago.ts";
 export function Sprite(props: { tamago: Tamago; activity: Activity; clock: number; heart: boolean; color: RGBA }): JSX.Element {
   const lines = createMemo((): Frame => {
     const t = props.tamago;
+    const mark = markOf(t.traits);
     return props.heart
-      ? heartFrame(t.species.id, t.stage, t.temperament)
-      : frameAt(t.species.id, t.stage, props.activity, frameIndex(props.activity, props.clock, t.behavior));
+      ? heartFrame(t.species.id, t.stage, t.temperament, mark)
+      : frameAt(t.species.id, t.stage, props.activity, frameIndex(props.activity, props.clock, t.behavior), mark);
   });
   return (
     <box flexDirection="column" flexShrink={0}>

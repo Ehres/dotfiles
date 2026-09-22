@@ -34,3 +34,24 @@ exports[`the card of an egg hides the species and the stats 1`] = `
 
   [--------------------] 0 / 200 xp → hatchling"
 `;
+
+exports[`the card lists the Traits held, with their marks 1`] = `
+"  Tamago                                               esc
+
+  + /\\   /\\
+    ( o o )    cat · common
+   /| ^^^ |\\   adult · 9,166 xp
+    |_____|    hatched today
+    /|   |\\
+
+  cheerful · bold shell
+
+  + Hardy
+
+  energy      [#####-----] 5
+  chatter     [#########-] 9
+  sensitivity [#---------] 1
+  patience    [######----] 6
+
+  [#####---------------] 9,166 / 20,000 xp → elder"
+`;

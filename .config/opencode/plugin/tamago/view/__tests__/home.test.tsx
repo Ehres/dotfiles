@@ -1,6 +1,7 @@
 /** @jsxImportSource @opentui/solid */
 import { expect, test } from "bun:test";
 import { tamago } from "../../core/tamago.ts";
+import { CHOICE_BADGE } from "../../core/text/traits.ts";
 import { HomeView } from "../home.tsx";
 import { ThemeProvider } from "../theme.tsx";
 import { OWNER } from "./fixtures.ts";
@@ -16,7 +17,7 @@ test("home: sprite left, name and stage, xp bar", async () => {
     ),
     HOME,
   );
-  expect(shown).toContain("Tamago · adult");
+  expect(shown).toContain(`Tamago ${CHOICE_BADGE} · adult`);
   expect(shown).toContain("9,166 / 20,000 xp → elder");
   expect(shown).toMatchSnapshot();
 });
