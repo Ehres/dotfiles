@@ -2,11 +2,12 @@ import { MEDIAN, type Behavior } from "../creature/behavior.ts";
 import type { Speaker } from "../creature/sheet.ts";
 import type { TamagoEvent } from "../moment/events.ts";
 import type { Session } from "../moment/session.ts";
-import { CUES, type Cue } from "./cue.ts";
+import { opensCue } from "./accent.ts";
+import { tuningOf, type AnyCue } from "./cue.ts";
 import { phrase } from "./register.ts";
 
 /** The phrase shown above the sprite for one Cue, until `until`. */
-export type Bubble = { cue: Cue; text: string; since: number; until: number };
+export type Bubble = { cue: AnyCue; text: string; since: number; until: number };
 
 /** Short memory of one Session's speech. Forgotten with the Session. */
 export type Voice = {
@@ -16,7 +17,7 @@ export type Voice = {
   /** When the Tamago last voiced "May I?" and is still waiting for the answer. */
   asked?: number;
   /** Times each Cue was spoken, for the seed of the next phrase and for cooldowns. */
-  spoken: Partial<Record<Cue, { at: number; times: number }>>;
+  spoken: Partial<Record<AnyCue, { at: number; times: number }>>;
   /** Timestamps of recent tool_failed, pruned to STREAK_MS. */
   failures: number[];
   /** When the OpenCode session became busy, for long_work. */
@@ -43,11 +44,12 @@ function listen(
   before: Session,
   after: Session,
   now: number,
+  speaker: Speaker,
   behavior: Behavior,
   awaits: boolean,
-): { voice: Voice; cue?: Cue } {
+): { voice: Voice; cue?: AnyCue } {
   let next = voice;
-  let cue: Cue | undefined;
+  let cue: AnyCue | undefined;
   if (!before.busy && after.busy) next = { ...next, busySince: now };
   switch (event.type) {
     case "permission_asked":
@@ -87,6 +89,16 @@ function listen(
     case "evolved":
       cue = event.stage === "hatchling" ? "hatched" : "evolved";
       break;
+    case "branch_changed":
+      if (opensCue(speaker.traits, "branch")) cue = "branch";
+      break;
+    case "worktree_ready":
+      if (opensCue(speaker.traits, "worktree")) cue = "worktree";
+      break;
+    case "files_stirred":
+      // Our own edits are not news: a stirred file only speaks while the session is calm.
+      if (!after.busy && opensCue(speaker.traits, "stir")) cue = "stir";
+      break;
     default:
       break;
   }
@@ -116,9 +128,9 @@ export function speak(
   if (event.type === "tick") {
     return voice.bubble !== undefined && voice.bubble.until <= now ? { ...voice, bubble: undefined } : voice;
   }
-  const { voice: next, cue } = listen(voice, event, before, after, now, behavior, awaits);
+  const { voice: next, cue } = listen(voice, event, before, after, now, speaker, behavior, awaits);
   if (cue === undefined) return next;
-  const { priority, cooldown } = CUES[cue];
+  const { priority, cooldown } = tuningOf(cue);
   const said = next.spoken[cue];
   if (said !== undefined && now - said.at < cooldown) return next;
   if (next.last !== undefined && now - next.last.at < behavior.quietMs && priority <= next.last.priority) return next;

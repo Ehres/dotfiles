@@ -30,6 +30,10 @@ export type TamagoEvent =
   | { type: "diff_updated"; files: number }
   /** A new Stage was reached. Raised by core/window.ts for every Session, never by the adapter. `hatchling` is the hatch: the Species shows. */
   | { type: "evolved"; stage: StageId }
+  /** The repository moved: a branch was changed, a worktree became ready, files stirred on disk. Speech only: they move nothing and count nothing. */
+  | { type: "branch_changed" }
+  | { type: "worktree_ready" }
+  | { type: "files_stirred" }
   | { type: "tick" };
 
 /**

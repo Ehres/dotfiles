@@ -41,6 +41,9 @@ export function transition(start: Session, event: TamagoEvent, now: number, beha
     case "todos_updated":
     case "diff_updated":
     case "evolved":
+    case "branch_changed":
+    case "worktree_ready":
+    case "files_stirred":
       return session;
     case "tick": {
       if (session.activity === "hurt" && now - session.since >= behavior.hurtMs) {

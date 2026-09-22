@@ -21,6 +21,9 @@ export const SUBSCRIBED = [
   "session.next.retried",
   "todo.updated",
   "session.diff",
+  "vcs.branch.updated",
+  "worktree.ready",
+  "file.watcher.updated",
 ] as const;
 
 const KIND_BY_TOOL: Record<string, ToolKind> = {
@@ -83,6 +86,8 @@ export function createTranslator(options: TranslatorOptions = {}): (event: Event
   const prompts = new Set<string>();
   const questions = new Set<string>();
   const children = new Set<string>();
+  /** The branch last seen: undefined until the first `vcs.branch.updated`, whose value is the branch we started on, not a move. */
+  let branch: string | undefined;
 
   const isChild = (id: string): boolean => children.has(id) || (options.isChild?.(id) ?? false);
 
@@ -204,6 +209,17 @@ export function createTranslator(options: TranslatorOptions = {}): (event: Event
         if (diff === undefined) return [];
         return mood(sessionID, { type: "diff_updated", files: diff.length });
       }
+      case "vcs.branch.updated": {
+        const current = isRecord(props) ? str(props.branch) : undefined;
+        if (current === undefined || current === branch) return [];
+        const first = branch === undefined; // the value seen at startup is the branch we are on, not a move
+        branch = current;
+        return first ? [] : [{ target: EVERY, event: { type: "branch_changed" } }];
+      }
+      case "worktree.ready":
+        return [{ target: EVERY, event: { type: "worktree_ready" } }];
+      case "file.watcher.updated":
+        return [{ target: EVERY, event: { type: "files_stirred" } }];
       default:
         return [];
     }

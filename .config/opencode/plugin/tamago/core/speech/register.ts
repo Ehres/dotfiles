@@ -2,7 +2,7 @@ import { signatureOf } from "../creature/catalog.ts";
 import { generator, seed, weighted } from "../creature/random.ts";
 import { TEMPERAMENTS, temperamentOf, type Speaker, type Temperament } from "../creature/sheet.ts";
 import { accentFor } from "./accent.ts";
-import type { Cue, Phrases } from "./cue.ts";
+import { isTraitCue, type AnyCue, type Cue, type Phrases } from "./cue.ts";
 import { FLAVOR, PHRASES } from "./phrases.ts";
 
 /** Who speaks a Cue: the Species, one of the four Temperaments, or nobody in particular. */
@@ -28,7 +28,7 @@ function pool(cue: Cue, speaker: Speaker, register: Register, r: number): Phrase
 }
 
 /** The domain of the voice seed: one draw per Cue and occurrence, so a Cue added later never moves the others. No Milestone id is ever `voice:…`. */
-function domain(cue: Cue, times: number): string {
+function domain(cue: AnyCue, times: number): string {
   return `voice:${cue}:${times}`;
 }
 
@@ -37,15 +37,18 @@ function domain(cue: Cue, times: number): string {
  * the hatch date, the Cue and the count: every window agrees for the same
  * occurrence of the Cue, nothing is stored, and one hears a different phrase
  * from one time to the next. On a Cue a held Trait takes, that Trait always
- * speaks and the Register stays silent. Otherwise the Register first, at
- * REGISTER shares; then, for the Temperament, which of the four at the
- * weight of its Stat; then a phrase, uniform. At `hatched` the Species
- * always speaks: that is where it shows.
+ * speaks and the Register stays silent. A Cue a Trait opens is spoken by
+ * that Trait alone: it never reaches the Register. Otherwise the Register
+ * first, at REGISTER shares; then, for the Temperament, which of the four
+ * at the weight of its Stat; then a phrase, uniform. At `hatched` the
+ * Species always speaks: that is where it shows.
  */
-export function phrase(cue: Cue, speaker: Speaker, times: number): string {
+export function phrase(cue: AnyCue, speaker: Speaker, times: number): string {
   const taken = accentFor(cue, speaker.traits);
   const random = generator(seed(speaker.hatchedAt, domain(cue, times)));
   if (taken !== undefined) return taken[Math.floor(random() * taken.length)] ?? taken[0];
+  // Unreachable while `opensCue` and `accentFor` agree: `listen` only raises a Trait-opened Cue when its Trait owns phrases for it.
+  if (isTraitCue(cue)) throw new Error(`${cue}: a Trait-opened Cue was spoken by no Trait`);
   const register = cue === "hatched" ? "species" : weighted(random(), REGISTERS, (key) => REGISTER[key]);
   const own = pool(cue, speaker, register, random());
   return own[Math.floor(random() * own.length)] ?? own[0];

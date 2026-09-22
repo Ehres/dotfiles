@@ -243,3 +243,22 @@ test("a child session's question counts but moves nobody, and its reply is dropp
   ]);
   assert.deepEqual(t(ev({ type: "question.replied", properties: { sessionID: "child", requestID: "q2", answers: [] } })), []);
 });
+
+test("the first branch of a run is silent; only a change speaks", () => {
+  const translate = createTranslator();
+  assert.deepEqual(translate({ type: "vcs.branch.updated", properties: { branch: "master" } } as never), []);
+  assert.deepEqual(translate({ type: "vcs.branch.updated", properties: { branch: "master" } } as never), []);
+  assert.deepEqual(translate({ type: "vcs.branch.updated", properties: { branch: "feature" } } as never), [
+    { target: { type: "every" }, event: { type: "branch_changed" } },
+  ]);
+});
+
+test("a ready worktree and a stirred file reach every session and count nothing", () => {
+  const translate = createTranslator();
+  assert.deepEqual(translate({ type: "worktree.ready", properties: { name: "hack" } } as never), [
+    { target: { type: "every" }, event: { type: "worktree_ready" } },
+  ]);
+  assert.deepEqual(translate({ type: "file.watcher.updated", properties: {} } as never), [
+    { target: { type: "every" }, event: { type: "files_stirred" } },
+  ]);
+});

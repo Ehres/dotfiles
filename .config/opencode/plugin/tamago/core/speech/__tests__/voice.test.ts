@@ -5,7 +5,7 @@ import type { TamagoEvent } from "../../moment/events.ts";
 import type { Sheet, Speaker } from "../../creature/sheet.ts";
 import { initialSession, type Session } from "../../moment/session.ts";
 import { transition } from "../../moment/transition.ts";
-import { CUES, type Cue } from "../cue.ts";
+import { CUES, type AnyCue } from "../cue.ts";
 import { phrase } from "../register.ts";
 import { BIG_DIFF_FILES, REPLY_MS, STREAK_MS, initialVoice, speak, type Voice } from "../voice.ts";
 
@@ -34,7 +34,7 @@ function replay(
   return { voice, session };
 }
 
-const cueOf = (voice: Voice): Cue | undefined => voice.bubble?.cue;
+const cueOf = (voice: Voice): AnyCue | undefined => voice.bubble?.cue;
 
 test("a permission request speaks, with the phrase of its first time, for BUBBLE_MS", () => {
   const { voice } = replay([[{ type: "permission_asked" }, 100]]);
@@ -263,4 +263,21 @@ test("the choice reminder repeats at most once an hour", () => {
   assert.equal(soon.spoken.choice?.times, 1);
   const later = speak(first, { type: "session_idle" }, busy, calm, 1_000 + 3_600_001, STOIC, MEDIAN, true);
   assert.equal(later.spoken.choice?.times, 2);
+});
+
+test("the Cues a Trait opens are silent until that Trait is held", () => {
+  const plain = { ...STOIC, traits: [] };
+  const seer = { ...STOIC, traits: ["watchful"] };
+  const calm = initialSession(0);
+  assert.equal(speak(initialVoice(), { type: "branch_changed" }, calm, calm, 10, plain, MEDIAN).bubble, undefined);
+  assert.equal(speak(initialVoice(), { type: "branch_changed" }, calm, calm, 10, seer, MEDIAN).bubble?.cue, "branch");
+  assert.equal(speak(initialVoice(), { type: "worktree_ready" }, calm, calm, 10, seer, MEDIAN).bubble?.cue, "worktree");
+});
+
+test("restless speaks of files stirring only while the session is calm: our own edits are not news", () => {
+  const restless = { ...STOIC, traits: ["watchful", "restless"] };
+  const calm = initialSession(0);
+  const busy = { ...initialSession(0), busy: true, activity: "working" as const };
+  assert.equal(speak(initialVoice(), { type: "files_stirred" }, calm, calm, 10, restless, MEDIAN).bubble?.cue, "stir");
+  assert.equal(speak(initialVoice(), { type: "files_stirred" }, busy, busy, 10, restless, MEDIAN).bubble, undefined);
 });

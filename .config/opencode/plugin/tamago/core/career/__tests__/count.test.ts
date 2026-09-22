@@ -48,3 +48,9 @@ test("a question asked counts one question and nothing else; a reply counts noth
   assert.deepEqual({ ...asked, questions: 0 }, EMPTY_DELTA);
   assert.equal(isEmpty(count({ type: "question_replied" })), true);
 });
+
+test("the Cues a Trait opens count nothing", () => {
+  for (const event of [{ type: "branch_changed" }, { type: "worktree_ready" }, { type: "files_stirred" }] as const) {
+    assert.ok(isEmpty(count(event)));
+  }
+});
