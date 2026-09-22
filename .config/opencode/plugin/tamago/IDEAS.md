@@ -289,18 +289,31 @@ Tamago sur une machine.
 - `core/choices/draw.ts` : Draw déterministe (FNV-1a sur `hatchedAt:milestone`,
   mulberry32, Fisher-Yates), `pending` pour la file des Milestones à offrir.
 
+**Boucle des choix faite le 2026-09-21**, voir
+`docs/superpowers/specs/2026-09-21-tamago-choices-design.md`. Quatre
+Milestones, un par Évolution : hatchling, young, adult, elder. À chacun, un
+Draw de trois Traits au plus parmi six, en trois familles de deux où le
+second a besoin du premier : `hardy` et `unshaken`, `proud` et `boastful`,
+`watchful` et `restless`. `tamago.choose` garde un Trait d'un Draw pending,
+sa description dit combien de choix attendent ; le Pick voyage comme un
+rename, affiché tout de suite, flushé sur disque, le plus ancien gagnant
+entre fenêtres au merge. Chaque Pick marque le sprite d'un caractère. Au-delà,
+un Trait prend des Cues existants, les disant lui-même pendant que la Species
+et le Temperament s'y taisent, ou ouvre des Cues qui n'existaient pas :
+une branche qui change, un worktree qui devient prêt, des fichiers qui
+bougent hors session. Un treizième Cue, `choice`, dit qu'un choix attend :
+il parle au premier calme après l'Évolution et une fois l'heure au plus,
+le badge après le Nom étant le rappel permanent. La carte liste les Traits
+tenus.
+
 **Reste à faire**, dans cet ordre :
 
-- Le premier Milestone réel (l'Évolution vers hatchling) et deux ou trois
-  Traits de Voice ; la Bubble qui annonce un Draw pending puis le
-  `DialogSelect` ; le Pick fait comme un rename (`addDelta` puis `show`).
-- L'effet des Traits sur les trois surfaces : `voice.ts` choisit ses phrases
-  par Trait tenu en plus du Temperament, le Sprite gagne une marque, un Cue
-  s'active.
-- Les Traits tenus sur la carte (`tamago.card`).
+- Les Milestones par compteur (sessions, prompts, tools, etc.) plutôt que par
+  seule Évolution.
 - Les Milestones par événement (« premier bash après minuit »), non dérivables
   des compteurs : une map `reached` fusionnée par plus ancienne date, même forme
   que `picks`.
+- D'autres Traits.
 - Contraintes qui tiennent : pas de mort, jamais de retrait sur la Career,
   aucun Trait n'est une punition, pas de lecture de contenu, merge commutatif,
   pas de re-roll.
@@ -383,8 +396,8 @@ donc jamais de suppression d'une Career du roster.
 3. ~~Species visuelle (idée 12, lot 1).~~ Fait.
 4. ~~Roster (idée 12, lot 2).~~ Fait.
 5. ~~Feuille de caractère (idée 12, lot 3).~~ Fait.
-6. Gamification (idée 11) : le premier Milestone et le `DialogSelect` ; les
-   Traits de Voice s'écriront contre la feuille.
+6. ~~Gamification (idée 11) : le premier Milestone et le `DialogSelect` ; les
+   Traits de Voice s'écriront contre la feuille.~~ Fait.
 7. Achievements et streak, avec le journal (idée 8), après une semaine d'usage
    réel des Species.
 8. Enrichissements Species (idée 12, lot 4), accessoires et couleur (idées 4

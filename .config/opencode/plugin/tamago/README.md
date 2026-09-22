@@ -100,7 +100,7 @@ creature does not repeat itself. At the hatch the species always speaks.
 
 ## Commands
 
-Six commands in the palette, always under `Tamago` so they stay easy to find
+Seven commands in the palette, always under `Tamago` so they stay easy to find
 whatever the creature is called; its Name only appears in their descriptions:
 
 | Command           | What it does                                                                                      |
@@ -111,10 +111,19 @@ whatever the creature is called; its Name only appears in their descriptions:
 | `rename`          | asks for a new name, 16 characters at most; empty keeps the old                                   |
 | `hatch a new egg` | lays a fresh egg once every creature on the machine is `elder`                                    |
 | `roster`          | lists every creature of this machine with its card; Enter on a resting one brings it to the front |
+| `choose a trait`  | keeps one trait from the pending draw, if one is offered                                          |
 
 Petting counts nothing and changes nothing in the career. The heart is the
 only non-ASCII character in a sprite: it takes one column in most terminals,
 two in a few, where the top line overflows by one column while it shows.
+
+At a milestone, today one per stage from `hatchling` on, the creature offers a
+draw of up to three traits and `choose a trait` keeps one; its description
+says how many choices are waiting, and a `★` after the Name is the same
+reminder in the sidebar and on the home screen. A trait is never a penalty:
+each one marks the sprite with a character, and either speaks cues the
+creature already had, so the species and the temperament stay quiet there, or
+opens a cue nothing else can speak. Traits held show on the card.
 
 ## What it is
 

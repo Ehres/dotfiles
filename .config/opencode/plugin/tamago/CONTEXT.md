@@ -378,6 +378,8 @@ _Avoid_: card, widget
   drawn again
 - A **Pick** is a **Delta** like a rename: made in one window, flushed with the
   counters, merged into the shared **Career**
+- A **Pick** grants a **Trait**
+- A **Trait** takes **Cues** or opens them, and marks the **Sprite**
 
 ## Example dialogue
 
