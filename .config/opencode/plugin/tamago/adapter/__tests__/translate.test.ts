@@ -25,9 +25,9 @@ test("toolKind buckets tool names", () => {
   assert.equal(toolKind("webfetch"), "other");
 });
 
-test("SUBSCRIBED lists every SDK event type the translator handles, once", () => {
+test("SUBSCRIBED lists every SDK event type the translator handles, once, and nothing else", () => {
   assert.deepEqual([...SUBSCRIBED].sort(), [...new Set(SUBSCRIBED)].sort());
-  for (const type of [
+  const expected = [
     "message.part.updated",
     "message.updated",
     "file.edited",
@@ -45,9 +45,11 @@ test("SUBSCRIBED lists every SDK event type the translator handles, once", () =>
     "question.asked",
     "question.replied",
     "question.rejected",
-  ]) {
-    assert.ok((SUBSCRIBED as readonly string[]).includes(type), `${type} must be subscribed`);
-  }
+    "vcs.branch.updated",
+    "worktree.ready",
+    "file.watcher.updated",
+  ];
+  assert.deepEqual([...SUBSCRIBED].sort(), expected.sort());
 });
 
 test("a tool part going running then completed yields started then finished, once each, on its session", () => {
@@ -246,19 +248,17 @@ test("a child session's question counts but moves nobody, and its reply is dropp
 
 test("the first branch of a run is silent; only a change speaks", () => {
   const translate = createTranslator();
-  assert.deepEqual(translate({ type: "vcs.branch.updated", properties: { branch: "master" } } as never), []);
-  assert.deepEqual(translate({ type: "vcs.branch.updated", properties: { branch: "master" } } as never), []);
-  assert.deepEqual(translate({ type: "vcs.branch.updated", properties: { branch: "feature" } } as never), [
-    { target: { type: "every" }, event: { type: "branch_changed" } },
+  assert.deepEqual(translate(ev({ type: "vcs.branch.updated", properties: { branch: "master" } })), []);
+  assert.deepEqual(translate(ev({ type: "vcs.branch.updated", properties: { branch: "master" } })), []);
+  assert.deepEqual(translate(ev({ type: "vcs.branch.updated", properties: { branch: "feature" } })), [
+    every({ type: "branch_changed" }),
   ]);
 });
 
 test("a ready worktree and a stirred file reach every session and count nothing", () => {
   const translate = createTranslator();
-  assert.deepEqual(translate({ type: "worktree.ready", properties: { name: "hack" } } as never), [
-    { target: { type: "every" }, event: { type: "worktree_ready" } },
+  assert.deepEqual(translate(ev({ type: "worktree.ready", properties: { name: "hack" } })), [
+    every({ type: "worktree_ready" }),
   ]);
-  assert.deepEqual(translate({ type: "file.watcher.updated", properties: {} } as never), [
-    { target: { type: "every" }, event: { type: "files_stirred" } },
-  ]);
+  assert.deepEqual(translate(ev({ type: "file.watcher.updated", properties: {} })), [every({ type: "files_stirred" })]);
 });

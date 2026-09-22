@@ -1,10 +1,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { MARK_COLUMN, MARK_LINE } from "../../appearance/marks.ts";
-import { frames } from "../../appearance/sprites.ts";
+import { frames, heartFrame } from "../../appearance/sprites.ts";
 import { STAGES } from "../../career/stage.ts";
 import { MAX_TEXT } from "../../speech/bubble.ts";
 import { CUES, type Cue } from "../../speech/cue.ts";
+import { ACTIVITIES } from "../../moment/session.ts";
+import { TEMPERAMENTS } from "../sheet.ts";
 import { REFERENCE, SPECIES, bodiesOf, known, signatureOf } from "../catalog.ts";
 
 test("SPECIES keeps the draw order: common first, then by Rarity, twenty ids, the reference among the common", () => {
@@ -78,11 +80,17 @@ test("a phrase belongs to one Species only", () => {
   assert.deepEqual(collisions, []);
 });
 
-test("every Species leaves the overlay cell free at every Stage, so a Trait mark never covers a body", () => {
+test("every Species leaves the overlay cell free at every Stage and Activity, and on the petted frame for every Temperament, so a Trait mark never covers a body", () => {
   for (const one of SPECIES) {
     for (const stage of ["egg", "hatchling", "young", "adult", "elder"] as const) {
-      for (const frame of frames(one.id, stage, "idle")) {
-        assert.equal((frame[MARK_LINE] ?? "")[MARK_COLUMN], " ", `${one.id}/${stage} fills the overlay cell`);
+      for (const activity of ACTIVITIES) {
+        for (const frame of frames(one.id, stage, activity)) {
+          assert.equal((frame[MARK_LINE] ?? "")[MARK_COLUMN], " ", `${one.id}/${stage}/${activity} fills the overlay cell`);
+        }
+      }
+      for (const temperament of TEMPERAMENTS) {
+        const frame = heartFrame(one.id, stage, temperament);
+        assert.equal((frame[MARK_LINE] ?? "")[MARK_COLUMN], " ", `${one.id}/${stage} heartFrame/${temperament} fills the overlay cell`);
       }
     }
   }

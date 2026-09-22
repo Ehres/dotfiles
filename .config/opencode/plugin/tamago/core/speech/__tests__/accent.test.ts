@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { ACCENT, accentFor, opensCue, type Accent } from "../accent.ts";
 import { MAX_TEXT } from "../bubble.ts";
-import type { AnyCue } from "../cue.ts";
+import { TRAIT_CUES, type AnyCue } from "../cue.ts";
 import type { TraitId } from "../../career/pick.ts";
 
 test("every Cue a Trait takes or opens has phrases, and every phrase belongs to a Cue it takes or opens", () => {
@@ -12,6 +12,11 @@ test("every Cue a Trait takes or opens has phrases, and every phrase belongs to 
     const names = new Set<string>(owned);
     for (const cue of Object.keys(accent.phrases)) assert.ok(names.has(cue), `${id} has phrases for ${cue} it never speaks`);
   }
+});
+
+test("every Cue a Trait can open is opened by some Trait, so none sits inert", () => {
+  const opened = new Set<string>(Object.values(ACCENT).flatMap((accent) => accent.opens));
+  for (const cue of Object.keys(TRAIT_CUES)) assert.ok(opened.has(cue), `${cue} is never opened by a Trait`);
 });
 
 test("every phrase in ACCENT fits in MAX_TEXT, in printable ASCII", () => {

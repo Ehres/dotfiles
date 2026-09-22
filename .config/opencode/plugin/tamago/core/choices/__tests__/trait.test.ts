@@ -2,6 +2,9 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { freshCareer, type Career } from "../../career/career.ts";
 import { TRAITS, eligible, traits, type Trait } from "../trait.ts";
+import { MARK } from "../../appearance/marks.ts";
+import { TRAIT_TEXT } from "../../text/traits.ts";
+import { ACCENT } from "../../speech/accent.ts";
 
 const table: readonly Trait[] = [
   { id: "sarcastic", needs: [] },
@@ -69,4 +72,17 @@ test("the shipped Traits are three families of two, the child needing its parent
 test("only the three parents are eligible before any Pick", () => {
   const career = withPicks({});
   assert.deepEqual(eligible(career), ["hardy", "proud", "watchful"]);
+});
+
+test("every shipped Trait has a mark, a name and a voice, and every table names only shipped Traits", () => {
+  const ids: ReadonlySet<string> = new Set(TRAITS.map((trait) => trait.id));
+  for (const [table, name] of [
+    [MARK, "MARK"],
+    [TRAIT_TEXT, "TRAIT_TEXT"],
+    [ACCENT, "ACCENT"],
+  ] as const) {
+    const keys: ReadonlySet<string> = new Set(Object.keys(table));
+    for (const id of ids) assert.ok(keys.has(id), `${name} is missing ${id}`);
+    for (const key of keys) assert.ok(ids.has(key), `${name} has a stale entry for ${key}`);
+  }
 });
