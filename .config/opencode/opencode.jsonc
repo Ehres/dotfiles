@@ -6,16 +6,16 @@
     "figma": {
       "type": "remote",
       "url": "https://mcp.figma.com/mcp",
-      "enabled": true
+      "enabled": true,
     },
     "google-drive": {
       "type": "local",
       "command": ["npx", "-y", "@piotr-agier/google-drive-mcp@2.6.0"],
       "environment": {
         "GOOGLE_DRIVE_OAUTH_CREDENTIALS": "/Users/maxime.grebauval/client_secret_1067784221910-7ckhspsri5f4qoda23v2hc857c69d2ih.apps.googleusercontent.com.json",
-        "GOOGLE_DRIVE_MCP_SCOPES": "drive.file,presentations"
+        "GOOGLE_DRIVE_MCP_SCOPES": "drive.file,presentations",
       },
-      "enabled": true
+      "enabled": false,
     },
     "chrome-devtools": {
       "type": "local",
@@ -24,30 +24,35 @@
         "-y",
         "chrome-devtools-mcp@latest",
         "--no-usage-statistics",
-        "--no-performance-crux"
+        "--no-performance-crux",
       ],
-      "enabled": true
-    }
+      "enabled": false,
+    },
+    "notion": {
+      "type": "remote",
+      "url": "https://mcp.notion.com/mcp",
+      "enabled": false,
+    },
   },
   "permission": {
     "question": "allow",
     "external_directory": {
-      "~/Library/Application Support/rtk/tee/**": "allow"
+      "~/Library/Application Support/rtk/tee/**": "allow",
     },
     "bash": {
       "*": "allow",
       "rm -rf *": "ask",
       "kubectl * delete *": "ask",
-      "security *": "ask"
-    }
+      "security *": "ask",
+    },
   },
   "plugin": [
     "@franlol/opencode-md-table-formatter@0.0.3",
     "superpowers@git+https://github.com/obra/superpowers.git",
     "opencode-scheduler",
-    "@mohak34/opencode-notifier@latest",
     "@slkiser/opencode-quota@latest",
-    "oh-my-opencode-slim"
+    "oh-my-opencode-slim",
+    "opencode-mermaid-renderer@0.0.1",
   ],
   "username": "Ehres",
   "provider": {
@@ -55,9 +60,9 @@
       "npm": "@ai-sdk/openai-compatible",
       "name": "Headroom Proxy",
       "options": {
-        "baseURL": "http://127.0.0.1:8787/v1"
-      }
-    }
+        "baseURL": "http://127.0.0.1:8787/v1",
+      },
+    },
   },
   "agent": {
     "plan": {
@@ -65,24 +70,24 @@
         "skill": {
           "*": "allow",
           "brainstorming": "deny",
-          "writing-plans": "deny"
-        }
-      }
+          "writing-plans": "deny",
+        },
+      },
     },
     "build": {
       "permission": {
         "skill": {
           "*": "allow",
           "brainstorming": "deny",
-          "writing-plans": "deny"
-        }
-      }
+          "writing-plans": "deny",
+        },
+      },
     },
     "explore": {
-      "disable": true
+      "disable": true,
     },
     "general": {
-      "disable": true
-    }
-  }
+      "disable": true,
+    },
+  },
 }
