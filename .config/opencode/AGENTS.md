@@ -39,6 +39,7 @@ Never commit specifications or implementation plans created by Superpowers skill
 - Verify plans, assumptions, and external information against the current source of truth before presenting them as fact.
 - Surface nearby inconsistencies, risks, and suspicious behavior discovered during work.
 - When the user says "Rappelle-toi de ...", persist the requested instruction in this global `AGENTS.md` file unless they specify another scope.
+- Always write specifications in French.
 - Do not add front-end unit tests that assert Tailwind CSS classes or other visual styling details. Unit tests must validate user-observable behavior and functionality, not visual implementation.
 - When a Figma value requires a custom hardcoded implementation because no design-system token exists, add a concise TODO beside it that names the missing design-system token to create later.
 - When speaking French, retain established English technical terms (for example, use `Chip` rather than `puce`) unless a French translation is clearly the industry standard.
