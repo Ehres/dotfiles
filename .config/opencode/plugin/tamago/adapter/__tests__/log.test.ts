@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, readFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { ERROR_LOG, createErrorLog } from "../log.ts";
@@ -34,4 +34,13 @@ test("non-Error values are logged as strings", () => {
   const dir = scratch();
   createErrorLog(dir)("plain failure");
   assert.ok(lines(dir)[0]?.endsWith("plain failure"));
+});
+
+test("an error that keeps repeating on a hot path touches the disk once, not once per occurrence", () => {
+  const dir = scratch();
+  const log = createErrorLog(dir);
+  log(new Error("EACCES: permission denied"));
+  rmSync(dir, { recursive: true, force: true });
+  log(new Error("EACCES: permission denied"));
+  assert.equal(existsSync(dir), false, "a repeat is counted in memory: nothing is written, nothing is made");
 });

@@ -10,8 +10,10 @@ function describe(err: unknown): { message: string; stack: string } {
 
 /**
  * Appends errors to error.log. A message identical to the previous one is
- * not written again; the repeat count is summarised when a different message
- * arrives. Best effort: logging must never throw into the TUI.
+ * not written again, and costs nothing on disk: `guard` wraps every handler,
+ * so one broken event would otherwise write once per event. The repeat count
+ * is summarised when a different message arrives. Best effort: logging must
+ * never throw into the TUI.
  */
 export function createErrorLog(dir: string): (err: unknown) => void {
   let last = "";
@@ -21,12 +23,12 @@ export function createErrorLog(dir: string): (err: unknown) => void {
 
   return (err) => {
     try {
-      mkdirSync(dir, { recursive: true });
       const { message, stack } = describe(err);
       if (message === last) {
         repeats += 1;
-        return;
+        return; // counted in memory: a guard firing per event must not touch the disk per event
       }
+      mkdirSync(dir, { recursive: true });
       if (repeats > 0) append(`previous error repeated ${repeats} more times`);
       last = message;
       repeats = 0;
