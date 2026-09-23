@@ -222,6 +222,23 @@ if [[ -d .agents/skills/open-review/src ]]; then
 fi
 
 # --------------------------------------------------------------------------
+section "opencode-notifier"
+# The upstream notifier can misclassify a deleted child session as a completed
+# root session. Keep the local event filter covered by the exact lifecycle that
+# previously produced duplicate notifications.
+if [[ -f .config/opencode/test/notification.test.ts ]]; then
+  if ! command -v node >/dev/null; then
+    warn "node not on PATH -- cannot run the opencode-notifier tests"
+  elif [[ ! -d .config/opencode/node_modules/@mohak34/opencode-notifier ]]; then
+    warn "opencode-notifier tests skipped -- run 'pnpm install' in .config/opencode"
+  elif (cd .config/opencode && node --test "test/notification.test.ts" >/dev/null 2>&1); then
+    ok "opencode-notifier tests pass"
+  else
+    fail "opencode-notifier tests fail -- run: (cd .config/opencode && node --test \"test/notification.test.ts\")"
+  fi
+fi
+
+# --------------------------------------------------------------------------
 section "opencode-tamago"
 # The TUI plugin is raw .tsx that Bun compiles when OpenCode starts; nothing
 # checks its types before then, so tsc is the only gate. Same shape as the

@@ -1,0 +1,5 @@
+allowBuilds:
+  core-js: false
+  msgpackr-extract: false
+minimumReleaseAgeExclude:
+  - '@mohak34/opencode-notifier@0.3.0'
