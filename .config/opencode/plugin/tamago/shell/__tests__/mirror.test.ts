@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { createRoot } from "solid-js";
 import { freshCareer } from "../../core/career/career.ts";
-import { freshWindow, receive } from "../../core/window.ts";
+import { freshWindow, receive, setLanguage } from "../../core/window.ts";
 import type { Effect } from "../../core/window.ts";
 import { createMirror } from "../mirror.ts";
 
@@ -20,6 +20,23 @@ test("commit mirrors only the parts that changed, run performs the effects", () 
     expect(mirror.career().prompts).toBe(1);
     expect(mirror.active().career).toBe(step.window.career);
     expect(effects).toEqual([]);
+    dispose();
+  });
+});
+
+test("commit mirrors the language only when it changed", () => {
+  createRoot((dispose) => {
+    const window = freshWindow(freshCareer(0));
+    const mirror = createMirror(window, "Tamago", () => {});
+    expect(mirror.language()).toBe("en");
+
+    mirror.commit(setLanguage(mirror.current(), "fr"));
+    const afterChange = mirror.current();
+    expect(mirror.language()).toBe("fr");
+
+    mirror.commit(setLanguage(mirror.current(), "fr"));
+    expect(mirror.current()).toBe(afterChange); // same Language again: setLanguage returns the same Window, so nobody is resignaled
+    expect(mirror.language()).toBe("fr");
     dispose();
   });
 });
