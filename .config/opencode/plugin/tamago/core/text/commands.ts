@@ -1,6 +1,6 @@
 export const PALETTE = "Tamago";
-export type CommandId = "mute" | "card" | "pet" | "rename" | "hatch" | "roster" | "choose";
-export const COMMAND_IDS: readonly CommandId[] = ["mute", "card", "pet", "rename", "hatch", "roster", "choose"];
+export type CommandId = "mute" | "card" | "pet" | "rename" | "hatch" | "roster" | "choose" | "language";
+export const COMMAND_IDS: readonly CommandId[] = ["mute", "card", "pet", "rename", "hatch", "roster", "choose", "language"];
 
 const TITLES: Record<CommandId, string> = {
   mute: "toggle bubbles",
@@ -10,6 +10,7 @@ const TITLES: Record<CommandId, string> = {
   hatch: "hatch a new egg",
   roster: "roster",
   choose: "choose a trait",
+  language: "language",
 };
 
 function description(id: CommandId, who: string, choices: number): string {
@@ -29,6 +30,8 @@ function description(id: CommandId, who: string, choices: number): string {
     case "choose":
       if (choices === 0) return `Nothing to choose for ${who} yet`;
       return choices === 1 ? `One choice waits for ${who}` : `${choices} choices wait for ${who}`;
+    case "language":
+      return "Choose the language everything is read in";
   }
 }
 

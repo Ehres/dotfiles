@@ -5,7 +5,7 @@ import type { Dialogs } from "./dialogs.tsx";
 import type { Guard } from "./guard.ts";
 import type { Mirror } from "./mirror.ts";
 
-/** The seven palette commands. `register` is called again after a rename, a Switch, a Pick, or an Evolution: the descriptions carry the Name and the choice count, both fixed at registration. */
+/** The eight palette commands. `register` is called again after a rename, a Switch, a Pick, an Evolution, or a Language change: the descriptions carry the Name and the choice count, both fixed at registration. */
 export function createPalette(deps: {
   api: TuiPluginApi;
   mirror: Mirror;
@@ -23,6 +23,7 @@ export function createPalette(deps: {
     hatch: dialogs.askHatch,
     roster: dialogs.showRoster,
     choose: dialogs.askChoice,
+    language: dialogs.askLanguage,
   };
 
   let unregisterCommands: (() => void) | undefined;

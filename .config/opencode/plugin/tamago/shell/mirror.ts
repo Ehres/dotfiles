@@ -1,5 +1,6 @@
 import { createMemo, createSignal, type Accessor } from "solid-js";
 import { sameCareer, type Career } from "../core/career/career.ts";
+import type { Language } from "../core/language.ts";
 import type { Session } from "../core/moment/session.ts";
 import type { Voice } from "../core/speech/voice.ts";
 import { tamago, type Tamago } from "../core/tamago.ts";
@@ -14,6 +15,8 @@ export type Mirror = {
   voices: Accessor<Record<string, Voice>>;
   /** Persisted through api.kv; when muted no Cue is heard and every Bubble is cleared. */
   muted: Accessor<boolean>;
+  /** Persisted through api.kv; every phrase the user reads is said in it. */
+  language: Accessor<Language>;
   /** The active Tamago, read from the Career once per change: Stage, Sheet, Behavior, Character. Derived, never stored; every window computes the same. */
   active: Accessor<Tamago>;
   /** The Name lives in the Career, so a rename in one window reaches the others on flush. */
@@ -33,6 +36,7 @@ export function createMirror(initial: Window, defaultName: string, onEffect: (ef
   const [sessions, setSessions] = createSignal<Record<string, Session>>(window.sessions);
   const [voices, setVoices] = createSignal<Record<string, Voice>>(window.voices);
   const [muted, setMuted] = createSignal(window.muted);
+  const [language, setLanguage] = createSignal<Language>(window.language);
   const active = createMemo(() => tamago(career()));
   const name = (): string => career().name?.value ?? defaultName;
   /** Makes `next` the Window and mirrors each changed part into its signal; an untouched part re-renders nobody. */
@@ -43,6 +47,7 @@ export function createMirror(initial: Window, defaultName: string, onEffect: (ef
     if (next.sessions !== prev.sessions) setSessions(next.sessions);
     if (next.voices !== prev.voices) setVoices(next.voices);
     if (next.muted !== prev.muted) setMuted(next.muted);
+    if (next.language !== prev.language) setLanguage(next.language);
   };
   return {
     current: () => window,
@@ -50,6 +55,7 @@ export function createMirror(initial: Window, defaultName: string, onEffect: (ef
     sessions,
     voices,
     muted,
+    language,
     active,
     name,
     commit,

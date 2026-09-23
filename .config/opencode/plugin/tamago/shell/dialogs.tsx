@@ -2,10 +2,12 @@
 import type { TuiPluginApi } from "@opencode-ai/plugin/tui";
 import { createEffect, createMemo, type Accessor } from "solid-js";
 import type { Store } from "../adapter/store.ts";
+import { isLanguage, LANGUAGES } from "../core/language.ts";
 import { blockers, idOf, ordered } from "../core/roster/roster.ts";
 import { tamago, type Tamago } from "../core/tamago.ts";
-import { RENAME, hatchConfirm } from "../core/text/dialogs.ts";
+import { LANGUAGE_TITLE, RENAME, hatchConfirm } from "../core/text/dialogs.ts";
 import { blocked, line } from "../core/text/roster.ts";
+import { LANGUAGE_NAME } from "../core/text/tables.ts";
 import { CHOOSE, CHOSEN_ELSEWHERE, NOTHING_TO_CHOOSE, TRAIT_TEXT } from "../core/text/traits.ts";
 import { CardView } from "../view/card.tsx";
 import { RosterView } from "../view/roster.tsx";
@@ -14,9 +16,16 @@ import type { Actions } from "./actions.ts";
 import type { Guard } from "./guard.ts";
 import type { Mirror } from "./mirror.ts";
 
-export type Dialogs = { showCard(): void; askName(): void; askHatch(): void; showRoster(): void; askChoice(): void };
+export type Dialogs = {
+  showCard(): void;
+  askName(): void;
+  askHatch(): void;
+  showRoster(): void;
+  askChoice(): void;
+  askLanguage(): void;
+};
 
-/** The five dialogs of the plugin. Each root posts the theme so no view threads it down. */
+/** The six dialogs of the plugin. Each root posts the theme so no view threads it down. */
 export function createDialogs(deps: {
   api: TuiPluginApi;
   store: Store;
@@ -142,5 +151,20 @@ export function createDialogs(deps: {
     });
   };
 
-  return { showCard, askName, askHatch, showRoster, askChoice };
+  /** The Languages, each named in its own. Two rows today; a select is the shape that survives a third. */
+  const askLanguage = () => {
+    api.ui.dialog.replace(() => (
+      <api.ui.DialogSelect
+        title={LANGUAGE_TITLE}
+        skipFilter
+        options={LANGUAGES.map((one) => ({ title: LANGUAGE_NAME[one], value: one }))}
+        onSelect={guard((option: { value: string }) => {
+          api.ui.dialog.clear();
+          if (isLanguage(option.value)) actions.setLanguage(option.value);
+        })}
+      />
+    ));
+  };
+
+  return { showCard, askName, askHatch, showRoster, askChoice, askLanguage };
 }

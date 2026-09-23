@@ -10,6 +10,7 @@ import { SUBSCRIBED, createTranslator } from "./adapter/translate.ts";
 import { footerPath } from "./core/appearance/footer.ts";
 import { freshCareer, isEmpty } from "./core/career/career.ts";
 import { MEDIAN, behavior } from "./core/creature/behavior.ts";
+import { resolveLanguage } from "./core/language.ts";
 import { tickInterval } from "./core/moment/cadence.ts";
 import { WARN_AFTER } from "./core/store/retry.ts";
 import { reveal } from "./core/text/card.ts";
@@ -56,19 +57,24 @@ const tui: TuiPlugin = async (api, options) => {
     const [clock, setClock] = createSignal(0);
     let palette: ReturnType<typeof createPalette> | undefined;
 
-    const mirror = createMirror(freshWindow(loaded.career, api.kv.get<boolean>("tamago.muted", false) === true), defaultName, (effect) => {
-      const name = mirror.name();
-      // palette descriptions carry the Name and the choice count, both fixed at registration
-      if (effect.type === "renamed" || effect.type === "chosen") palette?.register();
-      else if (effect.type === "switched") {
-        palette?.register();
-        api.ui.toast({ variant: "info", title: name, message: stepsIn(mirror.career(), defaultName) });
-      } else {
-        palette?.register(); // an Evolution is what makes a Draw appear
-        if (effect.stage === "hatchling") api.ui.toast({ variant: "success", title: name, message: reveal(name, mirror.active()) });
-        else api.ui.toast({ variant: "success", title: name, message: evolved(name, effect.stage) });
-      }
-    });
+    const language = resolveLanguage(api.kv.get<unknown>("tamago.language"), options?.language);
+    const mirror = createMirror(
+      freshWindow(loaded.career, api.kv.get<boolean>("tamago.muted", false) === true, language),
+      defaultName,
+      (effect) => {
+        const name = mirror.name();
+        // palette descriptions carry the Name and the choice count, both fixed at registration
+        if (effect.type === "renamed" || effect.type === "chosen") palette?.register();
+        else if (effect.type === "switched") {
+          palette?.register();
+          api.ui.toast({ variant: "info", title: name, message: stepsIn(mirror.career(), defaultName) });
+        } else {
+          palette?.register(); // an Evolution is what makes a Draw appear
+          if (effect.stage === "hatchling") api.ui.toast({ variant: "success", title: name, message: reveal(name, mirror.active()) });
+          else api.ui.toast({ variant: "success", title: name, message: evolved(name, effect.stage) });
+        }
+      },
+    );
 
     let warnedCorrupt = false;
     const warnCorrupt = () => {
@@ -78,7 +84,7 @@ const tui: TuiPlugin = async (api, options) => {
     };
     if (loaded.corrupt) warnCorrupt();
 
-    const actions = createActions({ api, store, mirror, warnCorrupt, guard });
+    const actions = createActions({ api, store, mirror, warnCorrupt, guard, onLanguage: () => palette?.register() });
     const dialogs = createDialogs({ api, store, mirror, actions, clock, started, defaultName, warnCorrupt, guard });
     palette = createPalette({ api, mirror, actions, dialogs, guard });
     palette.register();

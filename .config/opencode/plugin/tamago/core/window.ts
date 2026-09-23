@@ -3,6 +3,7 @@ import type { Addressed, TamagoEvent } from "./moment/events.ts";
 import { count } from "./career/count.ts";
 import { EMPTY_DELTA, addDelta, isEmpty, merge, sameCareer, type Career, type Delta } from "./career/career.ts";
 import { cleanName } from "./career/name.ts";
+import { DEFAULT_LANGUAGE, type Language } from "./language.ts";
 import { initialSession, type Session } from "./moment/session.ts";
 import { speakerOf } from "./creature/sheet.ts";
 import { evolution, type StageId } from "./career/stage.ts";
@@ -23,6 +24,8 @@ export type Window = {
   sessions: Record<string, Session>;
   voices: Record<string, Voice>;
   muted: boolean;
+  /** Every phrase the user reads is said in this Language. */
+  language: Language;
 };
 
 /** What the window must do beyond re-rendering: toast an Evolution, refresh palette titles after a rename, refresh them and say who steps in after a Switch, refresh the Draw after a Pick. */
@@ -30,8 +33,8 @@ export type Effect = { type: "evolved"; stage: StageId } | { type: "renamed" } |
 
 export type Step = { window: Window; effects: Effect[] };
 
-export function freshWindow(career: Career, muted = false): Window {
-  return { career, pending: EMPTY_DELTA, sessions: {}, voices: {}, muted };
+export function freshWindow(career: Career, muted = false, language: Language = DEFAULT_LANGUAGE): Window {
+  return { career, pending: EMPTY_DELTA, sessions: {}, voices: {}, muted, language };
 }
 
 /** Moves the Sessions `ids` through `event` with the Behavior of the Career, then lets each Voice hear it as the Career's Speaker unless muted. Same references when nothing changed. */
@@ -126,13 +129,24 @@ export function rename(window: Window, input: string, now: number, shown: string
   return earn(window, { ...EMPTY_DELTA, rename: { value, at: now } }, now);
 }
 
+/** Every Voice with its Bubble taken off screen; the same references when none was showing. */
+function hush(voices: Record<string, Voice>): Record<string, Voice> {
+  const next: Record<string, Voice> = {};
+  for (const [id, voice] of Object.entries(voices)) next[id] = voice.bubble === undefined ? voice : { ...voice, bubble: undefined };
+  return next;
+}
+
 /** Muting clears every Bubble on screen; while muted no Cue is heard. */
 export function setMuted(window: Window, muted: boolean): Window {
   if (window.muted === muted) return window;
   if (!muted) return { ...window, muted };
-  const voices: Record<string, Voice> = {};
-  for (const [id, voice] of Object.entries(window.voices)) voices[id] = voice.bubble === undefined ? voice : { ...voice, bubble: undefined };
-  return { ...window, muted, voices };
+  return { ...window, muted, voices: hush(window.voices) };
+}
+
+/** Changing the Language clears every Bubble on screen: a phrase already shown is in the old Language. */
+export function setLanguage(window: Window, language: Language): Window {
+  if (window.language === language) return window;
+  return { ...window, language, voices: hush(window.voices) };
 }
 
 /** The pending Delta reached the disk: forget it and show what the disk holds. */

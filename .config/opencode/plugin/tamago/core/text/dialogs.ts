@@ -6,5 +6,7 @@ export function hatchConfirm(name: string): { title: string; message: string } {
 
 export const ROSTER_TITLE = "Tamago: roster";
 
+export const LANGUAGE_TITLE = "Language";
+
 /** The hint on the right of a dialog title: OpenCode's Dialog closes on esc. */
 export const ESC_HINT = "esc";

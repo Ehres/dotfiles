@@ -6,7 +6,7 @@ import { speakerOf } from "../creature/sheet.ts";
 import { STAGES, WEIGHTS } from "../career/stage.ts";
 import { EMPTY_DELTA, freshCareer, isEmpty, type Career } from "../career/career.ts";
 import { phrase } from "../speech/register.ts";
-import { adopt, flushed, freshWindow, pick, receive, rename, setMuted, tick, type Window } from "../window.ts";
+import { adopt, flushed, freshWindow, pick, receive, rename, setLanguage, setMuted, tick, type Window } from "../window.ts";
 
 const HURT_MS = MEDIAN.hurtMs;
 const SLEEP_MS = MEDIAN.sleepMs;
@@ -244,6 +244,28 @@ test("a Pick made in another window arrives through adopt and raises `chosen`", 
   const elsewhere = { ...career, picks: { "evolution:hatchling": { trait: "proud", at: 3 } } };
   const { effects } = adopt(start, elsewhere, 10);
   assert.ok(effects.some((one) => one.type === "chosen"));
+});
+
+test("changing the Language clears every Bubble on screen", () => {
+  const spoken = receive(twoSessions(), { target: { type: "every" }, event: { type: "permission_asked" } }, 1_000).window;
+  const voices = Object.values(spoken.voices);
+  assert.ok(voices.length > 0 && voices.some((voice) => voice.bubble !== undefined), "a Bubble is on screen to start with");
+
+  const switched = setLanguage(spoken, "fr");
+  assert.equal(switched.language, "fr");
+  for (const voice of Object.values(switched.voices)) {
+    assert.equal(voice.bubble, undefined, "a phrase already shown is in the old Language");
+  }
+});
+
+test("setting the Language it already speaks changes nothing", () => {
+  const window = freshWindow(career, false, "fr");
+  assert.equal(setLanguage(window, "fr"), window, "same reference: nobody re-renders");
+});
+
+test("a fresh Window speaks English unless told otherwise", () => {
+  assert.equal(freshWindow(career).language, "en");
+  assert.equal(freshWindow(career, false, "fr").language, "fr");
 });
 
 test("the Window tells the Voice when a Draw awaits a Pick", () => {

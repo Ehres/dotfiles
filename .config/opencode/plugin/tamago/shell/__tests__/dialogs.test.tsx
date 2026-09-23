@@ -15,7 +15,7 @@ const grown: Career = { ...freshCareer(1_700_000_000_000), sessions: 10_000 };
 function harness(career: Career = grown) {
   const { api, toasts, shown, select } = fakeApi();
   const mirror = createMirror(freshWindow(career), "Tamago", () => {});
-  const actions = createActions({ api, store: {} as never, mirror, warnCorrupt: () => {}, guard: (fn) => fn, now: () => 42 });
+  const actions = createActions({ api, store: {} as never, mirror, warnCorrupt: () => {}, guard: (fn) => fn, now: () => 42, onLanguage: () => {} });
   const dialogs = createDialogs({
     api,
     store: {} as never,

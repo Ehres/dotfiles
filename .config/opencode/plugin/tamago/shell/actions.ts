@@ -4,9 +4,17 @@ import type { Store } from "../adapter/store.ts";
 import { PET_MS } from "../core/appearance/sprites.ts";
 import { isEmpty } from "../core/career/career.ts";
 import type { MilestoneId, TraitId } from "../core/career/pick.ts";
+import type { Language } from "../core/language.ts";
 import type { CareerId } from "../core/roster/roster.ts";
 import { BUSY, GONE } from "../core/text/toasts.ts";
-import { adopt, flushed, pick as pickWindow, rename as renameWindow, setMuted as muteWindow } from "../core/window.ts";
+import {
+  adopt,
+  flushed,
+  pick as pickWindow,
+  rename as renameWindow,
+  setLanguage as languageWindow,
+  setMuted as muteWindow,
+} from "../core/window.ts";
 import type { Guard } from "./guard.ts";
 import type { Mirror } from "./mirror.ts";
 
@@ -17,6 +25,7 @@ export type Actions = {
   lay(): void;
   rename(input: string): void;
   setMute(value: boolean): void;
+  setLanguage(value: Language): void;
   pet(): void;
   choose(milestone: MilestoneId, trait: TraitId): void;
   /** True while the sprite wears the heart after a pet. Per window, like the sprite itself. */
@@ -32,8 +41,10 @@ export function createActions(deps: {
   warnCorrupt: () => void;
   guard: Guard;
   now?: () => number;
+  /** The palette titles carry the Language's own words, fixed at registration: a switch must rebuild them. */
+  onLanguage: () => void;
 }): Actions {
-  const { api, store, mirror, warnCorrupt, guard } = deps;
+  const { api, store, mirror, warnCorrupt, guard, onLanguage } = deps;
   const now = deps.now ?? Date.now;
   const [heart, setHeart] = createSignal(false);
 
@@ -92,6 +103,15 @@ export function createActions(deps: {
     api.kv.set("tamago.muted", value);
   };
 
+  /** The Language is a window-and-machine preference, never a Delta: it does not touch the Career and never reaches the disk. */
+  const setLanguage = (value: Language) => {
+    const current = mirror.current();
+    if (current.language === value) return;
+    mirror.commit(languageWindow(current, value));
+    api.kv.set("tamago.language", value);
+    onLanguage();
+  };
+
   /** The heart is drawn wherever the sprite is, in this window; petting counts nothing. */
   let heartTimer: ReturnType<typeof setTimeout> | undefined;
   const pet = () => {
@@ -110,6 +130,7 @@ export function createActions(deps: {
     lay,
     rename,
     setMute,
+    setLanguage,
     pet,
     choose,
     heart,
