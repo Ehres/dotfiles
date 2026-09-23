@@ -222,7 +222,7 @@ test("the Voice speaks as the Career's Speaker: the phrase of its Species, Tempe
   assert.equal(w.sessions.a?.activity, "sleeping");
   w = receive(w, to("a", { type: "prompt_sent" }), T0 + 2 + SLEEP_MS + BUBBLE_MS + 10_000).window;
   assert.equal(w.voices.a?.bubble?.cue, "woke");
-  assert.equal(w.voices.a?.bubble?.text, phrase("woke", speakerOf(career), 0));
+  assert.equal(w.voices.a?.bubble?.text, phrase("woke", speakerOf(career), 0, "en"));
 });
 
 test("a Pick is shown at once, stays pending until the flush, and raises `chosen`", () => {

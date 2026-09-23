@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { MARK_COLUMN, MARK_LINE } from "../../appearance/marks.ts";
 import { frames, heartFrame } from "../../appearance/sprites.ts";
 import { STAGES } from "../../career/stage.ts";
-import { MAX_TEXT } from "../../speech/bubble.ts";
+import { assertSayable } from "../../speech/__tests__/sayable.ts";
 import { CUES, type Cue } from "../../speech/cue.ts";
 import { ACTIVITIES } from "../../moment/session.ts";
 import { TEMPERAMENTS } from "../sheet.ts";
@@ -52,15 +52,12 @@ test("no two Species share a body at any Stage, and no Species draws two Stages 
   }
 });
 
-test("a Signature covers every Cue with at least three phrases that fit in MAX_TEXT, in printable ASCII", () => {
+test("a Signature covers every Cue with at least three phrases", () => {
   for (const { id, signature } of SPECIES) {
     for (const cue of Object.keys(CUES) as Cue[]) {
       const phrases = signature[cue];
       assert.ok(phrases && phrases.length >= 3, `${id}/${cue}`);
-      for (const text of phrases ?? []) {
-        assert.ok(text.length <= MAX_TEXT, `${id}/${cue}: ${JSON.stringify(text)}`);
-        assert.match(text, /^[\x20-\x7e]+$/, `${id}/${cue}: ${JSON.stringify(text)}`);
-      }
+      for (const phrase of phrases ?? []) assertSayable(phrase, `${id}/${cue}`);
     }
   }
 });
@@ -70,7 +67,8 @@ test("a phrase belongs to one Species only", () => {
   const collisions: string[] = [];
   for (const { id, signature } of SPECIES) {
     for (const cue of Object.keys(CUES) as Cue[]) {
-      for (const text of signature[cue] ?? []) {
+      for (const phrase of signature[cue] ?? []) {
+        const text = phrase.en;
         const existing = owner.get(text);
         if (existing !== undefined && existing !== id) collisions.push(`"${text}" is said by both ${existing} and ${id}`);
         else owner.set(text, id);

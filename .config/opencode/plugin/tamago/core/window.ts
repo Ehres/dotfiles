@@ -58,7 +58,7 @@ function move(window: Window, ids: readonly string[], event: TamagoEvent, now: n
     let spoke = false;
     for (const id of ids) {
       const voice = voices[id] ?? initialVoice();
-      const heard = speak(voice, event, before[id] ?? initialSession(now), after[id] ?? initialSession(now), now, speaker, conduct, awaits);
+      const heard = speak(voice, event, before[id] ?? initialSession(now), after[id] ?? initialSession(now), now, speaker, conduct, awaits, window.language);
       next[id] = heard;
       if (heard !== voice) spoke = true;
     }

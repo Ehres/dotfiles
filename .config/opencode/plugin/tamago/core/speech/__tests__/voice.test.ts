@@ -40,7 +40,7 @@ const cueOf = (voice: Voice): AnyCue | undefined => voice.bubble?.cue;
 
 test("a permission request speaks, with the phrase of its first time, for BUBBLE_MS", () => {
   const { voice } = replay([[{ type: "permission_asked" }, 100]]);
-  assert.deepEqual(voice.bubble, { cue: "permission", text: phrase("permission", STOIC, 0), since: 100, until: 100 + BUBBLE_MS });
+  assert.deepEqual(voice.bubble, { cue: "permission", text: phrase("permission", STOIC, 0, "en"), since: 100, until: 100 + BUBBLE_MS });
 });
 
 test("waking from sleep speaks", () => {
@@ -184,7 +184,7 @@ test("a reply within REPLY_MS answers a spoken May I?, replacing it despite the 
   const asked = replay([[{ type: "permission_asked" }, 0]]);
   assert.equal(asked.voice.asked, 0);
   const granted = replay([[{ type: "permission_replied", granted: true }, 1]], asked);
-  assert.deepEqual(granted.voice.bubble, { cue: "granted", text: phrase("granted", STOIC, 0), since: 1, until: 1 + BUBBLE_MS });
+  assert.deepEqual(granted.voice.bubble, { cue: "granted", text: phrase("granted", STOIC, 0, "en"), since: 1, until: 1 + BUBBLE_MS });
   assert.equal(granted.voice.asked, undefined, "the question is answered");
   const denied = replay([[{ type: "permission_replied", granted: false }, REPLY_MS - 1]], asked);
   assert.equal(cueOf(denied.voice), "denied");
@@ -242,9 +242,9 @@ test("an injected Behavior sets the Bubble length, the quiet gap, the long-work 
 
 test("speak says the phrase of the Cue's count: the first time phrase 0, the next time phrase 1", () => {
   const first = replay([[{ type: "session_compacted" }, 0]]);
-  assert.equal(first.voice.bubble?.text, phrase("compacted", STOIC, 0));
+  assert.equal(first.voice.bubble?.text, phrase("compacted", STOIC, 0, "en"));
   const second = replay([[{ type: "session_compacted" }, BUBBLE_MS + QUIET_MS]], first);
-  assert.equal(second.voice.bubble?.text, phrase("compacted", STOIC, 1));
+  assert.equal(second.voice.bubble?.text, phrase("compacted", STOIC, 1, "en"));
 });
 
 test("a pending Draw makes the Tamago speak at the first calm, not during the work", () => {
@@ -289,8 +289,8 @@ test("speak raises no Bubble, and throws nothing, when a held Trait's table open
   const seer = { ...STOIC, traits: ["watchful"] };
   const calm = initialSession(0);
   const voice = initialVoice();
-  assert.doesNotThrow(() => speak(voice, { type: "branch_changed" }, calm, calm, 10, seer, MEDIAN, false, broken));
-  const after = speak(voice, { type: "branch_changed" }, calm, calm, 10, seer, MEDIAN, false, broken);
+  assert.doesNotThrow(() => speak(voice, { type: "branch_changed" }, calm, calm, 10, seer, MEDIAN, false, "en", broken));
+  const after = speak(voice, { type: "branch_changed" }, calm, calm, 10, seer, MEDIAN, false, "en", broken);
   assert.equal(after.bubble, undefined);
   assert.equal(after, voice, "the Voice is otherwise untouched");
 });

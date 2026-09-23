@@ -14,25 +14,25 @@ const sheetOf = (patch: Partial<Sheet>): Sheet => ({ cheerful: 0, sarcastic: 0, 
 const STOIC: Speaker = { hatchedAt: 1, species: "cat", sheet: sheetOf({ stoic: 8 }), traits: [] };
 const DRAGON: Speaker = { hatchedAt: 3, species: "dragon", sheet: sheetOf({ cheerful: 7 }), traits: [] };
 
-/** `phrase`, asserted non-undefined: every Cue below is a plain Cue, never a Trait-opened one whose table owns no phrases for it. */
+/** `phrase`, asserted non-undefined: every Cue below is a plain Cue, never a Trait-opened one whose table owns no phrases for it. English only: Task 2 writes no French. */
 function say(cue: Cue, speaker: Speaker, times: number): string {
-  const text = phrase(cue, speaker, times);
+  const text = phrase(cue, speaker, times, "en");
   assert.ok(text !== undefined, `${cue} unexpectedly said nothing`);
   return text;
 }
 
 /** Which Register a text of `cue` belongs to, for a Speaker whose pools are pairwise disjoint. */
 function registerOf(text: string, cue: Cue, species: string): "species" | Temperament | "neutral" | undefined {
-  if (signatureOf(species)?.[cue].includes(text)) return "species";
-  for (const temperament of TEMPERAMENTS) if (FLAVOR[temperament][cue].includes(text)) return temperament;
-  if (PHRASES[cue].includes(text)) return "neutral";
+  if (signatureOf(species)?.[cue].some((phrase) => phrase.en === text)) return "species";
+  for (const temperament of TEMPERAMENTS) if (FLAVOR[temperament][cue].some((phrase) => phrase.en === text)) return temperament;
+  if (PHRASES[cue].some((phrase) => phrase.en === text)) return "neutral";
   return undefined;
 }
 
 /** Fails unless the Species, the four Temperaments and the neutral phrases share no text for `cue`: the tests below classify by membership. */
 function assertDisjoint(cue: Cue, species: string): void {
   const pools = [signatureOf(species)?.[cue] ?? [], ...TEMPERAMENTS.map((temperament) => FLAVOR[temperament][cue]), PHRASES[cue]];
-  const all = pools.flat();
+  const all = pools.flat().map((phrase) => phrase.en);
   assert.equal(new Set(all).size, all.length, `${species}/${cue}: the pools overlap, pick another Cue for this test`);
 }
 
@@ -84,7 +84,7 @@ test("at the hatch the Species always speaks, and the phrase still varies", () =
   const seen = new Set<string>();
   for (let times = 0; times < 50; times++) {
     const text = say("hatched", DRAGON, times);
-    assert.ok(signatureOf("dragon")?.hatched.includes(text), text);
+    assert.ok(signatureOf("dragon")?.hatched.some((phrase) => phrase.en === text), text);
     seen.add(text);
   }
   assert.ok(seen.size >= 2);
@@ -116,13 +116,13 @@ test("a Trait that takes a Cue silences the Species and the Temperament there", 
   const held = { ...STOIC, traits: ["hardy"] };
   const said = new Set<string>();
   for (let times = 0; times < 30; times++) said.add(say("streak", held, times));
-  for (const text of said) assert.ok(ACCENT.hardy?.phrases.streak?.includes(text), `${text} is not hardy's`);
+  for (const text of said) assert.ok(ACCENT.hardy?.phrases.streak?.some((phrase) => phrase.en === text), `${text} is not hardy's`);
   assert.notDeepEqual(say("streak", plain, 0), say("streak", held, 0));
 });
 
 test("phrase says nothing, and never throws, when a held Trait's table opens a Cue it owns no phrases for", () => {
   const broken: Record<TraitId, Accent> = { watchful: { takes: [], opens: ["branch"], phrases: {} } };
   const seer = { ...STOIC, traits: ["watchful"] };
-  assert.doesNotThrow(() => phrase("branch", seer, 0, broken));
-  assert.equal(phrase("branch", seer, 0, broken), undefined);
+  assert.doesNotThrow(() => phrase("branch", seer, 0, "en", broken));
+  assert.equal(phrase("branch", seer, 0, "en", broken), undefined);
 });

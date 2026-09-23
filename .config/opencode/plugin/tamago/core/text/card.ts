@@ -1,5 +1,6 @@
 import { next } from "../career/stage.ts";
 import { BEHAVIOR_STATS, SCALE } from "../creature/sheet.ts";
+import { say } from "../language.ts";
 import type { Tamago } from "../tamago.ts";
 import { bar, fmt } from "../appearance/format.ts";
 import { MARK } from "../appearance/marks.ts";
@@ -31,7 +32,8 @@ export function progress(tamago: Tamago, width = BAR_WIDTH): string {
 /** The Species and its Rarity from hatchling on; before that the egg keeps its secret. */
 export function speciesLine(tamago: Tamago): string {
   if (tamago.stage === "egg") return "still an egg";
-  return `${tamago.species.label} · ${tamago.species.rarity}`;
+  // TODO(Task 9): read the Window's Language instead of the English side.
+  return `${say(tamago.species.label, "en")} · ${tamago.species.rarity}`;
 }
 
 /** "a" or "an", by the first letter of the label. */
@@ -41,7 +43,9 @@ function article(label: string): string {
 
 /** The hatch toast: the Species revealed, with its Rarity. */
 export function reveal(name: string, tamago: Tamago): string {
-  const { label, rarity } = tamago.species;
+  // TODO(Task 9): read the Window's Language instead of the English side.
+  const label = say(tamago.species.label, "en");
+  const { rarity } = tamago.species;
   return `${name} hatched: ${article(label)} ${label}, ${rarity}!`;
 }
 

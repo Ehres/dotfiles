@@ -2,6 +2,7 @@ import type { TraitId } from "../career/pick.ts";
 import { signatureOf } from "../creature/catalog.ts";
 import { generator, seed, weighted } from "../creature/random.ts";
 import { TEMPERAMENTS, temperamentOf, type Speaker, type Temperament } from "../creature/sheet.ts";
+import { say, type Language } from "../language.ts";
 import { ACCENT, accentFor, type Accent } from "./accent.ts";
 import { isTraitCue, type AnyCue, type Cue, type Phrases } from "./cue.ts";
 import { FLAVOR, PHRASES } from "./phrases.ts";
@@ -49,12 +50,12 @@ function domain(cue: AnyCue, times: number): string {
  * Temperament, which of the four at the weight of its Stat; then a phrase,
  * uniform. At `hatched` the Species always speaks: that is where it shows.
  */
-export function phrase(cue: AnyCue, speaker: Speaker, times: number, table: Record<TraitId, Accent> = ACCENT): string | undefined {
+export function phrase(cue: AnyCue, speaker: Speaker, times: number, language: Language, table: Record<TraitId, Accent> = ACCENT): string | undefined {
   const taken = accentFor(cue, speaker.traits, table);
   const random = generator(seed(speaker.hatchedAt, domain(cue, times)));
-  if (taken !== undefined) return taken[Math.floor(random() * taken.length)] ?? taken[0];
+  if (taken !== undefined) return say(taken[Math.floor(random() * taken.length)] ?? taken[0], language);
   if (isTraitCue(cue)) return undefined;
   const register = cue === "hatched" ? "species" : weighted(random(), REGISTERS, (key) => REGISTER[key]);
   const own = pool(cue, speaker, register, random());
-  return own[Math.floor(random() * own.length)] ?? own[0];
+  return say(own[Math.floor(random() * own.length)] ?? own[0], language);
 }

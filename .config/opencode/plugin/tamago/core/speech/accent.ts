@@ -15,46 +15,46 @@ export const ACCENT: Record<TraitId, Accent> = {
     takes: ["streak", "retried"],
     opens: [],
     phrases: {
-      streak: ["Still standing.", "Keep them coming.", "Barely felt it."],
-      retried: ["Again. Fine by me.", "Once more.", "I don't tire."],
+      streak: [{ en: "Still standing." }, { en: "Keep them coming." }, { en: "Barely felt it." }],
+      retried: [{ en: "Again. Fine by me." }, { en: "Once more." }, { en: "I don't tire." }],
     },
   },
   unshaken: {
     takes: ["denied", "long_work"],
     opens: [],
     phrases: {
-      denied: ["Understood.", "No matter.", "As you say."],
-      long_work: ["Long one. No trouble.", "Still steady.", "That held."],
+      denied: [{ en: "Understood." }, { en: "No matter." }, { en: "As you say." }],
+      long_work: [{ en: "Long one. No trouble." }, { en: "Still steady." }, { en: "That held." }],
     },
   },
   proud: {
     takes: ["todos_done", "big_diff"],
     opens: [],
     phrases: {
-      todos_done: ["Every one of them.", "Flawless.", "Look at that list."],
-      big_diff: ["A whole cathedral.", "Look at this work!", "We built that."],
+      todos_done: [{ en: "Every one of them." }, { en: "Flawless." }, { en: "Look at that list." }],
+      big_diff: [{ en: "A whole cathedral." }, { en: "Look at this work!" }, { en: "We built that." }],
     },
   },
   boastful: {
     takes: ["evolved", "granted"],
     opens: [],
     phrases: {
-      evolved: ["Behold the new me.", "Better already.", "Told you I would."],
-      granted: ["Naturally.", "Wise of you.", "Of course. Watch."],
+      evolved: [{ en: "Behold the new me." }, { en: "Better already." }, { en: "Told you I would." }],
+      granted: [{ en: "Naturally." }, { en: "Wise of you." }, { en: "Of course. Watch." }],
     },
   },
   watchful: {
     takes: [],
     opens: ["branch", "worktree"],
     phrases: {
-      branch: ["New branch. Noted.", "We moved. I saw.", "Different ground."],
-      worktree: ["A new tree. Nice.", "Another workspace.", "Room to work."],
+      branch: [{ en: "New branch. Noted." }, { en: "We moved. I saw." }, { en: "Different ground." }],
+      worktree: [{ en: "A new tree. Nice." }, { en: "Another workspace." }, { en: "Room to work." }],
     },
   },
   restless: {
     takes: [],
     opens: ["stir"],
-    phrases: { stir: ["Something moved.", "Files shifted. Hm.", "Not us, that one."] },
+    phrases: { stir: [{ en: "Something moved." }, { en: "Files shifted. Hm." }, { en: "Not us, that one." }] },
   },
 };
 

@@ -83,6 +83,6 @@ test("without Modifiers the Temperament is the historical one; a Species only we
 });
 
 test("a Species with a Modifier out of reach always has that Temperament", () => {
-  const table: readonly Species[] = [{ id: "always", label: "always", rarity: "common", sheet: { stoic: 12 } }];
+  const table: readonly Species[] = [{ id: "always", label: { en: "always" }, rarity: "common", sheet: { stoic: 12 } }];
   for (let t = 0; t < 1_000; t++) assert.equal(temperament(t * 997, "always", table), "stoic");
 });

@@ -7,7 +7,7 @@ import type { Cue, Phrases } from "./cue.ts";
  * (see `phrase` in register.ts): the Species most of the time, so a Tamago is
  * recognized by ear; the Temperament as a nuance; the neutral phrases as a
  * common ground. At `hatched` the Species always speaks: the hatch is where it
- * shows. English, at most MAX_TEXT characters each; a test in catalog.test.ts
- * enforces the coverage.
+ * shows. Every Language of every phrase is at most MAX_TEXT characters; a
+ * test in catalog.test.ts enforces the coverage.
  */
 export type Signature = Record<Cue, Phrases>;

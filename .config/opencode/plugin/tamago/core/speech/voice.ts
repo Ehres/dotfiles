@@ -3,6 +3,7 @@ import type { Speaker } from "../creature/sheet.ts";
 import type { TamagoEvent } from "../moment/events.ts";
 import type { Session } from "../moment/session.ts";
 import type { TraitId } from "../career/pick.ts";
+import { DEFAULT_LANGUAGE, type Language } from "../language.ts";
 import { ACCENT, opensCue, type Accent } from "./accent.ts";
 import { tuningOf, type AnyCue } from "./cue.ts";
 import { phrase } from "./register.ts";
@@ -126,6 +127,8 @@ export function speak(
   behavior: Behavior = MEDIAN,
   /** Whether a Draw awaits a Pick. The Voice cannot see the Career, so the Window computes it. */
   awaits = false,
+  /** Every phrase the user reads is said in this Language. */
+  language: Language = DEFAULT_LANGUAGE,
   /** The Accent table, injectable for tests; production always uses `ACCENT`. */
   table: Record<TraitId, Accent> = ACCENT,
 ): Voice {
@@ -139,7 +142,7 @@ export function speak(
   if (said !== undefined && now - said.at < cooldown) return next;
   if (next.last !== undefined && now - next.last.at < behavior.quietMs && priority <= next.last.priority) return next;
   const times = said?.times ?? 0;
-  const text = phrase(cue, speaker, times, table);
+  const text = phrase(cue, speaker, times, language, table);
   // A Trait-opened Cue whose table owns no phrases for it says nothing: no Bubble, the Voice otherwise untouched.
   if (text === undefined) return next;
   return {

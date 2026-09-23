@@ -1,3 +1,5 @@
+import type { Phrase } from "../language.ts";
+
 /** Why the Tamago speaks. Born from events and transitions, never from content. */
 export type Cue =
   | "permission"
@@ -14,8 +16,8 @@ export type Cue =
   | "hatched"
   | "choice";
 
-/** At least one phrase; a test bounds each to MAX_TEXT. */
-export type Phrases = readonly [string, ...string[]];
+/** At least one Phrase; a test bounds every Language of each to MAX_TEXT. */
+export type Phrases = readonly [Phrase, ...Phrase[]];
 
 /** Tuning table: a higher priority may interrupt the quiet window; Infinity means once per Session. */
 export const CUES: Record<Cue, { priority: number; cooldown: number }> = {

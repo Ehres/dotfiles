@@ -1,9 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { ACCENT, accentFor, opensCue, type Accent } from "../accent.ts";
-import { MAX_TEXT } from "../bubble.ts";
 import { TRAIT_CUES, type AnyCue } from "../cue.ts";
 import type { TraitId } from "../../career/pick.ts";
+import { assertSayable } from "./sayable.ts";
 
 test("every Cue a Trait takes or opens has phrases, and every phrase belongs to a Cue it takes or opens", () => {
   for (const [id, accent] of Object.entries(ACCENT)) {
@@ -19,13 +19,10 @@ test("every Cue a Trait can open is opened by some Trait, so none sits inert", (
   for (const cue of Object.keys(TRAIT_CUES)) assert.ok(opened.has(cue), `${cue} is never opened by a Trait`);
 });
 
-test("every phrase in ACCENT fits in MAX_TEXT, in printable ASCII", () => {
+test("every phrase in ACCENT fits in MAX_TEXT", () => {
   for (const [id, accent] of Object.entries(ACCENT)) {
     for (const cue of [...accent.takes, ...accent.opens]) {
-      for (const text of accent.phrases[cue] ?? []) {
-        assert.ok(text.length <= MAX_TEXT, `${id}/${cue}: ${JSON.stringify(text)}`);
-        assert.match(text, /^[\x20-\x7e]+$/, `${id}/${cue}: ${JSON.stringify(text)}`);
-      }
+      for (const phrase of accent.phrases[cue] ?? []) assertSayable(phrase, `${id}/${cue}`);
     }
   }
 });
@@ -45,8 +42,8 @@ test("a held Trait speaks the Cues it opens and nothing else", () => {
 
 test("when two held Traits take one Cue the most recent Pick speaks", () => {
   const table: Record<TraitId, Accent> = {
-    first: { takes: ["streak"], opens: [], phrases: { streak: ["First's phrase."] } },
-    second: { takes: ["streak"], opens: [], phrases: { streak: ["Second's phrase."] } },
+    first: { takes: ["streak"], opens: [], phrases: { streak: [{ en: "First's phrase." }] } },
+    second: { takes: ["streak"], opens: [], phrases: { streak: [{ en: "Second's phrase." }] } },
   };
   assert.deepEqual(accentFor("streak", ["first", "second"], table), table.second?.phrases.streak);
   assert.deepEqual(accentFor("streak", ["second", "first"], table), table.first?.phrases.streak);
@@ -54,8 +51,8 @@ test("when two held Traits take one Cue the most recent Pick speaks", () => {
 
 test("when two held Traits open one Cue the most recent Pick speaks", () => {
   const table: Record<TraitId, Accent> = {
-    first: { takes: [], opens: ["branch"], phrases: { branch: ["First's phrase."] } },
-    second: { takes: [], opens: ["branch"], phrases: { branch: ["Second's phrase."] } },
+    first: { takes: [], opens: ["branch"], phrases: { branch: [{ en: "First's phrase." }] } },
+    second: { takes: [], opens: ["branch"], phrases: { branch: [{ en: "Second's phrase." }] } },
   };
   assert.deepEqual(accentFor("branch", ["first", "second"], table), table.second?.phrases.branch);
   assert.deepEqual(accentFor("branch", ["second", "first"], table), table.first?.phrases.branch);

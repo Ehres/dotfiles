@@ -6,13 +6,13 @@ import { RARITIES, RARITY, hatch, pace, species, type Rarity, type Species } fro
 import { MODIFIERS_SUM_MAX, MODIFIER_MAX, type Modifiers } from "../sheet.ts";
 
 /** One Species per Rarity, so every tier can be drawn. */
-const full: readonly Species[] = RARITIES.map((rarity) => ({ id: `s-${rarity}`, label: rarity, rarity }));
+const full: readonly Species[] = RARITIES.map((rarity) => ({ id: `s-${rarity}`, label: { en: rarity }, rarity }));
 
 /** The table and the weights of the commit that shipped the draw, frozen: the pin below is about the formula, never about the data. */
 const ORIGINAL: readonly Species[] = [
-  { id: "cat", label: "cat", rarity: "common" },
-  { id: "owl", label: "owl", rarity: "common" },
-  { id: "dragon", label: "dragon", rarity: "legendary" },
+  { id: "cat", label: { en: "cat" }, rarity: "common" },
+  { id: "owl", label: { en: "owl" }, rarity: "common" },
+  { id: "dragon", label: { en: "dragon" }, rarity: "legendary" },
 ];
 const ORIGINAL_WEIGHTS: Record<Rarity, number> = { common: 60, uncommon: 25, rare: 10, epic: 4, legendary: 1 };
 
@@ -42,7 +42,7 @@ test("SPECIES ids are unique and REFERENCE is a common one", () => {
 });
 
 test("species and pace fall back to the reference for an unknown id", () => {
-  assert.equal(species("owl").label, "owl");
+  assert.deepEqual(species("owl").label, { en: "owl" });
   assert.equal(species("owl").rarity, "common");
   assert.deepEqual(species("nope"), species(REFERENCE));
   assert.equal(pace("dragon"), RARITY.legendary.pace);

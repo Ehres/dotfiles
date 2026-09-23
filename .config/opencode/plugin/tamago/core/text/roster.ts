@@ -1,6 +1,7 @@
 import { species } from "../creature/species.ts";
 import { stage } from "../career/stage.ts";
 import type { Career } from "../career/career.ts";
+import { say } from "../language.ts";
 import { idOf, type CareerId } from "../roster/roster.ts";
 
 /** The Name shown for a Career; `fallback` is the plugin's default Name. */
@@ -26,7 +27,8 @@ export function stepsIn(career: Career, fallback: string): string {
 export function line(career: Career, fallback: string, activeId: CareerId): string {
   const who = nameOf(career, fallback);
   const stageOf = stage(career);
-  const parts = stageOf === "egg" ? [who, stageOf] : [who, species(career.species).label, stageOf];
+  // TODO(Task 9): read the Window's Language instead of the English side.
+  const parts = stageOf === "egg" ? [who, stageOf] : [who, say(species(career.species).label, "en"), stageOf];
   if (idOf(career) === activeId) parts.push("active");
   return parts.join(" · ");
 }

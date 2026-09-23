@@ -81,9 +81,9 @@ test("temperamentOf breaks a tie by TEMPERAMENTS order", () => {
 
 /** A table for these tests: the reference without Modifiers, one Species that pushes, one whose push is out of reach. */
 const table: readonly Species[] = [
-  { id: "cat", label: "cat", rarity: "common" },
-  { id: "pusher", label: "pusher", rarity: "common", sheet: { stoic: 2, cheerful: -1, energy: 3, chatter: -3 } },
-  { id: "always", label: "always", rarity: "common", sheet: { stoic: 12 } },
+  { id: "cat", label: { en: "cat" }, rarity: "common" },
+  { id: "pusher", label: { en: "pusher" }, rarity: "common", sheet: { stoic: 2, cheerful: -1, energy: 3, chatter: -3 } },
+  { id: "always", label: { en: "always" }, rarity: "common", sheet: { stoic: 12 } },
 ];
 
 test("sheet adds the Modifiers of the Species; behavior Stats are clamped, Temperament Stats are not", () => {
@@ -139,7 +139,7 @@ test("the Speaker of a Career is derived once, and a table of its own never touc
   assert.equal(speakerOf(career), cached, "a Voice hears every event: the Career is what changes, not the Speaker");
   assert.notEqual(speakerOf({ ...career }), cached, "another Career object derives its own");
 
-  const table: readonly Species[] = [{ id: "owl", label: "owl", rarity: "common", sheet: { energy: 3 } }];
+  const table: readonly Species[] = [{ id: "owl", label: { en: "owl" }, rarity: "common", sheet: { energy: 3 } }];
   assert.deepEqual(speakerOf(career, table).sheet, sheet(career.hatchedAt, "owl", table));
   assert.notDeepEqual(speakerOf(career, table).sheet, cached.sheet, "the owl of that table is brisker than the catalog's");
   assert.equal(speakerOf(career), cached, "and asking with a table of its own left the cache alone");
