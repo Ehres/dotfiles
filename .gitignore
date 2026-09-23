@@ -3,6 +3,9 @@ node_modules
 network.out
 .worktrees/
 
+# Skills synchronized locally by an external tool.
+.agents/skills/synced/
+
 # opencode runtime state, not configuration. The README documents
 # `git add . && git commit` as the backup routine, which would otherwise commit
 # scheduler locks and scope paths named after work repos.
