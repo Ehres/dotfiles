@@ -35,6 +35,11 @@ return {
           })
           new_config.settings.tailwindCSS = new_config.settings.tailwindCSS or {}
           new_config.settings.tailwindCSS.classFunctions = { "cva" }
+          new_config.settings.tailwindCSS.lint = vim.tbl_deep_extend(
+            "keep",
+            new_config.settings.tailwindCSS.lint or {},
+            { suggestCanonicalClasses = "ignore" }
+          )
 
           local workspace_root = find_frontend_checkout(new_config.root_dir)
           if workspace_root then
