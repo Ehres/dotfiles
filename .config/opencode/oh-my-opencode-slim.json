@@ -6,7 +6,7 @@
     "openai": {
       "orchestrator": {
         "model": "openai/gpt-6-sol",
-        "variant": "Default",
+        "variant": "Medium",
         "skills": ["*"],
         "mcps": ["*", "!context7"]
       },
@@ -18,25 +18,25 @@
       },
       "librarian": {
         "model": "openai/gpt-6-luna",
-        "variant": "low",
+        "variant": "Default",
         "skills": [],
         "mcps": ["gh_grep"]
       },
       "explorer": {
         "model": "openai/gpt-6-luna",
-        "variant": "low",
+        "variant": "Default",
         "skills": [],
         "mcps": []
       },
       "designer": {
         "model": "openai/gpt-6-luna",
-        "variant": "medium",
+        "variant": "Default",
         "skills": [],
         "mcps": []
       },
       "fixer": {
         "model": "openai/gpt-6-luna",
-        "variant": "high",
+        "variant": "Default",
         "skills": [],
         "mcps": []
       }
