@@ -38,7 +38,6 @@ export function freshWindow(career: Career, muted = false): Window {
 function move(window: Window, ids: readonly string[], event: TamagoEvent, now: number): Window {
   if (ids.length === 0) return window;
   const conduct = behavior(window.career);
-  const awaits = pending(window.career).length > 0;
   const before = window.sessions;
   const after: Record<string, Session> = { ...before };
   let moved = false;
@@ -50,6 +49,7 @@ function move(window: Window, ids: readonly string[], event: TamagoEvent, now: n
   }
   let voices = window.voices;
   if (!window.muted) {
+    const awaits = pending(window.career).length > 0; // derived here, so a muted window never pays for a Draw nobody will hear
     const speaker = speakerOf(window.career);
     const next = { ...voices };
     let spoke = false;

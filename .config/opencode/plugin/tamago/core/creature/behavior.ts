@@ -62,7 +62,23 @@ export function behaviorOf(sheet: Sheet): Behavior {
   };
 }
 
+/**
+ * One Behavior per Career object. A Window derives it for every event and
+ * every Tick, while a Career only ever changes at a Flush; Careers are
+ * replaced on merge and never mutated, so identity is the right key. A table
+ * of its own is derived every time and never stored, so a caller that brings
+ * one is never served another's answer.
+ */
+const BEHAVIORS = new WeakMap<object, Behavior>();
+
 /** The Behavior of a Career: the same in every window, like its Stage. */
 export function behavior(career: Pick<Career, "hatchedAt" | "species">, table: readonly Species[] = SPECIES): Behavior {
-  return behaviorOf(sheet(career.hatchedAt, career.species, table));
+  const shared = table === SPECIES;
+  if (shared) {
+    const known = BEHAVIORS.get(career);
+    if (known !== undefined) return known;
+  }
+  const derived = behaviorOf(sheet(career.hatchedAt, career.species, table));
+  if (shared) BEHAVIORS.set(career, derived);
+  return derived;
 }

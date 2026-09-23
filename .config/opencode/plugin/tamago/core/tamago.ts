@@ -29,7 +29,7 @@ export type Tamago = {
   /** The Traits held, oldest Pick first. */
   traits: TraitId[];
   /** The Draws awaiting a Pick, in Milestone order; the first is the one the palette offers. */
-  choices: Pending[];
+  choices: readonly Pending[];
 };
 
 export function tamago(career: Career, table: readonly Species[] = SPECIES): Tamago {

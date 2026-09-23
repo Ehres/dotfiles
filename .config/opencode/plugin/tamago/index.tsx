@@ -31,6 +31,8 @@ const DATA_DIR = join(homedir(), ".local", "share", "opencode-tamago");
 const FLUSH_MS = 2_000;
 /** Longest pause between two flush attempts while the disk keeps failing. */
 const FLUSH_MAX_MS = 60_000;
+/** Pause between two flushes of a window with nothing of its own to write: it only watches what the other windows do. */
+const FLUSH_IDLE_MS = 10_000;
 
 const tui: TuiPlugin = async (api, options) => {
   /** The plugin option: the Name until the user renames the creature. */
@@ -111,6 +113,17 @@ const tui: TuiPlugin = async (api, options) => {
         if (failures === WARN_AFTER) api.ui.toast({ variant: "error", title: mirror.name(), message: cannotSave(mirror.name(), DATA_DIR) });
       },
       base: FLUSH_MS,
+      idle: FLUSH_IDLE_MS,
+      /** `guard` covers `persist`; this covers the choice of delay, read outside it: the loop never dies and never throws into the event loop. */
+      isIdle: () => {
+        try {
+          const window = mirror.current();
+          return isEmpty(window.pending) && !Object.values(window.sessions).some((session) => session.busy);
+        } catch (err) {
+          logError(err);
+          return false; // the delay we always had
+        }
+      },
       max: FLUSH_MAX_MS,
     });
     flusher.start();

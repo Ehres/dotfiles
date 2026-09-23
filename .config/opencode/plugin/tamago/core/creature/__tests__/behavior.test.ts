@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { MEDIAN, SLOW_PER_FAST, STREAK_MIN, behavior, behaviorOf } from "../behavior.ts";
-import { SCALE, draw, type Sheet } from "../sheet.ts";
+import { SCALE, draw, sheet, type Sheet } from "../sheet.ts";
 import type { Species } from "../species.ts";
 
 /** A Sheet with every Stat at `value`. */
@@ -58,4 +58,16 @@ test("behavior reads a Career: a date drawn all median gives MEDIAN, the Species
   ];
   assert.deepEqual(behavior({ hatchedAt: 1_006_599, species: "brisk" }, table), behaviorOf({ ...flat(SCALE.median), energy: 8 }));
   assert.equal(behavior({ hatchedAt: 1_006_599, species: "brisk" }, table).fastMs, 330);
+});
+
+test("the Behavior of a Career is derived once, and a table of its own never touches that cache", () => {
+  const career = { hatchedAt: 1_789_113_932_488, species: "owl" };
+  const cached = behavior(career);
+  assert.equal(behavior(career), cached, "a window derives per event: the Career is what changes, not the Behavior");
+  assert.notEqual(behavior({ ...career }), cached, "another Career object derives its own");
+
+  const table: readonly Species[] = [{ id: "owl", label: "owl", rarity: "common", sheet: { energy: 3 } }];
+  assert.deepEqual(behavior(career, table), behaviorOf(sheet(career.hatchedAt, "owl", table)));
+  assert.notDeepEqual(behavior(career, table), cached, "the owl of that table is brisker than the catalog's");
+  assert.equal(behavior(career), cached, "and asking with a table of its own left the cache alone");
 });

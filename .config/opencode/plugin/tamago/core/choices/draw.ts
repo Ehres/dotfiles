@@ -25,17 +25,26 @@ export function draw(career: Career, milestone: MilestoneId, table: readonly Tra
 
 export type Pending = { milestone: Milestone; draw: TraitId[] };
 
+/** One list per Career object, cached like the Behavior and for the same reason: a Window asks for every event, a Career changes at a Flush. Read-only, so a caller can never poison the cache. */
+const PENDING = new WeakMap<object, readonly Pending[]>();
+
 /** Reached Milestones without a Pick whose Draw is not empty, with that Draw, in table order. A Milestone can never block the queue. */
 export function pending(
   career: Career,
   milestones: readonly Milestone[] = MILESTONES,
   table: readonly Trait[] = TRAITS,
-): Pending[] {
+): readonly Pending[] {
+  const shared = milestones === MILESTONES && table === TRAITS;
+  if (shared) {
+    const known = PENDING.get(career);
+    if (known !== undefined) return known;
+  }
   const out: Pending[] = [];
   for (const milestone of reached(career, milestones)) {
     if (career.picks[milestone.id] !== undefined) continue;
     const offered = draw(career, milestone.id, table);
     if (offered.length > 0) out.push({ milestone, draw: offered });
   }
+  if (shared) PENDING.set(career, out);
   return out;
 }

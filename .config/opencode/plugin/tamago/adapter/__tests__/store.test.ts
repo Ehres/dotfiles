@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { chmodSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync, utimesSync, existsSync, readdirSync, statSync } from "node:fs";
+import { chmodSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync, utimesSync, existsSync, readdirSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { LOCK_STALE_MS } from "../../core/store/lock.ts";
@@ -23,6 +23,16 @@ test("load on an empty directory yields a fresh, non-corrupt egg and creates the
   assert.equal(loaded.corrupt, false);
   assert.deepEqual(loaded.career, freshCareer(42));
   assert.ok(existsSync(dir));
+});
+
+test("the directory is made once, so the poll of an idle window never touches the disk", () => {
+  const dir = join(scratch(), "nested");
+  const store = createStore(dir, () => 42);
+  store.load();
+  assert.ok(existsSync(dir));
+  rmSync(dir, { recursive: true, force: true });
+  store.load();
+  assert.equal(existsSync(dir), false, "a read that finds nothing leaves the disk alone");
 });
 
 test("load on an empty directory says the file is not present, so an idle window adopts nothing", () => {

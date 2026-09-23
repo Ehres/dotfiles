@@ -108,3 +108,14 @@ test("every line of four Picks keeps at least two candidates in every Draw", () 
   };
   walk(career(), 0);
 });
+
+test("the pending Draws of a Career are derived once, and tables of its own never touch that cache", () => {
+  const grown = career({ sessions: 900, prompts: 9_000, filesEdited: 2_000 });
+  const cached = pending(grown);
+  assert.ok(cached.length > 0, "a grown Career has Draws waiting: the cache is worth something here");
+  assert.equal(pending(grown), cached, "a window asks per event: the Career is what changes, not its Draws");
+  assert.notEqual(pending({ ...grown }), cached, "another Career object derives its own");
+
+  assert.notDeepEqual(pending(grown, milestones, table), cached, "tables of its own give their own Draws");
+  assert.equal(pending(grown), cached, "and asking with tables of its own left the cache alone");
+});

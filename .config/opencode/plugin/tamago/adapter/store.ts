@@ -68,6 +68,14 @@ export function createStore(dir: string, now: () => number = Date.now): Store {
   const lock = join(dir, LOCK_DIR);
   const ownerFile = join(lock, LOCK_OWNER_FILE);
   let token = "";
+  /** The data directory is made once, not at every read: the poll of an idle window must not touch the disk. The write path makes it again, so a directory removed under us still heals. */
+  let madeDir = false;
+
+  function ensureDir(): void {
+    if (madeDir) return;
+    mkdirSync(dir, { recursive: true });
+    madeDir = true;
+  }
 
   const restingFile = (id: CareerId): string => join(rosterDir, `${id}.json`);
 
@@ -85,7 +93,7 @@ export function createStore(dir: string, now: () => number = Date.now): Store {
 
   /** The active Career: a fresh egg, not corrupt, `present: false` when the file does not exist yet. */
   function read(): Read {
-    mkdirSync(dir, { recursive: true });
+    ensureDir();
     return readAt(file) ?? { career: freshCareer(now()), corrupt: false, unknown: {}, present: false };
   }
 

@@ -94,8 +94,18 @@ export function temperamentOf(sheet: Sheet): Temperament {
 /** What it takes to make a Tamago speak: its hatch date for the seed, its Species for the Signature, its Sheet for the Temperaments, its held Traits so the Voice never reads a Career. Derived from the Career, never stored. */
 export type Speaker = { hatchedAt: number; species: SpeciesId; sheet: Sheet; traits: readonly TraitId[] };
 
+/** One Speaker per Career object, cached like the Behavior and for the same reason: a Voice hears every event, a Career changes at a Flush. */
+const SPEAKERS = new WeakMap<object, Speaker>();
+
 export function speakerOf(career: Career, table: readonly Species[] = SPECIES): Speaker {
-  return { hatchedAt: career.hatchedAt, species: career.species, sheet: sheet(career.hatchedAt, career.species, table), traits: traits(career) };
+  const shared = table === SPECIES;
+  if (shared) {
+    const known = SPEAKERS.get(career);
+    if (known !== undefined) return known;
+  }
+  const derived: Speaker = { hatchedAt: career.hatchedAt, species: career.species, sheet: sheet(career.hatchedAt, career.species, table), traits: traits(career) };
+  if (shared) SPEAKERS.set(career, derived);
+  return derived;
 }
 
 /** 2^((v − median) / (max − median)): 0.5 at min, 1 at median, 2 at max. Geometric, because a duration is felt in ratio. */
