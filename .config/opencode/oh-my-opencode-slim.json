@@ -1,6 +1,7 @@
 {
   "$schema": "https://unpkg.com/oh-my-opencode-slim@latest/oh-my-opencode-slim.schema.json",
   "preset": "openai",
+  "disabled_mcps": ["context7"],
   "presets": {
     "openai": {
       "orchestrator": {
@@ -27,7 +28,6 @@
         "variant": "low",
         "skills": [],
         "mcps": [
-          "context7",
           "gh_grep"
         ]
       },
@@ -81,7 +81,6 @@
         "variant": "high",
         "skills": [],
         "mcps": [
-          "context7",
           "gh_grep"
         ]
       },
