@@ -49,8 +49,15 @@ What a Tamago is, decided at hatch and never changed: which creature is drawn
 at every Stage, and its Rarity. Drawn from the hatch date, then stored in the
 Career so that adding a Species later never changes an existing Tamago.
 A Species also carries Modifiers to the Sheet: it weighs on the character, it
-does not decide it.
+does not decide it. It also carries a Gender, because French agreement is a
+fact of the noun the Species names, not a choice the Tamago makes.
 _Avoid_: skin, style, breed, form, type
+
+**Gender**:
+Whether a Species agrees the French said about it in the masculine or the
+feminine. Fixed with the Species, since it is a fact about the noun; English
+agrees with nothing, so a Gender changes nothing there.
+_Avoid_: sex
 
 **Rarity**:
 How unlikely a Species is to hatch: common, uncommon, rare, epic or legendary.
@@ -177,6 +184,13 @@ _Avoid_: mode, voice (that is the memory), layer
 The phrases a Species owns for every Cue: its Register in the voice. At the
 hatch it is always the Signature that speaks.
 _Avoid_: species flavor, catchphrase, override
+
+**Phrase**:
+One thing to say, held once in English and once in French: what a Signature,
+a Temperament's flavor, the neutral phrases and an Accent are all pools of.
+Drawing which Phrase to say never depends on the Language; only reading it
+does.
+_Avoid_: string, text, translation
 
 **Language**:
 The Language everything the user reads is said in: the Bubbles, the card,

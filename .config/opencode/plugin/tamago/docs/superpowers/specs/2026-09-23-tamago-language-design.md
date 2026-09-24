@@ -4,8 +4,8 @@ Design of 2026-09-23. Adds a Language to the plugin: everything the user
 reads — Bubbles, card, roster, palette, toasts, dialogs, moods — is said in
 English or in French, chosen by the user.
 
-Status: approved in brainstorm, not implemented. The implementation plan goes
-to `docs/superpowers/plans/` once this spec is accepted.
+Status: implemented. See `docs/superpowers/plans/2026-09-23-tamago-language.md`
+for the plan that carried it out.
 
 ## What already exists
 
