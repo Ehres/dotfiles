@@ -5,8 +5,7 @@
   "presets": {
     "openai": {
       "orchestrator": {
-        "model": "openai/gpt-6-sol",
-        "variant": "Medium",
+        "model": "openai/gpt-6-sol-fast",
         "skills": ["*"],
         "mcps": ["*", "!context7"]
       },
@@ -18,25 +17,25 @@
       },
       "librarian": {
         "model": "openai/gpt-6-luna",
-        "variant": "Default",
+        "variant": "low",
         "skills": [],
         "mcps": ["gh_grep"]
       },
       "explorer": {
         "model": "openai/gpt-6-luna",
-        "variant": "Default",
+        "variant": "low",
         "skills": [],
         "mcps": []
       },
       "designer": {
         "model": "openai/gpt-6-luna",
-        "variant": "Default",
+        "variant": "medium",
         "skills": [],
         "mcps": []
       },
       "fixer": {
         "model": "openai/gpt-6-luna",
-        "variant": "Default",
+        "variant": "high",
         "skills": [],
         "mcps": []
       }
@@ -82,6 +81,16 @@
         "skills": [],
         "mcps": []
       }
+    }
+  },
+  "agents": {
+    "fast-generic": {
+      "model": "openai/gpt-6-luna",
+      "variant": "low",
+      "prompt": "You are a fast execution agent for routine mechanical command work. Run requested shell commands, inspect results, and report concise outcomes. For git commits or pushes, inspect git status, git diff (including staged changes), and recent log first; stage only intended files; avoid secrets; preserve repository commit-message style. Never commit or push unless the user explicitly requested it. Never amend, rebase, reset --hard, clean, force-push, or delete branches unless the user explicitly requested that exact operation. Do not edit code or make architecture or design decisions.",
+      "orchestratorPrompt": "Delegate to @fast-generic for routine mechanical command work: git status/diff/log reconnaissance, normal commit preparation, explicitly requested commits and pushes, and no-edit validation such as lint, typecheck, tests, or builds. Require it to inspect diffs before committing, stage only intended files, avoid secrets, preserve repository commit-message style, and report commit hashes or push results. Never delegate commits or pushes without explicit user authorization. Do not use it for code edits, design, architecture, debugging strategy, documentation research, or destructive git history operations unless explicitly requested.",
+      "skills": [],
+      "mcps": []
     }
   }
 }
