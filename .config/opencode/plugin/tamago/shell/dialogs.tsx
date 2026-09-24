@@ -2,7 +2,7 @@
 import type { TuiPluginApi } from "@opencode-ai/plugin/tui";
 import { createEffect, createMemo, type Accessor } from "solid-js";
 import type { Store } from "../adapter/store.ts";
-import { isLanguage, LANGUAGES } from "../core/language.ts";
+import { isLanguage, LANGUAGES, say } from "../core/language.ts";
 import { blockers, idOf, ordered } from "../core/roster/roster.ts";
 import { tamago, type Tamago } from "../core/tamago.ts";
 import { LANGUAGE_TITLE, RENAME, hatchConfirm } from "../core/text/dialogs.ts";
@@ -136,10 +136,11 @@ export function createDialogs(deps: {
         <api.ui.DialogSelect
           title={CHOOSE.title}
           skipFilter
+          // TODO(Task 10): read the Window's Language instead of the English side.
           options={(offered()?.draw ?? []).map((trait) => ({
-            title: TRAIT_TEXT[trait]?.title ?? trait,
+            title: say(TRAIT_TEXT[trait]?.title ?? { en: trait }, "en"),
             value: trait,
-            description: TRAIT_TEXT[trait]?.description ?? "",
+            description: say(TRAIT_TEXT[trait]?.description ?? { en: "" }, "en"),
           }))}
           onSelect={guard((option: { value: string }) => {
             ours = true;

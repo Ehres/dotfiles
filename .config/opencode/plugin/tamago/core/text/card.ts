@@ -84,5 +84,5 @@ export function sheetLines(tamago: Tamago, language: Language = "en"): string[] 
 
 /** One line per held Trait: its mark and its title. Empty when none is held, so the card shows nothing. */
 export function traitLines(tamago: Tamago, language: Language = "en"): string[] {
-  return tamago.traits.map((id) => `${MARK[id] ?? " "} ${TRAIT_TEXT[id]?.title ?? id}`);
+  return tamago.traits.map((id) => `${MARK[id] ?? " "} ${say(TRAIT_TEXT[id]?.title ?? { en: id }, language)}`);
 }

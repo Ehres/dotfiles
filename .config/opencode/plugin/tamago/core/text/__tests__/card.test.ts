@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { DAY_MS, STATS_HIDDEN, age, progress, reveal, sheetLines, speciesLine } from "../card.ts";
+import { DAY_MS, STATS_HIDDEN, age, progress, reveal, sheetLines, speciesLine, traitLines } from "../card.ts";
 import { REFERENCE } from "../../creature/catalog.ts";
 import { freshCareer, type Career } from "../../career/career.ts";
 import { tamago } from "../../tamago.ts";
@@ -112,4 +112,14 @@ test("sheetLines shows the Stats after the Modifiers of the Species", () => {
   const lines = sheetLines(tamago(dragon));
   assert.equal(lines[0], "energy      [##########] 10");
   assert.equal(lines[2], "sensitivity [----------] 0");
+});
+
+test("traitLines shows the mark and the title of each held Trait", () => {
+  const kept = tamago({ ...career, picks: { "evolution:hatchling": { trait: "hardy", at: 1 } } });
+  assert.deepEqual(traitLines(kept), ["+ Hardy"]);
+});
+
+test("traitLines shows the mark and the title of each held Trait, in French", () => {
+  const kept = tamago({ ...career, picks: { "evolution:hatchling": { trait: "hardy", at: 1 } } });
+  assert.deepEqual(traitLines(kept, "fr"), ["+ Endurant"]);
 });
