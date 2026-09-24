@@ -36,6 +36,11 @@ test("progress shows the bar towards the next stage", () => {
   assert.equal(progress(tamago({ ...freshCareer(0), species: "cat" }), 4), "[----] 0 / 200 xp → hatchling");
 });
 
+test("progress agrees the arrow-target Stage word with the gender, in French", () => {
+  assert.equal(progress(tamago({ ...freshCareer(0), species: "cat" }), 4, "fr"), "[----] 0 / 200 xp → nouveau-né");
+  assert.equal(progress(tamago({ ...freshCareer(0), species: "owl" }), 4, "fr"), "[----] 0 / 200 xp → nouveau-née");
+});
+
 test("an elder has reached its final form", () => {
   const elder: Career = { ...career, prompts: 20_000 };
   assert.equal(progress(tamago(elder), 4), "[####] 41,467 xp · final form");

@@ -9,7 +9,7 @@ export const BUSY = "Another window is writing. Try again.";
 export const GONE = "That Tamago is gone from the roster.";
 
 /** `gender` agrees the Stage word in French; the caller passes the Species' gender, masculine when there is none to read. */
-export function evolved(name: string, stage: StageId, language: Language = "en", gender: Gender = "m"): string {
+export function evolved(name: string, stage: StageId, gender: Gender = "m", language: Language = "en"): string {
   const stageWord = word(STAGE_TEXT[stage], language, gender);
   switch (language) {
     case "en":

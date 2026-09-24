@@ -24,6 +24,14 @@ test("every command reads in French: titles filed under Tamago, choose counts, i
     assert.ok(title.startsWith("Tamago: "), title);
     assert.ok(!title.includes("Mochi"), title);
   }
+  assert.equal(command("mute", "Mochi", 0, "fr").title, "Tamago: bulles on-off");
+  assert.equal(command("card", "Mochi", 0, "fr").title, "Tamago: voir la carte");
+  assert.equal(command("pet", "Mochi", 0, "fr").title, "Tamago: caresser");
+  assert.equal(command("rename", "Mochi", 0, "fr").title, "Tamago: renommer");
+  assert.equal(command("hatch", "Mochi", 0, "fr").title, "Tamago: faire éclore un œuf");
+  assert.equal(command("roster", "Mochi", 0, "fr").title, "Tamago: roster");
+  assert.equal(command("choose", "Mochi", 0, "fr").title, "Tamago: choisir un trait");
+  assert.equal(command("language", "Mochi", 0, "fr").title, "Tamago: langue");
   assert.equal(command("mute", "Mochi", 0, "fr").description, "Couper ou rendre la parole à Mochi");
   assert.equal(command("card", "Mochi", 0, "fr").description, "Qui est Mochi : espèce, stade, XP, âge, stats");
   assert.equal(command("pet", "Mochi", 0, "fr").description, "Faire une caresse à Mochi");
