@@ -22,7 +22,7 @@ function labelWidth(language: Language): number {
 }
 
 /** Whole days since hatching, in words. */
-export function age(hatchedAt: number, now: number, language: Language = "en"): string {
+export function age(hatchedAt: number, now: number, language: Language): string {
   const days = Math.max(0, Math.floor((now - hatchedAt) / DAY_MS));
   switch (language) {
     case "en":
@@ -33,7 +33,7 @@ export function age(hatchedAt: number, now: number, language: Language = "en"): 
 }
 
 /** The XP bar towards the next Stage, or a full bar once there is none. */
-export function progress(tamago: Tamago, width = BAR_WIDTH, language: Language = "en"): string {
+export function progress(tamago: Tamago, width: number, language: Language): string {
   const coming = next(tamago.career);
   if (coming === undefined) {
     const final = language === "en" ? "final form" : "forme finale";
@@ -45,7 +45,7 @@ export function progress(tamago: Tamago, width = BAR_WIDTH, language: Language =
 }
 
 /** The Species and its Rarity from hatchling on; before that the egg keeps its secret. */
-export function speciesLine(tamago: Tamago, language: Language = "en"): string {
+export function speciesLine(tamago: Tamago, language: Language): string {
   if (tamago.stage === "egg") return language === "en" ? "still an egg" : "encore un œuf";
   const gender = tamago.species.gender ?? "m";
   const label = say(tamago.species.label, language);
@@ -60,7 +60,7 @@ function article(tamago: Tamago, language: Language): string {
 }
 
 /** The hatch toast: the Species revealed, with its Rarity. */
-export function reveal(name: string, tamago: Tamago, language: Language = "en"): string {
+export function reveal(name: string, tamago: Tamago, language: Language): string {
   const label = say(tamago.species.label, language);
   const gender = tamago.species.gender ?? "m";
   const rarity = word(RARITY_TEXT[tamago.species.rarity], language, gender);
@@ -73,7 +73,7 @@ export function reveal(name: string, tamago: Tamago, language: Language = "en"):
 }
 
 /** One line per behavior Stat, in BEHAVIOR_STATS order: label, bar, value after the Modifiers of the Species. At egg the single STATS_HIDDEN line. */
-export function sheetLines(tamago: Tamago, language: Language = "en"): string[] {
+export function sheetLines(tamago: Tamago, language: Language): string[] {
   if (tamago.stage === "egg") return [say(STATS_HIDDEN, language)];
   const width = labelWidth(language);
   return BEHAVIOR_STATS.map((stat) => {
@@ -83,6 +83,6 @@ export function sheetLines(tamago: Tamago, language: Language = "en"): string[] 
 }
 
 /** One line per held Trait: its mark and its title. Empty when none is held, so the card shows nothing. */
-export function traitLines(tamago: Tamago, language: Language = "en"): string[] {
+export function traitLines(tamago: Tamago, language: Language): string[] {
   return tamago.traits.map((id) => `${MARK[id] ?? " "} ${say(TRAIT_TEXT[id]?.title ?? { en: id }, language)}`);
 }

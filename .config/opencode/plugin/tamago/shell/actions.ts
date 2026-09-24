@@ -5,6 +5,7 @@ import { PET_MS } from "../core/appearance/sprites.ts";
 import { isEmpty } from "../core/career/career.ts";
 import type { MilestoneId, TraitId } from "../core/career/pick.ts";
 import type { Language } from "../core/language.ts";
+import { say } from "../core/language.ts";
 import type { CareerId } from "../core/roster/roster.ts";
 import { BUSY, GONE } from "../core/text/toasts.ts";
 import {
@@ -70,7 +71,7 @@ export function createActions(deps: {
   /** The Delta must reach its own Career before the active one changes. False, with a toast, when the disk is busy; disk errors throw and `guard` logs them. */
   const settle = (): boolean => {
     if (persist()) return true;
-    api.ui.toast({ variant: "warning", title: mirror.name(), message: BUSY });
+    api.ui.toast({ variant: "warning", title: mirror.name(), message: say(BUSY, mirror.language()) });
     return false;
   };
 
@@ -79,9 +80,9 @@ export function createActions(deps: {
     if (id === mirror.current().career.hatchedAt) return; // another window brought it to the front while we flushed
     const result = store.switch(id);
     if (result.outcome === "written") mirror.run(flushed(mirror.current(), result.career, now()));
-    else if (result.outcome === "missing") api.ui.toast({ variant: "warning", title: mirror.name(), message: GONE });
+    else if (result.outcome === "missing") api.ui.toast({ variant: "warning", title: mirror.name(), message: say(GONE, mirror.language()) });
     else if (result.outcome === "corrupt") warnCorrupt();
-    else api.ui.toast({ variant: "warning", title: mirror.name(), message: BUSY });
+    else api.ui.toast({ variant: "warning", title: mirror.name(), message: say(BUSY, mirror.language()) });
   };
 
   const lay = () => {
@@ -89,7 +90,7 @@ export function createActions(deps: {
     const result = store.hatch(now());
     if (result.outcome === "written") mirror.run(flushed(mirror.current(), result.career, now()));
     else if (result.outcome === "corrupt") warnCorrupt();
-    else api.ui.toast({ variant: "warning", title: mirror.name(), message: BUSY });
+    else api.ui.toast({ variant: "warning", title: mirror.name(), message: say(BUSY, mirror.language()) });
   };
 
   /** A rename is a Delta: shown at once here, flushed like the counters, latest wins across windows. */

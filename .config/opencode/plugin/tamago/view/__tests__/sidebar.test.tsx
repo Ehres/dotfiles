@@ -3,6 +3,7 @@ import { expect, test } from "bun:test";
 import { tamago } from "../../core/tamago.ts";
 import type { Bubble } from "../../core/speech/voice.ts";
 import { CHOICE_BADGE } from "../../core/text/traits.ts";
+import { LanguageProvider } from "../language.tsx";
 import { SidebarView } from "../sidebar.tsx";
 import { ThemeProvider } from "../theme.tsx";
 import { EGG, FOOTER, OWNER, session } from "./fixtures.ts";
@@ -25,6 +26,22 @@ test("idle adult: sprite, name, stage and xp, mood, footer", async () => {
   expect(shown).toContain("adult · 9,166 xp");
   expect(shown).toContain("chilling");
   expect(shown).toContain("~/projects/");
+  expect(shown).toMatchSnapshot();
+});
+
+test("idle adult reads in French: mood and grouped xp", async () => {
+  const shown = await frame(
+    () => (
+      <ThemeProvider theme={TUI_THEME}>
+        <LanguageProvider language="fr">
+          <SidebarView name="Tamago" session={session("idle")} tamago={adult} clock={0} footer={FOOTER} heart={false} />
+        </LanguageProvider>
+      </ThemeProvider>
+    ),
+    SIDEBAR,
+  );
+  expect(shown).toContain("adult · 9 166 xp");
+  expect(shown).toContain("tranquille");
   expect(shown).toMatchSnapshot();
 });
 

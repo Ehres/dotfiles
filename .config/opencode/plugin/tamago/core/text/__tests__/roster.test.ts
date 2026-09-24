@@ -9,8 +9,11 @@ const elder = (hatchedAt: number, patch: Partial<Career> = {}): Career => ({ ...
 const egg = (hatchedAt: number, patch: Partial<Career> = {}): Career => ({ ...freshCareer(hatchedAt), species: "cat", ...patch });
 
 test("blocked names who is still growing and what to wait for", () => {
-  assert.equal(blocked(egg(T0, { name: { value: "Momo", at: 1 } }), "Tamago"), "Momo is still an egg. Hatch when every Tamago is elder.");
-  assert.equal(blocked({ ...egg(T0), sessions: 20 }, "Tamago"), "Tamago is still hatchling. Hatch when every Tamago is elder.");
+  assert.equal(
+    blocked(egg(T0, { name: { value: "Momo", at: 1 } }), "Tamago", "en"),
+    "Momo is still an egg. Hatch when every Tamago is elder.",
+  );
+  assert.equal(blocked({ ...egg(T0), sessions: 20 }, "Tamago", "en"), "Tamago is still hatchling. Hatch when every Tamago is elder.");
 });
 
 test("blocked names who is still growing and what to wait for, in French", () => {
@@ -25,9 +28,9 @@ test("blocked names who is still growing and what to wait for, in French", () =>
 });
 
 test("stepsIn announces a new egg or the Tamago that comes to the front", () => {
-  assert.equal(stepsIn(egg(T0), "Tamago"), "A new egg.");
-  assert.equal(stepsIn(elder(T0, { name: { value: "Momo", at: 1 } }), "Tamago"), "Momo steps in.");
-  assert.equal(stepsIn(elder(T0), "Tamago"), "Tamago steps in.");
+  assert.equal(stepsIn(egg(T0), "Tamago", "en"), "A new egg.");
+  assert.equal(stepsIn(elder(T0, { name: { value: "Momo", at: 1 } }), "Tamago", "en"), "Momo steps in.");
+  assert.equal(stepsIn(elder(T0), "Tamago", "en"), "Tamago steps in.");
 });
 
 test("stepsIn announces a new egg or the Tamago that comes to the front, in French", () => {
@@ -38,10 +41,10 @@ test("stepsIn announces a new egg or the Tamago that comes to the front, in Fren
 
 test("line names the Tamago, its species and stage, marks the active one, and shows an egg by its stage alone", () => {
   const momo = elder(T0, { species: "owl", name: { value: "Momo", at: 1 } });
-  assert.equal(line(momo, "Tamago", T0), "Momo · owl · elder · active");
-  assert.equal(line(momo, "Tamago", T0 - 1), "Momo · owl · elder");
-  assert.equal(line(egg(T0), "Tamago", T0 - 1), "Tamago · egg");
-  assert.equal(line(egg(T0), "Tamago", T0), "Tamago · egg · active");
+  assert.equal(line(momo, "Tamago", T0, "en"), "Momo · owl · elder · active");
+  assert.equal(line(momo, "Tamago", T0 - 1, "en"), "Momo · owl · elder");
+  assert.equal(line(egg(T0), "Tamago", T0 - 1, "en"), "Tamago · egg");
+  assert.equal(line(egg(T0), "Tamago", T0, "en"), "Tamago · egg · active");
 });
 
 test("line names the Tamago, its species and stage, marks the active one, in French", () => {

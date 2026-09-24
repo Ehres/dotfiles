@@ -5,7 +5,7 @@ import { CRAFT_TEXT, STANCE_TEXT, TEMPERAMENT_TEXT } from "./tables.ts";
 import { word } from "./word.ts";
 
 /** "sarcastic · prudent shell" / "sarcastique · mécano prudent", or the Temperament alone before young. */
-export function describe(character: Character, language: Language = "en"): string {
+export function describe(character: Character, language: Language): string {
   const temperament = say(TEMPERAMENT_TEXT[character.temperament], language);
   const vocation = character.vocation;
   if (vocation === undefined) return temperament;

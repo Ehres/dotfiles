@@ -55,3 +55,22 @@ exports[`the card lists the Traits held, with their marks 1`] = `
 
   [#####---------------] 9,166 / 20,000 xp → elder"
 `;
+
+exports[`the card of an adult reads in French 1`] = `
+"  Tamago                                               esc
+
+    /\\   /\\
+    ( o o )    chat · commun
+   /| ^^^ |\\   adult · 9 166 xp
+    |_____|    12 jours
+    /|   |\\
+
+  enjoué · mécano audacieux
+
+  énergie     [#####-----] 5
+  bavardage   [#########-] 9
+  sensibilité [#---------] 1
+  patience    [######----] 6
+
+  [#####---------------] 9 166 / 20 000 xp → ancien"
+`;

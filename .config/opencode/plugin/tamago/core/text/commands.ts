@@ -47,6 +47,6 @@ function description(id: CommandId, who: string, choices: number, language: Lang
 }
 
 /** Filed under PALETTE on purpose: the user searches for the plugin, not for a Name they may change; the Name only appears in the description. */
-export function command(id: CommandId, who: string, choices = 0, language: Language = "en"): { name: string; title: string; description: string } {
+export function command(id: CommandId, who: string, choices: number, language: Language): { name: string; title: string; description: string } {
   return { name: `tamago.${id}`, title: `${PALETTE}: ${say(TITLES[id], language)}`, description: description(id, who, choices, language) };
 }

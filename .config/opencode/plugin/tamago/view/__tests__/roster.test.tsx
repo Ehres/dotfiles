@@ -1,6 +1,8 @@
 /** @jsxImportSource @opentui/solid */
 import { expect, test } from "bun:test";
 import { tamago, type Tamago } from "../../core/tamago.ts";
+import { line } from "../../core/text/roster.ts";
+import { LanguageProvider } from "../language.tsx";
 import { RosterView } from "../roster.tsx";
 import { ThemeProvider } from "../theme.tsx";
 import { EGG, OWNER } from "./fixtures.ts";
@@ -30,4 +32,20 @@ test("the roster highlights the first line, moves with the arrows, selects with 
 
   await mockInput.pressKey("RETURN");
   expect(chosen).toBe(shown[1]);
+});
+
+test("the roster reads in French", async () => {
+  const shown = [tamago(OWNER)];
+  const lines = [line(OWNER, "Tamago", OWNER.hatchedAt, "fr")];
+  const { frame } = await mount(() => (
+    <ThemeProvider theme={TUI_THEME}>
+      <LanguageProvider language="fr">
+        <RosterView tamagos={shown} lines={lines} clock={0} now={0} onSelect={() => {}} />
+      </LanguageProvider>
+    </ThemeProvider>
+  ));
+  const shownFrame = trim(await frame());
+  expect(shownFrame).toContain("Tamago · chat · adulte · actif");
+  expect(shownFrame).toContain("chat · commun");
+  expect(shownFrame).toMatchSnapshot();
 });

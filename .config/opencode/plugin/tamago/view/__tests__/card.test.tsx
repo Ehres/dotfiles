@@ -2,6 +2,7 @@
 import { expect, test } from "bun:test";
 import { tamago } from "../../core/tamago.ts";
 import { CardView } from "../card.tsx";
+import { LanguageProvider } from "../language.tsx";
 import { ThemeProvider } from "../theme.tsx";
 import { DAY_MS } from "../../core/text/card.ts";
 import { EGG, OWNER } from "./fixtures.ts";
@@ -20,6 +21,21 @@ test("the card of an adult: title row, species, age, character, four bars, xp ba
   expect(shown).toContain("12 days old");
   expect(shown).toContain("cheerful · bold shell");
   expect(shown).toContain("energy");
+  expect(shown).toMatchSnapshot();
+});
+
+test("the card of an adult reads in French", async () => {
+  const now = OWNER.hatchedAt + 12 * DAY_MS;
+  const shown = await frame(() => (
+    <ThemeProvider theme={TUI_THEME}>
+      <LanguageProvider language="fr">
+        <CardView name="Tamago" tamago={tamago(OWNER)} clock={0} heart={false} now={now} />
+      </LanguageProvider>
+    </ThemeProvider>
+  ));
+  expect(shown).toContain("chat · commun");
+  expect(shown).toContain("12 jours");
+  expect(shown).toContain("énergie");
   expect(shown).toMatchSnapshot();
 });
 

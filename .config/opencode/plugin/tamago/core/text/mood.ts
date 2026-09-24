@@ -12,16 +12,6 @@ export const MOOD_TEXT: Record<Activity, Phrase> = {
   sleeping: { en: "zzz", fr: "zzz" },
 };
 
-export function mood(activity: Activity, language: Language = "en"): string {
+export function mood(activity: Activity, language: Language): string {
   return say(MOOD_TEXT[activity], language);
 }
-
-/** English only, kept for the sidebar's direct index until it switches to mood(). */
-export const MOOD: Record<Activity, string> = {
-  idle: MOOD_TEXT.idle.en,
-  thinking: MOOD_TEXT.thinking.en,
-  working: MOOD_TEXT.working.en,
-  waiting: MOOD_TEXT.waiting.en,
-  hurt: MOOD_TEXT.hurt.en,
-  sleeping: MOOD_TEXT.sleeping.en,
-};

@@ -2,11 +2,13 @@
 import type { KeyEvent } from "@opentui/core";
 import { useKeyboard, type JSX } from "@opentui/solid";
 import { Index, Show, createSignal } from "solid-js";
+import { say } from "../core/language.ts";
 import { rosterAction, step } from "../core/roster/roster.ts";
 import { ROSTER_TITLE } from "../core/text/dialogs.ts";
 import type { Tamago } from "../core/tamago.ts";
 import { CardBody } from "./card.tsx";
 import { DialogFrame } from "./dialog.tsx";
+import { useLanguage } from "./language.tsx";
 import { useTheme } from "./theme.tsx";
 
 /** The gutter of the highlighted line, and the blank one of the others, so the Names stay aligned. */
@@ -27,6 +29,7 @@ export function RosterView(props: {
   onSelect: (tamago: Tamago) => void;
 }): JSX.Element {
   const theme = useTheme();
+  const language = useLanguage();
   const [cursor, setCursor] = createSignal(0);
   const highlighted = (): Tamago | undefined => props.tamagos[cursor()];
   useKeyboard((key: KeyEvent) => {
@@ -40,7 +43,7 @@ export function RosterView(props: {
     setCursor((at) => step(at, action, props.tamagos.length));
   });
   return (
-    <DialogFrame title={ROSTER_TITLE}>
+    <DialogFrame title={say(ROSTER_TITLE, language())}>
       <box flexDirection="column">
         <Index each={props.lines}>
           {(text, index) => (

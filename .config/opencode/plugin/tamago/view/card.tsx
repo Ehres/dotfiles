@@ -1,11 +1,12 @@
 /** @jsxImportSource @opentui/solid */
 import type { JSX } from "@opentui/solid";
 import { Index, Show, createMemo } from "solid-js";
-import { age, progress, sheetLines, speciesLine, traitLines } from "../core/text/card.ts";
+import { BAR_WIDTH, age, progress, sheetLines, speciesLine, traitLines } from "../core/text/card.ts";
 import { fmt } from "../core/appearance/format.ts";
 import { describe } from "../core/text/character.ts";
 import type { Tamago } from "../core/tamago.ts";
 import { DialogFrame } from "./dialog.tsx";
+import { useLanguage } from "./language.tsx";
 import { Sprite } from "./sprite.tsx";
 import { useTheme } from "./theme.tsx";
 
@@ -18,29 +19,30 @@ import { useTheme } from "./theme.tsx";
  */
 export function CardBody(props: { tamago: Tamago; clock: number; heart: boolean; now: number }): JSX.Element {
   const theme = useTheme();
-  const traits = createMemo(() => traitLines(props.tamago));
+  const language = useLanguage();
+  const traits = createMemo(() => traitLines(props.tamago, language()));
   return (
     <box flexDirection="column" gap={1}>
       <box flexDirection="row" gap={2}>
         <Sprite tamago={props.tamago} activity="idle" clock={props.clock} heart={props.heart} color={theme.current.accent} />
         <box flexDirection="column" justifyContent="center">
-          <text fg={theme.current.textMuted}>{speciesLine(props.tamago)}</text>
+          <text fg={theme.current.textMuted}>{speciesLine(props.tamago, language())}</text>
           <text fg={theme.current.textMuted}>
-            {props.tamago.stage} · {fmt(props.tamago.xp)} xp
+            {props.tamago.stage} · {fmt(props.tamago.xp, language())} xp
           </text>
-          <text fg={theme.current.textMuted}>{age(props.tamago.career.hatchedAt, props.now)}</text>
+          <text fg={theme.current.textMuted}>{age(props.tamago.career.hatchedAt, props.now, language())}</text>
         </box>
       </box>
-      <text fg={theme.current.textMuted}>{describe(props.tamago.character)}</text>
+      <text fg={theme.current.textMuted}>{describe(props.tamago.character, language())}</text>
       <Show when={traits().length > 0}>
         <box flexDirection="column">
           <Index each={traits()}>{(line) => <text fg={theme.current.textMuted}>{line()}</text>}</Index>
         </box>
       </Show>
       <box flexDirection="column">
-        <Index each={sheetLines(props.tamago)}>{(line) => <text fg={theme.current.textMuted}>{line()}</text>}</Index>
+        <Index each={sheetLines(props.tamago, language())}>{(line) => <text fg={theme.current.textMuted}>{line()}</text>}</Index>
       </box>
-      <text fg={theme.current.textMuted}>{progress(props.tamago)}</text>
+      <text fg={theme.current.textMuted}>{progress(props.tamago, BAR_WIDTH, language())}</text>
     </box>
   );
 }

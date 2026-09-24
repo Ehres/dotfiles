@@ -33,7 +33,7 @@ export function createPalette(deps: {
       const who = mirror.name();
       unregisterCommands = api.keymap.registerLayer({
         commands: COMMAND_IDS.map((id) => ({
-          ...command(id, who, mirror.active().choices.length),
+          ...command(id, who, mirror.active().choices.length, mirror.language()),
           category: PALETTE,
           /** What lists a command in the palette; OpenCode's own commands carry it. */
           namespace: "palette",

@@ -5,11 +5,12 @@ import type { JSX } from "@opentui/solid";
 import { Show, createMemo } from "solid-js";
 import { bubbleBorders } from "../core/speech/bubble.ts";
 import { fmt } from "../core/appearance/format.ts";
-import { MOOD } from "../core/text/mood.ts";
+import { mood } from "../core/text/mood.ts";
 import { CHOICE_BADGE } from "../core/text/traits.ts";
 import type { Activity, Session } from "../core/moment/session.ts";
 import type { Tamago } from "../core/tamago.ts";
 import type { Bubble } from "../core/speech/voice.ts";
+import { useLanguage } from "./language.tsx";
 import { Portrait, type BubbleView } from "./portrait.tsx";
 import { useTheme } from "./theme.tsx";
 
@@ -39,6 +40,7 @@ export function SidebarView(props: {
   heart: boolean;
 }): JSX.Element {
   const theme = useTheme();
+  const language = useLanguage();
   const activity = () => props.session.activity;
   const bubble = createMemo((): BubbleView | undefined => {
     const current = props.bubble;
@@ -64,9 +66,9 @@ export function SidebarView(props: {
           </Show>
         </text>
         <text fg={theme.current.textMuted}>
-          {props.tamago.stage} · {fmt(props.tamago.xp)} xp
+          {props.tamago.stage} · {fmt(props.tamago.xp, language())} xp
         </text>
-        <text fg={theme.current.textMuted}>{MOOD[activity()]}</text>
+        <text fg={theme.current.textMuted}>{mood(activity(), language())}</text>
       </Portrait>
       <text>
         <span style={{ fg: theme.current.textMuted }}>{props.footer.parent}/</span>

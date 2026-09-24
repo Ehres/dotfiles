@@ -10,6 +10,7 @@ import { blocked, line } from "../core/text/roster.ts";
 import { LANGUAGE_NAME } from "../core/text/tables.ts";
 import { CHOOSE, CHOSEN_ELSEWHERE, NOTHING_TO_CHOOSE, TRAIT_TEXT } from "../core/text/traits.ts";
 import { CardView } from "../view/card.tsx";
+import { LanguageProvider } from "../view/language.tsx";
 import { RosterView } from "../view/roster.tsx";
 import { ThemeProvider } from "../view/theme.tsx";
 import type { Actions } from "./actions.ts";
@@ -43,7 +44,9 @@ export function createDialogs(deps: {
   const showCard = () => {
     api.ui.dialog.replace(() => (
       <ThemeProvider theme={api.theme}>
-        <CardView name={mirror.name()} tamago={mirror.active()} clock={clock()} heart={actions.heart()} now={started + clock()} />
+        <LanguageProvider language={mirror.language()}>
+          <CardView name={mirror.name()} tamago={mirror.active()} clock={clock()} heart={actions.heart()} now={started + clock()} />
+        </LanguageProvider>
       </ThemeProvider>
     ));
   };
@@ -51,8 +54,8 @@ export function createDialogs(deps: {
   const askName = () => {
     api.ui.dialog.replace(() => (
       <api.ui.DialogPrompt
-        title={RENAME.title}
-        placeholder={RENAME.placeholder}
+        title={say(RENAME.title, mirror.language())}
+        placeholder={say(RENAME.placeholder, mirror.language())}
         value={mirror.name()}
         onConfirm={guard((value: string) => {
           api.ui.dialog.clear();
@@ -73,19 +76,21 @@ export function createDialogs(deps: {
     const careers = ordered(roster);
     const shown = careers.map((one) => tamago(one));
     const activeId = idOf(roster.active);
-    const lines = careers.map((one) => line(one, defaultName, activeId));
+    const lines = careers.map((one) => line(one, defaultName, activeId, mirror.language()));
     api.ui.dialog.replace(() => (
       <ThemeProvider theme={api.theme}>
-        <RosterView
-          tamagos={shown}
-          lines={lines}
-          clock={clock()}
-          now={started + clock()}
-          onSelect={guard((chosen: Tamago) => {
-            api.ui.dialog.clear();
-            if (idOf(chosen.career) !== activeId) actions.switchTo(idOf(chosen.career));
-          })}
-        />
+        <LanguageProvider language={mirror.language()}>
+          <RosterView
+            tamagos={shown}
+            lines={lines}
+            clock={clock()}
+            now={started + clock()}
+            onSelect={guard((chosen: Tamago) => {
+              api.ui.dialog.clear();
+              if (idOf(chosen.career) !== activeId) actions.switchTo(idOf(chosen.career));
+            })}
+          />
+        </LanguageProvider>
       </ThemeProvider>
     ));
   };
@@ -99,10 +104,10 @@ export function createDialogs(deps: {
     }
     const first = blockers(roster)[0];
     if (first !== undefined) {
-      api.ui.toast({ variant: "warning", title: mirror.name(), message: blocked(first, defaultName) });
+      api.ui.toast({ variant: "warning", title: mirror.name(), message: blocked(first, defaultName, mirror.language()) });
       return;
     }
-    const confirm = () => hatchConfirm(mirror.name());
+    const confirm = () => hatchConfirm(mirror.name(), mirror.language());
     api.ui.dialog.replace(() => (
       <api.ui.DialogConfirm
         title={confirm().title}
@@ -120,7 +125,7 @@ export function createDialogs(deps: {
   const askChoice = () => {
     const first = mirror.active().choices[0];
     if (first === undefined) {
-      api.ui.toast({ variant: "info", title: mirror.name(), message: NOTHING_TO_CHOOSE });
+      api.ui.toast({ variant: "info", title: mirror.name(), message: say(NOTHING_TO_CHOOSE, mirror.language()) });
       return;
     }
     const milestone = first.milestone.id;
@@ -130,17 +135,16 @@ export function createDialogs(deps: {
       createEffect(() => {
         if (offered() !== undefined || ours) return;
         api.ui.dialog.clear();
-        api.ui.toast({ variant: "info", title: mirror.name(), message: CHOSEN_ELSEWHERE });
+        api.ui.toast({ variant: "info", title: mirror.name(), message: say(CHOSEN_ELSEWHERE, mirror.language()) });
       });
       return (
         <api.ui.DialogSelect
-          title={CHOOSE.title}
+          title={say(CHOOSE.title, mirror.language())}
           skipFilter
-          // TODO(Task 10): read the Window's Language instead of the English side.
           options={(offered()?.draw ?? []).map((trait) => ({
-            title: say(TRAIT_TEXT[trait]?.title ?? { en: trait }, "en"),
+            title: say(TRAIT_TEXT[trait]?.title ?? { en: trait }, mirror.language()),
             value: trait,
-            description: say(TRAIT_TEXT[trait]?.description ?? { en: "" }, "en"),
+            description: say(TRAIT_TEXT[trait]?.description ?? { en: "" }, mirror.language()),
           }))}
           onSelect={guard((option: { value: string }) => {
             ours = true;
@@ -156,7 +160,7 @@ export function createDialogs(deps: {
   const askLanguage = () => {
     api.ui.dialog.replace(() => (
       <api.ui.DialogSelect
-        title={LANGUAGE_TITLE}
+        title={say(LANGUAGE_TITLE, mirror.language())}
         skipFilter
         options={LANGUAGES.map((one) => ({ title: LANGUAGE_NAME[one], value: one }))}
         onSelect={guard((option: { value: string }) => {

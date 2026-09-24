@@ -2,6 +2,7 @@
 import { expect, test } from "bun:test";
 import { createRoot } from "solid-js";
 import { freshCareer, type Career } from "../../core/career/career.ts";
+import { say } from "../../core/language.ts";
 import { CHOSEN_ELSEWHERE, NOTHING_TO_CHOOSE } from "../../core/text/traits.ts";
 import { adopt, freshWindow } from "../../core/window.ts";
 import { frame } from "../../view/__tests__/render.tsx";
@@ -44,7 +45,7 @@ test("with nothing pending the command toasts instead of opening a dialog", () =
   const { dialogs, toasts, shown } = harness(freshCareer(1_700_000_000_000));
   createRoot(() => dialogs.askChoice());
   expect(shown()).toBeUndefined();
-  expect(toasts.at(-1)?.message).toBe(NOTHING_TO_CHOOSE);
+  expect(toasts.at(-1)?.message).toBe(say(NOTHING_TO_CHOOSE, "en"));
 });
 
 test("choosing through the dialog keeps the Pick, clears the dialog and never says chosen elsewhere", async () => {
@@ -65,7 +66,7 @@ test("choosing through the dialog keeps the Pick, clears the dialog and never sa
   props?.onSelect?.(option);
   expect(mirror.career().picks[milestone]).toEqual({ trait: option.value, at: 42 });
   expect(shown()).toBeUndefined();
-  expect(toasts.some((toast) => toast.message === CHOSEN_ELSEWHERE)).toBe(false);
+  expect(toasts.some((toast) => toast.message === say(CHOSEN_ELSEWHERE, "en"))).toBe(false);
 });
 
 test("a Pick landing from another window closes the dialog and says so, exactly once", async () => {
@@ -86,5 +87,5 @@ test("a Pick landing from another window closes the dialog and says so, exactly 
   const remoteCareer: Career = { ...mirror.career(), picks: { ...mirror.career().picks, [milestone]: { trait, at: 99 } } };
   mirror.run(adopt(mirror.current(), remoteCareer, 100));
   expect(shown()).toBeUndefined();
-  expect(toasts.filter((toast) => toast.message === CHOSEN_ELSEWHERE)).toHaveLength(1);
+  expect(toasts.filter((toast) => toast.message === say(CHOSEN_ELSEWHERE, "en"))).toHaveLength(1);
 });

@@ -5,15 +5,12 @@ import type { Phrase } from "../language.ts";
 export const CHOICE_BADGE = "★";
 
 /** The title of the Draw dialog and what to do there. */
-// TODO(Task 10): become Phrase and read with say(); see the plan's string table for the French.
-export const CHOOSE = { title: "Keep one" };
+export const CHOOSE: { title: Phrase } = { title: { en: "Keep one", fr: "En garder un" } };
 
 /** Nothing awaits, said as a toast when the command is run with an empty queue. */
-// TODO(Task 10): become Phrase and read with say(); see the plan's string table for the French.
-export const NOTHING_TO_CHOOSE = "No choice waits right now.";
+export const NOTHING_TO_CHOOSE: Phrase = { en: "No choice waits right now.", fr: "Aucun choix n'attend pour l'instant." };
 /** Another window picked first. */
-// TODO(Task 10): become Phrase and read with say(); see the plan's string table for the French.
-export const CHOSEN_ELSEWHERE = "That choice was made in another window.";
+export const CHOSEN_ELSEWHERE: Phrase = { en: "That choice was made in another window.", fr: "Ce choix a été fait dans une autre fenêtre." };
 
 /**
  * What each Trait is called and what it changes, shown in the Draw dialog and

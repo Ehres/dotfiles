@@ -10,7 +10,7 @@ import { SUBSCRIBED, createTranslator } from "./adapter/translate.ts";
 import { footerPath } from "./core/appearance/footer.ts";
 import { freshCareer, isEmpty } from "./core/career/career.ts";
 import { MEDIAN, behavior } from "./core/creature/behavior.ts";
-import { resolveLanguage } from "./core/language.ts";
+import { resolveLanguage, say } from "./core/language.ts";
 import { tickInterval } from "./core/moment/cadence.ts";
 import { WARN_AFTER } from "./core/store/retry.ts";
 import { reveal } from "./core/text/card.ts";
@@ -67,11 +67,13 @@ const tui: TuiPlugin = async (api, options) => {
         if (effect.type === "renamed" || effect.type === "chosen") palette?.register();
         else if (effect.type === "switched") {
           palette?.register();
-          api.ui.toast({ variant: "info", title: name, message: stepsIn(mirror.career(), defaultName) });
+          api.ui.toast({ variant: "info", title: name, message: stepsIn(mirror.career(), defaultName, mirror.language()) });
         } else {
           palette?.register(); // an Evolution is what makes a Draw appear
-          if (effect.stage === "hatchling") api.ui.toast({ variant: "success", title: name, message: reveal(name, mirror.active()) });
-          else api.ui.toast({ variant: "success", title: name, message: evolved(name, effect.stage) });
+          const gender = mirror.active().species.gender ?? "m";
+          if (effect.stage === "hatchling")
+            api.ui.toast({ variant: "success", title: name, message: reveal(name, mirror.active(), mirror.language()) });
+          else api.ui.toast({ variant: "success", title: name, message: evolved(name, effect.stage, gender, mirror.language()) });
         }
       },
     );
@@ -80,7 +82,7 @@ const tui: TuiPlugin = async (api, options) => {
     const warnCorrupt = () => {
       if (warnedCorrupt) return;
       warnedCorrupt = true;
-      api.ui.toast({ variant: "warning", title: mirror.name(), message: CORRUPT });
+      api.ui.toast({ variant: "warning", title: mirror.name(), message: say(CORRUPT, mirror.language()) });
     };
     if (loaded.corrupt) warnCorrupt();
 
@@ -116,7 +118,8 @@ const tui: TuiPlugin = async (api, options) => {
       persist: actions.persist,
       onError: (err, failures) => {
         logError(err);
-        if (failures === WARN_AFTER) api.ui.toast({ variant: "error", title: mirror.name(), message: cannotSave(mirror.name(), DATA_DIR) });
+        if (failures === WARN_AFTER)
+          api.ui.toast({ variant: "error", title: mirror.name(), message: cannotSave(mirror.name(), DATA_DIR, mirror.language()) });
       },
       base: FLUSH_MS,
       idle: FLUSH_IDLE_MS,

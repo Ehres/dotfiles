@@ -3,8 +3,8 @@ import assert from "node:assert/strict";
 import { cannotSave, evolved } from "../toasts.ts";
 
 test("evolved names the Tamago and the Stage it reached; cannotSave points at the error log next to the data directory", () => {
-  assert.equal(evolved("Mochi", "young"), "Mochi evolved: young!");
-  assert.equal(cannotSave("Mochi", "/d"), "Mochi cannot save its progress. See /d/error.log.");
+  assert.equal(evolved("Mochi", "young", "m", "en"), "Mochi evolved: young!");
+  assert.equal(cannotSave("Mochi", "/d", "en"), "Mochi cannot save its progress. See /d/error.log.");
 });
 
 test("evolved and cannotSave, in French", () => {
@@ -12,8 +12,8 @@ test("evolved and cannotSave, in French", () => {
   assert.equal(cannotSave("Mochi", "/d", "fr"), "Mochi n'arrive pas à enregistrer sa progression. Voir /d/error.log.");
 });
 
-test("evolved agrees the Stage word with the gender it is given, masculine by default", () => {
-  assert.equal(evolved("Mochi", "elder"), "Mochi evolved: elder!", "English does not agree, so the default gender never shows");
+test("evolved agrees the Stage word with the gender it is given, English never agreeing", () => {
+  assert.equal(evolved("Mochi", "elder", "m", "en"), "Mochi evolved: elder!", "English does not agree, so the gender never shows");
   assert.equal(evolved("Nono", "elder", "m", "fr"), "Nono évolue : ancien !");
   assert.equal(evolved("Nono", "elder", "f", "fr"), "Nono évolue : ancienne !");
 });

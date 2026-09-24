@@ -1,15 +1,17 @@
 /** @jsxImportSource @opentui/solid */
 import type { JSX } from "@opentui/solid";
 import { Show } from "solid-js";
-import { progress } from "../core/text/card.ts";
+import { BAR_WIDTH, progress } from "../core/text/card.ts";
 import { CHOICE_BADGE } from "../core/text/traits.ts";
 import type { Tamago } from "../core/tamago.ts";
+import { useLanguage } from "./language.tsx";
 import { Portrait } from "./portrait.tsx";
 import { useTheme } from "./theme.tsx";
 
 /** Rendered in the additive home_bottom slot, under the prompt: sprite on the left, name and progress on the right. */
 export function HomeView(props: { name: string; tamago: Tamago; clock: number; heart: boolean }): JSX.Element {
   const theme = useTheme();
+  const language = useLanguage();
 
   return (
     <box paddingTop={1}>
@@ -21,7 +23,7 @@ export function HomeView(props: { name: string; tamago: Tamago; clock: number; h
           </Show>
           <span style={{ fg: theme.current.textMuted }}> · {props.tamago.stage}</span>
         </text>
-        <text fg={theme.current.textMuted}>{progress(props.tamago)}</text>
+        <text fg={theme.current.textMuted}>{progress(props.tamago, BAR_WIDTH, language())}</text>
       </Portrait>
     </box>
   );

@@ -13,7 +13,7 @@ export function nameOf(career: Career, fallback: string): string {
 }
 
 /** The refusal when a Hatch is blocked. */
-export function blocked(first: Career, fallback: string, language: Language = "en"): string {
+export function blocked(first: Career, fallback: string, language: Language): string {
   const who = nameOf(first, fallback);
   const gender = species(first.species).gender ?? "m";
   const stageOf = word(STAGE_TEXT[stage(first)], language, gender);
@@ -31,7 +31,7 @@ export function blocked(first: Career, fallback: string, language: Language = "e
 }
 
 /** The toast when another Career becomes active, whether this window caused it or learned it at a Flush. */
-export function stepsIn(career: Career, fallback: string, language: Language = "en"): string {
+export function stepsIn(career: Career, fallback: string, language: Language): string {
   const isEgg = stage(career) === "egg";
   switch (language) {
     case "en":
@@ -42,7 +42,7 @@ export function stepsIn(career: Career, fallback: string, language: Language = "
 }
 
 /** One line of the roster view: Name, Species label and Stage; an egg shows its Stage alone; the active one says so. */
-export function line(career: Career, fallback: string, activeId: CareerId, language: Language = "en"): string {
+export function line(career: Career, fallback: string, activeId: CareerId, language: Language): string {
   const who = nameOf(career, fallback);
   const stageId = stage(career);
   const gender = species(career.species).gender ?? "m";

@@ -39,10 +39,10 @@ test("character and describe", () => {
   const full = tamago(owner).character;
   assert.equal(full.temperament, temperament(owner.hatchedAt));
   assert.deepEqual(full.vocation, { craft: "shell", stance: "bold" });
-  assert.equal(describe(full), `${full.temperament} · bold shell`);
+  assert.equal(describe(full, "en"), `${full.temperament} · bold shell`);
   const egg = tamago({ ...freshCareer(owner.hatchedAt), species: "cat" }).character;
   assert.deepEqual(egg, { temperament: full.temperament }, "no vocation key at all before young");
-  assert.equal(describe(egg), full.temperament);
+  assert.equal(describe(egg, "en"), full.temperament);
 });
 
 test("an unknown Species reads as the reference: no Modifier, common, pace 1", () => {

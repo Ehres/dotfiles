@@ -3,6 +3,7 @@ import type { TuiPluginApi } from "@opencode-ai/plugin/tui";
 import type { Accessor } from "solid-js";
 import { initialSession } from "../core/moment/session.ts";
 import { HomeView } from "../view/home.tsx";
+import { LanguageProvider } from "../view/language.tsx";
 import { SidebarView, type FooterInfo } from "../view/sidebar.tsx";
 import { ThemeProvider } from "../view/theme.tsx";
 import type { Actions } from "./actions.ts";
@@ -29,15 +30,17 @@ export function registerSlots(deps: {
       sidebar_footer(ctx, props) {
         return (
           <ThemeProvider theme={ctx.theme}>
-            <SidebarView
-              name={mirror.name()}
-              session={mirror.sessions()[props.session_id] ?? initialSession(0)}
-              tamago={mirror.active()}
-              clock={clock()}
-              footer={footer(props.session_id)}
-              bubble={mirror.voices()[props.session_id]?.bubble}
-              heart={actions.heart()}
-            />
+            <LanguageProvider language={mirror.language()}>
+              <SidebarView
+                name={mirror.name()}
+                session={mirror.sessions()[props.session_id] ?? initialSession(0)}
+                tamago={mirror.active()}
+                clock={clock()}
+                footer={footer(props.session_id)}
+                bubble={mirror.voices()[props.session_id]?.bubble}
+                heart={actions.heart()}
+              />
+            </LanguageProvider>
           </ThemeProvider>
         );
       },
@@ -50,7 +53,9 @@ export function registerSlots(deps: {
       home_bottom(ctx) {
         return (
           <ThemeProvider theme={ctx.theme}>
-            <HomeView name={mirror.name()} tamago={mirror.active()} clock={clock()} heart={actions.heart()} />
+            <LanguageProvider language={mirror.language()}>
+              <HomeView name={mirror.name()} tamago={mirror.active()} clock={clock()} heart={actions.heart()} />
+            </LanguageProvider>
           </ThemeProvider>
         );
       },

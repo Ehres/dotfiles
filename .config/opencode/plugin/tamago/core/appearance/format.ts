@@ -7,7 +7,7 @@ const grouped = new Intl.NumberFormat("en-US");
  * the narrow no-break space `fr-FR` would give: it keeps the ASCII rule, it
  * stays one column wide, and it cannot move when Node's ICU data changes.
  */
-export function fmt(n: number, language: Language = "en"): string {
+export function fmt(n: number, language: Language): string {
   const formatted = grouped.format(n);
   return language === "fr" ? formatted.replaceAll(",", " ") : formatted;
 }
