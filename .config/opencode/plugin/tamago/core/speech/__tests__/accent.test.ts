@@ -27,6 +27,14 @@ test("every phrase in ACCENT fits in MAX_TEXT", () => {
   }
 });
 
+test("every Trait speaks French on every Cue it takes or opens", () => {
+  for (const [id, accent] of Object.entries(ACCENT)) {
+    for (const cue of [...accent.takes, ...accent.opens]) {
+      for (const phrase of accent.phrases[cue] ?? []) assert.ok(phrase.fr !== undefined, `${id}/${cue}: ${JSON.stringify(phrase.en)}`);
+    }
+  }
+});
+
 test("a held Trait speaks the Cues it takes and nothing else", () => {
   assert.deepEqual(accentFor("streak", ["hardy"]), ACCENT.hardy?.phrases.streak);
   assert.equal(accentFor("woke", ["hardy"]), undefined);

@@ -1,11 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { TEMPERAMENTS, type Sheet, type Speaker, type Temperament } from "../../creature/sheet.ts";
-import { signatureOf } from "../../creature/catalog.ts";
+import { SPECIES, signatureOf } from "../../creature/catalog.ts";
 import { REGISTER, phrase } from "../register.ts";
 import { ACCENT, type Accent } from "../accent.ts";
 import { FLAVOR, PHRASES } from "../phrases.ts";
-import type { Cue } from "../cue.ts";
+import { CUES, TRAIT_CUES, type AnyCue, type Cue, type Phrases, type TraitCue } from "../cue.ts";
 import type { TraitId } from "../../career/pick.ts";
 
 /** A Sheet at the median everywhere but where `patch` says. */
@@ -118,6 +118,67 @@ test("a Trait that takes a Cue silences the Species and the Temperament there", 
   for (let times = 0; times < 30; times++) said.add(say("streak", held, times));
   for (const text of said) assert.ok(ACCENT.hardy?.phrases.streak?.some((phrase) => phrase.en === text), `${text} is not hardy's`);
   assert.notDeepEqual(say("streak", plain, 0), say("streak", held, 0));
+});
+
+/**
+ * Every Phrase the Voice can draw, indexed by its English. Two Phrases that
+ * carry one English must carry one French, or a draw could not be followed
+ * from one Language to the other by its words alone.
+ */
+function frenchByEnglish(): ReadonlyMap<string, string> {
+  const index = new Map<string, string>();
+  const add = (phrases: Phrases, where: string): void => {
+    for (const one of phrases) {
+      const french = one.fr;
+      assert.ok(french !== undefined, `${where}: ${JSON.stringify(one.en)} carries no French`);
+      const already = index.get(one.en);
+      assert.ok(already === undefined || already === french, `${where}: ${JSON.stringify(one.en)} is ${JSON.stringify(already)} elsewhere and ${JSON.stringify(french)} here`);
+      index.set(one.en, french);
+    }
+  };
+  for (const cue of Object.keys(CUES) as Cue[]) {
+    add(PHRASES[cue], `neutral/${cue}`);
+    for (const temperament of TEMPERAMENTS) add(FLAVOR[temperament][cue], `${temperament}/${cue}`);
+    for (const one of SPECIES) add(one.signature[cue], `${one.id}/${cue}`);
+  }
+  for (const [id, accent] of Object.entries(ACCENT)) {
+    for (const cue of [...accent.takes, ...accent.opens]) {
+      const phrases = accent.phrases[cue];
+      assert.ok(phrases !== undefined, `${id} claims ${cue} without phrases`);
+      add(phrases, `${id}/${cue}`);
+    }
+  }
+  return index;
+}
+
+test("a Language changes the words, never which phrase is drawn", () => {
+  const french = frenchByEnglish();
+  const holders: readonly Speaker[] = Object.keys(ACCENT).map((trait, index) => ({ hatchedAt: 30 + index, species: "owl", sheet: sheetOf({ cheerful: 6, stoic: 4 }), traits: [trait] }));
+  const speakers: readonly Speaker[] = [
+    STOIC,
+    DRAGON,
+    { hatchedAt: 21, species: "cat", sheet: sheetOf({ sarcastic: 9, dreamy: 3 }), traits: [] },
+    { hatchedAt: 22, species: "nope", sheet: sheetOf({ dreamy: 8 }), traits: [] },
+    ...holders,
+  ];
+  const cues: readonly AnyCue[] = [...(Object.keys(CUES) as Cue[]), ...(Object.keys(TRAIT_CUES) as TraitCue[])];
+  let checked = 0;
+  for (const speaker of speakers) {
+    for (const cue of cues) {
+      for (let times = 0; times < 24; times++) {
+        const english = phrase(cue, speaker, times, "en");
+        const said = phrase(cue, speaker, times, "fr");
+        if (english === undefined) {
+          assert.equal(said, undefined, `${cue}/${times}: English said nothing and French spoke`);
+          continue;
+        }
+        // the same draw: the French said here is the French of the English said there
+        assert.equal(said, french.get(english), `${cue}/${times}: the two Languages drew different phrases`);
+        checked++;
+      }
+    }
+  }
+  assert.ok(checked >= 1000, `the draws must reach every Register, only ${checked} checked`);
 });
 
 test("phrase says nothing, and never throws, when a held Trait's table opens a Cue it owns no phrases for", () => {
