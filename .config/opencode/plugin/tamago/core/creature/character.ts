@@ -64,9 +64,3 @@ export function vocation(paced: Paced): Vocation | undefined {
   if (stageIndex(stage(paced)) < VOCATION_FROM) return undefined;
   return { craft: craft(paced), stance: stance(paced) };
 }
-
-/** "sarcastic · prudent shell", or the Temperament alone before young. */
-export function describe(character: Character): string {
-  if (character.vocation === undefined) return character.temperament;
-  return `${character.temperament} · ${character.vocation.stance} ${character.vocation.craft}`;
-}

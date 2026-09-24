@@ -1,8 +1,11 @@
 import { species } from "../creature/species.ts";
 import { stage } from "../career/stage.ts";
 import type { Career } from "../career/career.ts";
+import type { Language } from "../language.ts";
 import { say } from "../language.ts";
 import { idOf, type CareerId } from "../roster/roster.ts";
+import { STAGE_TEXT } from "./tables.ts";
+import { word } from "./word.ts";
 
 /** The Name shown for a Career; `fallback` is the plugin's default Name. */
 export function nameOf(career: Career, fallback: string): string {
@@ -10,25 +13,41 @@ export function nameOf(career: Career, fallback: string): string {
 }
 
 /** The refusal when a Hatch is blocked. */
-export function blocked(first: Career, fallback: string): string {
+export function blocked(first: Career, fallback: string, language: Language = "en"): string {
   const who = nameOf(first, fallback);
-  const stageOf = stage(first);
-  return stageOf === "egg"
-    ? `${who} is still an egg. Hatch when every Tamago is elder.`
-    : `${who} is still ${stageOf}. Hatch when every Tamago is elder.`;
+  const gender = species(first.species).gender ?? "m";
+  const stageOf = word(STAGE_TEXT[stage(first)], language, gender);
+  switch (language) {
+    case "en":
+      return stage(first) === "egg"
+        ? `${who} is still an egg. Hatch when every Tamago is elder.`
+        : `${who} is still ${stageOf}. Hatch when every Tamago is elder.`;
+    case "fr":
+      // "encore un œuf" takes an article where "encore jeune" does not.
+      return stage(first) === "egg"
+        ? `${who} est encore un œuf. Une éclosion demande que tous soient anciens.`
+        : `${who} est encore ${stageOf}. Une éclosion demande que tous soient anciens.`;
+  }
 }
 
 /** The toast when another Career becomes active, whether this window caused it or learned it at a Flush. */
-export function stepsIn(career: Career, fallback: string): string {
-  return stage(career) === "egg" ? "A new egg." : `${nameOf(career, fallback)} steps in.`;
+export function stepsIn(career: Career, fallback: string, language: Language = "en"): string {
+  const isEgg = stage(career) === "egg";
+  switch (language) {
+    case "en":
+      return isEgg ? "A new egg." : `${nameOf(career, fallback)} steps in.`;
+    case "fr":
+      return isEgg ? "Un nouvel œuf." : `${nameOf(career, fallback)} prend la place.`;
+  }
 }
 
 /** One line of the roster view: Name, Species label and Stage; an egg shows its Stage alone; the active one says so. */
-export function line(career: Career, fallback: string, activeId: CareerId): string {
+export function line(career: Career, fallback: string, activeId: CareerId, language: Language = "en"): string {
   const who = nameOf(career, fallback);
-  const stageOf = stage(career);
-  // TODO(Task 9): read the Window's Language instead of the English side.
-  const parts = stageOf === "egg" ? [who, stageOf] : [who, say(species(career.species).label, "en"), stageOf];
-  if (idOf(career) === activeId) parts.push("active");
+  const stageId = stage(career);
+  const gender = species(career.species).gender ?? "m";
+  const stageWord = word(STAGE_TEXT[stageId], language, gender);
+  const parts = stageId === "egg" ? [who, stageWord] : [who, say(species(career.species).label, language), stageWord];
+  if (idOf(career) === activeId) parts.push(language === "en" ? "active" : "actif");
   return parts.join(" · ");
 }

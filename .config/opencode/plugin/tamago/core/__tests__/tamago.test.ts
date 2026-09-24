@@ -3,10 +3,11 @@ import assert from "node:assert/strict";
 import { freshCareer, type Career } from "../career/career.ts";
 import { growth, stage, xp } from "../career/stage.ts";
 import { behavior } from "../creature/behavior.ts";
-import { describe, temperament } from "../creature/character.ts";
+import { temperament } from "../creature/character.ts";
 import { sheet, temperamentOf } from "../creature/sheet.ts";
 import { species } from "../creature/species.ts";
 import { tamago } from "../tamago.ts";
+import { describe } from "../text/character.ts";
 
 /** The owner's real career on 2026-09-15, plus questions. */
 const owner: Career = {

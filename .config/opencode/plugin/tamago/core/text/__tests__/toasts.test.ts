@@ -6,3 +6,8 @@ test("evolved names the Tamago and the Stage it reached; cannotSave points at th
   assert.equal(evolved("Mochi", "young"), "Mochi evolved: young!");
   assert.equal(cannotSave("Mochi", "/d"), "Mochi cannot save its progress. See /d/error.log.");
 });
+
+test("evolved and cannotSave, in French", () => {
+  assert.equal(evolved("Mochi", "young", "fr"), "Mochi évolue : jeune !");
+  assert.equal(cannotSave("Mochi", "/d", "fr"), "Mochi n'arrive pas à enregistrer sa progression. Voir /d/error.log.");
+});
