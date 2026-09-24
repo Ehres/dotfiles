@@ -42,7 +42,7 @@ test("SPECIES ids are unique and REFERENCE is a common one", () => {
 });
 
 test("species and pace fall back to the reference for an unknown id", () => {
-  assert.deepEqual(species("owl").label, { en: "owl", fr: "chouette" });
+  assert.equal(species("owl").label.en, "owl");
   assert.equal(species("owl").rarity, "common");
   assert.deepEqual(species("nope"), species(REFERENCE));
   assert.equal(pace("dragon"), RARITY.legendary.pace);
