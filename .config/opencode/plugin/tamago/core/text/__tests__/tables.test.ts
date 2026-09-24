@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { LANGUAGES, say } from "../../language.ts";
+import { LANGUAGES, say, type Phrase } from "../../language.ts";
 import { STAGES } from "../../career/stage.ts";
 import { RARITIES } from "../../creature/species.ts";
 import { BEHAVIOR_STATS, TEMPERAMENTS } from "../../creature/sheet.ts";
@@ -31,10 +31,9 @@ function assertWord(w: Word, where: string): void {
   }
 }
 
-function assertPhrase(phrase: { en: string; fr?: string }, where: string): void {
+function assertPhrase(phrase: Phrase, where: string): void {
   for (const language of LANGUAGES) {
     const written = phrase[language];
-    if (written === undefined) continue;
     assert.ok(written.length > 0, `${where} [${language}]`);
     assert.match(written, ALLOWED[language], `${where} [${language}]`);
     assert.equal(written, written.normalize("NFC"), `${where} [${language}] must be NFC`);

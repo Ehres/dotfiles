@@ -18,7 +18,7 @@ rare, plus ou moins lente à grandir ; la collection viendra comme plusieurs
 Tamago sur une machine, un seul en cours à la fois. Les règles arrivent une à
 une ; les concepts qui en naissent rejoignent ce glossaire au fur et à mesure.
 
-## Language
+## Glossary
 
 ### The creature
 
@@ -177,6 +177,14 @@ _Avoid_: mode, voice (that is the memory), layer
 The phrases a Species owns for every Cue: its Register in the voice. At the
 hatch it is always the Signature that speaks.
 _Avoid_: species flavor, catchphrase, override
+
+**Language**:
+The Language everything the user reads is said in: the Bubbles, the card,
+the roster, the palette, the toasts, the dialogs. One per machine, chosen
+from the palette or from `options.language`, never part of a Career. It
+changes how something is said, never what is said or who says it: the same
+occurrence of the same Cue draws the same phrase in both.
+_Avoid_: tongue, locale, i18n, translation
 
 ### Over a lifetime
 

@@ -388,6 +388,20 @@ Contraintes qui tiennent : aucune Species n'est une punition, pas de lecture
 de contenu, merge commutatif, pas de re-roll, jamais de retrait sur la Career,
 donc jamais de suppression d'une Career du roster.
 
+### 13. Language : anglais et français
+
+**Fait le 2026-09-24**, voir
+`docs/superpowers/specs/2026-09-23-tamago-language-design.md`. Tout ce que
+l'utilisateur lit — bulles, carte, roster, palette, toasts, dialogues,
+moods — se dit en anglais ou en français, une Language par machine, jamais
+par Career. Choisie dans la palette (`tamago.language`, mémorisée via
+`api.kv`) ou par défaut via `options.language`. Elle change comment une
+chose est dite, jamais ce qui est dit ni qui le dit : une même occurrence
+d'un Cue tire la même phrase dans les deux langues. Chaque Phrase du corpus
+porte désormais `en` et `fr` obligatoires (environ 1 000 phrases écrites),
+et la Species porte un genre pour l'accord ; une phrase française n'est
+jamais écrite deux fois dans le catalogue.
+
 ## Ordre recommandé
 
 1. ~~Bulle avec templates locaux, plus mode muet.~~ Fait.
@@ -398,9 +412,10 @@ donc jamais de suppression d'une Career du roster.
 5. ~~Feuille de caractère (idée 12, lot 3).~~ Fait.
 6. ~~Gamification (idée 11) : le premier Milestone et le `DialogSelect` ; les
    Traits de Voice s'écriront contre la feuille.~~ Fait.
-7. Achievements et streak, avec le journal (idée 8), après une semaine d'usage
+7. ~~Language : anglais et français (idée 13).~~ Fait.
+8. Achievements et streak, avec le journal (idée 8), après une semaine d'usage
    réel des Species.
-8. Enrichissements Species (idée 12, lot 4), accessoires et couleur (idées 4
+9. Enrichissements Species (idée 12, lot 4), accessoires et couleur (idées 4
    et 10) sur la `Frame` en segments.
 
 ## Références

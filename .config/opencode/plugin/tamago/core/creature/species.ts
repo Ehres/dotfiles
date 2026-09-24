@@ -24,8 +24,8 @@ export type SpeciesId = string;
 /** French agrees in gender, English does not; the Species is what carries the fact. */
 export type Gender = "m" | "f";
 
-/** `sheet` holds the Modifiers this Species adds to the Sheet; absent for none. `gender` is optional only while the French is being written. */
-export type Species = { id: SpeciesId; label: Phrase; gender?: Gender; rarity: Rarity; sheet?: Modifiers };
+/** `sheet` holds the Modifiers this Species adds to the Sheet; absent for none. */
+export type Species = { id: SpeciesId; label: Phrase; gender: Gender; rarity: Rarity; sheet?: Modifiers };
 
 /** A catalog entry: the Species plus what it draws and what it says. Missing either is a compile error. */
 export type SpeciesDef = Species & { bodies: Bodies; signature: Signature };
@@ -35,7 +35,7 @@ const DOMAIN = "species";
 
 /** The table entry for an id; the reference entry for an id this build does not know. */
 export function species(id: SpeciesId, table: readonly Species[] = SPECIES): Species {
-  return table.find((entry) => entry.id === id) ?? table.find((entry) => entry.id === REFERENCE) ?? { id: REFERENCE, label: { en: REFERENCE }, rarity: "common" };
+  return table.find((entry) => entry.id === id) ?? table.find((entry) => entry.id === REFERENCE) ?? { id: REFERENCE, label: { en: REFERENCE, fr: REFERENCE }, gender: "m", rarity: "common" };
 }
 
 /** The Pace of a Species, 1 for an unknown one. */

@@ -14,7 +14,7 @@ const sheetOf = (patch: Partial<Sheet>): Sheet => ({ cheerful: 0, sarcastic: 0, 
 const STOIC: Speaker = { hatchedAt: 1, species: "cat", sheet: sheetOf({ stoic: 8 }), traits: [] };
 const DRAGON: Speaker = { hatchedAt: 3, species: "dragon", sheet: sheetOf({ cheerful: 7 }), traits: [] };
 
-/** `phrase`, asserted non-undefined: every Cue below is a plain Cue, never a Trait-opened one whose table owns no phrases for it. English only: Task 2 writes no French. */
+/** `phrase`, asserted non-undefined: every Cue below is a plain Cue, never a Trait-opened one whose table owns no phrases for it. English only: the Language itself is exercised by "a Language changes the words, never which phrase is drawn" below. */
 function say(cue: Cue, speaker: Speaker, times: number): string {
   const text = phrase(cue, speaker, times, "en");
   assert.ok(text !== undefined, `${cue} unexpectedly said nothing`);
@@ -130,7 +130,6 @@ function frenchByEnglish(): ReadonlyMap<string, string> {
   const add = (phrases: Phrases, where: string): void => {
     for (const one of phrases) {
       const french = one.fr;
-      assert.ok(french !== undefined, `${where}: ${JSON.stringify(one.en)} carries no French`);
       const already = index.get(one.en);
       assert.ok(already === undefined || already === french, `${where}: ${JSON.stringify(one.en)} is ${JSON.stringify(already)} elsewhere and ${JSON.stringify(french)} here`);
       index.set(one.en, french);

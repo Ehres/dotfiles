@@ -47,6 +47,17 @@ to `docs/superpowers/plans/` once this spec is accepted.
 7. **The allowed character set is per Language.** English phrases stay
    printable ASCII, as the current test demands. French adds the letters it
    cannot do without, and nothing else.
+8. **One French phrase per English phrase, corpus-wide.** Not decided here,
+   but surfaced by the parallel-draw test written while filling the
+   Signatures: wherever one English string is spoken — a Signature, a
+   Temperament's flavor, the neutral phrases, an Accent — it must carry the
+   same French, never a different one in a different place. The test that
+   proves "a Language changes the words, never which phrase is drawn" walks
+   both Languages in lockstep and looks up the French it expects by the
+   English just drawn; a second, divergent French for one English string
+   would make that lookup ambiguous. It is also simply right: the same thing
+   said in English should be the same thing said in French, wherever it is
+   said.
 
 ## The type
 

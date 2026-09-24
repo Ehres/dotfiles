@@ -25,9 +25,12 @@ It is referenced from `.config/opencode/tui.jsonc`:
 }
 ```
 
-`name` is the only option: the label shown next to the sprite and in toasts
-until you rename the creature from the palette. A rename is saved with the
-career, so every window shows it.
+`name` and `language` are the two options. `name` is the label shown next to
+the sprite and in toasts until you rename the creature from the palette; a
+rename is saved with the career, so every window shows it. `language` is
+`"en"` or `"fr"`, the default until you choose one from the palette; once
+chosen there, the choice is remembered across launches and wins over the
+option on every later start.
 
 ## How it reacts
 
@@ -106,7 +109,7 @@ creature does not repeat itself. At the hatch the species always speaks.
 
 ## Commands
 
-Seven commands in the palette, always under `Tamago` so they stay easy to find
+Eight commands in the palette, always under `Tamago` so they stay easy to find
 whatever the creature is called; its Name only appears in their descriptions:
 
 | Command           | What it does                                                                                      |
@@ -118,6 +121,7 @@ whatever the creature is called; its Name only appears in their descriptions:
 | `hatch a new egg` | lays a fresh egg once every creature on the machine is `elder`                                    |
 | `roster`          | lists every creature of this machine with its card; Enter on a resting one brings it to the front |
 | `choose a trait`  | keeps one trait from the pending draw, if one is offered                                          |
+| `language`        | picks English or French, each named in its own language; the choice is remembered across launches |
 
 Petting counts nothing and changes nothing in the career. The heart is the
 only non-ASCII character in a sprite: it takes one column in most terminals,

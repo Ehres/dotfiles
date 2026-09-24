@@ -27,14 +27,6 @@ test("every phrase in ACCENT fits in MAX_TEXT", () => {
   }
 });
 
-test("every Trait speaks French on every Cue it takes or opens", () => {
-  for (const [id, accent] of Object.entries(ACCENT)) {
-    for (const cue of [...accent.takes, ...accent.opens]) {
-      for (const phrase of accent.phrases[cue] ?? []) assert.ok(phrase.fr !== undefined, `${id}/${cue}: ${JSON.stringify(phrase.en)}`);
-    }
-  }
-});
-
 test("a held Trait speaks the Cues it takes and nothing else", () => {
   assert.deepEqual(accentFor("streak", ["hardy"]), ACCENT.hardy?.phrases.streak);
   assert.equal(accentFor("woke", ["hardy"]), undefined);
@@ -50,8 +42,8 @@ test("a held Trait speaks the Cues it opens and nothing else", () => {
 
 test("when two held Traits take one Cue the most recent Pick speaks", () => {
   const table: Record<TraitId, Accent> = {
-    first: { takes: ["streak"], opens: [], phrases: { streak: [{ en: "First's phrase." }] } },
-    second: { takes: ["streak"], opens: [], phrases: { streak: [{ en: "Second's phrase." }] } },
+    first: { takes: ["streak"], opens: [], phrases: { streak: [{ en: "First's phrase.", fr: "Phrase du premier." }] } },
+    second: { takes: ["streak"], opens: [], phrases: { streak: [{ en: "Second's phrase.", fr: "Phrase du second." }] } },
   };
   assert.deepEqual(accentFor("streak", ["first", "second"], table), table.second?.phrases.streak);
   assert.deepEqual(accentFor("streak", ["second", "first"], table), table.first?.phrases.streak);
@@ -59,8 +51,8 @@ test("when two held Traits take one Cue the most recent Pick speaks", () => {
 
 test("when two held Traits open one Cue the most recent Pick speaks", () => {
   const table: Record<TraitId, Accent> = {
-    first: { takes: [], opens: ["branch"], phrases: { branch: [{ en: "First's phrase." }] } },
-    second: { takes: [], opens: ["branch"], phrases: { branch: [{ en: "Second's phrase." }] } },
+    first: { takes: [], opens: ["branch"], phrases: { branch: [{ en: "First's phrase.", fr: "Phrase du premier." }] } },
+    second: { takes: [], opens: ["branch"], phrases: { branch: [{ en: "Second's phrase.", fr: "Phrase du second." }] } },
   };
   assert.deepEqual(accentFor("branch", ["first", "second"], table), table.second?.phrases.branch);
   assert.deepEqual(accentFor("branch", ["second", "first"], table), table.first?.phrases.branch);

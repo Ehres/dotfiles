@@ -53,8 +53,8 @@ test("behavior reads a Career: a date drawn all median gives MEDIAN, the Species
   assert.deepEqual(behavior({ hatchedAt: 1_006_599, species: "cat" }), MEDIAN); // draw(1_006_599) has every behavior Stat at 5
   assert.equal(draw(1_006_599).energy, SCALE.median, "the date above still draws median energy");
   const table: readonly Species[] = [
-    { id: "cat", label: { en: "cat" }, rarity: "common" },
-    { id: "brisk", label: { en: "brisk" }, rarity: "common", sheet: { energy: 3 } },
+    { id: "cat", label: { en: "cat", fr: "chat" }, gender: "m", rarity: "common" },
+    { id: "brisk", label: { en: "brisk", fr: "vif" }, gender: "m", rarity: "common", sheet: { energy: 3 } },
   ];
   assert.deepEqual(behavior({ hatchedAt: 1_006_599, species: "brisk" }, table), behaviorOf({ ...flat(SCALE.median), energy: 8 }));
   assert.equal(behavior({ hatchedAt: 1_006_599, species: "brisk" }, table).fastMs, 330);
@@ -66,7 +66,7 @@ test("the Behavior of a Career is derived once, and a table of its own never tou
   assert.equal(behavior(career), cached, "a window derives per event: the Career is what changes, not the Behavior");
   assert.notEqual(behavior({ ...career }), cached, "another Career object derives its own");
 
-  const table: readonly Species[] = [{ id: "owl", label: { en: "owl" }, rarity: "common", sheet: { energy: 3 } }];
+  const table: readonly Species[] = [{ id: "owl", label: { en: "owl", fr: "hibou" }, gender: "m", rarity: "common", sheet: { energy: 3 } }];
   assert.deepEqual(behavior(career, table), behaviorOf(sheet(career.hatchedAt, "owl", table)));
   assert.notDeepEqual(behavior(career, table), cached, "the owl of that table is brisker than the catalog's");
   assert.equal(behavior(career), cached, "and asking with a table of its own left the cache alone");

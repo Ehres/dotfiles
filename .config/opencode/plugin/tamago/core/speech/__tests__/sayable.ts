@@ -11,7 +11,6 @@ export const ALLOWED: Record<(typeof LANGUAGES)[number], RegExp> = {
 export function assertSayable(phrase: Phrase, where: string): void {
   for (const language of LANGUAGES) {
     const written = phrase[language];
-    if (written === undefined) continue; // not translated yet; Task 11 makes it impossible
     const shown = `${where} [${language}]: ${JSON.stringify(written)}`;
     assert.ok(written.length > 0, shown);
     assert.ok(written.length <= MAX_TEXT, `${shown} is ${written.length} long, MAX_TEXT is ${MAX_TEXT}`);

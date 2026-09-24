@@ -142,9 +142,9 @@ export function createDialogs(deps: {
           title={say(CHOOSE.title, mirror.language())}
           skipFilter
           options={(offered()?.draw ?? []).map((trait) => ({
-            title: say(TRAIT_TEXT[trait]?.title ?? { en: trait }, mirror.language()),
+            title: say(TRAIT_TEXT[trait]?.title ?? { en: trait, fr: trait }, mirror.language()),
             value: trait,
-            description: say(TRAIT_TEXT[trait]?.description ?? { en: "" }, mirror.language()),
+            description: say(TRAIT_TEXT[trait]?.description ?? { en: "", fr: "" }, mirror.language()),
           }))}
           onSelect={guard((option: { value: string }) => {
             ours = true;

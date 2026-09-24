@@ -25,8 +25,7 @@ test("isLanguage narrows only the two Languages", () => {
   assert.equal(isLanguage(""), false);
 });
 
-test("say falls back to English while a Phrase carries no French", () => {
+test("say reads the Phrase in the given Language", () => {
   assert.equal(say({ en: "Purr.", fr: "Rrron." }, "fr"), "Rrron.");
-  assert.equal(say({ en: "Purr." }, "fr"), "Purr.", "not written yet: English is read instead");
   assert.equal(say({ en: "Purr.", fr: "Rrron." }, "en"), "Purr.");
 });

@@ -22,13 +22,9 @@ export function resolveLanguage(stored: unknown, option: unknown): Language {
   return DEFAULT_LANGUAGE;
 }
 
-/**
- * One thing to say, in every Language. `fr` is optional only while the French
- * is being written; the last task of that work makes it required and deletes
- * the fallback below, so every gap becomes a compile error at once.
- */
-export type Phrase = { en: string; fr?: string };
+/** One thing to say, in every Language. A Phrase missing one does not compile. */
+export type Phrase = Record<Language, string>;
 
 export function say(phrase: Phrase, language: Language): string {
-  return phrase[language] ?? phrase.en;
+  return phrase[language];
 }

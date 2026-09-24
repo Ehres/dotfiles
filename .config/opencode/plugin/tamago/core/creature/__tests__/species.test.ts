@@ -6,13 +6,13 @@ import { RARITIES, RARITY, hatch, pace, species, type Rarity, type Species } fro
 import { MODIFIERS_SUM_MAX, MODIFIER_MAX, type Modifiers } from "../sheet.ts";
 
 /** One Species per Rarity, so every tier can be drawn. */
-const full: readonly Species[] = RARITIES.map((rarity) => ({ id: `s-${rarity}`, label: { en: rarity }, rarity }));
+const full: readonly Species[] = RARITIES.map((rarity) => ({ id: `s-${rarity}`, label: { en: rarity, fr: rarity }, gender: "m", rarity }));
 
 /** The table and the weights of the commit that shipped the draw, frozen: the pin below is about the formula, never about the data. */
 const ORIGINAL: readonly Species[] = [
-  { id: "cat", label: { en: "cat" }, rarity: "common" },
-  { id: "owl", label: { en: "owl" }, rarity: "common" },
-  { id: "dragon", label: { en: "dragon" }, rarity: "legendary" },
+  { id: "cat", label: { en: "cat", fr: "chat" }, gender: "m", rarity: "common" },
+  { id: "owl", label: { en: "owl", fr: "hibou" }, gender: "m", rarity: "common" },
+  { id: "dragon", label: { en: "dragon", fr: "dragon" }, gender: "m", rarity: "legendary" },
 ];
 const ORIGINAL_WEIGHTS: Record<Rarity, number> = { common: 60, uncommon: 25, rare: 10, epic: 4, legendary: 1 };
 
