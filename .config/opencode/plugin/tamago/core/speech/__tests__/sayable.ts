@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import { LANGUAGES, say, type Phrase } from "../../language.ts";
 import { MAX_TEXT } from "../bubble.ts";
 
-/** What every phrase must satisfy, in every Language it carries. */
-const ALLOWED: Record<(typeof LANGUAGES)[number], RegExp> = {
+/** What every phrase must satisfy, in every Language it carries. Exported so other tests can check the same charset without redefining it. */
+export const ALLOWED: Record<(typeof LANGUAGES)[number], RegExp> = {
   en: /^[\x20-\x7e]+$/,
   fr: /^[\x20-\x7eÀ-ÿŒœ]+$/,
 };
