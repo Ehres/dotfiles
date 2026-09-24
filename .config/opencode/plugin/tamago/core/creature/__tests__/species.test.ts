@@ -11,7 +11,7 @@ const full: readonly Species[] = RARITIES.map((rarity) => ({ id: `s-${rarity}`, 
 /** The table and the weights of the commit that shipped the draw, frozen: the pin below is about the formula, never about the data. */
 const ORIGINAL: readonly Species[] = [
   { id: "cat", label: { en: "cat", fr: "chat" }, gender: "m", rarity: "common" },
-  { id: "owl", label: { en: "owl", fr: "hibou" }, gender: "m", rarity: "common" },
+  { id: "owl", label: { en: "owl", fr: "chouette" }, gender: "m", rarity: "common" },
   { id: "dragon", label: { en: "dragon", fr: "dragon" }, gender: "m", rarity: "legendary" },
 ];
 const ORIGINAL_WEIGHTS: Record<Rarity, number> = { common: 60, uncommon: 25, rare: 10, epic: 4, legendary: 1 };

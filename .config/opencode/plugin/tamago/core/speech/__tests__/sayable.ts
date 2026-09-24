@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { LANGUAGES, say, type Phrase } from "../../language.ts";
+import { LANGUAGES, type Phrase } from "../../language.ts";
 import { MAX_TEXT } from "../bubble.ts";
 
 /** What every phrase must satisfy, in every Language it carries. Exported so other tests can check the same charset without redefining it. */
@@ -16,6 +16,6 @@ export function assertSayable(phrase: Phrase, where: string): void {
     assert.ok(written.length <= MAX_TEXT, `${shown} is ${written.length} long, MAX_TEXT is ${MAX_TEXT}`);
     assert.match(written, ALLOWED[language], shown);
     assert.equal(written, written.normalize("NFC"), `${shown} must be NFC: length is measured in UTF-16 units`);
-    assert.equal(say(phrase, language), written);
+    if (language === "fr") assert.doesNotMatch(written, /[^ ][?!:]/, `${shown} needs a space before ? ! and :`);
   }
 }

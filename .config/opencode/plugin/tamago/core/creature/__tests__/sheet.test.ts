@@ -139,7 +139,7 @@ test("the Speaker of a Career is derived once, and a table of its own never touc
   assert.equal(speakerOf(career), cached, "a Voice hears every event: the Career is what changes, not the Speaker");
   assert.notEqual(speakerOf({ ...career }), cached, "another Career object derives its own");
 
-  const table: readonly Species[] = [{ id: "owl", label: { en: "owl", fr: "hibou" }, gender: "m", rarity: "common", sheet: { energy: 3 } }];
+  const table: readonly Species[] = [{ id: "owl", label: { en: "owl", fr: "chouette" }, gender: "m", rarity: "common", sheet: { energy: 3 } }];
   assert.deepEqual(speakerOf(career, table).sheet, sheet(career.hatchedAt, "owl", table));
   assert.notDeepEqual(speakerOf(career, table).sheet, cached.sheet, "the owl of that table is brisker than the catalog's");
   assert.equal(speakerOf(career), cached, "and asking with a table of its own left the cache alone");

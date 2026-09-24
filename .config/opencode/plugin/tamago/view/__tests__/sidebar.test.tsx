@@ -1,5 +1,7 @@
 /** @jsxImportSource @opentui/solid */
 import { expect, test } from "bun:test";
+import { createSignal } from "solid-js";
+import type { Language } from "../../core/language.ts";
 import { tamago } from "../../core/tamago.ts";
 import type { Bubble } from "../../core/speech/voice.ts";
 import { CHOICE_BADGE } from "../../core/text/traits.ts";
@@ -7,7 +9,7 @@ import { LanguageProvider } from "../language.tsx";
 import { SidebarView } from "../sidebar.tsx";
 import { ThemeProvider } from "../theme.tsx";
 import { EGG, FOOTER, OWNER, session } from "./fixtures.ts";
-import { SIDEBAR, frame } from "./render.tsx";
+import { SIDEBAR, frame, mount, trim } from "./render.tsx";
 import { TUI_THEME } from "./theme.ts";
 
 const adult = tamago(OWNER);
@@ -81,6 +83,25 @@ test("a Bubble sits above the sprite, the heart replaces the eyes", async () => 
   expect(shown).toContain("♥");
   expect(shown).toContain("needs you");
   expect(shown).toMatchSnapshot();
+});
+
+test("switching the Language after mount repaints the sidebar: every view calls the accessor inside JSX, so Solid repaints it", async () => {
+  const [language, setLanguage] = createSignal<Language>("en");
+  const { frame: capture } = await mount(
+    () => (
+      <ThemeProvider theme={TUI_THEME}>
+        <LanguageProvider language={language()}>
+          <SidebarView name="Tamago" session={session("idle")} tamago={adult} clock={0} footer={FOOTER} heart={false} />
+        </LanguageProvider>
+      </ThemeProvider>
+    ),
+    SIDEBAR,
+  );
+  expect(trim(await capture())).toContain("adult · 9,166 xp");
+  expect(trim(await capture())).toContain("chilling");
+  setLanguage("fr");
+  expect(trim(await capture())).toContain("adulte · 9 166 xp");
+  expect(trim(await capture())).toContain("tranquille");
 });
 
 test("a pending Draw puts a badge after the name; none without one", async () => {

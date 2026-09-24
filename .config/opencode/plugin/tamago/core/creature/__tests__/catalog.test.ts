@@ -78,6 +78,9 @@ test("a phrase belongs to one Species only", () => {
   assert.deepEqual(collisions, []);
 });
 
+// Stricter than the English test above on purpose: a Species may repeat its own English line
+// across Cues (that reads as a verbal tic), but decision 8 forbids a second French for one
+// English everywhere, so nothing here excuses a repeat by the same Species either.
 test("a French phrase is written once in the whole catalog, whoever says it", () => {
   const owner = new Map<string, string>();
   const collisions: string[] = [];

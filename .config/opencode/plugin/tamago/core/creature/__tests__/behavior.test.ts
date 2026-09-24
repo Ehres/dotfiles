@@ -66,7 +66,7 @@ test("the Behavior of a Career is derived once, and a table of its own never tou
   assert.equal(behavior(career), cached, "a window derives per event: the Career is what changes, not the Behavior");
   assert.notEqual(behavior({ ...career }), cached, "another Career object derives its own");
 
-  const table: readonly Species[] = [{ id: "owl", label: { en: "owl", fr: "hibou" }, gender: "m", rarity: "common", sheet: { energy: 3 } }];
+  const table: readonly Species[] = [{ id: "owl", label: { en: "owl", fr: "chouette" }, gender: "m", rarity: "common", sheet: { energy: 3 } }];
   assert.deepEqual(behavior(career, table), behaviorOf(sheet(career.hatchedAt, "owl", table)));
   assert.notDeepEqual(behavior(career, table), cached, "the owl of that table is brisker than the catalog's");
   assert.equal(behavior(career), cached, "and asking with a table of its own left the cache alone");
