@@ -31,7 +31,7 @@ export const ACCENT: Record<TraitId, Accent> = {
     takes: ["todos_done", "big_diff"],
     opens: [],
     phrases: {
-      todos_done: [{ en: "Every one of them.", fr: "Toutes, sans exception." }, { en: "Flawless.", fr: "Sans un défaut." }, { en: "Look at that list.", fr: "Regarde cette liste." }],
+      todos_done: [{ en: "Every one of them.", fr: "Toutes, sans exception." }, { en: "Flawless.", fr: "Impeccable." }, { en: "Look at that list.", fr: "Regarde cette liste." }],
       big_diff: [{ en: "A whole cathedral.", fr: "Toute une cathédrale." }, { en: "Look at this work!", fr: "Vois un peu ce travail !" }, { en: "We built that.", fr: "C'est notre ouvrage." }],
     },
   },
@@ -39,8 +39,8 @@ export const ACCENT: Record<TraitId, Accent> = {
     takes: ["evolved", "granted"],
     opens: [],
     phrases: {
-      evolved: [{ en: "Behold the new me.", fr: "Voyez le nouveau moi." }, { en: "Better already.", fr: "Déjà bien mieux." }, { en: "Told you I would.", fr: "Je l'avais bien dit." }],
-      granted: [{ en: "Naturally.", fr: "Naturellement." }, { en: "Wise of you.", fr: "Sage de votre part." }, { en: "Of course. Watch.", fr: "Évidemment. Regardez." }],
+      evolved: [{ en: "Behold the new me.", fr: "Voyez le nouveau moi." }, { en: "Better already.", fr: "Déjà bien mieux." }, { en: "Told you I would.", fr: "Je te l'avais dit." }],
+      granted: [{ en: "Naturally.", fr: "Naturellement." }, { en: "Wise of you.", fr: "Sage de ta part." }, { en: "Of course. Watch.", fr: "Évidemment. Regardez." }],
     },
   },
   watchful: {
