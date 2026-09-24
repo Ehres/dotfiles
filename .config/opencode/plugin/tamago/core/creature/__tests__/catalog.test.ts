@@ -9,6 +9,7 @@ import { ACTIVITIES } from "../../moment/session.ts";
 import { TEMPERAMENTS } from "../sheet.ts";
 import { REFERENCE, SPECIES, bodiesOf, known, signatureOf } from "../catalog.ts";
 import { COMMON } from "../species/common.ts";
+import { UNCOMMON } from "../species/uncommon.ts";
 
 test("SPECIES keeps the draw order: common first, then by Rarity, twenty ids, the reference among the common", () => {
   assert.deepEqual(
@@ -97,6 +98,19 @@ test("every Species leaves the overlay cell free at every Stage and Activity, an
 
 test("every common Species is written in French: label, gender and all thirteen Cues", () => {
   for (const entry of COMMON) {
+    assert.ok(entry.label.fr !== undefined, `${entry.id}: no French label`);
+    assert.ok(entry.gender !== undefined, `${entry.id}: no gender, so French cannot agree`);
+    for (const cue of Object.keys(CUES) as Cue[]) {
+      for (const phrase of entry.signature[cue]) {
+        assert.ok(phrase.fr !== undefined, `${entry.id}/${cue}: ${JSON.stringify(phrase.en)} has no French`);
+        assertSayable(phrase, `${entry.id}/${cue}`);
+      }
+    }
+  }
+});
+
+test("every uncommon Species is written in French: label, gender and all thirteen Cues", () => {
+  for (const entry of UNCOMMON) {
     assert.ok(entry.label.fr !== undefined, `${entry.id}: no French label`);
     assert.ok(entry.gender !== undefined, `${entry.id}: no gender, so French cannot agree`);
     for (const cue of Object.keys(CUES) as Cue[]) {
