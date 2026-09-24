@@ -50,3 +50,6 @@ export const STANCE_TEXT: Record<Stance, Word> = {
   prudent: { en: "prudent", fr: { m: "prudent", f: "prudente" } },
   bold: { en: "bold", fr: { m: "audacieux", f: "audacieuse" } },
 };
+
+/** Marks the active Career in the roster line; agrees with the Species like the Stage word beside it. */
+export const ACTIVE: Word = { en: "active", fr: { m: "actif", f: "active" } };

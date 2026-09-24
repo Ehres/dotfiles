@@ -49,8 +49,10 @@ test("line names the Tamago, its species and stage, marks the active one, and sh
 
 test("line names the Tamago, its species and stage, marks the active one, in French", () => {
   const momo = elder(T0, { species: "owl", name: { value: "Momo", at: 1 } });
-  assert.equal(line(momo, "Tamago", T0, "fr"), "Momo · chouette · ancienne · actif");
+  const pixel = elder(T0, { species: "cat", name: { value: "Pixel", at: 1 } });
+  assert.equal(line(momo, "Tamago", T0, "fr"), "Momo · chouette · ancienne · active");
   assert.equal(line(momo, "Tamago", T0 - 1, "fr"), "Momo · chouette · ancienne");
+  assert.equal(line(pixel, "Tamago", T0, "fr"), "Pixel · chat · ancien · actif");
   assert.equal(line(egg(T0), "Tamago", T0 - 1, "fr"), "Tamago · œuf");
   assert.equal(line(egg(T0), "Tamago", T0, "fr"), "Tamago · œuf · actif");
 });

@@ -39,21 +39,21 @@ export function progress(tamago: Tamago, width: number, language: Language): str
     const final = language === "en" ? "final form" : "forme finale";
     return `${bar(1, width)} ${fmt(tamago.xp, language)} xp · ${final}`;
   }
-  const gender = tamago.species.gender ?? "m";
+  const gender = tamago.species.gender;
   const stageWord = word(STAGE_TEXT[coming.stage], language, gender);
   return `${bar(coming.progress, width)} ${fmt(tamago.xp, language)} / ${fmt(coming.threshold, language)} xp → ${stageWord}`;
 }
 
 /** The Stage as the user reads it, agreeing with the Species in French. */
 export function stageName(tamago: Tamago, language: Language): string {
-  const gender = tamago.species.gender ?? "m";
+  const gender = tamago.species.gender;
   return word(STAGE_TEXT[tamago.stage], language, gender);
 }
 
 /** The Species and its Rarity from hatchling on; before that the egg keeps its secret. */
 export function speciesLine(tamago: Tamago, language: Language): string {
   if (tamago.stage === "egg") return language === "en" ? "still an egg" : "encore un œuf";
-  const gender = tamago.species.gender ?? "m";
+  const gender = tamago.species.gender;
   const label = say(tamago.species.label, language);
   const rarity = word(RARITY_TEXT[tamago.species.rarity], language, gender);
   return `${label} · ${rarity}`;
@@ -68,7 +68,7 @@ function article(tamago: Tamago, language: Language): string {
 /** The hatch toast: the Species revealed, with its Rarity. */
 export function reveal(name: string, tamago: Tamago, language: Language): string {
   const label = say(tamago.species.label, language);
-  const gender = tamago.species.gender ?? "m";
+  const gender = tamago.species.gender;
   const rarity = word(RARITY_TEXT[tamago.species.rarity], language, gender);
   switch (language) {
     case "en":

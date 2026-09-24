@@ -70,10 +70,12 @@ const tui: TuiPlugin = async (api, options) => {
           api.ui.toast({ variant: "info", title: name, message: stepsIn(mirror.career(), defaultName, mirror.language()) });
         } else {
           palette?.register(); // an Evolution is what makes a Draw appear
-          const gender = mirror.active().species.gender ?? "m";
           if (effect.stage === "hatchling")
             api.ui.toast({ variant: "success", title: name, message: reveal(name, mirror.active(), mirror.language()) });
-          else api.ui.toast({ variant: "success", title: name, message: evolved(name, effect.stage, gender, mirror.language()) });
+          else {
+            const gender = mirror.active().species.gender;
+            api.ui.toast({ variant: "success", title: name, message: evolved(name, effect.stage, gender, mirror.language()) });
+          }
         }
       },
     );
