@@ -1,7 +1,7 @@
 /** @jsxImportSource @opentui/solid */
 import type { JSX } from "@opentui/solid";
 import { Index, Show, createMemo } from "solid-js";
-import { BAR_WIDTH, age, progress, sheetLines, speciesLine, traitLines } from "../core/text/card.ts";
+import { BAR_WIDTH, age, progress, sheetLines, speciesLine, stageName, traitLines } from "../core/text/card.ts";
 import { fmt } from "../core/appearance/format.ts";
 import { describe } from "../core/text/character.ts";
 import type { Tamago } from "../core/tamago.ts";
@@ -28,7 +28,7 @@ export function CardBody(props: { tamago: Tamago; clock: number; heart: boolean;
         <box flexDirection="column" justifyContent="center">
           <text fg={theme.current.textMuted}>{speciesLine(props.tamago, language())}</text>
           <text fg={theme.current.textMuted}>
-            {props.tamago.stage} · {fmt(props.tamago.xp, language())} xp
+            {stageName(props.tamago, language())} · {fmt(props.tamago.xp, language())} xp
           </text>
           <text fg={theme.current.textMuted}>{age(props.tamago.career.hatchedAt, props.now, language())}</text>
         </box>

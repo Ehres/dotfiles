@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { DAY_MS, STATS_HIDDEN, age, progress, reveal, sheetLines, speciesLine, traitLines } from "../card.ts";
+import { DAY_MS, STATS_HIDDEN, age, progress, reveal, sheetLines, speciesLine, stageName, traitLines } from "../card.ts";
 import { REFERENCE } from "../../creature/catalog.ts";
 import { freshCareer, type Career } from "../../career/career.ts";
 import { tamago } from "../../tamago.ts";
@@ -55,6 +55,13 @@ test("progress shows raw xp against a raw threshold farther away for a rarer spe
   const dragon: Career = { ...career, species: "dragon" }; // 2,147 xp, 536.75 growth: hatchling
   const text = progress(tamago(dragon), 10, "en");
   assert.ok(text.endsWith("2,147 / 6,000 xp → young"), text);
+});
+
+test("stageName reads the Stage word, English invariant, French agreeing with the Species gender", () => {
+  const elder: Career = { ...career, prompts: 20_000 };
+  assert.equal(stageName(tamago(elder), "en"), "elder");
+  assert.equal(stageName(tamago(elder), "fr"), "ancien");
+  assert.equal(stageName(tamago({ ...elder, species: "owl" }), "fr"), "ancienne");
 });
 
 test("speciesLine hides the species while still an egg, then names it with its rarity", () => {

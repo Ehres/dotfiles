@@ -40,8 +40,14 @@ export function progress(tamago: Tamago, width: number, language: Language): str
     return `${bar(1, width)} ${fmt(tamago.xp, language)} xp · ${final}`;
   }
   const gender = tamago.species.gender ?? "m";
-  const stageName = word(STAGE_TEXT[coming.stage], language, gender);
-  return `${bar(coming.progress, width)} ${fmt(tamago.xp, language)} / ${fmt(coming.threshold, language)} xp → ${stageName}`;
+  const stageWord = word(STAGE_TEXT[coming.stage], language, gender);
+  return `${bar(coming.progress, width)} ${fmt(tamago.xp, language)} / ${fmt(coming.threshold, language)} xp → ${stageWord}`;
+}
+
+/** The Stage as the user reads it, agreeing with the Species in French. */
+export function stageName(tamago: Tamago, language: Language): string {
+  const gender = tamago.species.gender ?? "m";
+  return word(STAGE_TEXT[tamago.stage], language, gender);
 }
 
 /** The Species and its Rarity from hatchling on; before that the egg keeps its secret. */

@@ -40,7 +40,7 @@ test("idle adult reads in French: mood and grouped xp", async () => {
     ),
     SIDEBAR,
   );
-  expect(shown).toContain("adult · 9 166 xp");
+  expect(shown).toContain("adulte · 9 166 xp");
   expect(shown).toContain("tranquille");
   expect(shown).toMatchSnapshot();
 });

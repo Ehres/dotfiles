@@ -12,6 +12,18 @@ exports[`idle adult: sprite, name, stage and xp, mood, footer 1`] = `
 • OpenCode 1.18.31"
 `;
 
+exports[`idle adult reads in French: mood and grouped xp 1`] = `
+"  /\\   /\\
+  ( o o )    Tamago ★
+ /| ^^^ |\\   adulte · 9 166 xp
+  |_____|    tranquille
+  /|   |\\
+
+~/projects/dotfiles:master
+
+• OpenCode 1.18.31"
+`;
+
 exports[`hurt egg says ouch and draws the egg 1`] = `
 "   .---.  *
   /     \\    Egg
@@ -44,18 +56,6 @@ exports[`a pending Draw puts a badge after the name; none without one 1`] = `
   ( o o )    Tamago ★
  /|~^^^~|\\   elder · 108,866 xp
   |_____|    chilling
-  /|   |\\
-
-~/projects/dotfiles:master
-
-• OpenCode 1.18.31"
-`;
-
-exports[`idle adult reads in French: mood and grouped xp 1`] = `
-"  /\\   /\\
-  ( o o )    Tamago ★
- /| ^^^ |\\   adult · 9 166 xp
-  |_____|    tranquille
   /|   |\\
 
 ~/projects/dotfiles:master
