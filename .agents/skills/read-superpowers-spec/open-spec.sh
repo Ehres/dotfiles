@@ -6,6 +6,7 @@ if [ ! -f "$spec_path" ]; then
   printf 'Spec not found: %s\n' "$spec_path"
   exit 0
 fi
+spec_path=$(cd "$(dirname "$spec_path")" && pwd)/$(basename "$spec_path")
 if [ -z "${TMUX:-}" ]; then
   printf 'Read the spec at %s (not in tmux).\n' "$spec_path"
   exit 0
