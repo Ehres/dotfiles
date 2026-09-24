@@ -30,13 +30,13 @@
       "designer": {
         "model": "openai/gpt-6-luna",
         "variant": "medium",
-        "skills": [],
+        "skills": ["make-interfaces-feel-better", "accessibility"],
         "mcps": []
       },
       "fixer": {
         "model": "openai/gpt-6-luna",
         "variant": "high",
-        "skills": [],
+        "skills": ["vercel-react-best-practices", "vercel-composition-patterns", "building-components"],
         "mcps": []
       }
     },
