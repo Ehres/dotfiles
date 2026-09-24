@@ -11,6 +11,8 @@ import { REFERENCE, SPECIES, bodiesOf, known, signatureOf } from "../catalog.ts"
 import { COMMON } from "../species/common.ts";
 import { UNCOMMON } from "../species/uncommon.ts";
 import { RARE } from "../species/rare.ts";
+import { EPIC } from "../species/epic.ts";
+import { LEGENDARY } from "../species/legendary.ts";
 
 test("SPECIES keeps the draw order: common first, then by Rarity, twenty ids, the reference among the common", () => {
   assert.deepEqual(
@@ -81,6 +83,23 @@ test("a phrase belongs to one Species only", () => {
   assert.deepEqual(collisions, []);
 });
 
+test("a French phrase is written once in the whole catalog, whoever says it", () => {
+  const owner = new Map<string, string>();
+  const collisions: string[] = [];
+  for (const { id, signature } of SPECIES) {
+    for (const cue of Object.keys(CUES) as Cue[]) {
+      for (const phrase of signature[cue] ?? []) {
+        const text = phrase.fr;
+        if (text === undefined) continue; // not translated yet; the per-Rarity tests below are what demand it
+        const existing = owner.get(text);
+        if (existing !== undefined) collisions.push(`"${text}" is said by both ${existing} and ${id}/${cue}`);
+        else owner.set(text, `${id}/${cue}`);
+      }
+    }
+  }
+  assert.deepEqual(collisions, []);
+});
+
 test("every Species leaves the overlay cell free at every Stage and Activity, and on the petted frame for every Temperament, so a Trait mark never covers a body", () => {
   for (const one of SPECIES) {
     for (const stage of ["egg", "hatchling", "young", "adult", "elder"] as const) {
@@ -125,6 +144,19 @@ test("every uncommon Species is written in French: label, gender and all thirtee
 
 test("every rare Species is written in French: label, gender and all thirteen Cues", () => {
   for (const entry of RARE) {
+    assert.ok(entry.label.fr !== undefined, `${entry.id}: no French label`);
+    assert.ok(entry.gender !== undefined, `${entry.id}: no gender, so French cannot agree`);
+    for (const cue of Object.keys(CUES) as Cue[]) {
+      for (const phrase of entry.signature[cue]) {
+        assert.ok(phrase.fr !== undefined, `${entry.id}/${cue}: ${JSON.stringify(phrase.en)} has no French`);
+        assertSayable(phrase, `${entry.id}/${cue}`);
+      }
+    }
+  }
+});
+
+test("every epic and legendary Species is written in French: label, gender and all thirteen Cues", () => {
+  for (const entry of [...EPIC, ...LEGENDARY]) {
     assert.ok(entry.label.fr !== undefined, `${entry.id}: no French label`);
     assert.ok(entry.gender !== undefined, `${entry.id}: no gender, so French cannot agree`);
     for (const cue of Object.keys(CUES) as Cue[]) {
