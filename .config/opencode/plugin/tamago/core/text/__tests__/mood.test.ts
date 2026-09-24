@@ -1,18 +1,21 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { ACTIVITIES } from "../../moment/session.ts";
-import { mood } from "../mood.ts";
+import { say } from "../../language.ts";
+import { MOOD_TEXT } from "../mood.ts";
 
 test("every Activity has a Mood, short enough for the sidebar caption, in both languages", () => {
   for (const activity of ACTIVITIES) {
-    assert.ok(mood(activity, "en").length > 0);
-    assert.ok(mood(activity, "en").length <= 12, `${activity}: ${mood(activity, "en")}`);
-    assert.ok(mood(activity, "fr").length > 0, activity);
+    for (const language of ["en", "fr"] as const) {
+      const written = say(MOOD_TEXT[activity], language);
+      assert.ok(written.length > 0, `${activity}/${language}`);
+      assert.ok(written.length <= 12, `${activity}/${language}: ${written}`);
+    }
   }
-  assert.equal(mood("idle", "fr"), "tranquille");
-  assert.equal(mood("thinking", "fr"), "réfléchit...");
-  assert.equal(mood("working", "fr"), "travaille");
-  assert.equal(mood("waiting", "fr"), "t'attend");
-  assert.equal(mood("hurt", "fr"), "aïe");
-  assert.equal(mood("sleeping", "fr"), "zzz");
+  assert.equal(say(MOOD_TEXT.idle, "fr"), "tranquille");
+  assert.equal(say(MOOD_TEXT.thinking, "fr"), "réfléchit...");
+  assert.equal(say(MOOD_TEXT.working, "fr"), "travaille");
+  assert.equal(say(MOOD_TEXT.waiting, "fr"), "t'attend");
+  assert.equal(say(MOOD_TEXT.hurt, "fr"), "aïe");
+  assert.equal(say(MOOD_TEXT.sleeping, "fr"), "zzz");
 });

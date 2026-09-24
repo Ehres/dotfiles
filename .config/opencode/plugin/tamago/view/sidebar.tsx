@@ -5,8 +5,9 @@ import type { JSX } from "@opentui/solid";
 import { Show, createMemo } from "solid-js";
 import { bubbleBorders } from "../core/speech/bubble.ts";
 import { fmt } from "../core/appearance/format.ts";
+import { say } from "../core/language.ts";
 import { stageName } from "../core/text/card.ts";
-import { mood } from "../core/text/mood.ts";
+import { MOOD_TEXT } from "../core/text/mood.ts";
 import { CHOICE_BADGE } from "../core/text/traits.ts";
 import type { Activity, Session } from "../core/moment/session.ts";
 import type { Tamago } from "../core/tamago.ts";
@@ -69,7 +70,7 @@ export function SidebarView(props: {
         <text fg={theme.current.textMuted}>
           {stageName(props.tamago, language())} · {fmt(props.tamago.xp, language())} xp
         </text>
-        <text fg={theme.current.textMuted}>{mood(activity(), language())}</text>
+        <text fg={theme.current.textMuted}>{say(MOOD_TEXT[activity()], language())}</text>
       </Portrait>
       <text>
         <span style={{ fg: theme.current.textMuted }}>{props.footer.parent}/</span>
