@@ -110,8 +110,8 @@ test("every common Species is written in French: label, gender and all thirteen 
   }
 });
 
-test("every rare Species is written in French: label, gender and all thirteen Cues", () => {
-  for (const entry of RARE) {
+test("every uncommon Species is written in French: label, gender and all thirteen Cues", () => {
+  for (const entry of UNCOMMON) {
     assert.ok(entry.label.fr !== undefined, `${entry.id}: no French label`);
     assert.ok(entry.gender !== undefined, `${entry.id}: no gender, so French cannot agree`);
     for (const cue of Object.keys(CUES) as Cue[]) {
@@ -123,8 +123,8 @@ test("every rare Species is written in French: label, gender and all thirteen Cu
   }
 });
 
-test("every uncommon Species is written in French: label, gender and all thirteen Cues", () => {
-  for (const entry of UNCOMMON) {
+test("every rare Species is written in French: label, gender and all thirteen Cues", () => {
+  for (const entry of RARE) {
     assert.ok(entry.label.fr !== undefined, `${entry.id}: no French label`);
     assert.ok(entry.gender !== undefined, `${entry.id}: no gender, so French cannot agree`);
     for (const cue of Object.keys(CUES) as Cue[]) {
