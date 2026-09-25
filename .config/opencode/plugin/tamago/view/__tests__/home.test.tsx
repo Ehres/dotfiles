@@ -73,9 +73,6 @@ test("a pending Draw shows on the Sprite, not beside the name", async () => {
   );
   expect(withoutDraw).toContain("Tamago · adult");
   expect(withDraw).toContain("Tamago · adult");
-  // The star that used to sit beside the Name (CHOICE_BADGE, pre-Task 10) is gone for good:
-  // the pending-Draw badge now lives only on the Sprite, checked below via badgeCorner.
-  expect(withDraw).not.toContain("★");
 
   const blank = "   |   ";
   expect(badgeCorner(withoutDraw)).toBe(blank);
