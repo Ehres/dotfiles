@@ -36,18 +36,17 @@ test("the roster highlights the first line, moves with the arrows, selects with 
 });
 
 /**
- * A real machine's roster is unbounded (adapter/store.ts reads every resting
- * Career file with no limit), so five adult Careers — the worst case per
- * entry, one line each above a full CardBody — is a realistic size, not a
- * stress test. DIALOG (60x26) was only ever checked against two entries. This
- * pins what actually happens at five: the overflow does not clip cleanly off
- * the bottom, it corrupts. The xp bar survives at the very bottom, but the
- * sheet's first bar ("energy") is silently dropped, and the list itself
- * overlays its first two lines into one (the same character-overlay failure
- * mode Task 8 fixed for the sidebar, resurfacing here one row earlier than
- * this task's height check covered). See the snapshot for the full picture.
+ * Parked, not fixed: a real machine's roster is unbounded (adapter/store.ts
+ * reads every resting Career file with no limit), so past two entries this
+ * overflows DIALOG, and the overflow corrupts rather than clips — the list's
+ * first two lines overlay into one, and the sheet's first bar ("energy") is
+ * silently dropped, while the xp bar below it survives untouched. Choosing
+ * among scrolling, a list cap, or a shorter roster card body is a product
+ * decision on a surface this branch was told not to touch, so it is left to
+ * the user; this test only pins what happens today so the defect is not
+ * forgotten, and does not demand it keep happening.
  */
-test("the roster at a realistic size (five adult Careers) corrupts, rather than clips, the overflow", async () => {
+test("the roster at five Careers: a known overflow, pinned here until it is decided", async () => {
   const careers = Array.from({ length: 5 }, (_, i) => ({ ...OWNER, hatchedAt: OWNER.hatchedAt + i }));
   const activeId = idOf(OWNER);
   const shown = careers.map((career) => tamago(career));
@@ -59,7 +58,6 @@ test("the roster at a realistic size (five adult Careers) corrupts, rather than 
   ));
   const shownFrame = trim(await frame());
   expect(shownFrame).toContain("9,166 / 20,000 xp → elder");
-  expect(shownFrame).not.toContain("energy");
   expect(shownFrame).toMatchSnapshot();
 });
 

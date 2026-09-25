@@ -51,7 +51,7 @@ exports[`the roster highlights the first line, moves with the arrows, selects wi
   [--------------------] 0 / 200 xp → hatchling"
 `;
 
-exports[`the roster at a realistic size (five adult Careers) corrupts, rather than clips, the overflow 1`] = `
+exports[`the roster at five Careers: a known overflow, pinned here until it is decided 1`] = `
 "  Tamago: roster                                       esc
 
   > Tamago 2 · cat · adult · active
