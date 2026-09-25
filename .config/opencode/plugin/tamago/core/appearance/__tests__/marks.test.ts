@@ -28,3 +28,18 @@ test("markOf returns the most recent Pick that has a mark, as a TraitId", () => 
   assert.equal(markOf(["hardy", "proud"]), "proud");
   assert.equal(markOf(["proud", "hardy"]), "hardy");
 });
+
+test("a Trait id that names an Object.prototype member has no mark, rather than a phantom one", () => {
+  for (const id of ["constructor", "toString", "valueOf", "hasOwnProperty", "__proto__"]) {
+    assert.equal(markOf([id]), undefined, id);
+    assert.equal(markOf(["hardy", id]), "hardy", `${id} must not mask a real earlier Pick`);
+  }
+});
+
+test("the badge differs from every pattern in MARK", () => {
+  const badgeStr = BADGE.join("/");
+  for (const [id, pattern] of Object.entries(MARK)) {
+    const patternStr = pattern.join("/");
+    assert.notEqual(badgeStr, patternStr, `BADGE is identical to MARK.${id}`);
+  }
+});

@@ -20,13 +20,13 @@ export const MARK: Record<TraitId, Pattern> = {
 };
 
 /** The pending-Draw badge, painted in the other corner. */
-export const BADGE: Pattern = ["#.#", ".#.", "#.#"];
+export const BADGE: Pattern = ["###", "#.#", "###"];
 
 /** The Trait whose mark the Sprite wears: the most recent Pick that has one. `held` comes from `traits(career)`, oldest first. */
 export function markOf(held: readonly TraitId[]): TraitId | undefined {
   for (let i = held.length - 1; i >= 0; i--) {
     const id = held[i];
-    if (id !== undefined && MARK[id] !== undefined) return id;
+    if (id !== undefined && Object.prototype.hasOwnProperty.call(MARK, id)) return id;
   }
   return undefined;
 }
