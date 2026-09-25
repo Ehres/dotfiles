@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { PIXEL_HEIGHT, SPRITE_WIDTH } from "../pixels.ts";
-import { SWEEP, blinksAt, shift, sweepAt } from "../motion.ts";
+import { BLINK_EVERY, SWEEP, blinksAt, shift, sweepAt } from "../motion.ts";
 
 function blank(): string[] {
   return Array.from({ length: PIXEL_HEIGHT }, () => ".".repeat(SPRITE_WIDTH));
@@ -54,4 +54,28 @@ test("a blink lands once every eleven beats and never on the resting beat", () =
   assert.equal(blinksAt(7), true);
   assert.equal(blinksAt(0), false);
   assert.equal(blinksAt(-4), blinksAt(18), "a negative index wraps like a positive one");
+});
+
+test("shift throws when the rectangle leaves the map on the x axis", () => {
+  const rows = blank();
+  assert.throws(() => shift(rows, { x: 18, y: 0, w: 5, h: 1 }, 0), /outside the map/);
+});
+
+test("shift throws when the rectangle leaves the map on the y axis", () => {
+  const rows = blank();
+  assert.throws(() => shift(rows, { x: 0, y: 18, w: 1, h: 5 }, 0), /outside the map/);
+});
+
+test("a pixel at the rectangle's left edge is dropped when shifted by -1", () => {
+  const rows = blank();
+  rows[4] = "a".padEnd(SPRITE_WIDTH, ".");
+  const moved = shift(rows, { x: 0, y: 4, w: 1, h: 1 }, -1);
+  assert.equal(moved[4]?.slice(0, 1), ".");
+});
+
+test("BLINK_EVERY and SWEEP.length are coprime", () => {
+  function gcd(a: number, b: number): number {
+    return b === 0 ? a : gcd(b, a % b);
+  }
+  assert.equal(gcd(BLINK_EVERY, SWEEP.length), 1, `gcd(${BLINK_EVERY}, ${SWEEP.length}) must be 1`);
 });

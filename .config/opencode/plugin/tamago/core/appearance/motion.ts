@@ -1,4 +1,4 @@
-import { PIXEL_HEIGHT, SPRITE_WIDTH, type Rect } from "./pixels.ts";
+import { assertInside, PIXEL_HEIGHT, SPRITE_WIDTH, type Rect } from "./pixels.ts";
 
 /** The regions of a Body that move. Absent means still. */
 export type Motion = { tail?: Rect; ears?: readonly Rect[] };
@@ -11,7 +11,7 @@ export type Motion = { tail?: Rect; ears?: readonly Rect[] };
 export const SWEEP: readonly number[] = [0, 1, 1, 0, -1, -1];
 
 /** Beats between two blinks. Prime against SWEEP.length so the two never lock in step. */
-const BLINK_EVERY = 11;
+export const BLINK_EVERY = 11;
 /** Which beat of the cycle the eyes shut on: not the resting one, so a blink reads as a change. */
 const BLINK_ON = 7;
 
@@ -35,9 +35,7 @@ export function blinksAt(index: number): boolean {
  * the body beside it.
  */
 export function shift(rows: readonly string[], at: Rect, dx: number): string[] {
-  if (at.x < 0 || at.y < 0 || at.x + at.w > SPRITE_WIDTH || at.y + at.h > PIXEL_HEIGHT) {
-    throw new Error(`the rectangle ${at.x},${at.y} ${at.w}x${at.h} falls outside the map`);
-  }
+  assertInside(at);
   if (dx === 0) return rows.slice();
   const next = rows.slice();
   for (let dy = 0; dy < at.h; dy++) {

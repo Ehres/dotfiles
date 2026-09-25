@@ -65,11 +65,16 @@ export const PAINT_OF: Record<"eye" | "mark" | "badge" | "heart", string> = { ey
 /** Rows of '#' (paint) and anything else (leave alone). */
 export type Pattern = readonly string[];
 
-/** Writes `pattern` into `at` as `role`, on a copy of `rows`. */
-export function paint(rows: readonly string[], at: Rect, pattern: Pattern, role: "eye" | "mark" | "badge" | "heart"): string[] {
+/** Throws unless `at` lies wholly inside the map. Shared by paint and shift so the bounds rule has one home. */
+export function assertInside(at: Rect): void {
   if (at.x < 0 || at.y < 0 || at.x + at.w > SPRITE_WIDTH || at.y + at.h > PIXEL_HEIGHT) {
     throw new Error(`the rectangle ${at.x},${at.y} ${at.w}x${at.h} falls outside the map`);
   }
+}
+
+/** Writes `pattern` into `at` as `role`, on a copy of `rows`. */
+export function paint(rows: readonly string[], at: Rect, pattern: Pattern, role: "eye" | "mark" | "badge" | "heart"): string[] {
+  assertInside(at);
   if (pattern.length !== at.h || pattern.some((line) => line.length !== at.w)) {
     throw new Error(`a pattern for a ${at.w} x ${at.h} rectangle must be ${at.h} rows of ${at.w}`);
   }
