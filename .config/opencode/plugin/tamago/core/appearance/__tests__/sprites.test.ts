@@ -85,6 +85,23 @@ test("eyes and motion rectangles fall inside the map and never touch a slot, or 
   }
 });
 
+// shift() moves a motion Rect's content by dx within its own width, dropping anything that lands
+// outside it. A Rect one pixel wide has nowhere for its content to go: every shift empties it. A
+// static render never exercises this — it only shows up once something actually moves — so this
+// is checked by construction (the Rect's width) rather than by rendering every beat.
+test("every motion rectangle (a tail, or an ears) is at least 2 pixels wide, so shift() has somewhere to move its content", () => {
+  for (const one of drawn) {
+    for (const { id: stage } of STAGES) {
+      if (stage === "egg") continue;
+      const { motion } = mapsOf(one.id)[stage];
+      if (motion?.tail !== undefined) assert.ok(motion.tail.w >= 2, `${one.id}/${stage} tail is only ${motion.tail.w} wide`);
+      for (const [index, ear] of (motion?.ears ?? []).entries()) {
+        assert.ok(ear.w >= 2, `${one.id}/${stage} ears[${index}] is only ${ear.w} wide`);
+      }
+    }
+  }
+});
+
 test("every Frame is SPRITE_HEIGHT rows of SPRITE_WIDTH cells, for every Species, Stage and Activity", () => {
   for (const one of SPECIES) {
     for (const { id: stage } of STAGES) {

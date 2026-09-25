@@ -705,7 +705,7 @@ export const COMMON: readonly SpeciesDef[] = [
           ".....................",
         ],
         eyes: [{ x: 5, y: 7, w: 3, h: 3 }, { x: 13, y: 7, w: 3, h: 3 }],
-        motion: { ears: [{ x: 7, y: 4, w: 1, h: 2 }, { x: 13, y: 4, w: 1, h: 2 }] },
+        motion: { ears: [{ x: 7, y: 4, w: 2, h: 2 }, { x: 13, y: 4, w: 2, h: 2 }] },
       },
       young: {
         pixels: [
@@ -731,7 +731,7 @@ export const COMMON: readonly SpeciesDef[] = [
           ".....................",
         ],
         eyes: [{ x: 4, y: 5, w: 3, h: 3 }, { x: 14, y: 5, w: 3, h: 3 }],
-        motion: { ears: [{ x: 6, y: 2, w: 1, h: 2 }, { x: 14, y: 2, w: 1, h: 2 }] },
+        motion: { ears: [{ x: 6, y: 2, w: 2, h: 2 }, { x: 14, y: 2, w: 2, h: 2 }] },
       },
       adult: {
         pixels: [
@@ -757,7 +757,7 @@ export const COMMON: readonly SpeciesDef[] = [
           ".....................",
         ],
         eyes: [{ x: 4, y: 3, w: 3, h: 3 }, { x: 14, y: 3, w: 3, h: 3 }],
-        motion: { ears: [{ x: 6, y: 0, w: 1, h: 2 }, { x: 14, y: 0, w: 1, h: 2 }] },
+        motion: { ears: [{ x: 6, y: 0, w: 2, h: 2 }, { x: 14, y: 0, w: 2, h: 2 }] },
       },
       elder: {
         pixels: [
@@ -783,7 +783,7 @@ export const COMMON: readonly SpeciesDef[] = [
           ".....................",
         ],
         eyes: [{ x: 4, y: 3, w: 3, h: 3 }, { x: 14, y: 3, w: 3, h: 3 }],
-        motion: { ears: [{ x: 6, y: 0, w: 1, h: 2 }, { x: 14, y: 0, w: 1, h: 2 }] },
+        motion: { ears: [{ x: 6, y: 0, w: 2, h: 2 }, { x: 14, y: 0, w: 2, h: 2 }] },
       },
     },
     palettes: {
