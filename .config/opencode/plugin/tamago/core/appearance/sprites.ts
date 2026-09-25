@@ -1,127 +1,149 @@
-import { REFERENCE, bodiesOf, known } from "../creature/catalog.ts";
+import { REFERENCE, known, mapsOf } from "../creature/catalog.ts";
 import type { Body } from "./bodies.ts";
-import { MARK_COLUMN, MARK_LINE } from "./marks.ts";
+import { BADGE, BADGE_SLOT, MARK, MARK_SLOT } from "./marks.ts";
+import { blinksAt, shift, sweepAt } from "./motion.ts";
+import { PIXEL_HEIGHT, SPRITE_WIDTH, pack, paint, type Frame, type Pattern } from "./pixels.ts";
 import type { Temperament } from "../creature/sheet.ts";
 import type { SpeciesId } from "../creature/species.ts";
 import type { StageId } from "../career/stage.ts";
+import type { TraitId } from "../career/pick.ts";
 import type { Activity } from "../moment/session.ts";
 
-export const SPRITE_WIDTH = 11;
-export const SPRITE_HEIGHT = 5;
-
-export type Frame = readonly string[];
-
-type Face = { eyes: string; mark: string };
-
-/** Pads every line to SPRITE_WIDTH so a short line never shifts the layout. */
-function fit(lines: string[]): Frame {
-  return lines.map((line) => line.padEnd(SPRITE_WIDTH));
-}
+export { PIXEL_HEIGHT, SPRITE_HEIGHT, SPRITE_WIDTH, type Cell, type Frame, type Role } from "./pixels.ts";
 
 /** The egg every Species hatches from: what is inside only shows at hatchling. */
-const EGG: Body = (e, m) => [
-  `   .---.  ${m}`,
-  "  /     \\",
-  ` |  ${e}  |`,
-  "  \\     /",
-  "   '---'",
-];
+const EGG: Body = {
+  pixels: [
+    "........ooo..........",
+    ".......ooaaaoo.......",
+    "......oaaaaaaao......",
+    ".....oaaaaaaaaao.....",
+    ".....oaaaaaaaaao.....",
+    "....oaaaaaaaaaaao....",
+    "....oaaaaaaaaaaao....",
+    "....oaaabbbaaaaao....",
+    "....oaaabbbaaaaao....",
+    "....oaaaaaaabbbao....",
+    "....oaaaaaaabbbao....",
+    "....oaaaaaaaaaaao....",
+    "....oaaabbbaaaaao....",
+    "....oaaabbbaaaaao....",
+    "....oaaaaaaaaaaao....",
+    "....oaaaaaaaaaaao....",
+    ".....oaaaaaaaaao.....",
+    ".....oaaaaaaaaao.....",
+    "......oaaaaaaao......",
+    ".......ooooooo.......",
+  ],
+  eyes: [
+    { x: 6, y: 6, w: 3, h: 3 },
+    { x: 12, y: 6, w: 3, h: 3 },
+  ],
+};
 
-/** The body to draw: the common egg, else the Species' body, else the reference's for a Species this build does not know. */
+/** The 3 x 3 eye patterns, one set per Activity, alternated by the cadence. */
+const FACES: Record<Activity, readonly Pattern[]> = {
+  idle: [[".#.", "###", ".#."]],
+  thinking: [[".#.", "###", ".#."], ["...", "###", ".#."]],
+  working: [[".#.", "###", ".#."]],
+  waiting: [["###", "#.#", "###"]],
+  hurt: [["#.#", ".#.", "#.#"]],
+  sleeping: [["...", "###", "..."]],
+};
+
+const SHUT: Pattern = ["...", "###", "..."];
+
+/** Eyes of a petted Tamago, per Temperament. */
+export const EYES: Record<Temperament, Pattern> = {
+  cheerful: ["#.#", ".#.", "..."],
+  sarcastic: ["...", "###", ".#."],
+  stoic: [".#.", "###", ".#."],
+  dreamy: ["...", "#.#", "###"],
+};
+
+/** How long the heart stays on the sprite after a pet. */
+export const PET_MS = 2_000;
+/** The heart drawn over the head while petted. Pixels now, not a character. */
+const HEART: Pattern = [".#.#.", "#####", "#####", ".###.", "..#.."];
+const HEART_AT = { x: 8, y: 1, w: 5, h: 5 };
+
+/** The body to draw: the common egg, else the Species' map, else the reference's. */
 function body(species: SpeciesId, stage: StageId): Body {
   if (stage === "egg") return EGG;
-  return bodiesOf(species)[stage];
+  return mapsOf(species)[stage];
 }
 
-/** The cache key: every egg shares one entry so identity holds across Species; an unknown Species shares the reference's. */
+/** The cache key: every egg shares one entry, an unknown Species shares the reference's. */
 function keyOf(species: SpeciesId, stage: StageId): string {
   if (stage === "egg") return "egg";
   return `${known(species) ? species : REFERENCE}/${stage}`;
 }
 
-const FACES: Record<Activity, readonly Face[]> = {
-  idle: [
-    { eyes: "o o", mark: " " },
-    { eyes: "- -", mark: " " },
-  ],
-  thinking: [
-    { eyes: "o o", mark: "." },
-    { eyes: "o o", mark: "?" },
-  ],
-  working: [
-    { eyes: "o o", mark: "|" },
-    { eyes: "o o", mark: "/" },
-    { eyes: "o o", mark: "-" },
-    { eyes: "o o", mark: "\\" },
-  ],
-  waiting: [
-    { eyes: "O O", mark: "!" },
-    { eyes: "O O", mark: " " },
-  ],
-  hurt: [
-    { eyes: "x x", mark: "*" },
-    { eyes: "x x", mark: " " },
-  ],
-  sleeping: [{ eyes: "- -", mark: "z" }],
-};
+/** Builds one Frame: the map, moved, then the overlays, then packed. */
+function build(one: Body, face: Pattern, beat: number, mark: TraitId | undefined, badge: boolean): Frame {
+  let rows: readonly string[] = one.pixels;
+  const motion = one.motion;
+  if (motion?.tail !== undefined) rows = shift(rows, motion.tail, sweepAt(beat));
+  if (motion?.ears !== undefined && blinksAt(beat)) for (const ear of motion.ears) rows = shift(rows, ear, 1);
+  for (const eye of one.eyes) rows = paint(rows, eye, face, "eye");
+  const pattern = mark === undefined ? undefined : MARK[mark];
+  if (pattern !== undefined) rows = paint(rows, MARK_SLOT, pattern, "mark");
+  if (badge) rows = paint(rows, BADGE_SLOT, BADGE, "badge");
+  return pack(rows);
+}
 
-/** One entry per species × stage × activity; frames never change, so callers can rely on identity. */
-const CACHE = new Map<string, readonly Frame[]>();
+const CACHE = new Map<string, Frame>();
 
-export function frames(species: SpeciesId, stage: StageId, activity: Activity): readonly Frame[] {
-  const key = `${keyOf(species, stage)}/${activity}`;
+function cached(key: string, make: () => Frame): Frame {
   const hit = CACHE.get(key);
-  if (hit) return hit;
-  const draw = body(species, stage);
-  const built = FACES[activity].map((face) => fit(draw(face.eyes, face.mark)));
+  if (hit !== undefined) return hit;
+  const built = make();
   CACHE.set(key, built);
   return built;
 }
 
-/** Writes `mark` over the overlay cell of a Frame. */
-function overlay(frame: Frame, mark: string): Frame {
-  return frame.map((line, index) => (index === MARK_LINE ? line.slice(0, MARK_COLUMN) + mark + line.slice(MARK_COLUMN + 1) : line));
+/** Every Frame of an Activity, in cadence order, for the callers that count them. */
+export function frames(species: SpeciesId, stage: StageId, activity: Activity): readonly Frame[] {
+  return FACES[activity].map((_, index) => frameAt(species, stage, activity, index));
 }
 
-const MARKED = new Map<string, readonly Frame[]>();
-
-/** The Frames of an Activity with a Trait mark written on them, cached like the bare ones so identity stays stable. */
-function markedFrames(species: SpeciesId, stage: StageId, activity: Activity, mark: string): readonly Frame[] {
-  const key = `${keyOf(species, stage)}/${activity}/${mark}`;
-  const hit = MARKED.get(key);
-  if (hit) return hit;
-  const built = frames(species, stage, activity).map((frame) => overlay(frame, mark));
-  MARKED.set(key, built);
-  return built;
+export function frameAt(
+  species: SpeciesId,
+  stage: StageId,
+  activity: Activity,
+  index: number,
+  mark?: TraitId,
+  badge = false,
+): Frame {
+  const faces = FACES[activity];
+  const beat = ((index % faces.length) + faces.length) % faces.length;
+  const key = `${keyOf(species, stage)}/${activity}/${index}/${mark ?? ""}/${badge}`;
+  return cached(key, () => {
+    const one = body(species, stage);
+    const blinking = activity !== "sleeping" && blinksAt(index);
+    return build(one, blinking ? SHUT : (faces[beat] ?? SHUT), index, mark, badge);
+  });
 }
 
-/** How long the heart stays on the sprite after a pet. */
-export const PET_MS = 2_000;
-/** Not ASCII: one column in most terminals, two in a few, where line 0 overflows for PET_MS. */
-export const HEART = "♥";
-
-/** Eyes of a petted Tamago, per Temperament. Three columns, like every Face. */
-export const EYES: Record<Temperament, string> = {
-  cheerful: "^ ^",
-  sarcastic: "- o",
-  stoic: "o o",
-  dreamy: "~ ~",
-};
-const HEARTS = new Map<string, Frame>();
-
-/** The Sprite while petted, whatever the Activity: the Temperament's eyes and a heart for the mark. Cached, so identity is stable. */
-export function heartFrame(species: SpeciesId, stage: StageId, temperament: Temperament, mark?: string): Frame {
-  const key = `${keyOf(species, stage)}/${temperament}/${mark ?? ""}`;
-  const hit = HEARTS.get(key);
-  if (hit) return hit;
-  const drawn = fit(body(species, stage)(EYES[temperament], HEART));
-  const built = mark === undefined || mark === "" ? drawn : overlay(drawn, mark);
-  HEARTS.set(key, built);
-  return built;
+/** The Sprite while petted: the Temperament's eyes and a heart over the head. */
+export function heartFrame(
+  species: SpeciesId,
+  stage: StageId,
+  temperament: Temperament,
+  mark?: TraitId,
+  badge = false,
+): Frame {
+  const key = `${keyOf(species, stage)}/heart/${temperament}/${mark ?? ""}/${badge}`;
+  return cached(key, () => {
+    const one = body(species, stage);
+    let rows: readonly string[] = one.pixels;
+    for (const eye of one.eyes) rows = paint(rows, eye, EYES[temperament], "eye");
+    rows = paint(rows, HEART_AT, HEART, "heart");
+    const pattern = mark === undefined ? undefined : MARK[mark];
+    if (pattern !== undefined) rows = paint(rows, MARK_SLOT, pattern, "mark");
+    if (badge) rows = paint(rows, BADGE_SLOT, BADGE, "badge");
+    return pack(rows);
+  });
 }
 
-export function frameAt(species: SpeciesId, stage: StageId, activity: Activity, index: number, mark?: string): Frame {
-  const all = mark === undefined || mark === "" ? frames(species, stage, activity) : markedFrames(species, stage, activity, mark);
-  const frame = all[((index % all.length) + all.length) % all.length];
-  return frame ?? fit([]);
-}
+export { BADGE_SLOT, MARK_SLOT };

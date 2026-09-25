@@ -1,4 +1,4 @@
-import type { Bodies } from "../appearance/bodies.ts";
+import type { Bodies, Maps } from "../appearance/bodies.ts";
 import type { Palettes, Skin, Variant } from "../appearance/palette.ts";
 import type { Signature } from "../speech/signature.ts";
 import type { SpeciesDef, SpeciesId } from "./species.ts";
@@ -33,11 +33,18 @@ export function known(id: SpeciesId, table: readonly SpeciesDef[] = SPECIES): bo
   return entry(id, table) !== undefined;
 }
 
-/** The bodies to draw: the Species' own, else the reference's for a Species this build does not know. */
-export function bodiesOf(id: SpeciesId, table: readonly SpeciesDef[] = SPECIES): Bodies {
+/** The bodies to draw: the Species' own, else the reference's for a Species this build does not know. Undefined once a Species draws pixel maps instead. */
+export function bodiesOf(id: SpeciesId, table: readonly SpeciesDef[] = SPECIES): Bodies | undefined {
   const found = entry(id, table) ?? entry(REFERENCE, table);
   if (found === undefined) throw new Error(`no reference Species "${REFERENCE}" in the table`);
   return found.bodies;
+}
+
+/** The maps to draw: the Species' own, else the reference's for a Species this build does not draw. */
+export function mapsOf(id: SpeciesId, table: readonly SpeciesDef[] = SPECIES): Maps {
+  const maps = entry(id, table)?.maps ?? entry(REFERENCE, table)?.maps;
+  if (maps === undefined) throw new Error(`no maps on the reference Species "${REFERENCE}"`);
+  return maps;
 }
 
 /** The Signature of a Species; undefined when this build does not know it, so its Temperament speaks in its place. */

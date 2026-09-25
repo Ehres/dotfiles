@@ -4,7 +4,6 @@ import type { Language, Phrase } from "../language.ts";
 import { say } from "../language.ts";
 import type { Tamago } from "../tamago.ts";
 import { bar, fmt } from "../appearance/format.ts";
-import { MARK } from "../appearance/marks.ts";
 import { RARITY_TEXT, STAGE_TEXT, STAT_TEXT } from "./tables.ts";
 import { TRAIT_TEXT } from "./traits.ts";
 import { word } from "./word.ts";
@@ -88,7 +87,7 @@ export function sheetLines(tamago: Tamago, language: Language): string[] {
   });
 }
 
-/** One line per held Trait: its mark and its title. Empty when none is held, so the card shows nothing. */
+/** One line per held Trait: its title. Empty when none is held, so the card shows nothing. The mark lives on the Sprite, not here. */
 export function traitLines(tamago: Tamago, language: Language): string[] {
-  return tamago.traits.map((id) => `${MARK[id] ?? " "} ${say(TRAIT_TEXT[id]?.title ?? { en: id, fr: id }, language)}`);
+  return tamago.traits.map((id) => say(TRAIT_TEXT[id]?.title ?? { en: id, fr: id }, language));
 }

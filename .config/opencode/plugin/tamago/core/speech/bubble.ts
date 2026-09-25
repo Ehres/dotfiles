@@ -1,5 +1,3 @@
-import type { Frame } from "../appearance/sprites.ts";
-
 /** Longest phrase a Bubble may hold, so it never wraps in a narrow sidebar. */
 export const MAX_TEXT = 24;
 /** Column of the tail in the bottom border; the sprite's head starts at column 2. */
@@ -22,8 +20,8 @@ export function bubbleBorders(text: string): { top: string; bottom: string } {
   return { top, bottom };
 }
 
-/** The whole bubble as a Frame: every line is text.length + 4 wide. */
-export function bubbleFrame(text: string): Frame {
+/** The whole bubble as lines of text: every line is text.length + 4 wide. */
+export function bubbleFrame(text: string): readonly string[] {
   const { top, bottom } = bubbleBorders(text);
   return [top, `( ${text} )`, bottom];
 }

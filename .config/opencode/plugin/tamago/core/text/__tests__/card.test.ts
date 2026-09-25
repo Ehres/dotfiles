@@ -130,12 +130,12 @@ test("sheetLines shows the Stats after the Modifiers of the Species", () => {
   assert.equal(lines[2], "sensitivity [----------] 0");
 });
 
-test("traitLines shows the mark and the title of each held Trait", () => {
+test("traitLines shows the title of each held Trait", () => {
   const kept = tamago({ ...career, picks: { "evolution:hatchling": { trait: "hardy", at: 1 } } });
-  assert.deepEqual(traitLines(kept, "en"), ["+ Hardy"]);
+  assert.deepEqual(traitLines(kept, "en"), ["Hardy"]);
 });
 
-test("traitLines shows the mark and the title of each held Trait, in French", () => {
+test("traitLines shows the title of each held Trait, in French", () => {
   const kept = tamago({ ...career, picks: { "evolution:hatchling": { trait: "hardy", at: 1 } } });
-  assert.deepEqual(traitLines(kept, "fr"), ["+ Endurant"]);
+  assert.deepEqual(traitLines(kept, "fr"), ["Endurant"]);
 });

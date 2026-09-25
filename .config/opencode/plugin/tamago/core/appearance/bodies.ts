@@ -1,14 +1,27 @@
 import type { StageId } from "../career/stage.ts";
+import type { Rect } from "./pixels.ts";
+import type { Motion } from "./motion.ts";
 
 export type Grown = Exclude<StageId, "egg">;
-/** Takes three-column eyes and a one-column mark, gives the lines of the sprite; `fit` in sprites.ts pads them to SPRITE_WIDTH. */
-export type Body = (eyes: string, mark: string) => string[];
+
 /**
- * Four bodies per Species, one per Stage past the egg. The bodies of every
- * Species live in `core/creature/species/<rarity>.ts`, one entry per Species
- * with its Signature. Every body fits in SPRITE_WIDTH × SPRITE_HEIGHT, puts
- * the eyes in `( e )` on line 1 and the mark at column 10 of line 0; the
- * hatchling holds in four lines. Tests in sprites.test.ts and catalog.test.ts
- * enforce the size.
+ * One Stage of one Species. `pixels` is PIXEL_HEIGHT rows of SPRITE_WIDTH
+ * characters of MAP_ALPHABET: colour, and only colour. Everything that moves
+ * or receives an overlay is a rectangle declared beside it, so no character
+ * of the map ever has two meanings.
+ *
+ * MARK_SLOT and BADGE_SLOT must stay transparent; `eyes` must fall on the
+ * body; a `motion` rectangle must hold the region alone. Tests in
+ * sprites.test.ts and catalog.test.ts enforce all three.
  */
-export type Bodies = Record<Grown, Body>;
+export type Body = {
+  pixels: readonly string[];
+  eyes: readonly [Rect, Rect];
+  motion?: Motion;
+};
+
+/** Four bodies per Species, one per Stage past the egg. */
+export type Maps = Record<Grown, Body>;
+
+/** Kept until Task 14 deletes the last ASCII body. */
+export type Bodies = Record<Grown, (eyes: string, mark: string) => string[]>;

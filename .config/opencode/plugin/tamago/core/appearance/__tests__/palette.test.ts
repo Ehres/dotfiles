@@ -92,7 +92,7 @@ test("the two variants of a Species differ: a light theme is not the dark one", 
 
 test("paletteOf throws when neither the requested Species nor the reference has Palettes", () => {
   const EMPTY_FIXTURE: readonly SpeciesDef[] = [
-    SPECIES.find((one) => one.id === REFERENCE)!,
+    { ...SPECIES.find((one) => one.id === REFERENCE)!, palettes: undefined },
   ];
   assert.throws(
     () => paletteOf("no-such-species", "dark", EMPTY_FIXTURE),

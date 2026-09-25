@@ -1,12 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { MARK_COLUMN, MARK_LINE } from "../../appearance/marks.ts";
-import { frames, heartFrame } from "../../appearance/sprites.ts";
 import { STAGES } from "../../career/stage.ts";
 import { assertSayable } from "../../speech/__tests__/sayable.ts";
 import { CUES, type Cue } from "../../speech/cue.ts";
-import { ACTIVITIES } from "../../moment/session.ts";
-import { TEMPERAMENTS } from "../sheet.ts";
 import { REFERENCE, SPECIES, bodiesOf, known, signatureOf } from "../catalog.ts";
 
 test("SPECIES keeps the draw order: common first, then by Rarity, twenty ids, the reference among the common", () => {
@@ -28,6 +24,7 @@ test("bodiesOf falls back to the reference and known says which ids are the buil
 
 test("every body draws every Stage past the egg", () => {
   for (const { id, bodies } of SPECIES) {
+    if (bodies === undefined) continue; // drawn as pixel maps instead
     for (const { id: stage } of STAGES) {
       if (stage === "egg") continue;
       assert.equal(typeof bodies[stage], "function", `${id}/${stage}`);
@@ -35,19 +32,20 @@ test("every body draws every Stage past the egg", () => {
   }
 });
 
-test("no two Species share a body at any Stage, and no Species draws two Stages alike", () => {
+test("no two drawn Species share a map at a Stage, and no Species draws two Stages alike", () => {
   const seen = new Map<string, string>();
-  for (const { id, bodies } of SPECIES) {
+  for (const one of SPECIES) {
+    if (one.maps === undefined) continue;
     const own = new Set<string>();
     for (const { id: stage } of STAGES) {
       if (stage === "egg") continue;
-      const frame = bodies[stage]("o o", " ").join("\n");
-      assert.ok(!own.has(frame), `${id} draws two Stages alike (${stage})`);
-      own.add(frame);
-      const key = `${stage}\n${frame}`;
+      const drawing = one.maps[stage].pixels.join("\n");
+      assert.ok(!own.has(drawing), `${one.id} draws two Stages alike (${stage})`);
+      own.add(drawing);
+      const key = `${stage}\n${drawing}`;
       const other = seen.get(key);
-      assert.equal(other, undefined, `${id} and ${other} share the ${stage} body`);
-      seen.set(key, id);
+      assert.equal(other, undefined, `${one.id} and ${other} share the ${stage} map`);
+      seen.set(key, one.id);
     }
   }
 });
@@ -95,20 +93,4 @@ test("a French phrase is written once in the whole catalog, whoever says it", ()
     }
   }
   assert.deepEqual(collisions, []);
-});
-
-test("every Species leaves the overlay cell free at every Stage and Activity, and on the petted frame for every Temperament, so a Trait mark never covers a body", () => {
-  for (const one of SPECIES) {
-    for (const stage of ["egg", "hatchling", "young", "adult", "elder"] as const) {
-      for (const activity of ACTIVITIES) {
-        for (const frame of frames(one.id, stage, activity)) {
-          assert.equal((frame[MARK_LINE] ?? "")[MARK_COLUMN], " ", `${one.id}/${stage}/${activity} fills the overlay cell`);
-        }
-      }
-      for (const temperament of TEMPERAMENTS) {
-        const frame = heartFrame(one.id, stage, temperament);
-        assert.equal((frame[MARK_LINE] ?? "")[MARK_COLUMN], " ", `${one.id}/${stage} heartFrame/${temperament} fills the overlay cell`);
-      }
-    }
-  }
 });
