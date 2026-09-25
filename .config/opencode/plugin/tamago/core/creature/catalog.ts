@@ -1,4 +1,5 @@
 import type { Bodies } from "../appearance/bodies.ts";
+import type { Palettes, Skin, Variant } from "../appearance/palette.ts";
 import type { Signature } from "../speech/signature.ts";
 import type { SpeciesDef, SpeciesId } from "./species.ts";
 import { COMMON } from "./species/common.ts";
@@ -42,4 +43,12 @@ export function bodiesOf(id: SpeciesId, table: readonly SpeciesDef[] = SPECIES):
 /** The Signature of a Species; undefined when this build does not know it, so its Temperament speaks in its place. */
 export function signatureOf(id: SpeciesId, table: readonly SpeciesDef[] = SPECIES): Signature | undefined {
   return entry(id, table)?.signature;
+}
+
+/** The Skin to paint a Species with: its own, else the reference's for a Species this build does not draw. */
+export function paletteOf(id: SpeciesId, variant: Variant, table: readonly SpeciesDef[] = SPECIES): Skin {
+  const own = entry(id, table)?.palettes;
+  const palettes: Palettes | undefined = own ?? entry(REFERENCE, table)?.palettes;
+  if (palettes === undefined) throw new Error(`no Palettes on the reference Species "${REFERENCE}"`);
+  return palettes[variant];
 }
