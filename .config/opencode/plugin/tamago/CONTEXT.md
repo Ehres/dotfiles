@@ -312,9 +312,10 @@ The pixel drawing of the Tamago for a given Stage and Activity: the map for
 that Stage, shifted by its Motion, stamped with a Look and painted with the
 Trait mark and the Draw badge, in the Species' Palette. "Body" names the
 per-Stage record that holds it (`bodies.ts`'s `Body`: pixels, anchors,
-motion, and an optional per-Stage expressions override); the map is
-specifically its pixel rows, not the whole record — the two words are not
-interchangeable.
+motion, an optional per-Stage expressions override, and optional further
+frames — whole drawn maps the cadence alternates over, the pixels above
+being frame zero and the only one a Species owes); the map is specifically
+its pixel rows, not the whole record — the two words are not interchangeable.
 _Avoid_: ASCII (it draws in Pixels now)
 
 **Frame**:

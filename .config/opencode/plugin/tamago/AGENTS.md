@@ -106,9 +106,13 @@ side by side for persistence changes.
 
 `node scripts/import.ts <path-to-png> [--patch <anchor>]` turns a drawn PNG
 into a Species' `pixels:`/`palette:` block. Without `--patch` the PNG must be
-the full 32 x 32 map; with it, any size, for a Patch pinned to that Anchor. It
-only prints to stdout — a Species file is pasted into by hand, never rewritten
-by this tool.
+the full 32 x 32 map; with it, any size, for a Patch pinned to that Anchor —
+but `--patch` builds its own palette from just that image, so its indices do
+not line up with the Species' own Palette the Patch must index into; remap
+them by hand before pasting. The pasteable block (and, with `--patch`, a
+leading `// patch: <anchor>` comment) goes to stdout; a Species file is
+pasted into by hand from there, never rewritten by this tool. The colour
+count and the ceiling warning go to stderr instead.
 
 The ceiling is sixteen colours (`PALETTE_MAX`): past it, the tool refuses by
 name, listing every colour by descending pixel count, so near-duplicate shades
@@ -116,9 +120,9 @@ from anti-aliasing are visible rather than a bare "N colours". Art for this
 engine must be flat: no gradient banding, no anti-aliased edges.
 
 The decoder (`scripts/png.ts`) is hand-written on top of `node:zlib`'s inflate
-— chunk parsing, the three PNG filters, colour types 2/3/6 — because the
-project carries no runtime dependency and the plugin never imports it; resist
-replacing it with a library.
+— chunk parsing, the five PNG filters (None, Sub, Up, Average, Paeth), colour
+types 2/3/6 — because the project carries no runtime dependency and the
+plugin never imports it; resist replacing it with a library.
 
 ## Scope
 

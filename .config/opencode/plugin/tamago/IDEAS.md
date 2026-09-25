@@ -6,11 +6,12 @@ avant implémentation.
 
 ## État des lieux
 
-Ce que Tamago fait aujourd'hui, relu le 2026-09-19 :
+Ce que Tamago fait aujourd'hui, relu le 2026-09-25 :
 
-- Sprite ASCII 11×5 par Species et par Stage (`core/appearance/sprites.ts`),
-  5 stades pilotés par le Growth, l'XP fois le Pace de la Species
-  (`core/career/stage.ts`) : egg → hatchling → young → adult → elder.
+- Sprite en pixels 32×32 par Species et par Stage, dessiné en demi-blocs
+  (`▀ ▄ █`) (`core/appearance/sprites.ts`), 5 stades pilotés par le Growth,
+  l'XP fois le Pace de la Species (`core/career/stage.ts`) : egg → hatchling
+  → young → adult → elder.
 - 6 activités de session (`core/moment/session.ts`) : idle, thinking, working,
   waiting, hurt, sleeping. Animation des yeux et d'une "marque" à côté de la
   tête.

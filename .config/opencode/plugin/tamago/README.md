@@ -57,9 +57,10 @@ and animates faster. See "Who it is".
 Colors come from the species' own Palette, up to sixteen indexed colours
 with no light or dark variant to choose between. Idle, thinking and working
 leave it untouched; waiting, hurt and asleep tint it 45 % toward the theme's
-`warning`, `error` and `textMuted`. The trait mark, the draw badge and the
-pet's heart always use the theme's `success`, `warning` and `error`,
-whatever the species.
+`warning`, `error` and `textMuted`. The draw badge and the pet's heart always
+use the theme's `warning` and `error`, whatever the species; the trait mark
+uses the theme colour its Trait names — six distinct ones across the six
+traits — falling back to `success` while no Trait is held.
 
 ## How it talks
 
@@ -134,7 +135,8 @@ about it depends on the terminal's own column widths.
 At a milestone, today one per stage from `hatchling` on, the creature offers a
 draw of up to three traits and `choose a trait` keeps one; its description
 says how many choices are waiting, and a small badge pulses in the sprite's
-top-right corner as the same reminder, in the sidebar.
+top-right corner as the same reminder, wherever the sprite appears: the
+sidebar, and the card and roster dialogs.
 A trait is never a penalty: each one marks the sprite's top-left corner with
 its own pattern, and either speaks cues the creature already had, so the
 species and the temperament stay quiet there, or opens a cue nothing else can
@@ -291,7 +293,7 @@ manager in `.config/opencode` itself: it breaks the LSPs.
 
 ```sh
 pnpm install --ignore-workspace   # types for the editor and tsc, nothing at runtime
-node --test "core/**/__tests__/*.test.ts" "adapter/__tests__/*.test.ts"
+pnpm test                         # core, the adapter and the PNG importer's scripts/__tests__
 bun test view shell               # view snapshots (Bun compiles the Solid JSX)
 ./node_modules/.bin/tsc --noEmit
 ```
@@ -305,9 +307,11 @@ Drawing a Species: export a 32 x 32 PNG of at most sixteen flat colours — no
 gradient banding, no anti-aliased edges — and run `node scripts/import.ts
 <path>.png` to print the `palette:` and `pixels:` blocks to paste into its
 entry in `core/creature/species/<rarity>.ts`. `--patch <anchor>` prints a
-Patch instead, any size, for an Expression pinned to that Anchor. Past sixteen
-colours the tool refuses, listing every colour by pixel count so
-near-duplicate anti-aliased shades are visible.
+Patch instead, any size, for an Expression pinned to that Anchor — but it
+builds a fresh palette from just that patch image, so its printed indices do
+not line up with the Species' own Palette; remap them by hand before
+pasting. Past sixteen colours the tool refuses, listing every colour by
+pixel count so near-duplicate anti-aliased shades are visible.
 
 Layout:
 
