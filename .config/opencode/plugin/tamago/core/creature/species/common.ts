@@ -35,7 +35,7 @@ export const COMMON: readonly SpeciesDef[] = [
           { x: 6, y: 8, w: 3, h: 3 },
           { x: 12, y: 8, w: 3, h: 3 },
         ],
-        motion: { ears: [{ x: 5, y: 4, w: 4, h: 3 }, { x: 12, y: 4, w: 4, h: 3 }] },
+        motion: {},
       },
       young: {
         pixels: [
@@ -64,10 +64,7 @@ export const COMMON: readonly SpeciesDef[] = [
           { x: 5, y: 5, w: 3, h: 3 },
           { x: 13, y: 5, w: 3, h: 3 },
         ],
-        motion: {
-          tail: { x: 18, y: 13, w: 3, h: 4 },
-          ears: [{ x: 4, y: 1, w: 4, h: 3 }, { x: 13, y: 1, w: 4, h: 3 }],
-        },
+        motion: {},
       },
       adult: {
         pixels: [
@@ -96,10 +93,7 @@ export const COMMON: readonly SpeciesDef[] = [
           { x: 4, y: 5, w: 3, h: 3 },
           { x: 14, y: 5, w: 3, h: 3 },
         ],
-        motion: {
-          tail: { x: 18, y: 14, w: 3, h: 4 },
-          ears: [{ x: 3, y: 0, w: 5, h: 3 }, { x: 13, y: 0, w: 5, h: 3 }],
-        },
+        motion: {},
       },
       elder: {
         pixels: [
@@ -128,10 +122,7 @@ export const COMMON: readonly SpeciesDef[] = [
           { x: 4, y: 5, w: 3, h: 3 },
           { x: 14, y: 5, w: 3, h: 3 },
         ],
-        motion: {
-          tail: { x: 18, y: 14, w: 3, h: 4 },
-          ears: [{ x: 3, y: 0, w: 6, h: 3 }, { x: 12, y: 0, w: 6, h: 3 }],
-        },
+        motion: {},
       },
     },
     palettes: {
