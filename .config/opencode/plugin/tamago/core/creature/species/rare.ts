@@ -1,3 +1,4 @@
+import { DEFAULT_EXPRESSIONS } from "../../appearance/default-expressions.ts";
 import type { SpeciesDef } from "../species.ts";
 
 /** The rare Species: creatures past the ordinary living. */
@@ -44,7 +45,7 @@ export const RARE: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 12, y: 18, w: 3, h: 3 }, { x: 16, y: 18, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 12, y: 18 }, right_eye: { x: 16, y: 18 } },
       },
       young: {
         pixels: [
@@ -81,7 +82,7 @@ export const RARE: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 12, y: 16, w: 3, h: 3 }, { x: 16, y: 16, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 12, y: 16 }, right_eye: { x: 16, y: 16 } },
       },
       adult: {
         pixels: [
@@ -118,7 +119,7 @@ export const RARE: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 12, y: 15, w: 3, h: 3 }, { x: 16, y: 15, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 12, y: 15 }, right_eye: { x: 16, y: 15 } },
       },
       elder: {
         pixels: [
@@ -155,10 +156,11 @@ export const RARE: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 12, y: 15, w: 3, h: 3 }, { x: 16, y: 15, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 12, y: 15 }, right_eye: { x: 16, y: 15 } },
       },
     },
     palette: ["#1c2126", "#8b96a3", "#c9d3da", "#3ad6c9", "#12100e"],
+    expressions: DEFAULT_EXPRESSIONS,
     signature: {
       permission: [{ en: "Access requested.", fr: "Accès demandé." }, { en: "Awaiting input.", fr: "Saisie : en attente." }, { en: "Query: proceed?", fr: "Requête : continuer ?" }],
       granted: [{ en: "Access granted.", fr: "Accès autorisé." }, { en: "Executing.", fr: "Exécution en cours." }, { en: "Input received. Go.", fr: "Ordre reçu. Lancement." }],
@@ -217,7 +219,7 @@ export const RARE: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 13, y: 18, w: 3, h: 3 }, { x: 16, y: 18, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 13, y: 18 }, right_eye: { x: 16, y: 18 } },
       },
       young: {
         pixels: [
@@ -254,7 +256,7 @@ export const RARE: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 12, y: 17, w: 3, h: 3 }, { x: 16, y: 17, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 12, y: 17 }, right_eye: { x: 16, y: 17 } },
       },
       adult: {
         pixels: [
@@ -291,7 +293,7 @@ export const RARE: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 11, y: 16, w: 3, h: 3 }, { x: 17, y: 16, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 11, y: 16 }, right_eye: { x: 17, y: 16 } },
         motion: { tail: { x: 14, y: 25, w: 3, h: 2 } },
       },
       elder: {
@@ -329,11 +331,12 @@ export const RARE: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 11, y: 16, w: 3, h: 3 }, { x: 17, y: 16, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 11, y: 16 }, right_eye: { x: 17, y: 16 } },
         motion: { tail: { x: 23, y: 25, w: 3, h: 2 } },
       },
     },
     palette: ["#cfc9de", "#e8e6f0", "#c9c6d9", "#a8c9e8", "#3a3550"],
+    expressions: DEFAULT_EXPRESSIONS,
     signature: {
       permission: [{ en: "Boo... may I?", fr: "Bouh... je peux ?" }, { en: "A whisper: allowed?", fr: "Un murmure : permis ?" }, { en: "Drift in? You say.", fr: "Je passe ? Dis-moi." }],
       granted: [{ en: "Drifting through.", fr: "Je traverse le mur." }, { en: "Boo. On it.", fr: "Bouh. J'y vais." }, { en: "Passing in...", fr: "Je m'infiltre..." }],
@@ -392,7 +395,7 @@ export const RARE: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 13, y: 18, w: 3, h: 3 }, { x: 16, y: 18, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 13, y: 18 }, right_eye: { x: 16, y: 18 } },
       },
       young: {
         pixels: [
@@ -429,7 +432,7 @@ export const RARE: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 12, y: 17, w: 3, h: 3 }, { x: 16, y: 17, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 12, y: 17 }, right_eye: { x: 16, y: 17 } },
       },
       adult: {
         pixels: [
@@ -466,7 +469,7 @@ export const RARE: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 11, y: 16, w: 3, h: 3 }, { x: 17, y: 16, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 11, y: 16 }, right_eye: { x: 17, y: 16 } },
         motion: { ears: [{ x: 12, y: 24, w: 2, h: 3 }, { x: 16, y: 24, w: 2, h: 3 }] },
       },
       elder: {
@@ -504,11 +507,12 @@ export const RARE: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 11, y: 16, w: 3, h: 3 }, { x: 17, y: 16, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 11, y: 16 }, right_eye: { x: 17, y: 16 } },
         motion: { ears: [{ x: 11, y: 24, w: 2, h: 4 }, { x: 17, y: 24, w: 2, h: 4 }] },
       },
     },
     palette: ["#a8d8e0", "#c8ecf2", "#e8f7fa", "#e85a9e", "#1f3a3d"],
+    expressions: DEFAULT_EXPRESSIONS,
     signature: {
       permission: [{ en: "Drift in? May I?", fr: "Dériver jusque-là ?" }, { en: "Current says ask.", fr: "Le courant attend. Toi ?" }, { en: "Float ahead?", fr: "Je flotte plus loin ?" }],
       granted: [{ en: "Drifting in...", fr: "Portée par le courant." }, { en: "Pulsing forward.", fr: "Une pulsation. J'avance." }, { en: "Glow on. Go.", fr: "Je m'allume. En route." }],
@@ -567,7 +571,7 @@ export const RARE: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 12, y: 19, w: 3, h: 3 }, { x: 16, y: 19, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 12, y: 19 }, right_eye: { x: 16, y: 19 } },
       },
       young: {
         pixels: [
@@ -604,7 +608,7 @@ export const RARE: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 11, y: 18, w: 3, h: 3 }, { x: 16, y: 18, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 11, y: 18 }, right_eye: { x: 16, y: 18 } },
       },
       adult: {
         pixels: [
@@ -641,7 +645,7 @@ export const RARE: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 10, y: 17, w: 3, h: 3 }, { x: 16, y: 17, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 10, y: 17 }, right_eye: { x: 16, y: 17 } },
         motion: { tail: { x: 22, y: 24, w: 3, h: 1 } },
       },
       elder: {
@@ -679,11 +683,12 @@ export const RARE: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 10, y: 17, w: 3, h: 3 }, { x: 16, y: 17, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 10, y: 17 }, right_eye: { x: 16, y: 17 } },
         motion: { tail: { x: 22, y: 24, w: 3, h: 2 } },
       },
     },
     palette: ["#16261f", "#2f8f7a", "#bfe8d9", "#a13fa1", "#0d1a15"],
+    expressions: DEFAULT_EXPRESSIONS,
     signature: {
       permission: [{ en: "Blend in? May I?", fr: "Invisible ? J'y vais ?" }, { en: "Color check: allowed?", fr: "Je teste une couleur ?" }, { en: "Your call. Watching.", fr: "C'est toi qui vois." }],
       granted: [{ en: "Blending in.", fr: "Je prends la couleur." }, { en: "Colors up. On it.", fr: "Couleurs vives. Ça part." }, { en: "Slow tongue, fast yes.", fr: "Langue lente, oui vif." }],

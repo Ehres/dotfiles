@@ -1,4 +1,5 @@
 import type { Maps } from "../appearance/bodies.ts";
+import type { Expressions } from "../appearance/expressions.ts";
 import type { Palette } from "../appearance/palette.ts";
 import type { Phrase } from "../language.ts";
 import type { Signature } from "../speech/signature.ts";
@@ -28,8 +29,8 @@ export type Gender = "m" | "f";
 /** `sheet` holds the Modifiers this Species adds to the Sheet; absent for none. */
 export type Species = { id: SpeciesId; label: Phrase; gender: Gender; rarity: Rarity; sheet?: Modifiers };
 
-/** A catalog entry: the Species plus what it draws and what it says. Missing any is a compile error. */
-export type SpeciesDef = Species & { maps: Maps; palette: Palette; signature: Signature };
+/** A catalog entry: the Species plus what it draws, how it looks and what it says. Missing any is a compile error. */
+export type SpeciesDef = Species & { maps: Maps; palette: Palette; expressions: Expressions; signature: Signature };
 
 /** The domain mixed into the hatch seed. No Milestone id is ever this string. */
 const DOMAIN = "species";

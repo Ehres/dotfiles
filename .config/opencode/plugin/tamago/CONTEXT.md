@@ -309,27 +309,47 @@ _Avoid_: dot, point, cell (that is the character)
 
 **Sprite**:
 The pixel drawing of the Tamago for a given Stage and Activity: the map for
-that Stage, shifted by its Motion and painted with the eyes, the Trait mark
-and the Draw badge, in the Species' Palette. "Body" names the per-Stage
-record that holds it (`bodies.ts`'s `Body`: pixels, eyes, motion); the map is
+that Stage, shifted by its Motion, stamped with a Look and painted with the
+Trait mark and the Draw badge, in the Species' Palette. "Body" names the
+per-Stage record that holds it (`bodies.ts`'s `Body`: pixels, anchors,
+motion, and an optional per-Stage expressions override); the map is
 specifically its pixel rows, not the whole record — the two words are not
 interchangeable.
 _Avoid_: ASCII (it draws in Pixels now)
 
 **Frame**:
 One state of a Sprite, already packed into cells: the map's Pixels with the
-eyes, the Motion and the overlays applied. A Sprite has one or more Frames
+Motion, a Look and the overlays applied. A Sprite has one or more Frames
 that alternate to animate.
 
-**Face**:
-The eyes for a given Activity: a 3 × 3 pattern painted into each eyes
-rectangle of the map, one or more per Activity that alternate by cadence,
-while the map itself stays the same for a Species and a Stage.
+**Anchor**:
+A named point of a Body — `head`, `left_eye`, whatever the creature has —
+that a Patch is pinned to. `head` is required: the heart and the Bubble's
+tail are aimed at it. A creature can have one eye or three; the engine knows
+only the names its Species uses.
+_Avoid_: eye rectangle (an eye is no longer a rectangle the engine owns)
+
+**Patch**:
+Rows of map characters pinned to an Anchor, its top-left pixel landing on
+that point. `.` leaves what is under it alone, so a Patch redraws only what
+it means to. Its characters are indices into the Species' own Palette.
+
+**Look**:
+Everything redrawn for one beat: the Patches stamped together.
+
+**Expression**:
+One or more Looks that alternate by cadence, declared by the Species rather
+than shared by the engine, so a cat and a dragon blink differently. Eleven
+ids: `open`, `shut`, the five Activities and the four pet Temperaments. Only
+`open` and `shut` are owed; the rest fall back to `open`, so a Species is
+enriched over time instead of blocked on eleven drawings. A Body may
+override its Species' table for one Stage, merged over it, and rarely does.
+_Avoid_: Face (the engine no longer has one to share)
 
 **Role**:
 What a pixel is, never what colour it is: outline, primary, secondary,
-accent, eye, mark, badge, heart — a map carries the first four, the engine
-paints the rest.
+accent, mark, badge, heart — a map and its Species' Patches carry the first
+four, the engine paints the rest.
 _Avoid_: layer, segment, class
 
 **Palette**:
@@ -406,8 +426,8 @@ _Avoid_: card, widget
   its **Species**, **Stage**, **XP**, **Growth**, **Sheet**, **Temperament**,
   **Behavior**, **Character** and Speaker together; the views receive that
   and derive nothing themselves
-- The **Voice** speaks with the **Temperament**; the **Face** of a pet wears
-  it; the card states the whole **Character**
+- The **Voice** speaks with the **Temperament**; the **Expression** of a pet
+  wears it; the card states the whole **Character**
 - The **Voice** draws a **Register** for each **Cue** it speaks: the
   **Signature** of the **Species** most often, a **Temperament** at the
   weight of its **Stat**, the neutral phrases rarely; at the hatch it is

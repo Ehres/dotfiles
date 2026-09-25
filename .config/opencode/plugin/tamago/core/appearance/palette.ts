@@ -13,9 +13,9 @@ export const PALETTE_MAX = 16;
  * hatches from it: the Rarity and the Species are learned at the hatch, and
  * the egg reveals neither.
  *
- * Index 3 is a placeholder: the egg's map never writes it, and it exists only
- * to keep index 4 — the egg's eye colour — aligned with EYE_INDEX in
- * sprites.ts, the slot every Species' own eye shares too. Task 4 removes the
- * shared eye index, and with it the need for this placeholder.
+ * The egg's map writes only indices 0 to 2. Indices 3 and 4 exist for the
+ * patches: the egg takes DEFAULT_EXPRESSIONS, the migrated table that draws an
+ * eye at index 4, so index 3 is a placeholder holding index 4 in place. Both
+ * go when the egg is redrawn with a table of its own.
  */
 export const EGG_PALETTE: Palette = ["#4c4438", "#d9cdb8", "#efe7d6", "#4c4438", "#2a2520"];

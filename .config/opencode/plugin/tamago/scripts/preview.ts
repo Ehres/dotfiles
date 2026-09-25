@@ -1,7 +1,8 @@
 // scripts/preview.ts — run: node scripts/preview.ts cat adult [--plain]
 import { SPECIES, mapsOf, paletteOf } from "../core/creature/catalog.ts";
-import { frameAt } from "../core/appearance/sprites.ts";
+import { expressionsOf, frameAt, headOf } from "../core/appearance/sprites.ts";
 import type { Cell, Frame, Ink, Rect } from "../core/appearance/pixels.ts";
+import type { Point } from "../core/appearance/expressions.ts";
 import { EGG_PALETTE, type Palette } from "../core/appearance/palette.ts";
 import type { Grown } from "../core/appearance/bodies.ts";
 import { STAGES, type StageId } from "../core/career/stage.ts";
@@ -75,18 +76,38 @@ function rectLine(label: string, rect: Rect | undefined): string {
   return `  ${label}: x=${rect.x} y=${rect.y} w=${rect.w} h=${rect.h}`;
 }
 
-/** A short, readable summary of the eyes and motion rectangles, in place of a raw JSON dump. */
+function pointLine(label: string, point: Point): string {
+  return `  ${label}: x=${point.x} y=${point.y}`;
+}
+
+/**
+ * A short, readable summary of the anchors, the motion rectangles and the
+ * expressions this Species declares, in place of a raw JSON dump. `head`
+ * leads: the heart and the Bubble's tail are aimed at it.
+ */
 function summarize(id: string, stage: StageId): string {
-  if (stage === "egg") return "rectangles: n/a (the egg is a shared body, not a Species map)";
+  // The egg is the engine's own shared body, so only what a caller can reach is printed: its head,
+  // which the heart and the Bubble aim at, and the migrated table every egg is drawn with.
+  if (stage === "egg") {
+    return [
+      "anchors: the shared egg's own, not this Species'",
+      pointLine("head", headOf(id, stage)),
+      `expressions: ${Object.keys(expressionsOf(id, stage)).join(", ")}`,
+    ].join("\n");
+  }
   const map = mapsOf(id)[stage as Grown];
+  const named = Object.entries(map.anchors).filter(([name]) => name !== "head");
+  named.sort(([a], [b]) => a.localeCompare(b));
   const lines = [
+    "anchors:",
+    pointLine("head", map.anchors.head),
+    ...named.map(([name, point]) => pointLine(name, point)),
     "rectangles:",
-    rectLine("eyes[0]", map.eyes[0]),
-    rectLine("eyes[1]", map.eyes[1]),
     rectLine("motion.tail", map.motion?.tail),
   ];
   if (map.motion?.ears === undefined) lines.push(rectLine("motion.ears", undefined));
   else map.motion.ears.forEach((ear, index) => lines.push(rectLine(`motion.ears[${index}]`, ear)));
+  lines.push(`expressions: ${Object.keys(expressionsOf(id, stage)).join(", ")}`);
   return lines.join("\n");
 }
 

@@ -2,6 +2,7 @@
 import type { JSX } from "@opentui/solid";
 import { createMemo } from "solid-js";
 import { bubbleBorders, tailOffset } from "../core/speech/bubble.ts";
+import { headOf } from "../core/appearance/sprites.ts";
 import type { Activity, Session } from "../core/moment/session.ts";
 import type { Tamago } from "../core/tamago.ts";
 import type { Bubble } from "../core/speech/voice.ts";
@@ -25,7 +26,7 @@ export function SidebarView(props: {
     const current = props.bubble;
     if (current === undefined) return undefined;
     const { top, bottom } = bubbleBorders(current.text);
-    return { top, text: current.text, bottom, border: theme.current.textMuted, ink: theme.current.text, offset: tailOffset(current.text) };
+    return { top, text: current.text, bottom, border: theme.current.textMuted, ink: theme.current.text, offset: tailOffset(current.text, headOf(props.tamago.species.id, props.tamago.stage).x) };
   });
   return (
     <Portrait

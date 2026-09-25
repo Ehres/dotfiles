@@ -6,19 +6,43 @@ import { BADGE_SLOT, MARK_SLOT } from "../marks.ts";
 import { SWEEP, shift } from "../motion.ts";
 import { MAP_ALPHABET, PIXEL_HEIGHT, SPRITE_HEIGHT, SPRITE_WIDTH, type Frame, type Rect } from "../pixels.ts";
 import { EGG_PALETTE } from "../palette.ts";
-import { EGG_PIXELS, EYE_INDEX, frameAt, heartFrame, periodOf } from "../sprites.ts";
+import type { Expression, Expressions } from "../expressions.ts";
+import { EGG_PIXELS, HEART_HEIGHT, expressionsOf, frameAt, heartFrame, periodOf } from "../sprites.ts";
 import { STAGES } from "../../career/stage.ts";
 import { ACTIVITIES } from "../../moment/session.ts";
 
 const drawn = SPECIES;
 
-test("every index a map writes, and the eye it paints, has a colour behind it", () => {
+/**
+ * Object.entries over an Expressions falls to the lib's `{}` overload and hands back `any`, which
+ * would quietly untype every walk below it. Narrowed here once, with no cast: `any` is assignable
+ * to the annotated return, and everything downstream is a real Expression again.
+ */
+function entries(table: Expressions): readonly (readonly [string, Expression])[] {
+  return Object.entries(table);
+}
+
+test("every index a map writes, and every index its expressions paint, has a colour behind it", () => {
   for (const one of drawn) {
     const palette = paletteOf(one.id);
-    assert.ok(
-      EYE_INDEX >= 0 && EYE_INDEX < palette.length,
-      `${one.id} has ${palette.length} colours but the eye paints at index ${EYE_INDEX}`,
-    );
+    // The successor of the shared EYE_INDEX check: an eye colour now lives in the Species' own
+    // patches, so a table reaching past its own Palette is the same defect in a new place.
+    for (const [id, expression] of entries(expressionsOf(one.id))) {
+      for (const look of expression) {
+        for (const patch of look) {
+          for (const row of patch.pixels) {
+            for (const char of row) {
+              if (char === ".") continue;
+              const index = MAP_ALPHABET.indexOf(char) - 1;
+              assert.ok(
+                index >= 0 && index < palette.length,
+                `${one.id}/${id} patch at ${patch.at} writes "${char}" (index ${index}) but the palette holds ${palette.length} colours`,
+              );
+            }
+          }
+        }
+      }
+    }
     for (const { id: stage } of STAGES) {
       if (stage === "egg") continue;
       const { pixels } = mapsOf(one.id)[stage];
@@ -37,8 +61,8 @@ test("every index a map writes, and the eye it paints, has a colour behind it", 
 });
 
 // Walks what is actually painted (every Activity's full period, and heartFrame for every
-// Temperament), not just the static map: the map alone cannot see the eye the engine overlays at
-// EYE_INDEX, which is exactly the defect that slipped through the first version of this test.
+// Temperament), not just the static map: the map alone cannot see the eye the expressions stamp
+// over it, which is exactly the defect that slipped through the first version of this test.
 test("the egg's painted Frame never reads a Species' palette", () => {
   for (const [y, row] of EGG_PIXELS.entries()) {
     for (const [x, char] of [...row].entries()) {
@@ -49,7 +73,7 @@ test("the egg's painted Frame never reads a Species' palette", () => {
   }
   const inks = (frame: Frame) => frame.flatMap((row) => row.flatMap((cell) => [cell.top, cell.bottom]));
   for (const activity of ACTIVITIES) {
-    const period = periodOf(activity);
+    const period = periodOf(REFERENCE, "egg", activity);
     for (let beat = 0; beat < period; beat++) {
       for (const ink of inks(frameAt(REFERENCE, "egg", activity, beat))) {
         if (typeof ink !== "number") continue;
@@ -97,7 +121,7 @@ test("MARK_SLOT and BADGE_SLOT are transparent in every drawn map", () => {
   }
 });
 
-test("eyes and motion rectangles fall inside the map and never touch a slot, or each other", () => {
+test("motion rectangles fall inside the map and never touch a slot, or each other", () => {
   const inside = (r: Rect) => r.x >= 0 && r.y >= 0 && r.x + r.w <= SPRITE_WIDTH && r.y + r.h <= PIXEL_HEIGHT;
   const overlaps = (a: Rect, b: Rect) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
   for (const one of drawn) {
@@ -105,8 +129,6 @@ test("eyes and motion rectangles fall inside the map and never touch a slot, or 
       if (stage === "egg") continue;
       const body = mapsOf(one.id)[stage];
       const named: readonly (readonly [string, Rect])[] = [
-        ["eyes[0]", body.eyes[0]],
-        ["eyes[1]", body.eyes[1]],
         ...(body.motion?.ears ?? []).map((ear, index): readonly [string, Rect] => [`ears[${index}]`, ear]),
         ...(body.motion?.tail !== undefined ? [["tail", body.motion.tail] as readonly [string, Rect]] : []),
       ];
@@ -115,14 +137,99 @@ test("eyes and motion rectangles fall inside the map and never touch a slot, or 
         assert.ok(!overlaps(rect, MARK_SLOT), `${one.id}/${stage} ${label} overlaps MARK_SLOT`);
         assert.ok(!overlaps(rect, BADGE_SLOT), `${one.id}/${stage} ${label} overlaps BADGE_SLOT`);
       }
-      // Every pair, not just eyes against eyes: an eye drawn over an ear, or a tail over an eye,
-      // is exactly the kind of mistake a Species copying this file's shape could make unnoticed.
+      // Every pair, not just ears against ears: a tail drawn over an ear is exactly the kind of
+      // mistake a Species copying this file's shape could make unnoticed.
       for (const [i, [labelA, a]] of named.entries()) {
         for (const [j, [labelB, b]] of named.entries()) {
           if (j <= i) continue;
           assert.ok(!overlaps(a, b), `${one.id}/${stage} ${labelA} overlaps ${labelB}`);
         }
       }
+    }
+  }
+});
+
+function anchorsNamedBy(table: Expressions): ReadonlySet<string> {
+  const named = new Set<string>();
+  for (const [, expression] of entries(table)) for (const look of expression) for (const patch of look) named.add(patch.at);
+  return named;
+}
+
+// Both tables, not just the Species': a Body's own `expressions` override replaces an id wholesale,
+// so it can name an anchor the Species' table never does, and the Species' table still has to land
+// on every Body whose Stage the override leaves alone.
+test("every anchor a Species' expressions name exists in all four of its Bodies", () => {
+  for (const one of drawn) {
+    const shared = anchorsNamedBy(expressionsOf(one.id));
+    for (const { id: stage } of STAGES) {
+      if (stage === "egg") continue;
+      const { anchors } = mapsOf(one.id)[stage];
+      for (const at of new Set([...shared, ...anchorsNamedBy(expressionsOf(one.id, stage))])) {
+        assert.ok(anchors[at] !== undefined, `${one.id}/${stage} has no anchor "${at}"`);
+      }
+    }
+  }
+});
+
+// stamp() clips rather than throws — core never throws at render — so a patch hanging off the
+// bottom or the right of the canvas is silently cropped in the window. This is where it is caught.
+test("every patch fits inside the canvas from its anchor", () => {
+  for (const one of drawn) {
+    for (const { id: stage } of STAGES) {
+      if (stage === "egg") continue;
+      const { anchors } = mapsOf(one.id)[stage];
+      for (const [id, expression] of entries(expressionsOf(one.id, stage))) {
+        for (const look of expression) {
+          for (const patch of look) {
+            const at = anchors[patch.at];
+            if (at === undefined) continue; // named by the test above
+            const height = patch.pixels.length;
+            const width = patch.pixels[0]?.length ?? 0;
+            for (const row of patch.pixels) assert.equal(row.length, width, `${one.id}/${id} patch at ${patch.at} is ragged`);
+            assert.ok(
+              at.x >= 0 && at.y >= 0 && at.x + width <= SPRITE_WIDTH && at.y + height <= PIXEL_HEIGHT,
+              `${one.id}/${stage}/${id} patch at ${patch.at} (${at.x},${at.y} ${width}x${height}) runs off the canvas`,
+            );
+          }
+        }
+      }
+    }
+  }
+});
+
+// An Expression with no Look makes periodOf zero, and `index % 0` is NaN: one frozen Frame under a
+// NaN cache key, for ever. periodOf's Math.max(1, …) refuses to melt; this refuses the table.
+test("no Expression is empty, so a period is never zero", () => {
+  for (const one of drawn) {
+    for (const [id, expression] of entries(expressionsOf(one.id))) {
+      assert.ok(expression.length > 0, `${one.id}/${id} has no Look`);
+    }
+    // A Body's override is merged in wholesale, so an empty Expression can enter there too.
+    for (const { id: stage } of STAGES) {
+      for (const [id, expression] of entries(expressionsOf(one.id, stage))) {
+        assert.ok(expression.length > 0, `${one.id}/${stage}/${id} has no Look`);
+      }
+    }
+  }
+  for (const one of drawn) {
+    for (const { id: stage } of STAGES) {
+      for (const activity of ACTIVITIES) {
+        assert.ok(periodOf(one.id, stage, activity) > 0, `${one.id}/${stage}/${activity} has a period of zero`);
+      }
+    }
+  }
+});
+
+// heartFrame paints a 5-wide, HEART_HEIGHT-tall heart at (head.x - 2, head.y - HEART_HEIGHT), and
+// paint() does throw when that rectangle leaves the map. A head too high or too near an edge would
+// therefore take the window down on a pet, which is why this is checked on the table, not at render.
+test("every head anchor leaves room for the heart above it", () => {
+  for (const one of drawn) {
+    for (const { id: stage } of STAGES) {
+      if (stage === "egg") continue;
+      const { head } = mapsOf(one.id)[stage].anchors;
+      assert.ok(head.y >= HEART_HEIGHT, `${one.id}/${stage} head at y=${head.y} leaves no room for the ${HEART_HEIGHT}-row heart`);
+      assert.ok(head.x - 2 >= 0 && head.x + 3 <= SPRITE_WIDTH, `${one.id}/${stage} head at x=${head.x} pushes the heart off the canvas`);
     }
   }
 });
@@ -194,7 +301,7 @@ test("every Frame is SPRITE_HEIGHT rows of SPRITE_WIDTH cells, across a full per
   for (const one of SPECIES) {
     for (const { id: stage } of STAGES) {
       for (const activity of ACTIVITIES) {
-        const period = periodOf(activity);
+        const period = periodOf(one.id, stage, activity);
         for (let beat = 0; beat < period; beat++) {
           const frame = frameAt(one.id, stage, activity, beat, "hardy", true);
           assert.equal(frame.length, SPRITE_HEIGHT, `${one.id}/${stage}/${activity}/${beat}`);
@@ -206,17 +313,17 @@ test("every Frame is SPRITE_HEIGHT rows of SPRITE_WIDTH cells, across a full per
 });
 
 // The egg has no motion, so nothing but the beat can move it: a clean way to test that the beat
-// wraps by the Activity's Face count and not by the raw index, with no tail or ear to confound it.
-test("frameAt wraps the beat by the Activity's Face count, not by the raw index", () => {
+// wraps by the Expression's Look count and not by the raw index, with no tail or ear to confound it.
+test("frameAt wraps the beat by the Expression's Look count, not by the raw index", () => {
   // Content, not identity: 0 and 2 land on the same beat but are cached under different keys
   // (the cache key carries the whole wrapped index, not the reduced beat), so they are two
   // separately-built Frames that must look alike, not the same object.
   assert.notDeepEqual(frameAt(REFERENCE, "egg", "thinking", 0), frameAt(REFERENCE, "egg", "thinking", 1), "different beats should differ");
-  assert.deepEqual(frameAt(REFERENCE, "egg", "thinking", 0), frameAt(REFERENCE, "egg", "thinking", 2), "two Faces around is the same beat again");
+  assert.deepEqual(frameAt(REFERENCE, "egg", "thinking", 0), frameAt(REFERENCE, "egg", "thinking", 2), "two Looks around is the same beat again");
 });
 
 test("the animation period repeats identity, so a clock that only advances never grows the cache", () => {
-  const period = periodOf("idle");
+  const period = periodOf(REFERENCE, "adult", "idle");
   assert.equal(frameAt(REFERENCE, "adult", "idle", 5), frameAt(REFERENCE, "adult", "idle", 5 + period), "one period later, the same object");
 
   const seen = new Set<Frame>();
@@ -251,8 +358,9 @@ test("a heart Frame keeps the size, wears the heart and the Temperament's eyes",
       const frame = heartFrame(REFERENCE, stage, temperament);
       assert.equal(frame.length, SPRITE_HEIGHT);
       assert.ok(frame.some((row) => row.some((cell) => cell.top === "heart" || cell.bottom === "heart")), `${stage}/${temperament} heart`);
-      // The eyes are drawn at palette index 4 (EYE_INDEX in sprites.ts): the migration put every
-      // Species' old eye colour there. Task 4 replaces this with a Species' own expressions.
+      // The reference takes DEFAULT_EXPRESSIONS, which paints at palette index 4: the migration
+      // put every Species' old eye colour there. A redrawn Species picks its own index, and this
+      // assertion moves with it.
       assert.ok(frame.some((row) => row.some((cell) => cell.top === 4 || cell.bottom === 4)), `${stage}/${temperament} eyes`);
       assert.equal(heartFrame(REFERENCE, stage, temperament), frame, "cached");
     }

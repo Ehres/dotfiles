@@ -1,3 +1,4 @@
+import { DEFAULT_EXPRESSIONS } from "../../appearance/default-expressions.ts";
 import type { SpeciesDef } from "../species.ts";
 
 /** The legendary Species: the dragon alone, so it keeps its standing. */
@@ -44,7 +45,7 @@ export const LEGENDARY: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 12, y: 18, w: 3, h: 3 }, { x: 16, y: 18, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 12, y: 18 }, right_eye: { x: 16, y: 18 } },
       },
       young: {
         pixels: [
@@ -81,7 +82,7 @@ export const LEGENDARY: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 11, y: 18, w: 3, h: 3 }, { x: 16, y: 18, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 11, y: 18 }, right_eye: { x: 16, y: 18 } },
       },
       adult: {
         pixels: [
@@ -118,7 +119,7 @@ export const LEGENDARY: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 10, y: 18, w: 3, h: 3 }, { x: 16, y: 18, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 10, y: 18 }, right_eye: { x: 16, y: 18 } },
         motion: { tail: { x: 22, y: 24, w: 3, h: 2 } },
       },
       elder: {
@@ -156,11 +157,12 @@ export const LEGENDARY: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 9, y: 18, w: 3, h: 3 }, { x: 17, y: 18, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 9, y: 18 }, right_eye: { x: 17, y: 18 } },
         motion: { tail: { x: 22, y: 24, w: 3, h: 3 } },
       },
     },
     palette: ["#0a1f12", "#1f6b3f", "#e8c34a", "#e8621f", "#3a2c08"],
+    expressions: DEFAULT_EXPRESSIONS,
     signature: {
       permission: [{ en: "Grant it, mortal.", fr: "Accordez-le, mortel." }, { en: "Permission? Amusing.", fr: "Permission ? Amusant." }, { en: "I await. Briefly.", fr: "Ne tardez pas trop." }],
       granted: [{ en: "Naturally.", fr: "Naturellement." }, { en: "The gates open.", fr: "Les portes s'ouvrent." }, { en: "As decreed.", fr: "Ainsi fut-il décrété." }],

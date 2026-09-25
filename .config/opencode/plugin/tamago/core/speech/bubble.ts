@@ -8,13 +8,6 @@ export const MAX_TEXT = 24;
 export const TAIL_COLUMN = 5;
 
 /**
- * Column the tail aims at: where the migrated maps put the head (old column 10
- * plus the re-framing offset of 5). Task 4 replaces this with the Body's own
- * `head` anchor, which is the whole reason a Species declares one.
- */
-export const HEAD_COLUMN = 15;
-
-/**
  * Top and bottom borders of a bubble around `text`. Both are one column
  * narrower than the middle line on each side, the usual rounded look:
  *
@@ -38,11 +31,17 @@ export function bubbleFrame(text: string): readonly string[] {
 }
 
 /**
- * How far from the Sprite's own left edge a Bubble starts, so its tail lands on the head. Never
- * negative in practice: the tail sits at column 5 at most (TAIL_COLUMN) and the head is at
- * HEAD_COLUMN, so no text length ever pushes the Bubble past the left edge.
+ * How far from the Sprite's own left edge a Bubble starts, so its tail lands on `headColumn` — the
+ * x of the Body's own `head` anchor, which is why a Species declares one.
+ *
+ * Clamped at zero, and that clamp is the whole reason this takes a column instead of reading a
+ * constant. The tail sits at TAIL_COLUMN once the text is 3 characters or longer, so a Body whose
+ * head is drawn further left than that asks for a negative offset — and the view adds this to a
+ * padding, which would slide the Bubble out of the Sprite's own column band. A head that far left
+ * gets a Bubble flush against the edge, aimed as near the head as the tail can reach, rather than
+ * one drawn off it.
  */
-export function tailOffset(text: string): number {
+export function tailOffset(text: string, headColumn: number): number {
   const { bottom } = bubbleBorders(text);
-  return HEAD_COLUMN - bottom.indexOf("o");
+  return Math.max(0, headColumn - bottom.indexOf("o"));
 }

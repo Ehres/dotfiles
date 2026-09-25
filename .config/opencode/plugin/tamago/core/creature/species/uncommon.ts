@@ -1,3 +1,4 @@
+import { DEFAULT_EXPRESSIONS } from "../../appearance/default-expressions.ts";
 import type { SpeciesDef } from "../species.ts";
 
 /** The uncommon Species: marked silhouettes, ears, wings, tentacles, spines, gills. */
@@ -44,7 +45,7 @@ export const UNCOMMON: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 11, y: 20, w: 3, h: 3 }, { x: 17, y: 20, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 11, y: 20 }, right_eye: { x: 17, y: 20 } },
       },
       young: {
         pixels: [
@@ -81,7 +82,7 @@ export const UNCOMMON: readonly SpeciesDef[] = [
           ".........0000...0000............",
           "................................",
         ],
-        eyes: [{ x: 10, y: 17, w: 3, h: 3 }, { x: 18, y: 17, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 10, y: 17 }, right_eye: { x: 18, y: 17 } },
         motion: { tail: { x: 23, y: 24, w: 3, h: 4 } },
       },
       adult: {
@@ -119,7 +120,7 @@ export const UNCOMMON: readonly SpeciesDef[] = [
           ".......0000.......0000..........",
           "................................",
         ],
-        eyes: [{ x: 9, y: 16, w: 3, h: 3 }, { x: 19, y: 16, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 9, y: 16 }, right_eye: { x: 19, y: 16 } },
         motion: { tail: { x: 23, y: 25, w: 3, h: 4 } },
       },
       elder: {
@@ -157,11 +158,12 @@ export const UNCOMMON: readonly SpeciesDef[] = [
           ".......0000.......0000..........",
           "................................",
         ],
-        eyes: [{ x: 9, y: 16, w: 3, h: 3 }, { x: 19, y: 16, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 9, y: 16 }, right_eye: { x: 19, y: 16 } },
         motion: { tail: { x: 23, y: 25, w: 3, h: 4 } },
       },
     },
     palette: ["#2b1108", "#c0421f", "#fdf6ec", "#1a1310", "#0f0c0a"],
+    expressions: DEFAULT_EXPRESSIONS,
     signature: {
       permission: [{ en: "May I? Sly grin.", fr: "Je me sers ? Hé hé." }, { en: "Your henhouse, boss.", fr: "Ton poulailler, chef." }, { en: "Permission, hm?", fr: "La permission, hmm ?" }],
       granted: [{ en: "Clever choice.", fr: "Bien joué." }, { en: "Slipping in. Quiet.", fr: "Je me faufile. Chut." }, { en: "Foxy. On it.", fr: "Tout en finesse." }],
@@ -220,7 +222,7 @@ export const UNCOMMON: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 11, y: 19, w: 3, h: 3 }, { x: 17, y: 19, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 11, y: 19 }, right_eye: { x: 17, y: 19 } },
       },
       young: {
         pixels: [
@@ -257,7 +259,7 @@ export const UNCOMMON: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 11, y: 18, w: 3, h: 3 }, { x: 17, y: 18, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 11, y: 18 }, right_eye: { x: 17, y: 18 } },
       },
       adult: {
         pixels: [
@@ -294,7 +296,7 @@ export const UNCOMMON: readonly SpeciesDef[] = [
           "...........333...333............",
           "................................",
         ],
-        eyes: [{ x: 10, y: 17, w: 3, h: 3 }, { x: 18, y: 17, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 10, y: 17 }, right_eye: { x: 18, y: 17 } },
       },
       elder: {
         pixels: [
@@ -331,10 +333,11 @@ export const UNCOMMON: readonly SpeciesDef[] = [
           "...........000...000............",
           "................................",
         ],
-        eyes: [{ x: 10, y: 16, w: 3, h: 3 }, { x: 18, y: 16, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 10, y: 16 }, right_eye: { x: 18, y: 16 } },
       },
     },
     palette: ["#0b0e14", "#232f3d", "#f5f5f0", "#e8973a", "#12100e"],
+    expressions: DEFAULT_EXPRESSIONS,
     signature: {
       permission: [{ en: "Protocol: ask you.", fr: "Protocole : je demande." }, { en: "May I, formally?", fr: "Puis-je, je vous prie ?" }, { en: "Awaiting clearance.", fr: "En attente de feu vert." }],
       granted: [{ en: "Cleared. Sliding in.", fr: "Accordé. Je m'élance." }, { en: "Formation, go.", fr: "La colonne s'ébranle." }, { en: "Flippers up. On it.", fr: "Ailerons levés. Je pars." }],
@@ -393,7 +396,7 @@ export const UNCOMMON: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 11, y: 18, w: 3, h: 3 }, { x: 17, y: 18, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 11, y: 18 }, right_eye: { x: 17, y: 18 } },
       },
       young: {
         pixels: [
@@ -430,7 +433,7 @@ export const UNCOMMON: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 10, y: 17, w: 3, h: 3 }, { x: 18, y: 17, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 10, y: 17 }, right_eye: { x: 18, y: 17 } },
       },
       adult: {
         pixels: [
@@ -467,7 +470,7 @@ export const UNCOMMON: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 9, y: 16, w: 3, h: 3 }, { x: 19, y: 16, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 9, y: 16 }, right_eye: { x: 19, y: 16 } },
       },
       elder: {
         pixels: [
@@ -504,10 +507,11 @@ export const UNCOMMON: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 9, y: 16, w: 3, h: 3 }, { x: 18, y: 16, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 9, y: 16 }, right_eye: { x: 18, y: 16 } },
       },
     },
     palette: ["#2b0f24", "#c0447a", "#f0b8d0", "#5c2d5c", "#150a12"],
+    expressions: DEFAULT_EXPRESSIONS,
     signature: {
       permission: [{ en: "Eight arms ask: may I?", fr: "Huit bras. J'y touche ?" }, { en: "Reach in? Your call.", fr: "Un bras tendu ? À toi." }, { en: "Ink or go? You say.", fr: "L'encre ou le geste ?" }],
       granted: [{ en: "All arms in!", fr: "Tous les bras dedans !" }, { en: "Curious. Reaching.", fr: "Intriguée. J'explore." }, { en: "Eight hands on it.", fr: "Huit mains dessus." }],
@@ -566,7 +570,7 @@ export const UNCOMMON: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 11, y: 17, w: 3, h: 3 }, { x: 17, y: 17, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 11, y: 17 }, right_eye: { x: 17, y: 17 } },
       },
       young: {
         pixels: [
@@ -603,7 +607,7 @@ export const UNCOMMON: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 10, y: 16, w: 3, h: 3 }, { x: 18, y: 16, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 10, y: 16 }, right_eye: { x: 18, y: 16 } },
         motion: { ears: [{ x: 5, y: 20, w: 2, h: 1 }, { x: 24, y: 20, w: 2, h: 1 }] },
       },
       adult: {
@@ -641,7 +645,7 @@ export const UNCOMMON: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 10, y: 15, w: 3, h: 3 }, { x: 18, y: 15, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 10, y: 15 }, right_eye: { x: 18, y: 15 } },
       },
       elder: {
         pixels: [
@@ -678,10 +682,11 @@ export const UNCOMMON: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 10, y: 15, w: 3, h: 3 }, { x: 18, y: 15, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 10, y: 15 }, right_eye: { x: 18, y: 15 } },
       },
     },
     palette: ["#0f0a16", "#3d3350", "#a89bc4", "#e8dcc0", "#050307"],
+    expressions: DEFAULT_EXPRESSIONS,
     signature: {
       permission: [{ en: "Whisper: may I?", fr: "Tout bas : j'y vais ?" }, { en: "Dark says ask you.", fr: "Le noir dit : demande." }, { en: "Hang on. Allowed?", fr: "Suspendue. Permis ?" }],
       granted: [{ en: "Swooping in.", fr: "Je descends en piqué." }, { en: "Wings out. Quiet.", fr: "Ailes ouvertes. Muette." }, { en: "Good. Into the dark.", fr: "Bien. Vers la nuit." }],
@@ -740,7 +745,7 @@ export const UNCOMMON: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 10, y: 20, w: 3, h: 3 }, { x: 17, y: 20, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 10, y: 20 }, right_eye: { x: 17, y: 20 } },
       },
       young: {
         pixels: [
@@ -777,7 +782,7 @@ export const UNCOMMON: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 9, y: 19, w: 3, h: 3 }, { x: 18, y: 19, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 9, y: 19 }, right_eye: { x: 18, y: 19 } },
       },
       adult: {
         pixels: [
@@ -814,7 +819,7 @@ export const UNCOMMON: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 8, y: 18, w: 3, h: 3 }, { x: 19, y: 18, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 8, y: 18 }, right_eye: { x: 19, y: 18 } },
       },
       elder: {
         pixels: [
@@ -851,10 +856,11 @@ export const UNCOMMON: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 8, y: 18, w: 3, h: 3 }, { x: 19, y: 18, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 8, y: 18 }, right_eye: { x: 19, y: 18 } },
       },
     },
     palette: ["#241a10", "#9c8365", "#f0e6d2", "#4a3826", "#120c08"],
+    expressions: DEFAULT_EXPRESSIONS,
     signature: {
       permission: [{ en: "Spines down. May I?", fr: "Piquants baissés. Oui ?" }, { en: "Careful ask: allowed?", fr: "Prudemment : je peux ?" }, { en: "Your call. Curling.", fr: "Comme tu veux. J'hésite." }],
       granted: [{ en: "Uncurling. On it.", fr: "Je me déroule. Voilà." }, { en: "Spines relaxed. Go.", fr: "Piquants au repos. Bien." }, { en: "Good. Snuffling in.", fr: "D'accord. Je renifle." }],
@@ -913,7 +919,7 @@ export const UNCOMMON: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 11, y: 19, w: 3, h: 3 }, { x: 17, y: 19, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 11, y: 19 }, right_eye: { x: 17, y: 19 } },
       },
       young: {
         pixels: [
@@ -950,7 +956,7 @@ export const UNCOMMON: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 10, y: 18, w: 3, h: 3 }, { x: 18, y: 18, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 10, y: 18 }, right_eye: { x: 18, y: 18 } },
         motion: { ears: [{ x: 7, y: 17, w: 2, h: 2 }, { x: 22, y: 17, w: 2, h: 2 }] },
       },
       adult: {
@@ -988,7 +994,7 @@ export const UNCOMMON: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 9, y: 17, w: 3, h: 3 }, { x: 19, y: 17, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 9, y: 17 }, right_eye: { x: 19, y: 17 } },
         motion: { ears: [{ x: 6, y: 16, w: 2, h: 2 }, { x: 23, y: 16, w: 2, h: 2 }] },
       },
       elder: {
@@ -1026,11 +1032,12 @@ export const UNCOMMON: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 9, y: 16, w: 3, h: 3 }, { x: 19, y: 16, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 9, y: 16 }, right_eye: { x: 19, y: 16 } },
         motion: { ears: [{ x: 6, y: 15, w: 2, h: 2 }, { x: 23, y: 15, w: 2, h: 2 }] },
       },
     },
     palette: ["#6b3a45", "#f2b8c6", "#fbe0e8", "#e85a7a", "#3a1f26"],
+    expressions: DEFAULT_EXPRESSIONS,
     signature: {
       permission: [{ en: "Gills say: may I?", fr: "Mes branchies demandent." }, { en: "Soft ask. Allowed?", fr: "Un petit oui ? Merci !" }, { en: "Your call. Smiling.", fr: "À toi. Tout sourire." }],
       granted: [{ en: "Swimming in. Smile.", fr: "Je nage. Tout content." }, { en: "Gills up. On it.", fr: "Branchies au taquet." }, { en: "Lovely. Wiggling.", fr: "Super. J'ondule." }],

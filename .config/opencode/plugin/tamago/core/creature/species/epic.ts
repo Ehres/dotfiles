@@ -1,3 +1,4 @@
+import { DEFAULT_EXPRESSIONS } from "../../appearance/default-expressions.ts";
 import type { SpeciesDef } from "../species.ts";
 
 /** The epic Species: the myth. */
@@ -44,7 +45,7 @@ export const EPIC: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 12, y: 18, w: 3, h: 3 }, { x: 16, y: 18, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 12, y: 18 }, right_eye: { x: 16, y: 18 } },
       },
       young: {
         pixels: [
@@ -81,7 +82,7 @@ export const EPIC: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 11, y: 17, w: 3, h: 3 }, { x: 16, y: 17, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 11, y: 17 }, right_eye: { x: 16, y: 17 } },
       },
       adult: {
         pixels: [
@@ -118,7 +119,7 @@ export const EPIC: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 11, y: 16, w: 3, h: 3 }, { x: 16, y: 16, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 11, y: 16 }, right_eye: { x: 16, y: 16 } },
         motion: { ears: [{ x: 13, y: 25, w: 2, h: 2 }, { x: 18, y: 25, w: 2, h: 2 }] },
       },
       elder: {
@@ -156,11 +157,12 @@ export const EPIC: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 11, y: 16, w: 3, h: 3 }, { x: 16, y: 16, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 11, y: 16 }, right_eye: { x: 16, y: 16 } },
         motion: { ears: [{ x: 12, y: 26, w: 2, h: 2 }, { x: 15, y: 26, w: 2, h: 2 }, { x: 18, y: 26, w: 2, h: 2 }] },
       },
     },
     palette: ["#3d0f0a", "#e8481f", "#ffcf4a", "#8a1a1a", "#1a0a08"],
+    expressions: DEFAULT_EXPRESSIONS,
     signature: {
       permission: [{ en: "Fire asks: may I?", fr: "Ce feu peut partir ?" }, { en: "Blaze ahead? Say so.", fr: "Ça flambe ? Dis-le." }, { en: "Your spark, your call.", fr: "L'étincelle attend." }],
       granted: [{ en: "Blazing in!", fr: "Me voilà en flammes !" }, { en: "Wings alight. Go!", fr: "Plumes en feu. Partons !" }, { en: "Bright yes. On it.", fr: "Un oui clair. Je fonce." }],
@@ -219,7 +221,7 @@ export const EPIC: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 12, y: 18, w: 3, h: 3 }, { x: 16, y: 18, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 12, y: 18 }, right_eye: { x: 16, y: 18 } },
       },
       young: {
         pixels: [
@@ -256,7 +258,7 @@ export const EPIC: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 11, y: 17, w: 3, h: 3 }, { x: 16, y: 17, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 11, y: 17 }, right_eye: { x: 16, y: 17 } },
       },
       adult: {
         pixels: [
@@ -293,7 +295,7 @@ export const EPIC: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 10, y: 16, w: 3, h: 3 }, { x: 17, y: 16, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 10, y: 16 }, right_eye: { x: 17, y: 16 } },
         motion: { ears: [{ x: 14, y: 25, w: 2, h: 1 }, { x: 19, y: 25, w: 2, h: 1 }] },
       },
       elder: {
@@ -331,11 +333,12 @@ export const EPIC: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 9, y: 16, w: 3, h: 3 }, { x: 18, y: 16, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 9, y: 16 }, right_eye: { x: 18, y: 16 } },
         motion: { ears: [{ x: 12, y: 25, w: 2, h: 1 }, { x: 17, y: 25, w: 2, h: 1 }, { x: 20, y: 25, w: 2, h: 1 }] },
       },
     },
     palette: ["#050c0d", "#123138", "#5fa89c", "#4de8c4", "#050505"],
+    expressions: DEFAULT_EXPRESSIONS,
     signature: {
       permission: [{ en: "The deep asks: may I?", fr: "D'en bas : un signe ?" }, { en: "Surface? Your call.", fr: "Remonter ? Tu décides." }, { en: "Tentacles wait. Go?", fr: "Tentacules suspendus." }],
       granted: [{ en: "Rising from the deep.", fr: "Ça remonte du fond." }, { en: "The sea moves. On it.", fr: "Remous. Je m'exécute." }, { en: "Good. Surfacing.", fr: "Vers la surface, donc." }],
@@ -394,7 +397,7 @@ export const EPIC: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 12, y: 18, w: 3, h: 3 }, { x: 16, y: 18, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 12, y: 18 }, right_eye: { x: 16, y: 18 } },
       },
       young: {
         pixels: [
@@ -431,7 +434,7 @@ export const EPIC: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 11, y: 17, w: 3, h: 3 }, { x: 16, y: 17, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 11, y: 17 }, right_eye: { x: 16, y: 17 } },
       },
       adult: {
         pixels: [
@@ -468,7 +471,7 @@ export const EPIC: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 10, y: 16, w: 3, h: 3 }, { x: 17, y: 16, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 10, y: 16 }, right_eye: { x: 17, y: 16 } },
         motion: { tail: { x: 5, y: 23, w: 3, h: 2 }, ears: [{ x: 23, y: 18, w: 2, h: 4 }] },
       },
       elder: {
@@ -506,11 +509,12 @@ export const EPIC: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 10, y: 16, w: 3, h: 3 }, { x: 17, y: 16, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 10, y: 16 }, right_eye: { x: 17, y: 16 } },
         motion: { tail: { x: 5, y: 23, w: 3, h: 3 }, ears: [{ x: 23, y: 18, w: 2, h: 5 }] },
       },
     },
     palette: ["#8a76a0", "#f0e6f5", "#f5b8d0", "#e8c34a", "#4a3a5c"],
+    expressions: DEFAULT_EXPRESSIONS,
     signature: {
       permission: [{ en: "Sparkle: may I?", fr: "Corne baissée. J'ose ?" }, { en: "Horn tilts. Allowed?", fr: "Tu me laisses briller ?" }, { en: "Your wish, my call.", fr: "Fais un vœu. J'écoute." }],
       granted: [{ en: "Sparkling in!", fr: "Paillettes en avant !" }, { en: "Horn aglow. On it.", fr: "Corne allumée. Hop !" }, { en: "Lovely. Prancing.", fr: "Charmant. Je caracole." }],

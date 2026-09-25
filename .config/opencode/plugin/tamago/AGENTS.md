@@ -26,9 +26,10 @@ AGENTS.md. Vocabulary lives in `CONTEXT.md`; use those terms.
   stored. Anything that decides a Stage takes a `Paced` (counters plus
   Species), never bare counters.
 - Errors never change XP.
-- Every map is 32 rows of 32 characters of `.oabc`, and only colour: the eyes,
-  what moves, the Trait mark and the Draw badge are rectangles declared beside
-  it. A Species' colours are its Palette, two variants, written in
+- Every map is 32 rows of 32 characters of `MAP_ALPHABET` (a Palette index, or
+  `.` for transparent), and only colour: what moves, the Trait mark and the
+  Draw badge are rectangles declared beside it, and the points a Species'
+  Expressions are pinned to are its named anchors. A Species' colours are its Palette, two variants, written in
   hexadecimal in the Species file; `core/` may name a colour there, and a
   theme key for a Trait's mark (`core/appearance/marks.ts`'s `ThemeColor`),
   but it never resolves one to an actual colour value — that happens once,

@@ -1,3 +1,4 @@
+import { DEFAULT_EXPRESSIONS } from "../../appearance/default-expressions.ts";
 import type { SpeciesDef } from "../species.ts";
 
 /** The common Species: everyday creatures. */
@@ -43,10 +44,7 @@ export const COMMON: readonly SpeciesDef[] = [
           "..........01122222110...........",
           "..........00000000000...........",
         ],
-        eyes: [
-          { x: 11, y: 20, w: 3, h: 3 },
-          { x: 17, y: 20, w: 3, h: 3 },
-        ],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 11, y: 20 }, right_eye: { x: 17, y: 20 } },
       },
       young: {
         pixels: [
@@ -83,10 +81,7 @@ export const COMMON: readonly SpeciesDef[] = [
           ".........0110...0110............",
           ".........0000...0000............",
         ],
-        eyes: [
-          { x: 10, y: 17, w: 3, h: 3 },
-          { x: 18, y: 17, w: 3, h: 3 },
-        ],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 10, y: 17 }, right_eye: { x: 18, y: 17 } },
         motion: { tail: { x: 22, y: 25, w: 4, h: 4 } },
       },
       adult: {
@@ -124,10 +119,7 @@ export const COMMON: readonly SpeciesDef[] = [
           ".......0110.......0110..........",
           ".......0000.......0000..........",
         ],
-        eyes: [
-          { x: 9, y: 17, w: 3, h: 3 },
-          { x: 19, y: 17, w: 3, h: 3 },
-        ],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 9, y: 17 }, right_eye: { x: 19, y: 17 } },
         motion: { tail: { x: 23, y: 26, w: 3, h: 4 } },
       },
       elder: {
@@ -165,14 +157,12 @@ export const COMMON: readonly SpeciesDef[] = [
           ".......0110.......0110..........",
           ".......0000.......0000..........",
         ],
-        eyes: [
-          { x: 9, y: 17, w: 3, h: 3 },
-          { x: 19, y: 17, w: 3, h: 3 },
-        ],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 9, y: 17 }, right_eye: { x: 19, y: 17 } },
         motion: { tail: { x: 23, y: 26, w: 3, h: 4 } },
       },
     },
     palette: ["#2b1d12", "#e8974a", "#f5d9b0", "#c96a5a", "#12100e"],
+    expressions: DEFAULT_EXPRESSIONS,
     signature: {
       permission: [{ en: "Mrow? May I?", fr: "Miaou ? Je peux ?" }, { en: "Paw on it. Yes?", fr: "Patte dessus. Oui ?" }, { en: "Say yes, human.", fr: "Dis oui, humain." }],
       granted: [{ en: "Purr.", fr: "Ronron." }, { en: "Good human.", fr: "Gentil humain." }, { en: "As it should be.", fr: "C'est normal." }],
@@ -231,7 +221,7 @@ export const COMMON: readonly SpeciesDef[] = [
           "............0222220.............",
           ".............00000..............",
         ],
-        eyes: [{ x: 10, y: 21, w: 3, h: 3 }, { x: 18, y: 21, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 10, y: 21 }, right_eye: { x: 18, y: 21 } },
       },
       young: {
         pixels: [
@@ -268,7 +258,7 @@ export const COMMON: readonly SpeciesDef[] = [
           "............00000000............",
           ".............00..00.............",
         ],
-        eyes: [{ x: 9, y: 19, w: 3, h: 3 }, { x: 19, y: 19, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 9, y: 19 }, right_eye: { x: 19, y: 19 } },
       },
       adult: {
         pixels: [
@@ -305,7 +295,7 @@ export const COMMON: readonly SpeciesDef[] = [
           "..........00000000000...........",
           "...........00.3.3.00............",
         ],
-        eyes: [{ x: 9, y: 18, w: 3, h: 3 }, { x: 19, y: 18, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 9, y: 18 }, right_eye: { x: 19, y: 18 } },
       },
       elder: {
         pixels: [
@@ -342,10 +332,11 @@ export const COMMON: readonly SpeciesDef[] = [
           "..........00000000000...........",
           "...........00.3.3.00............",
         ],
-        eyes: [{ x: 9, y: 18, w: 3, h: 3 }, { x: 19, y: 18, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 9, y: 18 }, right_eye: { x: 19, y: 18 } },
       },
     },
     palette: ["#2b1d12", "#8b6b3d", "#e8dcc0", "#5c3a21", "#12100e"],
+    expressions: DEFAULT_EXPRESSIONS,
     signature: {
       permission: [{ en: "Hoo decides? You.", fr: "Hou. Qui décide ? Vous." }, { en: "Awaiting your word.", fr: "J'attends votre aval." }, { en: "Hoot? Permission?", fr: "Hou ? La permission ?" }],
       granted: [{ en: "Wise choice.", fr: "Sage décision." }, { en: "Hoot. Proceed.", fr: "Hou. Je procède." }, { en: "So it is allowed.", fr: "C'est donc permis." }],
@@ -404,7 +395,7 @@ export const COMMON: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 10, y: 17, w: 3, h: 3 }, { x: 18, y: 17, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 10, y: 17 }, right_eye: { x: 18, y: 17 } },
       },
       young: {
         pixels: [
@@ -441,7 +432,7 @@ export const COMMON: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 9, y: 15, w: 3, h: 3 }, { x: 19, y: 15, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 9, y: 15 }, right_eye: { x: 19, y: 15 } },
       },
       adult: {
         pixels: [
@@ -478,7 +469,7 @@ export const COMMON: readonly SpeciesDef[] = [
           "......000.............000.......",
           "................................",
         ],
-        eyes: [{ x: 9, y: 13, w: 3, h: 3 }, { x: 19, y: 13, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 9, y: 13 }, right_eye: { x: 19, y: 13 } },
       },
       elder: {
         pixels: [
@@ -515,10 +506,11 @@ export const COMMON: readonly SpeciesDef[] = [
           "......000.............000.......",
           "................................",
         ],
-        eyes: [{ x: 9, y: 12, w: 3, h: 3 }, { x: 19, y: 12, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 9, y: 12 }, right_eye: { x: 19, y: 12 } },
       },
     },
     palette: ["#1a3d1a", "#4a9b4a", "#a8d98a", "#2f6b2f", "#0d1f0d"],
+    expressions: DEFAULT_EXPRESSIONS,
     signature: {
       permission: [{ en: "Ribbit? May I?", fr: "Croa ? J'y vais ?" }, { en: "Hop to it, or not?", fr: "Je saute, ou pas ?" }, { en: "Your pond, your call.", fr: "Ta mare, ton choix." }],
       granted: [{ en: "Ribbit. Hopping in.", fr: "Croa. Je plonge." }, { en: "Splash. On it.", fr: "Plouf. J'y suis." }, { en: "Good. Off the pad.", fr: "Bien. Hors du nénuphar." }],
@@ -577,7 +569,7 @@ export const COMMON: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 11, y: 20, w: 3, h: 3 }, { x: 16, y: 20, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 11, y: 20 }, right_eye: { x: 16, y: 20 } },
       },
       young: {
         pixels: [
@@ -614,7 +606,7 @@ export const COMMON: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 9, y: 18, w: 3, h: 3 }, { x: 14, y: 18, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 9, y: 18 }, right_eye: { x: 14, y: 18 } },
       },
       adult: {
         pixels: [
@@ -651,7 +643,7 @@ export const COMMON: readonly SpeciesDef[] = [
           "...........0003333.000..........",
           "...........000.....000..........",
         ],
-        eyes: [{ x: 8, y: 16, w: 3, h: 3 }, { x: 13, y: 16, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 8, y: 16 }, right_eye: { x: 13, y: 16 } },
       },
       elder: {
         pixels: [
@@ -688,10 +680,11 @@ export const COMMON: readonly SpeciesDef[] = [
           "...........0003333.000..........",
           "...........000.....000..........",
         ],
-        eyes: [{ x: 8, y: 16, w: 3, h: 3 }, { x: 13, y: 16, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 8, y: 16 }, right_eye: { x: 13, y: 16 } },
       },
     },
     palette: ["#5c4a12", "#f2c94c", "#fff3c4", "#e8873a", "#12100e"],
+    expressions: DEFAULT_EXPRESSIONS,
     signature: {
       permission: [{ en: "Quack? Allowed?", fr: "Coin ? J'ai le droit ?" }, { en: "Waddle ahead, maybe?", fr: "Je me dandine, dis ?" }, { en: "Say the word. Quack.", fr: "T'as qu'un mot à dire !" }],
       granted: [{ en: "Quack! Paddling in.", fr: "Coin ! Je pagaie !" }, { en: "Yes! Splash time.", fr: "Oui ! Au plouf !" }, { en: "Quack quack. Go.", fr: "Coin coin. J'y vais." }],
@@ -750,7 +743,7 @@ export const COMMON: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 10, y: 21, w: 3, h: 3 }, { x: 18, y: 21, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 10, y: 21 }, right_eye: { x: 18, y: 21 } },
         motion: { ears: [{ x: 11, y: 16, w: 4, h: 2 }, { x: 17, y: 16, w: 4, h: 2 }] },
       },
       young: {
@@ -788,7 +781,7 @@ export const COMMON: readonly SpeciesDef[] = [
           "............000..000............",
           "................................",
         ],
-        eyes: [{ x: 9, y: 19, w: 3, h: 3 }, { x: 19, y: 19, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 9, y: 19 }, right_eye: { x: 19, y: 19 } },
         motion: { ears: [{ x: 10, y: 14, w: 4, h: 2 }, { x: 18, y: 14, w: 4, h: 2 }] },
       },
       adult: {
@@ -826,7 +819,7 @@ export const COMMON: readonly SpeciesDef[] = [
           "............00...00.............",
           "............000.000.............",
         ],
-        eyes: [{ x: 8, y: 17, w: 3, h: 3 }, { x: 20, y: 17, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 8, y: 17 }, right_eye: { x: 20, y: 17 } },
         motion: { ears: [{ x: 10, y: 12, w: 4, h: 2 }, { x: 18, y: 12, w: 4, h: 2 }] },
       },
       elder: {
@@ -864,11 +857,12 @@ export const COMMON: readonly SpeciesDef[] = [
           "............00...00.............",
           "............000.000.............",
         ],
-        eyes: [{ x: 8, y: 17, w: 3, h: 3 }, { x: 20, y: 17, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 8, y: 17 }, right_eye: { x: 20, y: 17 } },
         motion: { ears: [{ x: 10, y: 12, w: 5, h: 2 }, { x: 17, y: 12, w: 5, h: 2 }] },
       },
     },
     palette: ["#4a2f18", "#d9a066", "#f5e0c0", "#b8703f", "#12100e"],
+    expressions: DEFAULT_EXPRESSIONS,
     signature: {
       permission: [{ en: "Squeak? Can I?", fr: "Couic ? J'y file ?" }, { en: "Wheel's ready. Go?", fr: "Roue prête. On y va ?" }, { en: "Say go, I'll run.", fr: "Dis go, je cours !" }],
       granted: [{ en: "Squeak! Running!", fr: "Couic ! Je cours !" }, { en: "Wheel time! Go go!", fr: "La roue ! Vite vite !" }, { en: "Cheeks full. On it.", fr: "Joues pleines. Prêt." }],
@@ -927,7 +921,7 @@ export const COMMON: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        eyes: [{ x: 10, y: 19, w: 3, h: 3 }, { x: 18, y: 19, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 10, y: 19 }, right_eye: { x: 18, y: 19 } },
         motion: { ears: [{ x: 12, y: 16, w: 2, h: 2 }, { x: 18, y: 16, w: 2, h: 2 }] },
       },
       young: {
@@ -965,7 +959,7 @@ export const COMMON: readonly SpeciesDef[] = [
           "...........000000000............",
           "................................",
         ],
-        eyes: [{ x: 9, y: 17, w: 3, h: 3 }, { x: 19, y: 17, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 9, y: 17 }, right_eye: { x: 19, y: 17 } },
         motion: { ears: [{ x: 11, y: 14, w: 2, h: 2 }, { x: 19, y: 14, w: 2, h: 2 }] },
       },
       adult: {
@@ -1003,7 +997,7 @@ export const COMMON: readonly SpeciesDef[] = [
           "............0000000.............",
           "................................",
         ],
-        eyes: [{ x: 9, y: 15, w: 3, h: 3 }, { x: 19, y: 15, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 9, y: 15 }, right_eye: { x: 19, y: 15 } },
         motion: { ears: [{ x: 11, y: 12, w: 2, h: 2 }, { x: 19, y: 12, w: 2, h: 2 }] },
       },
       elder: {
@@ -1041,11 +1035,12 @@ export const COMMON: readonly SpeciesDef[] = [
           "............0000000.............",
           "................................",
         ],
-        eyes: [{ x: 9, y: 15, w: 3, h: 3 }, { x: 19, y: 15, w: 3, h: 3 }],
+        anchors: { head: { x: 15, y: 18 }, left_eye: { x: 9, y: 15 }, right_eye: { x: 19, y: 15 } },
         motion: { ears: [{ x: 11, y: 12, w: 2, h: 2 }, { x: 19, y: 12, w: 2, h: 2 }] },
       },
     },
     palette: ["#2f2418", "#8a9b6b", "#d4c9a8", "#6b4a2f", "#12100e"],
+    expressions: DEFAULT_EXPRESSIONS,
     signature: {
       permission: [{ en: "May I... slowly?", fr: "Je peux... doucement ?" }, { en: "Shell says: ask you.", fr: "La coquille dit : toi." }, { en: "Your call. No rush.", fr: "Ton choix. Sans hâte." }],
       granted: [{ en: "Sliding in. Slowly.", fr: "Je glisse. Lentement." }, { en: "Off we go. Eventually.", fr: "En route. Un jour." }, { en: "Good. Antennae up.", fr: "Bien. Antennes levées." }],

@@ -1,4 +1,5 @@
 import type { Maps } from "../appearance/bodies.ts";
+import type { Expressions } from "../appearance/expressions.ts";
 import type { Palette } from "../appearance/palette.ts";
 import type { Signature } from "../speech/signature.ts";
 import type { SpeciesDef, SpeciesId } from "./species.ts";
@@ -38,6 +39,18 @@ export function mapsOf(id: SpeciesId, table: readonly SpeciesDef[] = SPECIES): M
   const maps = entry(id, table)?.maps ?? entry(REFERENCE, table)?.maps;
   if (maps === undefined) throw new Error(`no maps on the reference Species "${REFERENCE}"`);
   return maps;
+}
+
+/**
+ * The Expressions of a Species: its own, else the reference's for a Species
+ * this build does not draw. Named `tableOf` and not `expressionsOf` because
+ * sprites.ts owns that name: what it exports merges this with the Body's
+ * per-Stage override, and that is what a caller wants.
+ */
+export function tableOf(id: SpeciesId, table: readonly SpeciesDef[] = SPECIES): Expressions {
+  const expressions = entry(id, table)?.expressions ?? entry(REFERENCE, table)?.expressions;
+  if (expressions === undefined) throw new Error(`no Expressions on the reference Species "${REFERENCE}"`);
+  return expressions;
 }
 
 /** The Signature of a Species; undefined when this build does not know it, so its Temperament speaks in its place. */
