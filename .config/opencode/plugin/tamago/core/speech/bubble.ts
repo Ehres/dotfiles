@@ -2,7 +2,11 @@ import { SPRITE_WIDTH } from "../appearance/pixels.ts";
 
 /** Longest phrase a Bubble may hold, so it never wraps in a narrow sidebar. */
 export const MAX_TEXT = 24;
-/** Column of the tail in the bottom border; the sprite's head starts at column 2. */
+/**
+ * Column of the tail in the bottom border. Fixed at 5 once `text` is 3 characters or longer
+ * (shorter text pulls it left, down to 2 for an empty string); tailOffset uses it to line the tail
+ * up under the Sprite's own head.
+ */
 export const TAIL_COLUMN = 5;
 
 /**
@@ -29,11 +33,11 @@ export function bubbleFrame(text: string): readonly string[] {
 }
 
 /**
- * How far from the Sprite's own left edge a Bubble starts, so its tail lands
- * on the head. Never negative: a Bubble wide enough to be pushed off the left
- * edge sits flush instead, and its tail leans.
+ * How far from the Sprite's own left edge a Bubble starts, so its tail lands on the head. Never
+ * negative in practice: the tail sits at column 5 at most (TAIL_COLUMN) and the head is at column
+ * 10 (`Math.floor(SPRITE_WIDTH / 2)`), so no text length ever pushes the Bubble past the left edge.
  */
 export function tailOffset(text: string): number {
   const { bottom } = bubbleBorders(text);
-  return Math.max(0, Math.floor(SPRITE_WIDTH / 2) - bottom.indexOf("o"));
+  return Math.floor(SPRITE_WIDTH / 2) - bottom.indexOf("o");
 }
