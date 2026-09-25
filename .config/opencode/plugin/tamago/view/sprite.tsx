@@ -7,7 +7,7 @@ import { paletteOf } from "../core/creature/catalog.ts";
 import type { Variant } from "../core/appearance/palette.ts";
 import { frameAt, heartFrame } from "../core/appearance/sprites.ts";
 import type { Cell, Frame, Role } from "../core/appearance/pixels.ts";
-import { markOf } from "../core/appearance/marks.ts";
+import { MARK, markOf } from "../core/appearance/marks.ts";
 import { frameIndex } from "../core/moment/cadence.ts";
 import type { Activity } from "../core/moment/session.ts";
 import type { Tamago } from "../core/tamago.ts";
@@ -90,13 +90,17 @@ export function Sprite(props: {
     const skin = paletteOf(props.tamago.species.id, props.variant);
     const tint = TINT[props.activity];
     const shade = (value: string) => RGBA.fromHex(tint === null ? value : mixed(value, hex(props.theme[tint.color]), tint.amount));
+    // The mark itself carries no colour (core is colour-free): the Trait it marks names a theme key,
+    // and this is the one place that key becomes an RGBA.
+    const marked = markOf(props.tamago.traits);
+    const markColor = marked === undefined ? "success" : (MARK[marked]?.color ?? "success");
     return {
       outline: shade(skin.outline),
       primary: shade(skin.primary),
       secondary: shade(skin.secondary),
       accent: shade(skin.accent),
       eye: shade(skin.eye),
-      mark: props.theme.success,
+      mark: props.theme[markColor],
       badge: props.theme.warning,
       heart: props.theme.error,
     };

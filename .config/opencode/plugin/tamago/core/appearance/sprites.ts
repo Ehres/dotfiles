@@ -86,7 +86,7 @@ function build(one: Body, face: Pattern, beat: number, mark: TraitId | undefined
   if (motion?.tail !== undefined) rows = shift(rows, motion.tail, sweepAt(beat));
   if (motion?.ears !== undefined && blinksAt(beat)) for (const ear of motion.ears) rows = shift(rows, ear, 1);
   for (const eye of one.eyes) rows = paint(rows, eye, face, "eye");
-  const pattern = mark === undefined ? undefined : MARK[mark];
+  const pattern = mark === undefined ? undefined : MARK[mark]?.pattern;
   if (pattern !== undefined) rows = paint(rows, MARK_SLOT, pattern, "mark");
   if (badge) rows = paint(rows, BADGE_SLOT, BADGE, "badge");
   return pack(rows);
@@ -161,7 +161,7 @@ export function heartFrame(
     let rows: readonly string[] = one.pixels;
     for (const eye of one.eyes) rows = paint(rows, eye, EYES[temperament], "eye");
     rows = paint(rows, HEART_AT, HEART, "heart");
-    const pattern = mark === undefined ? undefined : MARK[mark];
+    const pattern = mark === undefined ? undefined : MARK[mark]?.pattern;
     if (pattern !== undefined) rows = paint(rows, MARK_SLOT, pattern, "mark");
     if (badge) rows = paint(rows, BADGE_SLOT, BADGE, "badge");
     return pack(rows);

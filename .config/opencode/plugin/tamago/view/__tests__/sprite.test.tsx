@@ -3,7 +3,6 @@ import { expect, test } from "bun:test";
 import { createSignal } from "solid-js";
 import { frameAt, heartFrame } from "../../core/appearance/sprites.ts";
 import type { Frame } from "../../core/appearance/pixels.ts";
-import { MARK } from "../../core/appearance/marks.ts";
 import { tamago } from "../../core/tamago.ts";
 import { Sprite, glyphOf, mixed, skinOf } from "../sprite.tsx";
 import { ThemeProvider } from "../theme.tsx";
@@ -90,8 +89,6 @@ test("a held Trait marks the sprite's top-left cell", async () => {
     ),
     SIZE,
   );
-  const mark = MARK.proud;
-  if (mark === undefined) throw new Error('no mark for "proud" in MARK');
   expect(trim(shown)).toBe(trim(plain(frameAt("cat", "adult", "idle", 0, "proud"))));
   expect(shown).toMatchSnapshot();
 });

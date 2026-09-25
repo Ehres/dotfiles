@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { BADGE, BADGE_SLOT, MARK, MARK_SLOT, markOf } from "../marks.ts";
 
 test("every Trait has a 3 x 3 pattern, and so does the badge", () => {
-  for (const [id, pattern] of Object.entries(MARK)) {
+  for (const [id, { pattern }] of Object.entries(MARK)) {
     assert.equal(pattern.length, MARK_SLOT.h, id);
     for (const row of pattern) assert.equal(row.length, MARK_SLOT.w, id);
     assert.ok(pattern.some((row) => row.includes("#")), `${id} draws nothing`);
@@ -13,7 +13,12 @@ test("every Trait has a 3 x 3 pattern, and so does the badge", () => {
 });
 
 test("no two Traits draw the same pattern", () => {
-  const seen = new Set(Object.values(MARK).map((pattern) => pattern.join("/")));
+  const seen = new Set(Object.values(MARK).map(({ pattern }) => pattern.join("/")));
+  assert.equal(seen.size, Object.keys(MARK).length);
+});
+
+test("no two Traits are given the same colour: pattern alone never has to carry the distinction", () => {
+  const seen = new Set(Object.values(MARK).map(({ color }) => color));
   assert.equal(seen.size, Object.keys(MARK).length);
 });
 
@@ -38,7 +43,7 @@ test("a Trait id that names an Object.prototype member has no mark, rather than 
 
 test("the badge differs from every pattern in MARK", () => {
   const badgeStr = BADGE.join("/");
-  for (const [id, pattern] of Object.entries(MARK)) {
+  for (const [id, { pattern }] of Object.entries(MARK)) {
     const patternStr = pattern.join("/");
     assert.notEqual(badgeStr, patternStr, `BADGE is identical to MARK.${id}`);
   }
