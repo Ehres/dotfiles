@@ -86,7 +86,7 @@ AGENTS.md. Vocabulary lives in `CONTEXT.md`; use those terms.
 ## Verify
 
 `pnpm test` runs `node --test` over core, the adapter and `scripts/__tests__`
-(the PNG importer): 486 tests, all passing.
+(the PNG importer): 496 tests, all passing.
 
 `bun test view shell` for the views and the shell (Bun compiles the Solid
 JSX; the frames are snapshots under `__snapshots__/`, and a changed snapshot
