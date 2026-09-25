@@ -4,12 +4,9 @@ A terminal tamagotchi that lives inside the OpenCode TUI. It mirrors what the
 current session is doing in real time, and grows over weeks from the activity
 accumulated across every session and project on the machine.
 
-```
-   .---.
-  ( o o )   Tamago
-   \ ^ /    young · 1,840 xp
-    '-'
-```
+Each of the twenty drawn Species renders as a small Sprite in half-block
+characters (`▀ ▄ █`), its own four-colour Palette, two eyes and whatever
+moves, captioned by its name and Stage: `Tamago · young · 1,840 xp`.
 
 Zero upkeep: nothing to feed, nothing dies. The creature suffers in the moment
 when something fails and recovers a few seconds later.
