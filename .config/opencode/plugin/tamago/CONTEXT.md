@@ -310,9 +310,11 @@ _Avoid_: dot, point, cell (that is the character)
 **Sprite**:
 The pixel drawing of the Tamago for a given Stage and Activity: the map for
 that Stage, shifted by its Motion and painted with the eyes, the Trait mark
-and the Draw badge, in the Species' Palette.
-_Avoid_: body (that was the map's name before this), ASCII (it draws in
-Pixels now)
+and the Draw badge, in the Species' Palette. "Body" names the per-Stage
+record that holds it (`bodies.ts`'s `Body`: pixels, eyes, motion); the map is
+specifically its pixel rows, not the whole record — the two words are not
+interchangeable.
+_Avoid_: ASCII (it draws in Pixels now)
 
 **Frame**:
 One state of a Sprite, already packed into cells: the map's Pixels with the
@@ -332,8 +334,10 @@ _Avoid_: layer, segment, class
 
 **Palette**:
 One colour per Role for one Species, in a dark variant and a light one
-chosen by the theme's mode, written in hexadecimal in the Species file.
-_Avoid_: theme (that is OpenCode's), skin, scheme
+chosen by the theme's mode, written in hexadecimal in the Species file. A
+"Skin" is one of the two variants alone (`palette.ts`'s `Skin`: one colour
+per Role, one variant); the Palette is both together.
+_Avoid_: theme (that is OpenCode's), scheme
 
 **Portrait**:
 The Sprite and its text column, topped by the Bubble when there is one.
