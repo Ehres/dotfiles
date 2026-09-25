@@ -51,6 +51,34 @@ exports[`the roster highlights the first line, moves with the arrows, selects wi
   [--------------------] 0 / 200 xp → hatchling"
 `;
 
+exports[`the roster at a realistic size (five adult Careers) corrupts, rather than clips, the overflow 1`] = `
+"  Tamago: roster                                       esc
+
+  > Tamago 2 · cat · adult · active
+    Tamago 3 · cat · adult
+    Tamago 4 · cat · adult
+    Tamago 5 · cat · adult
+
+
+     █████▄▄▄▄▄█████▀▀▀
+  ▄▀███▀█████████▀███▀▄
+  ████▀█▀███████▀█▀████  cat · common
+  █████████▀▀▀█████████  adult · 9,166 xp
+   ███████▀▀▀▀▀███████   hatched today
+    ▀▀▀▀█▀▀▀▀▀▀▀█▀▀▀▀    chilling
+     ▄▀███████████▀▄▀██
+    ████████████████ ▀▀
+    █▀▀█       █▀▀█
+
+  cheerful · bold shell
+
+  chatter     [#########-] 9
+  sensitivity [#---------] 1
+  patience    [######----] 6
+
+  [#####---------------] 9,166 / 20,000 xp → elder"
+`;
+
 exports[`the roster reads in French 1`] = `
 "  Tamago : roster                                      esc
 

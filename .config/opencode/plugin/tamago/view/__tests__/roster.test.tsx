@@ -1,5 +1,6 @@
 /** @jsxImportSource @opentui/solid */
 import { expect, test } from "bun:test";
+import { idOf } from "../../core/roster/roster.ts";
 import { tamago, type Tamago } from "../../core/tamago.ts";
 import { line } from "../../core/text/roster.ts";
 import { LanguageProvider } from "../language.tsx";
@@ -32,6 +33,34 @@ test("the roster highlights the first line, moves with the arrows, selects with 
 
   await mockInput.pressKey("RETURN");
   expect(chosen).toBe(shown[1]);
+});
+
+/**
+ * A real machine's roster is unbounded (adapter/store.ts reads every resting
+ * Career file with no limit), so five adult Careers — the worst case per
+ * entry, one line each above a full CardBody — is a realistic size, not a
+ * stress test. DIALOG (60x26) was only ever checked against two entries. This
+ * pins what actually happens at five: the overflow does not clip cleanly off
+ * the bottom, it corrupts. The xp bar survives at the very bottom, but the
+ * sheet's first bar ("energy") is silently dropped, and the list itself
+ * overlays its first two lines into one (the same character-overlay failure
+ * mode Task 8 fixed for the sidebar, resurfacing here one row earlier than
+ * this task's height check covered). See the snapshot for the full picture.
+ */
+test("the roster at a realistic size (five adult Careers) corrupts, rather than clips, the overflow", async () => {
+  const careers = Array.from({ length: 5 }, (_, i) => ({ ...OWNER, hatchedAt: OWNER.hatchedAt + i }));
+  const activeId = idOf(OWNER);
+  const shown = careers.map((career) => tamago(career));
+  const lines = careers.map((career, i) => line(career, `Tamago ${i + 1}`, activeId, "en"));
+  const { frame } = await mount(() => (
+    <ThemeProvider theme={TUI_THEME}>
+      <RosterView tamagos={shown} lines={lines} clock={0} now={0} onSelect={() => {}} />
+    </ThemeProvider>
+  ));
+  const shownFrame = trim(await frame());
+  expect(shownFrame).toContain("9,166 / 20,000 xp → elder");
+  expect(shownFrame).not.toContain("energy");
+  expect(shownFrame).toMatchSnapshot();
 });
 
 test("the roster reads in French", async () => {
