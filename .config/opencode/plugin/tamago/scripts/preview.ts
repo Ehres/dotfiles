@@ -4,7 +4,7 @@ import { frameAt } from "../core/appearance/sprites.ts";
 import type { Cell, Frame, Rect, Role } from "../core/appearance/pixels.ts";
 import type { Skin } from "../core/appearance/palette.ts";
 import type { Grown } from "../core/appearance/bodies.ts";
-import type { StageId } from "../core/career/stage.ts";
+import { STAGES, type StageId } from "../core/career/stage.ts";
 
 const GLYPH = { both: "█", top: "▀", bottom: "▄", none: " " };
 const RESET = "\x1b[0m";
@@ -94,6 +94,11 @@ const [id = "cat", stage = "adult"] = args.filter((arg) => arg !== "--plain" && 
 
 if (!SPECIES.some((one) => one.id === id)) {
   console.error(`unknown Species "${id}". Known: ${SPECIES.map((one) => one.id).join(", ")}`);
+  process.exit(1);
+}
+
+if (!STAGES.some((one) => one.id === stage)) {
+  console.error(`unknown Stage "${stage}". Known: ${STAGES.map((one) => one.id).join(", ")}`);
   process.exit(1);
 }
 
