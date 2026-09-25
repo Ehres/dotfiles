@@ -2,6 +2,7 @@
 import { expect, test } from "bun:test";
 import { idOf } from "../../core/roster/roster.ts";
 import { tamago, type Tamago } from "../../core/tamago.ts";
+import { BAR_WIDTH, progress, sheetLines } from "../../core/text/card.ts";
 import { line } from "../../core/text/roster.ts";
 import { LanguageProvider } from "../language.tsx";
 import { RosterView } from "../roster.tsx";
@@ -59,6 +60,34 @@ test("the roster at five Careers: a known overflow, pinned here until it is deci
   const shownFrame = trim(await frame());
   expect(shownFrame).toContain("9,166 / 20,000 xp → elder");
   expect(shownFrame).toMatchSnapshot();
+});
+
+/**
+ * Unlike the five-Careers overflow above, this needs no unbounded list: a
+ * roster of just two Careers already overflows DIALOG once the selected one
+ * holds a Trait, because the Trait block on its CardBody costs two extra
+ * lines (view/card.tsx). It asserts on both roster lines and on every Sheet
+ * bar, not just the tail, because at this height the corruption is not the
+ * tail: the list's own two lines overlay into one — "Tamago 1" disappears —
+ * and the Sheet's first bar ("energy") is silently dropped, while the last
+ * Sheet bar and the xp bar beneath it stay intact. Asserting on the tail
+ * alone would have passed while missing both.
+ */
+test("the roster at two Careers, the selected one holding one Trait: both roster lines and every Sheet bar", async () => {
+  const kept = { ...OWNER, picks: { "evolution:hatchling": { trait: "hardy", at: 1 } } };
+  const careers = [kept, { ...OWNER, hatchedAt: OWNER.hatchedAt + 1 }];
+  const activeId = idOf(OWNER);
+  const shown = careers.map((career) => tamago(career));
+  const lines = careers.map((career, i) => line(career, `Tamago ${i + 1}`, activeId, "en"));
+  const { frame } = await mount(() => (
+    <ThemeProvider theme={TUI_THEME}>
+      <RosterView tamagos={shown} lines={lines} clock={0} now={0} onSelect={() => {}} />
+    </ThemeProvider>
+  ));
+  const shownFrame = trim(await frame());
+  for (const text of lines) expect(shownFrame).toContain(text);
+  for (const bar of sheetLines(shown[0]!, "en")) expect(shownFrame).toContain(bar);
+  expect(shownFrame).toContain(progress(shown[0]!, BAR_WIDTH, "en"));
 });
 
 test("the roster reads in French", async () => {
