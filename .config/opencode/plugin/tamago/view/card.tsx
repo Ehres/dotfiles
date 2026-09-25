@@ -4,6 +4,8 @@ import { Index, Show, createMemo } from "solid-js";
 import { BAR_WIDTH, age, progress, sheetLines, speciesLine, stageName, traitLines } from "../core/text/card.ts";
 import { fmt } from "../core/appearance/format.ts";
 import { describe } from "../core/text/character.ts";
+import { say } from "../core/language.ts";
+import { MOOD_TEXT } from "../core/text/mood.ts";
 import type { Tamago } from "../core/tamago.ts";
 import { DialogFrame } from "./dialog.tsx";
 import { useLanguage } from "./language.tsx";
@@ -39,6 +41,7 @@ export function CardBody(props: { tamago: Tamago; clock: number; heart: boolean;
             {stageName(props.tamago, language())} · {fmt(props.tamago.xp, language())} xp
           </text>
           <text fg={theme.current.textMuted}>{age(props.tamago.career.hatchedAt, props.now, language())}</text>
+          <text fg={theme.current.textMuted}>{say(MOOD_TEXT["idle"], language())}</text>
         </box>
       </box>
       <text fg={theme.current.textMuted}>{describe(props.tamago.character, language())}</text>

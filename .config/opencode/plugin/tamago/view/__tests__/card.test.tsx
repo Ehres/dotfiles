@@ -51,6 +51,19 @@ test("the card of an egg hides the species and the stats", async () => {
   expect(shown).toMatchSnapshot();
 });
 
+test("the card carries what the sidebar dropped: name, species, stage, xp, age and mood", async () => {
+  const now = OWNER.hatchedAt + 12 * DAY_MS;
+  const shown = await frame(() => (
+    <ThemeProvider theme={TUI_THEME}>
+      <CardView name="Tamago" tamago={tamago(OWNER)} clock={0} heart={false} now={now} />
+    </ThemeProvider>
+  ));
+  expect(shown).toContain("Tamago");
+  expect(shown).toContain("cat · common");
+  expect(shown).toContain("adult · 9,166 xp");
+  expect(shown).toContain("chilling");
+});
+
 test("the card lists the Traits held, with their marks", async () => {
   const kept = { ...OWNER, picks: { "evolution:hatchling": { trait: "hardy", at: 1 } } };
   const shown = await frame(() => (
