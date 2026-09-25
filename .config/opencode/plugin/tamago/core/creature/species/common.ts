@@ -35,7 +35,6 @@ export const COMMON: readonly SpeciesDef[] = [
           { x: 6, y: 8, w: 3, h: 3 },
           { x: 12, y: 8, w: 3, h: 3 },
         ],
-        motion: {},
       },
       young: {
         pixels: [
@@ -176,7 +175,6 @@ export const COMMON: readonly SpeciesDef[] = [
           "........ooooo........",
         ],
         eyes: [{ x: 5, y: 9, w: 3, h: 3 }, { x: 13, y: 9, w: 3, h: 3 }],
-        motion: {},
       },
       young: {
         pixels: [
@@ -202,7 +200,6 @@ export const COMMON: readonly SpeciesDef[] = [
           "........oo..oo.......",
         ],
         eyes: [{ x: 4, y: 7, w: 3, h: 3 }, { x: 14, y: 7, w: 3, h: 3 }],
-        motion: {},
       },
       adult: {
         pixels: [
@@ -228,7 +225,6 @@ export const COMMON: readonly SpeciesDef[] = [
           "......oo.c.c.oo......",
         ],
         eyes: [{ x: 4, y: 6, w: 3, h: 3 }, { x: 14, y: 6, w: 3, h: 3 }],
-        motion: {},
       },
       elder: {
         pixels: [
@@ -254,7 +250,6 @@ export const COMMON: readonly SpeciesDef[] = [
           "......oo.c.c.oo......",
         ],
         eyes: [{ x: 4, y: 6, w: 3, h: 3 }, { x: 14, y: 6, w: 3, h: 3 }],
-        motion: {},
       },
     },
     palettes: {
