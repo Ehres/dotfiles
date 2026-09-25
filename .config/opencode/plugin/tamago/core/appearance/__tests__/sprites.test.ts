@@ -372,20 +372,27 @@ test("a heart Frame keeps the size, wears the heart and the Temperament's eyes",
 });
 
 const BLANK = Array.from({ length: PIXEL_HEIGHT }, () => ".".repeat(SPRITE_WIDTH));
-/** A map whose only opaque row is `y`: two of them differ, and differ visibly. */
+/** A map whose only opaque row is `y`: each of the four differs, and differs visibly. */
 function bar(y: number): readonly string[] {
   return BLANK.map((row, at) => (at === y ? "1".repeat(SPRITE_WIDTH) : row));
 }
 const FRAME_A = bar(20);
 const FRAME_B = bar(21);
-const TWO_FRAMES = [FRAME_A, FRAME_B];
+const FRAME_C = bar(22);
+const FRAME_D = bar(23);
+// Four, not two: "idle"'s unfolded period is lcm(looks=1, SWEEP.length=6, BLINK_EVERY=11) = 66,
+// which is already even, so a 2-frame cycle divides it whether or not periodOf folds the frame
+// count in at all — that assertion could not fail. 66 is not a multiple of 4, so folding a
+// 4-frame cycle in must change the period to lcm(66, 4) = 132 for `% 4 === 0` to hold; without
+// the fold it stays 66, and 66 % 4 === 2. Four frames is the smallest count that pins the fold.
+const FOUR_FRAMES = [FRAME_A, FRAME_B, FRAME_C, FRAME_D];
 
 const CAT = SPECIES.find((one) => one.id === "cat");
 if (CAT === undefined) throw new Error("the reference Species is missing from the catalog");
 
 const BODY: Body = {
   pixels: FRAME_A,
-  frames: TWO_FRAMES,
+  frames: FOUR_FRAMES,
   anchors: { head: { x: 15, y: 18 }, left_eye: { x: 11, y: 18 }, right_eye: { x: 17, y: 18 } },
 };
 
@@ -403,11 +410,12 @@ const FIXTURE: SpeciesDef = {
 const TABLE = [...SPECIES, FIXTURE];
 
 test("a Body with frames alternates over them, and the period covers them", () => {
-  const first = frameAt("test:framed", "adult", "idle", 0, undefined, false, TABLE);
-  const second = frameAt("test:framed", "adult", "idle", 1, undefined, false, TABLE);
-  assert.notDeepEqual(first, second, "two frames should draw differently");
-  assert.deepEqual(frameAt("test:framed", "adult", "idle", 2, undefined, false, TABLE), first, "two frames around is the first again");
-  assert.equal(periodOf("test:framed", "adult", "idle", TABLE) % TWO_FRAMES.length, 0, "the period must cover the frame cycle");
+  const beats = [0, 1, 2, 3].map((index) => frameAt("test:framed", "adult", "idle", index, undefined, false, TABLE));
+  for (let i = 0; i < beats.length; i++) {
+    for (let j = i + 1; j < beats.length; j++) assert.notDeepEqual(beats[i], beats[j], `beat ${i} and beat ${j} should draw differently`);
+  }
+  assert.deepEqual(frameAt("test:framed", "adult", "idle", 4, undefined, false, TABLE), beats[0], "four frames around is the first again");
+  assert.equal(periodOf("test:framed", "adult", "idle", TABLE) % FOUR_FRAMES.length, 0, "the period must cover the frame cycle");
 });
 
 test("a Body without frames draws its single map at every beat", () => {

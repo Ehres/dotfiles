@@ -146,10 +146,10 @@ function lcm(a: number, b: number): number {
 }
 
 /**
- * How many beats before the whole animation repeats: the Look cycle, the tail sweep and the blink
- * cadence all wrap within it, and nothing past it can change a Frame. Computed, never hardcoded, so
- * an Expression with a different Look count still gets the right period. Exported so a test can walk
- * a whole period without duplicating the arithmetic.
+ * How many beats before the whole animation repeats: the Look cycle, the tail sweep, the blink
+ * cadence and the Body's own `frames` cycle all wrap within it, and nothing past it can change a
+ * Frame. Computed, never hardcoded, so an Expression with a different Look count still gets the
+ * right period. Exported so a test can walk a whole period without duplicating the arithmetic.
  *
  * Math.max(1, …) is load-bearing, not defensive noise: an Expression with no Look would make this
  * zero, and `index % 0` is NaN — one frozen Frame under a NaN cache key, for ever. The catalog test
