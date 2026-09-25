@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { TEMPERAMENTS } from "../../creature/sheet.ts";
 import { REFERENCE, SPECIES, mapsOf } from "../../creature/catalog.ts";
 import { BADGE_SLOT, MARK_SLOT } from "../marks.ts";
-import { BLINK_EVERY, SWEEP } from "../motion.ts";
+import { BLINK_EVERY, SWEEP, shift } from "../motion.ts";
 import { MAP_ALPHABET, PIXEL_HEIGHT, SPRITE_HEIGHT, SPRITE_WIDTH, type Frame, type Rect } from "../pixels.ts";
 import { frameAt, frames, heartFrame } from "../sprites.ts";
 import { STAGES } from "../../career/stage.ts";
@@ -97,6 +97,45 @@ test("every motion rectangle (a tail, or an ears) is at least 2 pixels wide, so 
       if (motion?.tail !== undefined) assert.ok(motion.tail.w >= 2, `${one.id}/${stage} tail is only ${motion.tail.w} wide`);
       for (const [index, ear] of (motion?.ears ?? []).entries()) {
         assert.ok(ear.w >= 2, `${one.id}/${stage} ears[${index}] is only ${ear.w} wide`);
+      }
+    }
+  }
+});
+
+// A rect can be wide enough (w >= 2, checked above) and still lose pixels at one edge: shift()
+// drops anything whose destination falls outside the rect's own width, so content sitting flush
+// against an edge vanishes on exactly the beat that pushes it that way. That is the general
+// property the width check cannot see — a fox's tail or a bat's wingtip drawn edge-to-edge inside
+// a 3-wide rect passed that check and still emptied on every other sweep. A static render never
+// exercises this either, since it only shows up once something actually moves, so this shifts
+// every declared rect by every value SWEEP produces (tail) and by the blink's fixed dx = 1 (ears),
+// and asserts the rect holds the same count of opaque pixels afterwards it held before.
+test("shifting a motion rectangle by any beat it actually uses never changes how many pixels it holds", () => {
+  function countOpaque(rows: readonly string[], rect: Rect): number {
+    let n = 0;
+    for (let dy = 0; dy < rect.h; dy++) {
+      const row = rows[rect.y + dy];
+      for (let dx = 0; dx < rect.w; dx++) if (row?.[rect.x + dx] !== ".") n++;
+    }
+    return n;
+  }
+  for (const one of drawn) {
+    for (const { id: stage } of STAGES) {
+      if (stage === "egg") continue;
+      const { pixels, motion } = mapsOf(one.id)[stage];
+      if (motion?.tail !== undefined) {
+        const rect = motion.tail;
+        const rest = countOpaque(pixels, rect);
+        for (const dx of new Set(SWEEP)) {
+          if (dx === 0) continue;
+          const after = countOpaque(shift(pixels, rect, dx), rect);
+          assert.equal(after, rest, `${one.id}/${stage} tail loses pixels at dx=${dx}: ${rest} -> ${after}`);
+        }
+      }
+      for (const [index, rect] of (motion?.ears ?? []).entries()) {
+        const rest = countOpaque(pixels, rect);
+        const after = countOpaque(shift(pixels, rect, 1), rect);
+        assert.equal(after, rest, `${one.id}/${stage} ears[${index}] loses pixels on blink: ${rest} -> ${after}`);
       }
     }
   }
