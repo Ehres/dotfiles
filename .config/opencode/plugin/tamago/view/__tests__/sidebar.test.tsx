@@ -35,8 +35,18 @@ test("idle adult: the creature and the footer", async () => {
   expect(shown).toMatchSnapshot();
 });
 
-test("the sidebar renders nothing wider than 37 columns", async () => {
-  for (const line of (await sidebar()).split("\n")) expect(line.length).toBeLessThanOrEqual(37);
+test("the sidebar's content stays inside the real 37 columns", async () => {
+  // Rendered wider than the real sidebar on purpose: at exactly 37 the viewport
+  // clips an overflow instead of revealing it, so the assertion could never fail.
+  const shown = await frame(
+    () => (
+      <ThemeProvider theme={TUI_THEME}>
+        <SidebarView name="Tamago" session={session("idle")} tamago={adult} clock={0} footer={FOOTER} heart={false} />
+      </ThemeProvider>
+    ),
+    { width: 60, height: SIDEBAR.height },
+  );
+  for (const line of shown.split("\n")) expect(line.length).toBeLessThanOrEqual(37);
 });
 
 test("the sidebar holds no name, no stage, no xp and no mood", async () => {
