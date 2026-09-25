@@ -126,16 +126,20 @@ test("shifting a motion rectangle by any beat it actually uses never changes how
       if (motion?.tail !== undefined) {
         const rect = motion.tail;
         const rest = countOpaque(pixels, rect);
+        // tail shifts by sweepAt(beat), which ranges over the whole of SWEEP: both directions occur.
         for (const dx of new Set(SWEEP)) {
           if (dx === 0) continue;
           const after = countOpaque(shift(pixels, rect, dx), rect);
-          assert.equal(after, rest, `${one.id}/${stage} tail loses pixels at dx=${dx}: ${rest} -> ${after}`);
+          assert.equal(after, rest, `${one.id}/${stage} tail ${JSON.stringify(rect)} loses pixels at dx=${dx}: ${rest} -> ${after}`);
         }
       }
+      // ears shifts by a hardcoded dx = 1 on blink (see build() in sprites.ts) — never -1 — so only
+      // that one direction is ever exercised; testing the direction it never travels would flag
+      // rects that are perfectly fine and send a repair chasing a beat that never happens.
       for (const [index, rect] of (motion?.ears ?? []).entries()) {
         const rest = countOpaque(pixels, rect);
         const after = countOpaque(shift(pixels, rect, 1), rect);
-        assert.equal(after, rest, `${one.id}/${stage} ears[${index}] loses pixels on blink: ${rest} -> ${after}`);
+        assert.equal(after, rest, `${one.id}/${stage} ears[${index}] ${JSON.stringify(rect)} loses pixels on blink (dx=1): ${rest} -> ${after}`);
       }
     }
   }
