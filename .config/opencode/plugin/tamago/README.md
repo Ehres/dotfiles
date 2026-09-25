@@ -301,6 +301,14 @@ snapshot-tested headless under Bun; the adapter and the colors are verified by
 launching OpenCode: open two instances side by side, run some tools in one,
 and watch the other's XP follow.
 
+Drawing a Species: export a 32 x 32 PNG of at most sixteen flat colours — no
+gradient banding, no anti-aliased edges — and run `node scripts/import.ts
+<path>.png` to print the `palette:` and `pixels:` blocks to paste into its
+entry in `core/creature/species/<rarity>.ts`. `--patch <anchor>` prints a
+Patch instead, any size, for an Expression pinned to that Anchor. Past sixteen
+colours the tool refuses, listing every colour by pixel count so
+near-duplicate anti-aliased shades are visible.
+
 Layout:
 
 ```

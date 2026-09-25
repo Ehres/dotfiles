@@ -104,6 +104,22 @@ Then `./node_modules/.bin/tsc --noEmit`, and launch OpenCode once for
 anything the snapshots cannot see: colors, the dialog stack, two instances
 side by side for persistence changes.
 
+`node scripts/import.ts <path-to-png> [--patch <anchor>]` turns a drawn PNG
+into a Species' `pixels:`/`palette:` block. Without `--patch` the PNG must be
+the full 32 x 32 map; with it, any size, for a Patch pinned to that Anchor. It
+only prints to stdout — a Species file is pasted into by hand, never rewritten
+by this tool.
+
+The ceiling is sixteen colours (`PALETTE_MAX`): past it, the tool refuses by
+name, listing every colour by descending pixel count, so near-duplicate shades
+from anti-aliasing are visible rather than a bare "N colours". Art for this
+engine must be flat: no gradient banding, no anti-aliased edges.
+
+The decoder (`scripts/png.ts`) is hand-written on top of `node:zlib`'s inflate
+— chunk parsing, the three PNG filters, colour types 2/3/6 — because the
+project carries no runtime dependency and the plugin never imports it; resist
+replacing it with a library.
+
 ## Scope
 
 `IDEAS.md` is a backlog, not a decision; a retained idea gets a design spec
