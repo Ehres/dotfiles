@@ -1,15 +1,29 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { PAINTED_ROLES, SKIN_ROLES, type Skin } from "../palette.ts";
+import { MAP_ROLES, PAINTED_ROLES, SKIN_ROLES, type Skin } from "../palette.ts";
 import { REFERENCE, SPECIES } from "../../creature/catalog.ts";
 import { paletteOf } from "../../creature/catalog.ts";
 import type { SpeciesDef } from "../../creature/species.ts";
 
 const HEX = /^#[0-9a-f]{6}$/;
 
-test("a Skin covers every Role a map can carry, and no Role the engine paints", () => {
-  assert.deepEqual([...SKIN_ROLES], ["outline", "primary", "secondary", "accent"]);
+test("the Role partition is complete and correct: MAP, PAINTED, and SKIN lists", () => {
+  assert.deepEqual([...MAP_ROLES], ["outline", "primary", "secondary", "accent"]);
   assert.deepEqual([...PAINTED_ROLES], ["eye", "mark", "badge", "heart"]);
+  assert.deepEqual([...SKIN_ROLES], ["outline", "primary", "secondary", "accent", "eye"]);
+});
+
+test("Skin's keys agree with SKIN_ROLES at runtime", () => {
+  const skin: Skin = {
+    outline: "#111111",
+    primary: "#222222",
+    secondary: "#333333",
+    accent: "#444444",
+    eye: "#555555",
+  };
+  const keysFromType = Object.keys(skin).sort();
+  const rolesFromArray = [...SKIN_ROLES].sort();
+  assert.deepEqual(keysFromType, rolesFromArray);
 });
 
 test("every Species that declares Palettes covers every Skin Role in both variants, in lowercase hex", () => {
