@@ -90,15 +90,28 @@ AGENTS.md. Vocabulary lives in `CONTEXT.md`; use those terms.
 
 `bun test view shell` for the views and the shell (Bun compiles the Solid
 JSX; the frames are snapshots under `__snapshots__/`, and a changed snapshot
-is named in the commit) is expected at **36 pass, 5 fail**, not 41 pass: once
+is named in the commit) is expected at **34 pass, 7 fail**, not 41 pass: once
 the Sprite grew to 32 x 32, its 16-row height alone overflows the 26-row
 `DIALOG` test fixture, and the overflow corrupts rather than clips. `DIALOG`
 is frozen on purpose — its value is the owner's, to measure against a running
-TUI, and widening it would turn these five honest failures green while the
-real dialog stayed just as cramped. The five: the card at four held Traits,
-the card of an adult (English and French), the roster at two Careers, and
-the roster's highlight/arrows/return; see the comments in
-`view/__tests__/card.test.tsx` and `roster.test.tsx` for which and why.
+TUI, and widening it would turn these seven honest failures green while the
+real dialog stayed just as cramped. The seven, by their test names:
+
+- `the card of an adult: title row, species, age, character, four bars, xp bar`
+- `the card of an adult reads in French`
+- `the card lists the Traits held, with their marks`
+- `the card at four held Traits: every Trait's title, every Sheet bar and the xp bar`
+- `the roster highlights the first line, moves with the arrows, selects with return`
+- `the roster at two Careers, the selected one holding one Trait: both roster lines and every Sheet bar`
+- `the roster reads in French`
+
+The last two of the card's and the roster's used to pass: they asserted on a
+line the overflow happens to spare, so the render went green and their
+snapshots were regenerated around a Sheet missing its `energy` bar. Recording
+the damage as correct is worse than failing at it, so they assert on every
+Sheet bar now and their snapshot entries are deleted until the overflow is
+settled. See the comments in `view/__tests__/card.test.tsx` and
+`roster.test.tsx` for which and why.
 
 Then `./node_modules/.bin/tsc --noEmit`, and launch OpenCode once for
 anything the snapshots cannot see: colors, the dialog stack, two instances

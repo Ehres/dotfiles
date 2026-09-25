@@ -87,6 +87,7 @@ test("the roster at two Careers, the selected one holding one Trait: both roster
   const activeId = idOf(OWNER);
   const shown = careers.map((career) => tamago(career));
   const lines = careers.map((career, i) => line(career, `Tamago ${i + 1}`, activeId, "en"));
+  const selected = shown[0] ?? tamago(kept);
   const { frame } = await mount(() => (
     <ThemeProvider theme={TUI_THEME}>
       <RosterView tamagos={shown} lines={lines} clock={0} now={0} onSelect={() => {}} />
@@ -94,12 +95,18 @@ test("the roster at two Careers, the selected one holding one Trait: both roster
   ));
   const shownFrame = trim(await frame());
   for (const text of lines) expect(shownFrame).toContain(text);
-  for (const bar of sheetLines(shown[0]!, "en")) expect(shownFrame).toContain(bar);
-  expect(shownFrame).toContain(progress(shown[0]!, BAR_WIDTH, "en"));
+  for (const bar of sheetLines(selected, "en")) expect(shownFrame).toContain(bar);
+  expect(shownFrame).toContain(progress(selected, BAR_WIDTH, "en"));
 });
 
+// Overflowing too, and this one used to pass: a roster of one Career drops "énergie" just as the
+// two-Career case above drops "energy", but nothing asserted on the Sheet, so the snapshot was
+// regenerated around the missing bar and recorded the damage as correct. It asserts on every Sheet
+// bar and the xp bar now, like its English neighbour, so it fails for the same honest reason. Its
+// snapshot entry is deleted rather than kept: it comes back when the overflow is settled.
 test("the roster reads in French", async () => {
-  const shown = [tamago(OWNER)];
+  const one = tamago(OWNER);
+  const shown = [one];
   const lines = [line(OWNER, "Tamago", OWNER.hatchedAt, "fr")];
   const { frame } = await mount(() => (
     <ThemeProvider theme={TUI_THEME}>
@@ -111,5 +118,7 @@ test("the roster reads in French", async () => {
   const shownFrame = trim(await frame());
   expect(shownFrame).toContain("Tamago · chat · adulte · actif");
   expect(shownFrame).toContain("chat · commun");
+  for (const bar of sheetLines(one, "fr")) expect(shownFrame).toContain(bar);
+  expect(shownFrame).toContain(progress(one, BAR_WIDTH, "fr"));
   expect(shownFrame).toMatchSnapshot();
 });

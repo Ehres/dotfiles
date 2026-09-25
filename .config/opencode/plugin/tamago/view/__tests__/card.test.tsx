@@ -74,14 +74,23 @@ test("the card carries what the sidebar dropped: name, species, stage, xp, age a
   expect(shown).toContain("chilling");
 });
 
+// Also overflowing, and this one used to pass: the card at a single held Trait drops "energy"
+// exactly like the four-Trait case below, but the only assertion was on the Trait's own title, so
+// the render went green and its snapshot was regenerated around the missing bar — the repo's
+// stated ground truth for a card became a card short of a stat. Asserting on every Sheet bar and
+// every Trait title, as the four-Trait case does, makes it fail for the reason it is broken. Its
+// snapshot entry is deleted rather than kept: it comes back when the overflow is settled.
 test("the card lists the Traits held, with their marks", async () => {
   const kept = { ...OWNER, picks: { "evolution:hatchling": { trait: "hardy", at: 1 } } };
+  const t = tamago(kept);
   const shown = await frame(() => (
     <ThemeProvider theme={TUI_THEME}>
-      <CardView name="Tamago" tamago={tamago(kept)} clock={0} heart={false} now={OWNER.hatchedAt} />
+      <CardView name="Tamago" tamago={t} clock={0} heart={false} now={OWNER.hatchedAt} />
     </ThemeProvider>
   ));
   expect(shown).toContain("Hardy");
+  for (const line of sheetLines(t, "en")) expect(shown).toContain(line);
+  for (const title of traitLines(t, "en")) expect(shown).toContain(title);
   expect(shown).toMatchSnapshot();
 });
 
