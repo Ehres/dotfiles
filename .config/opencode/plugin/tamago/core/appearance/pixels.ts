@@ -20,6 +20,9 @@ export type Frame = readonly (readonly Cell[])[];
 /** A rectangle of pixels inside a map: where the eyes go, or what moves. */
 export type Rect = { x: number; y: number; w: number; h: number };
 
+/** The five characters a hand-drawn map may use. `E`, `M`, `G` and `H` are the engine's. */
+export const MAP_ALPHABET = ".oabc";
+
 /** The whole map alphabet. A character outside it is a typo, and throws. */
 export const ROLE_OF: Record<string, Role | null> = {
   ".": null,
@@ -27,6 +30,10 @@ export const ROLE_OF: Record<string, Role | null> = {
   a: "primary",
   b: "secondary",
   c: "accent",
+  E: "eye",
+  M: "mark",
+  G: "badge",
+  H: "heart",
 };
 
 function roleAt(rows: readonly string[], x: number, y: number): Role | null {
@@ -50,4 +57,30 @@ export function pack(rows: readonly string[]): Frame {
     frame.push(line);
   }
   return frame;
+}
+
+/** The character a painted overlay writes for each Role the engine owns. */
+export const PAINT_OF: Record<"eye" | "mark" | "badge" | "heart", string> = { eye: "E", mark: "M", badge: "G", heart: "H" };
+
+/** Rows of '#' (paint) and anything else (leave alone). */
+export type Pattern = readonly string[];
+
+/** Writes `pattern` into `at` as `role`, on a copy of `rows`. */
+export function paint(rows: readonly string[], at: Rect, pattern: Pattern, role: "eye" | "mark" | "badge" | "heart"): string[] {
+  if (at.x < 0 || at.y < 0 || at.x + at.w > SPRITE_WIDTH || at.y + at.h > PIXEL_HEIGHT) {
+    throw new Error(`the rectangle ${at.x},${at.y} ${at.w}x${at.h} falls outside the map`);
+  }
+  if (pattern.length !== at.h || pattern.some((line) => line.length !== at.w)) {
+    throw new Error(`a pattern for a ${at.w} x ${at.h} rectangle must be ${at.h} rows of ${at.w}`);
+  }
+  const char = PAINT_OF[role];
+  const next = rows.slice();
+  for (let dy = 0; dy < at.h; dy++) {
+    const row = next[at.y + dy];
+    if (row === undefined) continue;
+    const chars = row.split("");
+    for (let dx = 0; dx < at.w; dx++) if (pattern[dy]?.[dx] === "#") chars[at.x + dx] = char;
+    next[at.y + dy] = chars.join("");
+  }
+  return next;
 }
