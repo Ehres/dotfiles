@@ -33,7 +33,6 @@ export function SidebarView(props: {
       activity={activity()}
       clock={props.clock}
       heart={props.heart}
-      variant={theme.mode()}
       theme={theme.current}
       badge={props.tamago.choices.length > 0}
       width={SIDEBAR_WIDTH}

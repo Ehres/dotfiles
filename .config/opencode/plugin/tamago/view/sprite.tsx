@@ -4,9 +4,9 @@ import { RGBA } from "@opentui/core";
 import type { JSX } from "@opentui/solid";
 import { Index, createMemo } from "solid-js";
 import { paletteOf } from "../core/creature/catalog.ts";
-import type { Variant } from "../core/appearance/palette.ts";
+import { EGG_PALETTE } from "../core/appearance/palette.ts";
 import { frameAt, heartFrame } from "../core/appearance/sprites.ts";
-import type { Cell, Frame, Role } from "../core/appearance/pixels.ts";
+import type { Cell, Frame, Ink } from "../core/appearance/pixels.ts";
 import { MARK, markOf } from "../core/appearance/marks.ts";
 import { frameIndex } from "../core/moment/cadence.ts";
 import type { Activity } from "../core/moment/session.ts";
@@ -17,7 +17,7 @@ const UPPER = "▀";
 const LOWER = "▄";
 
 /** The whole rendering rule. A bg is set only under an opaque bottom pixel, so no rectangle ever shows. */
-export function glyphOf(cell: Cell): { glyph: string; fg: Role | null; bg: Role | null } {
+export function glyphOf(cell: Cell): { glyph: string; fg: Ink | null; bg: Ink | null } {
   if (cell.top !== null && cell.bottom !== null) {
     return cell.top === cell.bottom ? { glyph: FULL, fg: cell.top, bg: null } : { glyph: UPPER, fg: cell.top, bg: cell.bottom };
   }
@@ -33,10 +33,6 @@ export function mixed(from: string, towards: string, amount: number): string {
   const b = parse(towards);
   const channel = (i: number) => Math.round((a[i] ?? 0) + ((b[i] ?? 0) - (a[i] ?? 0)) * amount);
   return `#${[0, 1, 2].map((i) => channel(i).toString(16).padStart(2, "0")).join("")}`;
-}
-
-export function skinOf(species: string, variant: Variant) {
-  return paletteOf(species, variant);
 }
 
 /**
@@ -65,16 +61,15 @@ function hex(color: RGBA): string {
  * The Sprite of a Tamago for an Activity at a moment of the clock: the heart
  * while petted, else the Frame the Behavior's cadence lands on. Frames are
  * cached in core, so the memo hands back the same reference for the same
- * frame and a tick that changes nothing re-renders nothing. The colour a Role
+ * frame and a tick that changes nothing re-renders nothing. The colour an Ink
  * paints as is its own memo: the Palette tinted toward the theme, computed
- * once per variant/theme/activity change, never per cell.
+ * once per theme/activity change, never per cell.
  */
 export function Sprite(props: {
   tamago: Tamago;
   activity: Activity;
   clock: number;
   heart: boolean;
-  variant: Variant;
   theme: TuiThemeCurrent;
   badge: boolean;
 }): JSX.Element {
@@ -86,24 +81,21 @@ export function Sprite(props: {
       : frameAt(t.species.id, t.stage, props.activity, frameIndex(props.activity, props.clock, t.behavior), mark, props.badge);
   });
 
-  const colours = createMemo((): Record<Role, RGBA> => {
-    const skin = paletteOf(props.tamago.species.id, props.variant);
+  const colours = createMemo((): { of: (ink: Ink) => RGBA | undefined } => {
+    const palette = props.tamago.stage === "egg" ? EGG_PALETTE : paletteOf(props.tamago.species.id);
     const tint = TINT[props.activity];
     const shade = (value: string) => RGBA.fromHex(tint === null ? value : mixed(value, hex(props.theme[tint.color]), tint.amount));
+    const shaded = palette.map(shade);
     // The mark itself carries no colour (core is colour-free): the Trait it marks names a theme key,
     // and this is the one place that key becomes an RGBA.
     const marked = markOf(props.tamago.traits);
     const markColor = marked === undefined ? "success" : (MARK[marked]?.color ?? "success");
-    return {
-      outline: shade(skin.outline),
-      primary: shade(skin.primary),
-      secondary: shade(skin.secondary),
-      accent: shade(skin.accent),
-      eye: shade(skin.eye),
+    const painted: Record<"mark" | "badge" | "heart", RGBA> = {
       mark: props.theme[markColor],
       badge: props.theme.warning,
       heart: props.theme.error,
     };
+    return { of: (ink) => (typeof ink === "number" ? shaded[ink] : painted[ink]) };
   });
 
   return (
@@ -120,10 +112,12 @@ export function Sprite(props: {
                 const drawn = createMemo(() => glyphOf(cell()));
                 const style = createMemo(() => {
                   const shown = drawn();
-                  const palette = colours();
+                  const of = colours().of;
+                  const fg = shown.fg === null ? undefined : of(shown.fg);
+                  const bg = shown.bg === null ? undefined : of(shown.bg);
                   return {
-                    ...(shown.fg === null ? {} : { fg: palette[shown.fg] }),
-                    ...(shown.bg === null ? {} : { bg: palette[shown.bg] }),
+                    ...(fg === undefined ? {} : { fg }),
+                    ...(bg === undefined ? {} : { bg }),
                   };
                 });
                 return <span style={style()}>{drawn().glyph}</span>;

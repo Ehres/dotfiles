@@ -1,5 +1,5 @@
 import type { Maps } from "../appearance/bodies.ts";
-import type { Palettes } from "../appearance/palette.ts";
+import type { Palette } from "../appearance/palette.ts";
 import type { Phrase } from "../language.ts";
 import type { Signature } from "../speech/signature.ts";
 import { REFERENCE, SPECIES } from "./catalog.ts";
@@ -29,7 +29,7 @@ export type Gender = "m" | "f";
 export type Species = { id: SpeciesId; label: Phrase; gender: Gender; rarity: Rarity; sheet?: Modifiers };
 
 /** A catalog entry: the Species plus what it draws and what it says. Missing any is a compile error. */
-export type SpeciesDef = Species & { maps: Maps; palettes: Palettes; signature: Signature };
+export type SpeciesDef = Species & { maps: Maps; palette: Palette; signature: Signature };
 
 /** The domain mixed into the hatch seed. No Milestone id is ever this string. */
 const DOMAIN = "species";

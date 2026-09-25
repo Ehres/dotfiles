@@ -9,44 +9,47 @@ import type { StageId } from "../career/stage.ts";
 import type { TraitId } from "../career/pick.ts";
 import type { Activity } from "../moment/session.ts";
 
-export { PIXEL_HEIGHT, SPRITE_HEIGHT, SPRITE_WIDTH, type Cell, type Frame, type Role } from "./pixels.ts";
+export { PIXEL_HEIGHT, SPRITE_HEIGHT, SPRITE_WIDTH, type Cell, type Frame, type Ink } from "./pixels.ts";
+
+/** The egg's own map: indices into EGG_PALETTE, never a Species' Palette. Exported for its own catalog test. */
+export const EGG_PIXELS: readonly string[] = [
+  "................................",
+  "................................",
+  "................................",
+  "................................",
+  "................................",
+  "................................",
+  "................................",
+  "................................",
+  "................................",
+  "................................",
+  "................................",
+  "................................",
+  ".............000................",
+  "............0011100.............",
+  "...........011111110............",
+  "..........01111111110...........",
+  "..........01111111110...........",
+  ".........0111111111110..........",
+  ".........0111111111110..........",
+  ".........0111222111110..........",
+  ".........0111222111110..........",
+  ".........0111111122210..........",
+  ".........0111111122210..........",
+  ".........0111111111110..........",
+  ".........0111222111110..........",
+  ".........0111222111110..........",
+  ".........0111111111110..........",
+  ".........0111111111110..........",
+  "..........01111111110...........",
+  "..........01111111110...........",
+  "...........011111110............",
+  "............0000000.............",
+];
 
 /** The egg every Species hatches from: what is inside only shows at hatchling. */
 const EGG: Body = {
-  pixels: [
-    "................................",
-    "................................",
-    "................................",
-    "................................",
-    "................................",
-    "................................",
-    "................................",
-    "................................",
-    "................................",
-    "................................",
-    "................................",
-    "................................",
-    ".............ooo................",
-    "............ooaaaoo.............",
-    "...........oaaaaaaao............",
-    "..........oaaaaaaaaao...........",
-    "..........oaaaaaaaaao...........",
-    ".........oaaaaaaaaaaao..........",
-    ".........oaaaaaaaaaaao..........",
-    ".........oaaabbbaaaaao..........",
-    ".........oaaabbbaaaaao..........",
-    ".........oaaaaaaabbbao..........",
-    ".........oaaaaaaabbbao..........",
-    ".........oaaaaaaaaaaao..........",
-    ".........oaaabbbaaaaao..........",
-    ".........oaaabbbaaaaao..........",
-    ".........oaaaaaaaaaaao..........",
-    ".........oaaaaaaaaaaao..........",
-    "..........oaaaaaaaaao...........",
-    "..........oaaaaaaaaao...........",
-    "...........oaaaaaaao............",
-    "............ooooooo.............",
-  ],
+  pixels: EGG_PIXELS,
   eyes: [
     { x: 11, y: 18, w: 3, h: 3 },
     { x: 17, y: 18, w: 3, h: 3 },
@@ -79,6 +82,13 @@ export const PET_MS = 2_000;
 const HEART: Pattern = [".#.#.", "#####", "#####", ".###.", "..#.."];
 const HEART_AT = { x: 13, y: 13, w: 5, h: 5 };
 
+/**
+ * Where the migration put every Species' old eye colour. Task 4 deletes this
+ * along with the engine's shared Faces: once a Species owns its expressions,
+ * an eye is drawn in whatever colours that Species chose.
+ */
+const EYE_INDEX = 4;
+
 /** The body to draw: the common egg, else the Species' map, else the reference's. */
 function body(species: SpeciesId, stage: StageId): Body {
   if (stage === "egg") return EGG;
@@ -97,7 +107,7 @@ function build(one: Body, face: Pattern, beat: number, mark: TraitId | undefined
   const motion = one.motion;
   if (motion?.tail !== undefined) rows = shift(rows, motion.tail, sweepAt(beat));
   if (motion?.ears !== undefined && blinksAt(beat)) for (const ear of motion.ears) rows = shift(rows, ear, 1);
-  for (const eye of one.eyes) rows = paint(rows, eye, face, "eye");
+  for (const eye of one.eyes) rows = paint(rows, eye, face, EYE_INDEX);
   const pattern = mark === undefined ? undefined : MARK[mark]?.pattern;
   if (pattern !== undefined) rows = paint(rows, MARK_SLOT, pattern, "mark");
   if (badge) rows = paint(rows, BADGE_SLOT, BADGE, "badge");
@@ -167,7 +177,7 @@ export function heartFrame(
   return cached(key, () => {
     const one = body(species, stage);
     let rows: readonly string[] = one.pixels;
-    for (const eye of one.eyes) rows = paint(rows, eye, EYES[temperament], "eye");
+    for (const eye of one.eyes) rows = paint(rows, eye, EYES[temperament], EYE_INDEX);
     rows = paint(rows, HEART_AT, HEART, "heart");
     const pattern = mark === undefined ? undefined : MARK[mark]?.pattern;
     if (pattern !== undefined) rows = paint(rows, MARK_SLOT, pattern, "mark");

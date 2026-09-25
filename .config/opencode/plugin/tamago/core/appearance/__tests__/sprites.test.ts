@@ -1,15 +1,46 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { TEMPERAMENTS } from "../../creature/sheet.ts";
-import { REFERENCE, SPECIES, mapsOf } from "../../creature/catalog.ts";
+import { REFERENCE, SPECIES, mapsOf, paletteOf } from "../../creature/catalog.ts";
 import { BADGE_SLOT, MARK_SLOT } from "../marks.ts";
 import { SWEEP, shift } from "../motion.ts";
 import { MAP_ALPHABET, PIXEL_HEIGHT, SPRITE_HEIGHT, SPRITE_WIDTH, type Frame, type Rect } from "../pixels.ts";
-import { frameAt, heartFrame, periodOf } from "../sprites.ts";
+import { EGG_PALETTE } from "../palette.ts";
+import { EGG_PIXELS, frameAt, heartFrame, periodOf } from "../sprites.ts";
 import { STAGES } from "../../career/stage.ts";
 import { ACTIVITIES } from "../../moment/session.ts";
 
 const drawn = SPECIES;
+
+test("every index a map writes has a colour behind it", () => {
+  for (const one of drawn) {
+    const palette = paletteOf(one.id);
+    for (const { id: stage } of STAGES) {
+      if (stage === "egg") continue;
+      const { pixels } = mapsOf(one.id)[stage];
+      for (const [y, row] of pixels.entries()) {
+        for (const [x, char] of [...row].entries()) {
+          if (char === ".") continue;
+          const index = MAP_ALPHABET.indexOf(char) - 1;
+          assert.ok(
+            index >= 0 && index < palette.length,
+            `${one.id}/${stage} row ${y} column ${x} writes "${char}" (index ${index}) but the palette holds ${palette.length} colours`,
+          );
+        }
+      }
+    }
+  }
+});
+
+test("the egg's map never reads a Species' palette", () => {
+  for (const [y, row] of EGG_PIXELS.entries()) {
+    for (const [x, char] of [...row].entries()) {
+      if (char === ".") continue;
+      const index = MAP_ALPHABET.indexOf(char) - 1;
+      assert.ok(index >= 0 && index < EGG_PALETTE.length, `the egg writes "${char}" at ${x},${y}, outside its own ${EGG_PALETTE.length} colours`);
+    }
+  }
+});
 
 test("every drawn map is exactly 32 rows of 32 characters, all from the alphabet", () => {
   for (const one of drawn) {
@@ -197,7 +228,9 @@ test("a heart Frame keeps the size, wears the heart and the Temperament's eyes",
       const frame = heartFrame(REFERENCE, stage, temperament);
       assert.equal(frame.length, SPRITE_HEIGHT);
       assert.ok(frame.some((row) => row.some((cell) => cell.top === "heart" || cell.bottom === "heart")), `${stage}/${temperament} heart`);
-      assert.ok(frame.some((row) => row.some((cell) => cell.top === "eye" || cell.bottom === "eye")), `${stage}/${temperament} eyes`);
+      // The eyes are drawn at palette index 4 (EYE_INDEX in sprites.ts): the migration put every
+      // Species' old eye colour there. Task 4 replaces this with a Species' own expressions.
+      assert.ok(frame.some((row) => row.some((cell) => cell.top === 4 || cell.bottom === 4)), `${stage}/${temperament} eyes`);
       assert.equal(heartFrame(REFERENCE, stage, temperament), frame, "cached");
     }
   }

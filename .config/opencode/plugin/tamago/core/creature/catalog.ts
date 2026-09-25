@@ -1,5 +1,5 @@
 import type { Maps } from "../appearance/bodies.ts";
-import type { Palettes, Skin, Variant } from "../appearance/palette.ts";
+import type { Palette } from "../appearance/palette.ts";
 import type { Signature } from "../speech/signature.ts";
 import type { SpeciesDef, SpeciesId } from "./species.ts";
 import { COMMON } from "./species/common.ts";
@@ -10,7 +10,7 @@ import { UNCOMMON } from "./species/uncommon.ts";
 
 /**
  * Every Species that can hatch, one file per Rarity, each entry complete:
- * Modifiers, maps, Palettes and Signature. A test bounds each Modifier to
+ * Modifiers, maps, a Palette and a Signature. A test bounds each Modifier to
  * ±MODIFIER_MAX and their sum to MODIFIERS_SUM_MAX. Order within a Rarity is
  * the order of the draw: never reorder once shipped. Tune a `sheet` line
  * before that Species has hatched anywhere: the Sheet is derived, so
@@ -45,10 +45,9 @@ export function signatureOf(id: SpeciesId, table: readonly SpeciesDef[] = SPECIE
   return entry(id, table)?.signature;
 }
 
-/** The Skin to paint a Species with: its own, else the reference's for a Species this build does not draw. */
-export function paletteOf(id: SpeciesId, variant: Variant, table: readonly SpeciesDef[] = SPECIES): Skin {
-  const own = entry(id, table)?.palettes;
-  const palettes: Palettes | undefined = own ?? entry(REFERENCE, table)?.palettes;
-  if (palettes === undefined) throw new Error(`no Palettes on the reference Species "${REFERENCE}"`);
-  return palettes[variant];
+/** The colours to paint a Species with: its own, else the reference's for a Species this build does not draw. */
+export function paletteOf(id: SpeciesId, table: readonly SpeciesDef[] = SPECIES): Palette {
+  const palette = entry(id, table)?.palette ?? entry(REFERENCE, table)?.palette;
+  if (palette === undefined) throw new Error(`no Palette on the reference Species "${REFERENCE}"`);
+  return palette;
 }

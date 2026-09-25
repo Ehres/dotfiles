@@ -5,7 +5,7 @@ import { BADGE_SLOT } from "../../core/appearance/marks.ts";
 import { frameAt, heartFrame } from "../../core/appearance/sprites.ts";
 import type { Frame } from "../../core/appearance/pixels.ts";
 import { tamago } from "../../core/tamago.ts";
-import { Sprite, glyphOf, mixed, skinOf } from "../sprite.tsx";
+import { Sprite, glyphOf, mixed } from "../sprite.tsx";
 import { ThemeProvider } from "../theme.tsx";
 import { OWNER } from "./fixtures.ts";
 import { frame as frameSnapshot, mount, trim } from "./render.tsx";
@@ -20,17 +20,17 @@ function plain(shown: Frame): string {
   return shown.map((row) => row.map((cell) => glyphOf(cell).glyph).join("")).join("\n");
 }
 
-test("a cell with two opaque pixels of the same Role is a full block with no bg", () => {
-  expect(glyphOf({ top: "primary", bottom: "primary" })).toEqual({ glyph: "█", fg: "primary", bg: null });
+test("a cell with two opaque pixels of the same index is a full block with no bg", () => {
+  expect(glyphOf({ top: 1, bottom: 1 })).toEqual({ glyph: "█", fg: 1, bg: null });
 });
 
-test("a cell with two opaque pixels of different Roles is an upper half with a bg", () => {
-  expect(glyphOf({ top: "outline", bottom: "primary" })).toEqual({ glyph: "▀", fg: "outline", bg: "primary" });
+test("a cell with two opaque pixels of different indices is an upper half with a bg", () => {
+  expect(glyphOf({ top: 0, bottom: 1 })).toEqual({ glyph: "▀", fg: 0, bg: 1 });
 });
 
 test("a bg is never set when the bottom pixel is transparent", () => {
-  expect(glyphOf({ top: "primary", bottom: null })).toEqual({ glyph: "▀", fg: "primary", bg: null });
-  expect(glyphOf({ top: null, bottom: "primary" })).toEqual({ glyph: "▄", fg: "primary", bg: null });
+  expect(glyphOf({ top: 1, bottom: null })).toEqual({ glyph: "▀", fg: 1, bg: null });
+  expect(glyphOf({ top: null, bottom: 1 })).toEqual({ glyph: "▄", fg: 1, bg: null });
 });
 
 test("an empty cell is a space with no colour at all", () => {
@@ -43,11 +43,6 @@ test("mixing toward a colour by 0 keeps it, by 1 replaces it", () => {
   expect(mixed("#000000", "#ffffff", 0.5)).toBe("#808080");
 });
 
-test("the theme variant is part of what a painted Sprite depends on", () => {
-  // Review Focus: theme.mode() can flip mid-session.
-  expect(skinOf("cat", "dark")).not.toEqual(skinOf("cat", "light"));
-});
-
 test("draws the frame of the Activity at the clock, and the heart while petted", async () => {
   const [clock, setClock] = createSignal(0);
   const [heart, setHeart] = createSignal(false);
@@ -58,7 +53,6 @@ test("draws the frame of the Activity at the clock, and the heart while petted",
         activity="working"
         clock={clock()}
         heart={heart()}
-        variant="dark"
         theme={TUI_THEME.current}
         badge={false}
       />
@@ -82,7 +76,6 @@ test("a held Trait marks the sprite's top-left cell", async () => {
           activity="idle"
           clock={0}
           heart={false}
-          variant="dark"
           theme={TUI_THEME.current}
           badge={false}
         />
@@ -96,15 +89,11 @@ test("a held Trait marks the sprite's top-left cell", async () => {
 
 test("the badge prop reaches the Frame: a pending Draw paints the top-right cell", async () => {
   const without = await frameSnapshot(
-    () => (
-      <Sprite tamago={adult} activity="idle" clock={0} heart={false} variant="dark" theme={TUI_THEME.current} badge={false} />
-    ),
+    () => <Sprite tamago={adult} activity="idle" clock={0} heart={false} theme={TUI_THEME.current} badge={false} />,
     SIZE,
   );
   const withBadge = await frameSnapshot(
-    () => (
-      <Sprite tamago={adult} activity="idle" clock={0} heart={false} variant="dark" theme={TUI_THEME.current} badge={true} />
-    ),
+    () => <Sprite tamago={adult} activity="idle" clock={0} heart={false} theme={TUI_THEME.current} badge={true} />,
     SIZE,
   );
   expect(trim(without)).toBe(trim(plain(frameAt("cat", "adult", "idle", 0, undefined, false))));
@@ -134,12 +123,7 @@ function badgeCorner(shown: string): string {
 
 test("a pending Draw fills the badge corner, and nothing fills it without one", async () => {
   const render = (badge: boolean) =>
-    frameSnapshot(
-      () => (
-        <Sprite tamago={adult} activity="idle" clock={0} heart={false} variant="dark" theme={TUI_THEME.current} badge={badge} />
-      ),
-      SIZE,
-    );
+    frameSnapshot(() => <Sprite tamago={adult} activity="idle" clock={0} heart={false} theme={TUI_THEME.current} badge={badge} />, SIZE);
   const blank = "   |   ";
   expect(badgeCorner(await render(false))).toBe(blank);
   expect(badgeCorner(await render(true))).not.toBe(blank);

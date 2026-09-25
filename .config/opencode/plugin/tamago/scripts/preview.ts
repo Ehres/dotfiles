@@ -1,8 +1,8 @@
-// scripts/preview.ts — run: node scripts/preview.ts cat adult [--plain] [--light]
+// scripts/preview.ts — run: node scripts/preview.ts cat adult [--plain]
 import { SPECIES, mapsOf, paletteOf } from "../core/creature/catalog.ts";
 import { frameAt } from "../core/appearance/sprites.ts";
-import type { Cell, Frame, Rect, Role } from "../core/appearance/pixels.ts";
-import type { Skin } from "../core/appearance/palette.ts";
+import type { Cell, Frame, Ink, Rect } from "../core/appearance/pixels.ts";
+import { EGG_PALETTE, type Palette } from "../core/appearance/palette.ts";
 import type { Grown } from "../core/appearance/bodies.ts";
 import { STAGES, type StageId } from "../core/career/stage.ts";
 
@@ -10,9 +10,10 @@ const GLYPH = { both: "█", top: "▀", bottom: "▄", none: " " };
 const RESET = "\x1b[0m";
 
 /**
- * mark, badge and heart are never in a Species' Skin — the view layer paints
- * them from the OpenCode theme at render time. These three are stand-ins so
- * the preview can still show where they land; they are not the real colours.
+ * mark, badge and heart are never in a Species' Palette — the view layer
+ * paints them from the OpenCode theme at render time. These three are
+ * stand-ins so the preview can still show where they land; they are not the
+ * real colours.
  */
 const THEME_STAND_IN: Record<"mark" | "badge" | "heart", string> = {
   mark: "#e0af68",
@@ -35,25 +36,27 @@ function bg(hex: string): string {
   return `\x1b[48;2;${r};${g};${b}m`;
 }
 
-function colorOf(role: Role, skin: Skin): string {
-  if (role === "mark" || role === "badge" || role === "heart") return THEME_STAND_IN[role];
-  return skin[role];
+/** Magenta so an index with no colour behind it is visible rather than silent. */
+function colorOf(ink: Ink, palette: Palette): string {
+  if (ink === "mark" || ink === "badge" || ink === "heart") return THEME_STAND_IN[ink];
+  return palette[ink] ?? "#ff00ff";
 }
 
 /** One glyph, coloured per the view layer's rule: bg is set only under an opaque bottom pixel. */
-function drawCell(cell: Cell, skin: Skin): string {
+function drawCell(cell: Cell, palette: Palette): string {
   const { top, bottom } = cell;
   if (top === null && bottom === null) return GLYPH.none;
   if (top !== null && bottom !== null) {
-    if (top === bottom) return `${fg(colorOf(top, skin))}${GLYPH.both}${RESET}`;
-    return `${fg(colorOf(top, skin))}${bg(colorOf(bottom, skin))}${GLYPH.top}${RESET}`;
+    if (top === bottom) return `${fg(colorOf(top, palette))}${GLYPH.both}${RESET}`;
+    return `${fg(colorOf(top, palette))}${bg(colorOf(bottom, palette))}${GLYPH.top}${RESET}`;
   }
-  if (top !== null) return `${fg(colorOf(top, skin))}${GLYPH.top}${RESET}`;
-  return `${fg(colorOf(bottom as Role, skin))}${GLYPH.bottom}${RESET}`;
+  if (top !== null) return `${fg(colorOf(top, palette))}${GLYPH.top}${RESET}`;
+  if (bottom !== null) return `${fg(colorOf(bottom, palette))}${GLYPH.bottom}${RESET}`;
+  return GLYPH.none;
 }
 
-function draw(frame: Frame, skin: Skin): string {
-  return frame.map((row) => `${row.map((cell) => drawCell(cell, skin)).join("")}${RESET}`).join("\n");
+function draw(frame: Frame, palette: Palette): string {
+  return frame.map((row) => `${row.map((cell) => drawCell(cell, palette)).join("")}${RESET}`).join("\n");
 }
 
 /** The monochrome fallback for a terminal without truecolor: every non-null pixel is a block. */
@@ -89,8 +92,7 @@ function summarize(id: string, stage: StageId): string {
 
 const args = process.argv.slice(2);
 const plain = args.includes("--plain");
-const variant = args.includes("--light") ? "light" : "dark";
-const [id = "cat", stage = "adult"] = args.filter((arg) => arg !== "--plain" && arg !== "--light");
+const [id = "cat", stage = "adult"] = args.filter((arg) => arg !== "--plain");
 
 if (!SPECIES.some((one) => one.id === id)) {
   console.error(`unknown Species "${id}". Known: ${SPECIES.map((one) => one.id).join(", ")}`);
@@ -102,7 +104,8 @@ if (!STAGES.some((one) => one.id === stage)) {
   process.exit(1);
 }
 
-console.log(`${id} / ${stage} / ${variant}\n`);
+console.log(`${id} / ${stage}\n`);
 const frame = frameAt(id, stage as StageId, "idle", 0);
-console.log(plain ? drawPlain(frame) : draw(frame, paletteOf(id, variant)));
+const palette = stage === "egg" ? EGG_PALETTE : paletteOf(id);
+console.log(plain ? drawPlain(frame) : draw(frame, palette));
 console.log(`\n${summarize(id, stage as StageId)}`);

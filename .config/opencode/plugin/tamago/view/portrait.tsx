@@ -3,7 +3,6 @@ import type { TuiThemeCurrent } from "@opencode-ai/plugin/tui";
 import type { RGBA } from "@opentui/core";
 import type { JSX } from "@opentui/solid";
 import { Show } from "solid-js";
-import type { Variant } from "../core/appearance/palette.ts";
 import { SPRITE_WIDTH } from "../core/appearance/pixels.ts";
 import type { Activity } from "../core/moment/session.ts";
 import type { Tamago } from "../core/tamago.ts";
@@ -23,7 +22,6 @@ export function Portrait(props: {
   activity: Activity;
   clock: number;
   heart: boolean;
-  variant: Variant;
   theme: TuiThemeCurrent;
   badge: boolean;
   width?: number;
@@ -50,7 +48,6 @@ export function Portrait(props: {
           activity={props.activity}
           clock={props.clock}
           heart={props.heart}
-          variant={props.variant}
           theme={props.theme}
           badge={props.badge}
         />

@@ -1,73 +1,21 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { MAP_ROLES, PAINTED_ROLES, SKIN_ROLES, type Skin } from "../palette.ts";
-import { REFERENCE, SPECIES } from "../../creature/catalog.ts";
-import { paletteOf } from "../../creature/catalog.ts";
-import type { SpeciesDef } from "../../creature/species.ts";
+import { EGG_PALETTE, PALETTE_MAX } from "../palette.ts";
+import { SPECIES } from "../../creature/catalog.ts";
 
 const HEX = /^#[0-9a-f]{6}$/;
 
-test("the Role partition is complete and correct: MAP, PAINTED, and SKIN lists", () => {
-  assert.deepEqual([...MAP_ROLES], ["outline", "primary", "secondary", "accent"]);
-  assert.deepEqual([...PAINTED_ROLES], ["eye", "mark", "badge", "heart"]);
-  assert.deepEqual([...SKIN_ROLES], ["outline", "primary", "secondary", "accent", "eye"]);
-});
-
-test("every Species covers every Skin Role in both variants, in lowercase hex", () => {
+test("every Species' palette holds between 1 and PALETTE_MAX lowercase #rrggbb colours", () => {
   for (const one of SPECIES) {
-    for (const variant of ["dark", "light"] as const) {
-      const skin: Skin = one.palettes[variant];
-      for (const role of SKIN_ROLES) {
-        assert.match(skin[role] ?? "", HEX, `${one.id}/${variant}/${role}`);
-      }
+    assert.ok(one.palette.length >= 1 && one.palette.length <= PALETTE_MAX, `${one.id} has ${one.palette.length} colours`);
+    for (const [index, color] of one.palette.entries()) {
+      assert.match(color, HEX, `${one.id}[${index}]`);
     }
   }
 });
 
-test("paletteOf falls back to the reference for a Species this build does not draw", () => {
-  const FIXTURE: readonly SpeciesDef[] = [
-    {
-      ...SPECIES.find((one) => one.id === REFERENCE)!,
-      palettes: {
-        dark: {
-          outline: "#111111",
-          primary: "#222222",
-          secondary: "#333333",
-          accent: "#444444",
-          eye: "#555555",
-        },
-        light: {
-          outline: "#aaaaaa",
-          primary: "#bbbbbb",
-          secondary: "#cccccc",
-          accent: "#dddddd",
-          eye: "#eeeeee",
-        },
-      },
-    },
-  ];
-  assert.deepEqual(paletteOf("no-such-species", "dark", FIXTURE), paletteOf(REFERENCE, "dark", FIXTURE));
-  assert.deepEqual(paletteOf("__proto__", "dark", FIXTURE), paletteOf(REFERENCE, "dark", FIXTURE));
-  assert.deepEqual(paletteOf("constructor", "light", FIXTURE), paletteOf(REFERENCE, "light", FIXTURE));
-});
-
-test("the two variants of a Species differ: a light theme is not the dark one", () => {
-  // Against the real catalogue, not a hand-written fixture whose variants differ by construction:
-  // this is the only check that a Species' two Palettes were actually drawn as two, not one copied
-  // onto the other.
+test("EGG_PALETTE is none of the Species' own palettes", () => {
   for (const one of SPECIES) {
-    assert.notDeepEqual(paletteOf(one.id, "dark"), paletteOf(one.id, "light"), one.id);
+    assert.notStrictEqual(one.palette, EGG_PALETTE, one.id);
   }
-});
-
-test("paletteOf throws when neither the requested Species nor the reference has Palettes", () => {
-  // palettes is required on SpeciesDef now; this simulates a malformed table (a bad cast, bad
-  // data on disk) to prove paletteOf's defensive throw still fires instead of reading undefined.
-  const EMPTY_FIXTURE = [
-    { ...SPECIES.find((one) => one.id === REFERENCE)!, palettes: undefined },
-  ] as unknown as readonly SpeciesDef[];
-  assert.throws(
-    () => paletteOf("no-such-species", "dark", EMPTY_FIXTURE),
-    /no Palettes on the reference Species/,
-  );
 });
