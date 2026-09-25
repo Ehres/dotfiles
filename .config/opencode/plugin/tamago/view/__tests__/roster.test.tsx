@@ -16,6 +16,9 @@ import { TUI_THEME } from "./theme.ts";
 // a fifth Career — see the two overflow comments below ("the roster at five Careers" and "the
 // roster at two Careers... holding one Trait"), which park the same defect and the same fix:
 // DIALOG's real value is the user's to measure against the running TUI, not this fixture's to grow.
+// This test throws before reaching either of its two toMatchSnapshot calls, so task 2's
+// --update-snapshots run deleted both of its committed snapshot entries rather than updating them;
+// they return once the overflow is settled, not before.
 test("the roster highlights the first line, moves with the arrows, selects with return", async () => {
   const shown = [tamago(OWNER), tamago(EGG)];
   const lines = ["Tamago · cat · adult · active", "Egg · egg"];

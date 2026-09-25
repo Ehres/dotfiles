@@ -11,7 +11,7 @@ import { ACTIVITIES } from "../../moment/session.ts";
 
 const drawn = SPECIES;
 
-test("every drawn map is exactly 20 rows of 21 characters, all from the alphabet", () => {
+test("every drawn map is exactly 32 rows of 32 characters, all from the alphabet", () => {
   for (const one of drawn) {
     for (const { id: stage } of STAGES) {
       if (stage === "egg") continue;

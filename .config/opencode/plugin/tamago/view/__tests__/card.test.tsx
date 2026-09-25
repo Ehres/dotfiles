@@ -14,7 +14,9 @@ import { TUI_THEME } from "./theme.ts";
 // made the overflow test below fail first. The overflow corrupts rather than clips — see the
 // comment above "the roster at five Careers" in roster.test.tsx, which parks the same defect and
 // the same fix: DIALOG's real value is the user's to measure against the running TUI, not this
-// fixture's to grow.
+// fixture's to grow. This test and the French one below throw before reaching toMatchSnapshot, so
+// task 2's --update-snapshots run deleted their two committed snapshot entries rather than
+// updating them; the snapshots return once the overflow is settled, not before.
 test("the card of an adult: title row, species, age, character, four bars, xp bar", async () => {
   const now = OWNER.hatchedAt + 12 * DAY_MS;
   const shown = await frame(() => (

@@ -2,7 +2,8 @@
 import { testRender, type JSX } from "@opentui/solid";
 
 export type Size = { width: number; height: number };
-/** The real sidebar, measured 2026-09-25: tall enough for a Bubble above the centred sprite. */
+/** The width is the real sidebar, measured 2026-09-25; the height is a test viewport, raised from
+ * 18 to fit a Bubble above the taller, 16-cell sprite — a real sidebar is as tall as the terminal. */
 export const SIDEBAR: Size = { width: 37, height: 24 };
 /** Grown to fit the card, not measured: the real dialog is sized by preset (see shell/dialogs.tsx's
  * `setSize("xlarge")`), and that preset's actual row count is for the user to read off the running TUI. */
