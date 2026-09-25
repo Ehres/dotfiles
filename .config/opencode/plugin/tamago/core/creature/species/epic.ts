@@ -243,8 +243,8 @@ export const EPIC: readonly SpeciesDef[] = [
       },
     },
     palettes: {
-      dark: { outline: "#050c0d", primary: "#123138", secondary: "#5fa89c", accent: "#4de8c4", eye: "#0a1f22" },
-      light: { outline: "#03080a", primary: "#0c262b", secondary: "#4a8f84", accent: "#2fae95", eye: "#071518" },
+      dark: { outline: "#050c0d", primary: "#123138", secondary: "#5fa89c", accent: "#4de8c4", eye: "#050505" },
+      light: { outline: "#03080a", primary: "#0c262b", secondary: "#4a8f84", accent: "#2fae95", eye: "#050505" },
     },
     signature: {
       permission: [{ en: "The deep asks: may I?", fr: "D'en bas : un signe ?" }, { en: "Surface? Your call.", fr: "Remonter ? Tu décides." }, { en: "Tentacles wait. Go?", fr: "Tentacules suspendus." }],
