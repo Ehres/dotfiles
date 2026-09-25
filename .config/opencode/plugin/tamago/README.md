@@ -4,9 +4,10 @@ A terminal tamagotchi that lives inside the OpenCode TUI. It mirrors what the
 current session is doing in real time, and grows over weeks from the activity
 accumulated across every session and project on the machine.
 
-Each of the twenty drawn Species renders as a small Sprite in half-block
-characters (`▀ ▄ █`), its own four-colour Palette, two eyes and whatever
-moves, captioned by its name and Stage: `Tamago · young · 1,840 xp`.
+Each of the twenty drawn Species renders as a 32 x 32 Sprite in half-block
+characters (`▀ ▄ █`), painted in its own Palette of up to sixteen colours,
+its Expressions and whatever moves, captioned by its name and Stage:
+`Tamago · young · 1,840 xp`.
 
 Zero upkeep: nothing to feed, nothing dies. The creature suffers in the moment
 when something fails and recovers a few seconds later.
@@ -32,7 +33,7 @@ option on every later start.
 ## How it reacts
 
 The sprite appears alone, centred, in the sidebar footer of a session, and
-beside its name and stage under the prompt on the home screen. Each OpenCode
+beside its name and stage in the card and roster dialogs. Each OpenCode
 session has its own mood, tinting and animating the sprite to show it.
 Subagent sessions never drive it: their tools still earn XP, their prompts do
 not count. Activity follows the session:
@@ -53,12 +54,12 @@ The 3 s and 120 s above are those of a median sheet. Each creature has its
 own: a sensitive one stays hurt longer, an energetic one stays awake longer
 and animates faster. See "Who it is".
 
-Colors come from the species' own palette, one colour per role (outline,
-primary, secondary, accent, eyes), in a dark and a light variant chosen by
-the OpenCode theme's mode. Idle, thinking and working leave it untouched;
-waiting, hurt and asleep tint it 45 % toward the theme's `warning`, `error`
-and `textMuted`. The trait mark, the draw badge and the pet's heart always use
-the theme's `success`, `warning` and `error`, whatever the species.
+Colors come from the species' own Palette, up to sixteen indexed colours
+with no light or dark variant to choose between. Idle, thinking and working
+leave it untouched; waiting, hurt and asleep tint it 45 % toward the theme's
+`warning`, `error` and `textMuted`. The trait mark, the draw badge and the
+pet's heart always use the theme's `success`, `warning` and `error`,
+whatever the species.
 
 ## How it talks
 
@@ -133,7 +134,7 @@ about it depends on the terminal's own column widths.
 At a milestone, today one per stage from `hatchling` on, the creature offers a
 draw of up to three traits and `choose a trait` keeps one; its description
 says how many choices are waiting, and a small badge pulses in the sprite's
-top-right corner as the same reminder, in the sidebar and on the home screen.
+top-right corner as the same reminder, in the sidebar.
 A trait is never a penalty: each one marks the sprite's top-left corner with
 its own pattern, and either speaks cues the creature already had, so the
 species and the temperament stay quiet there, or opens a cue nothing else can
@@ -155,8 +156,8 @@ with the career. Twenty species, by rarity:
 The egg looks the same for every species; the creature shows at
 `hatchling`, with a toast and a bubble. A species never changes: the only way
 to meet another one is a new egg. Two eggs may hatch the same species: the
-draw has no memory. Each species lives whole, maps, palette and signature, in
-`core/creature/species/<rarity>.ts`.
+draw has no memory. Each species lives whole, maps, palette, expressions and
+signature, in `core/creature/species/<rarity>.ts`.
 
 | Rarity      | First egg | After one common elder | Cap    | Pace |
 | ----------- | --------- | ---------------------- | ------ | ---- |
@@ -313,7 +314,7 @@ core/moment/        what it is doing now: Session, events, transition, cadence
 core/speech/        what it says: Cues, phrases, Registers, the Voice, Bubbles
 core/choices/       Milestones, Draws and Traits
 core/roster/        every Career of the machine
-core/appearance/    how it is drawn: Sprite assembly, frames, formatting
+core/appearance/    how it is drawn: Sprite assembly, frames, anchors, expressions, formatting
 core/text/          every phrase the user reads: card, roster lines, toasts, dialogs, palette commands, Moods
 core/store/         the pure decisions of the store: lock, retry
 adapter/            the only layer touching SDK event shapes and the disk

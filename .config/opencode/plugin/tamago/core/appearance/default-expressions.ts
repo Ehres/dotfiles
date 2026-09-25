@@ -1,5 +1,16 @@
 import type { Expressions, Look } from "./expressions.ts";
 
+/** Pins the same pattern to both eyes: every look below is symmetric. */
+function eyes(pattern: readonly string[]): Look {
+  return [
+    { at: "left_eye", pixels: pattern },
+    { at: "right_eye", pixels: pattern },
+  ];
+}
+
+const OPEN = [".4.", "444", ".4."];
+const SHUT = ["...", "444", "..."];
+
 /**
  * The eleven looks the engine used to share across every Species, as patches
  * pinned to `left_eye` and `right_eye` and drawn in palette index 4, which is
@@ -11,16 +22,6 @@ import type { Expressions, Look } from "./expressions.ts";
  * indices mean nothing outside a migrated palette. Delete this file once the
  * last Species is redrawn and the egg has a table of its own.
  */
-function eyes(pattern: readonly string[]): Look {
-  return [
-    { at: "left_eye", pixels: pattern },
-    { at: "right_eye", pixels: pattern },
-  ];
-}
-
-const OPEN = [".4.", "444", ".4."];
-const SHUT = ["...", "444", "..."];
-
 export const DEFAULT_EXPRESSIONS: Expressions = {
   open: [eyes(OPEN)],
   shut: [eyes(SHUT)],

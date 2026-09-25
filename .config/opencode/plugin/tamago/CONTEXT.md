@@ -304,7 +304,7 @@ _Avoid_: perk, upgrade, buff, card
 
 **Pixel**:
 Half a cell, square on screen because a cell is twice as tall as wide; a
-Sprite is 21 × 20 of them, drawn with `▀ ▄ █` and the space.
+Sprite is 32 × 32 of them, drawn with `▀ ▄ █` and the space.
 _Avoid_: dot, point, cell (that is the character)
 
 **Sprite**:
@@ -346,17 +346,12 @@ enriched over time instead of blocked on eleven drawings. A Body may
 override its Species' table for one Stage, merged over it, and rarely does.
 _Avoid_: Face (the engine no longer has one to share)
 
-**Role**:
-What a pixel is, never what colour it is: outline, primary, secondary,
-accent, mark, badge, heart — a map and its Species' Patches carry the first
-four, the engine paints the rest.
-_Avoid_: layer, segment, class
-
 **Palette**:
-One colour per Role for one Species, in a dark variant and a light one
-chosen by the theme's mode, written in hexadecimal in the Species file. A
-"Skin" is one of the two variants alone (`palette.ts`'s `Skin`: one colour
-per Role, one variant); the Palette is both together.
+One indexed list of up to sixteen colours for one Species, written in
+hexadecimal in the Species file. A map's characters, and a Patch's, are
+indices into it; there is no light or dark variant to choose between. The
+egg keeps its own Palette (`palette.ts`'s `EGG_PALETTE`), never a Species',
+so it reveals nothing about what will hatch.
 _Avoid_: theme (that is OpenCode's), scheme
 
 **Portrait**:
@@ -382,8 +377,8 @@ _Avoid_: card, widget
 - A **Career** is identified by its hatch date: two Careers of one machine
   never hatch in the same millisecond, since a Hatch needs the whole Roster
   to be `elder`
-- The sidebar, the home and the card show the **active** Career; the
-  **Voices** are its
+- The sidebar and the card show the **active** Career; the **Voices** are
+  its
 - An older build knows only the **active** Career: its Deltas credit it,
   whichever it is at Flush time
 - Each OpenCode window has exactly one **Window**, which holds one **Delta**
@@ -401,8 +396,6 @@ _Avoid_: card, widget
   **Stage** threshold
 - A **Session** has exactly one **Voice**; a **Voice** holds at most one
   **Bubble**; a **Bubble** comes from exactly one **Cue**
-- The home screen has no **Voice**: without an OpenCode session there is no
-  **Cue**
 - A **Career** has exactly one **Sheet**, derived from its hatch date and its
   **Species**; two windows compute the same one
 - A **Sheet** has exactly eight **Stats**: four of Temperament, four of

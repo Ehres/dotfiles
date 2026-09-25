@@ -29,11 +29,16 @@ AGENTS.md. Vocabulary lives in `CONTEXT.md`; use those terms.
 - Every map is 32 rows of 32 characters of `MAP_ALPHABET` (a Palette index, or
   `.` for transparent), and only colour: what moves, the Trait mark and the
   Draw badge are rectangles declared beside it, and the points a Species'
-  Expressions are pinned to are its named anchors. A Species' colours are its Palette, two variants, written in
-  hexadecimal in the Species file; `core/` may name a colour there, and a
-  theme key for a Trait's mark (`core/appearance/marks.ts`'s `ThemeColor`),
-  but it never resolves one to an actual colour value — that happens once,
-  in `view/`.
+  Expressions are pinned to are its named anchors. A Species' colours are its
+  Palette, written in hexadecimal in the Species file; `core/` may name a
+  colour there, and a theme key for a Trait's mark
+  (`core/appearance/marks.ts`'s `ThemeColor`), but it never resolves one to an
+  actual colour value — that happens once, in `view/`.
+- `sprites.test.ts` checks four things beyond the map format: an anchor named
+  by an Expression but absent from a Body, a Patch that runs off the canvas
+  from its anchor, an Expression with no Look, and a head anchor with no room
+  for the heart above it. Anchor names are plain strings, not a closed union,
+  so this test — not `tsc` — is where a typo in one is caught.
 - A `motion` rectangle (a tail, or an ears) must be at least 2 pixels wide, so
   `shift()` has a column to move its content into; its content must not sit
   flush against the edge it shifts toward, since `shift()` drops any pixel
@@ -66,10 +71,11 @@ AGENTS.md. Vocabulary lives in `CONTEXT.md`; use those terms.
   derived from a Career is derived there, once, and passed down as one
   prop. A new derived attribute is a new field of `Tamago`.
 - A new Species is one entry in `core/creature/species/<rarity>.ts`: id, label,
-  Rarity, Modifiers, four maps, a Palette in both variants and a full
-  Signature. A missing map, Palette or Signature does not compile; the order
-  of the entries is the draw order and never changes once shipped. The rarity
-  weights live in `core/creature/luck.ts`, never in the Species files.
+  Rarity, Modifiers, four maps, a Palette, an Expressions table and a full
+  Signature. A missing map, Palette, Expressions table or Signature does not
+  compile; the order of the entries is the draw order and never changes once
+  shipped. The rarity weights live in `core/creature/luck.ts`, never in the
+  Species files.
 - The voice never picks a phrase by rotation or by `Math.random`: `phrase`
   seeds from the hatch date, the Cue and its count, so every window agrees for
   the same occurrence of the Cue.
@@ -79,12 +85,24 @@ AGENTS.md. Vocabulary lives in `CONTEXT.md`; use those terms.
 
 ## Verify
 
-`node --test "core/**/__tests__/*.test.ts" "adapter/__tests__/*.test.ts"` for the
-core and the adapter, `bun test view shell` for the views and the shell (Bun
-compiles the Solid JSX; the frames are snapshots under `__snapshots__/`, and a
-changed snapshot is named in the commit), and `./node_modules/.bin/tsc --noEmit`.
-Then launch OpenCode once for anything the snapshots cannot see: colors, the
-dialog stack, two instances side by side for persistence changes.
+`pnpm test` runs `node --test` over core, the adapter and `scripts/__tests__`
+(the PNG importer): 486 tests, all passing.
+
+`bun test view shell` for the views and the shell (Bun compiles the Solid
+JSX; the frames are snapshots under `__snapshots__/`, and a changed snapshot
+is named in the commit) is expected at **36 pass, 5 fail**, not 41 pass: once
+the Sprite grew to 32 x 32, its 16-row height alone overflows the 26-row
+`DIALOG` test fixture, and the overflow corrupts rather than clips. `DIALOG`
+is frozen on purpose — its value is the owner's, to measure against a running
+TUI, and widening it would turn these five honest failures green while the
+real dialog stayed just as cramped. The five: the card at four held Traits,
+the card of an adult (English and French), the roster at two Careers, and
+the roster's highlight/arrows/return; see the comments in
+`view/__tests__/card.test.tsx` and `roster.test.tsx` for which and why.
+
+Then `./node_modules/.bin/tsc --noEmit`, and launch OpenCode once for
+anything the snapshots cannot see: colors, the dialog stack, two instances
+side by side for persistence changes.
 
 ## Scope
 

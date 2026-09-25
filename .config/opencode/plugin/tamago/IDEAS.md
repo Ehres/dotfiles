@@ -18,11 +18,11 @@ Ce que Tamago fait aujourd'hui, relu le 2026-09-19 :
   `core/career/count.ts`), translator SDK → événements internes ciblés par
   session (`adapter/translate.ts`), persistance multi-instances avec lock et
   rename atomique (`adapter/store.ts`, `core/career/career.ts`).
-- Quatre surfaces Solid : sidebar (`view/sidebar.tsx`, slot `sidebar_footer`),
-  home (`view/home.tsx`, slot `home_bottom`), carte et roster en dialogues
-  (`view/card.tsx`, `view/roster.tsx`), sur les composants partagés
-  `view/sprite.tsx`, `view/portrait.tsx`, `view/dialog.tsx` et le thème en
-  contexte (`view/theme.tsx`). Un toast à chaque évolution.
+- Trois surfaces Solid : sidebar (`view/sidebar.tsx`, slot `sidebar_footer`),
+  carte et roster en dialogues (`view/card.tsx`, `view/roster.tsx`), sur les
+  composants partagés `view/sprite.tsx`, `view/portrait.tsx`,
+  `view/dialog.tsx` et le thème en contexte (`view/theme.tsx`). Un toast à
+  chaque évolution.
 - Le shell ne fait que câbler (`index.tsx`) : miroir Window → signaux,
   boucles de tick et de flush, actions, dialogues, palette et slots vivent
   dans `shell/`, seule couche qui touche `api.*` et les timers.
@@ -244,11 +244,9 @@ du seul toast. Une animation d'éclosion au premier lancement.
 
 ### 8. Vue home enrichie
 
-Aujourd'hui sprite + barre d'XP. Ajouter un journal court : "Hier : 42 prompts,
-13 fichiers, 2 erreurs", plus l'âge en jours depuis `hatchedAt`.
-
-Nécessite un historique par jour dans `career.json` (fenêtre glissante de 30
-jours) et sa règle de merge.
+**Abandonnée le 2026-09-25.** La vue home a été supprimée (plus de
+`view/home.tsx`, plus de slot `home_bottom`) : un journal enrichi
+demanderait d'abord une surface pour l'accueillir.
 
 ### 9. Sons et notifications
 
@@ -258,12 +256,15 @@ l'erreur, ronflement à l'endormissement. À limiter à l'évolution et à
 
 ### 10. Rendu et couleur
 
-Le sprite est monochrome par activité. OpenTUI permet des `<span>` colorés :
-yeux d'une couleur, corps d'une autre, accessoire en `theme.warning`. Les stades
-supérieurs pourraient utiliser des caractères de dessin de boîte, avec repli
-ASCII si nécessaire.
+**Couleur : fait le 2026-09-25**, voir
+`docs/superpowers/specs/2026-09-25-tamago-sprite-engine-design.md`. Chaque
+Species a désormais sa propre Palette indexée, jusqu'à seize couleurs : un
+pixel du corps, des yeux et d'un accessoire peuvent déjà être trois couleurs
+différentes, en plus de la teinte que l'Activity applique par-dessus.
 
-Même préalable que l'idée 4 : la `Frame` en segments.
+Reste ouvert : les stades supérieurs pourraient utiliser des caractères de
+dessin de boîte, avec repli ASCII si nécessaire. Même préalable que l'idée 4 :
+la `Frame` en segments.
 
 ### 11. Gamification : Milestones, Draws, Picks et Traits
 
@@ -379,10 +380,15 @@ Quatre lots :
      s'apprend à l'éclosion, seulement ; l'œuf ne révèle rien, et c'est une
      règle, pas un manque.
    - Gardées pour plus tard, dictées le 2026-09-17 : revoir les sprites et
-     leur affichage dans la barre latérale, dimensions comprises ; du loot et
-     des accessoires (lunettes, chapeau, baguette, badges) gagnés puis portés
-     par le sprite, sur la Frame en segments, ce qui suppose une tête à place
-     fixe dans toutes les Species, déjà le cas.
+     leur affichage dans la barre latérale, dimensions comprises — **fait le
+     2026-09-25**, voir
+     `docs/superpowers/specs/2026-09-25-tamago-sprite-engine-design.md`
+     (canvas 32 x 32, Palette indexée par Species, import PNG). Reste
+     ouvert : du loot et des accessoires (lunettes, chapeau, baguette,
+     badges) gagnés puis portés par le sprite, sur la Frame en segments —
+     ils pendront désormais des Anchors que ce lot introduit (`head`, etc.)
+     plutôt que de supposer une tête à place fixe dans toutes les Species :
+     une tête est déclarée, non plus supposée.
 
 Contraintes qui tiennent : aucune Species n'est une punition, pas de lecture
 de contenu, merge commutatif, pas de re-roll, jamais de retrait sur la Career,
