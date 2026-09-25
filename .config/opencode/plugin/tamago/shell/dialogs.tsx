@@ -42,6 +42,7 @@ export function createDialogs(deps: {
 
   /** The dialog stack wraps the card in OpenCode's own centered Dialog; nothing to position here. */
   const showCard = () => {
+    api.ui.dialog.setSize("xlarge");
     api.ui.dialog.replace(() => (
       <ThemeProvider theme={api.theme}>
         <LanguageProvider language={mirror.language()}>
@@ -77,6 +78,7 @@ export function createDialogs(deps: {
     const shown = careers.map((one) => tamago(one));
     const activeId = idOf(roster.active);
     const lines = careers.map((one) => line(one, defaultName, activeId, mirror.language()));
+    api.ui.dialog.setSize("xlarge");
     api.ui.dialog.replace(() => (
       <ThemeProvider theme={api.theme}>
         <LanguageProvider language={mirror.language()}>
