@@ -1,6 +1,6 @@
 // Bun Snapshot v1, https://bun.sh/docs/test/snapshots
 
-exports[`idle adult: the creature and the footer 1`] = `
+exports[`idle adult: the creature alone 1`] = `
 "           ▄▀▀▄       ▄▀▀▄█▀█
            █████▄▄▄▄▄█████▀▀▀
         ▄▀███▀█████████▀███▀▄
@@ -10,14 +10,10 @@ exports[`idle adult: the creature and the footer 1`] = `
           ▀▀▀▀█▀▀▀▀▀▀▀█▀▀▀▀
            ▄▀███████████▀▄ █
           ████████████████ ▀
-          █▀▀█       █▀▀█
-
-~/projects/dotfiles:master
-
-• OpenCode 1.18.31"
+          █▀▀█       █▀▀█"
 `;
 
-exports[`hurt egg: draws the egg, no mood or xp text, and the footer 1`] = `
+exports[`hurt egg: draws the egg, no mood or xp text 1`] = `
 "               ▄█▀▀▄▄▄
              ▄▀███████▀▄
             ▄▀█████████▀▄
@@ -27,11 +23,7 @@ exports[`hurt egg: draws the egg, no mood or xp text, and the footer 1`] = `
             █████████████
             █████████████
              ███████████
-              ▀▀▀▀▀▀▀▀▀
-
-~/projects/dotfiles:master
-
-• OpenCode 1.18.31"
+              ▀▀▀▀▀▀▀▀▀"
 `;
 
 exports[`a Bubble sits above the sprite; petting changes the drawn sprite 1`] = `
@@ -47,11 +39,7 @@ exports[`a Bubble sits above the sprite; petting changes the drawn sprite 1`] = 
           ▀▀▀▀█▀▀▀▀▀▀▀█▀▀▀▀
            ▄▀███████████▀▄ █
           ████████████████ ▀
-          █▀▀█       █▀▀█
-
-~/projects/dotfiles:master
-
-• OpenCode 1.18.31"
+          █▀▀█       █▀▀█"
 `;
 
 exports[`a pending Draw changes the drawn sprite; none without one 1`] = `
@@ -64,9 +52,5 @@ exports[`a pending Draw changes the drawn sprite; none without one 1`] = `
           ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
            ▄▀███████████▀▄ █
           ██████████████▀▄ ▀
-          █▀▀█       █▀▀█
-
-~/projects/dotfiles:master
-
-• OpenCode 1.18.31"
+          █▀▀█       █▀▀█"
 `;

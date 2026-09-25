@@ -1,6 +1,7 @@
 /** @jsxImportSource @opentui/solid */
 import { expect, test } from "bun:test";
 import { createSignal } from "solid-js";
+import { BADGE_SLOT } from "../../core/appearance/marks.ts";
 import { frameAt, heartFrame } from "../../core/appearance/sprites.ts";
 import type { Frame } from "../../core/appearance/pixels.ts";
 import { tamago } from "../../core/tamago.ts";
@@ -109,4 +110,37 @@ test("the badge prop reaches the Frame: a pending Draw paints the top-right cell
   expect(trim(without)).toBe(trim(plain(frameAt("cat", "adult", "idle", 0, undefined, false))));
   expect(trim(withBadge)).toBe(trim(plain(frameAt("cat", "adult", "idle", 0, undefined, true))));
   expect(withBadge).not.toBe(without);
+});
+
+/**
+ * The BADGE_SLOT corner of the rendered Sprite, read out of the frame text
+ * rather than diffed against another frame: a fixture that also moves
+ * MARK_SLOT must not be able to fake this. `frame()` trims trailing spaces,
+ * so a blank corner can end a line early — hence the padEnd before slicing.
+ * Moved here from view/__tests__/home.test.tsx when the home surface was
+ * dropped; it was the only test reading the corner's own pixels.
+ */
+function badgeCorner(shown: string): string {
+  const lines = shown.split("\n");
+  const firstRow = Math.floor(BADGE_SLOT.y / 2);
+  const lastRow = Math.floor((BADGE_SLOT.y + BADGE_SLOT.h - 1) / 2);
+  const width = BADGE_SLOT.x + BADGE_SLOT.w;
+  const rows: string[] = [];
+  for (let row = firstRow; row <= lastRow; row++) {
+    rows.push((lines[row] ?? "").padEnd(width).slice(BADGE_SLOT.x, width));
+  }
+  return rows.join("|");
+}
+
+test("a pending Draw fills the badge corner, and nothing fills it without one", async () => {
+  const render = (badge: boolean) =>
+    frameSnapshot(
+      () => (
+        <Sprite tamago={adult} activity="idle" clock={0} heart={false} variant="dark" theme={TUI_THEME.current} badge={badge} />
+      ),
+      SIZE,
+    );
+  const blank = "   |   ";
+  expect(badgeCorner(await render(false))).toBe(blank);
+  expect(badgeCorner(await render(true))).not.toBe(blank);
 });

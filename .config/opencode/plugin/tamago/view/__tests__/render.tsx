@@ -7,8 +7,6 @@ export const SIDEBAR: Size = { width: 37, height: 18 };
 /** Grown to fit the card, not measured: the real dialog is sized by preset (see shell/dialogs.tsx's
  * `setSize("xlarge")`), and that preset's actual row count is for the user to read off the running TUI. */
 export const DIALOG: Size = { width: 60, height: 26 };
-/** The home_bottom slot spans the terminal: wide enough for the 20-cell xp bar and its caption beside the sprite. */
-export const HOME: Size = { width: 80, height: 14 };
 
 /** Renders once and returns the setup plus a `frame()` that renders again and captures the characters. */
 export async function mount(node: () => JSX.Element, size: Size = DIALOG) {

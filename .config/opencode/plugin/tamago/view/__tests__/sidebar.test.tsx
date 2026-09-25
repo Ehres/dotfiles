@@ -4,7 +4,7 @@ import { tamago } from "../../core/tamago.ts";
 import type { Bubble } from "../../core/speech/voice.ts";
 import { SidebarView } from "../sidebar.tsx";
 import { ThemeProvider } from "../theme.tsx";
-import { EGG, FOOTER, OWNER, session } from "./fixtures.ts";
+import { EGG, OWNER, session } from "./fixtures.ts";
 import { SIDEBAR, frame } from "./render.tsx";
 import { TUI_THEME } from "./theme.ts";
 
@@ -15,24 +15,29 @@ function sidebar() {
   return frame(
     () => (
       <ThemeProvider theme={TUI_THEME}>
-        <SidebarView name="Tamago" session={session("idle")} tamago={adult} clock={0} footer={FOOTER} heart={false} />
+        <SidebarView name="Tamago" session={session("idle")} tamago={adult} clock={0} heart={false} />
       </ThemeProvider>
     ),
     SIDEBAR,
   );
 }
 
-test("idle adult: the creature and the footer", async () => {
+test("idle adult: the creature alone", async () => {
   const shown = await frame(
     () => (
       <ThemeProvider theme={TUI_THEME}>
-        <SidebarView name="Tamago" session={session("idle")} tamago={adult} clock={0} footer={FOOTER} heart={false} />
+        <SidebarView name="Tamago" session={session("idle")} tamago={adult} clock={0} heart={false} />
       </ThemeProvider>
     ),
     SIDEBAR,
   );
-  expect(shown).toContain("~/projects/");
   expect(shown).toMatchSnapshot();
+});
+
+test("the sidebar draws the creature and nothing else", async () => {
+  const shown = await sidebar();
+  expect(shown).not.toContain("~/projects");
+  expect(shown).not.toContain("OpenCode");
 });
 
 test("the sidebar's content stays inside the real 37 columns", async () => {
@@ -41,7 +46,7 @@ test("the sidebar's content stays inside the real 37 columns", async () => {
   const shown = await frame(
     () => (
       <ThemeProvider theme={TUI_THEME}>
-        <SidebarView name="Tamago" session={session("idle")} tamago={adult} clock={0} footer={FOOTER} heart={false} />
+        <SidebarView name="Tamago" session={session("idle")} tamago={adult} clock={0} heart={false} />
       </ThemeProvider>
     ),
     { width: 60, height: SIDEBAR.height },
@@ -56,18 +61,17 @@ test("the sidebar holds no name, no stage, no xp and no mood", async () => {
   expect(shown).not.toContain("chilling");
 });
 
-test("hurt egg: draws the egg, no mood or xp text, and the footer", async () => {
+test("hurt egg: draws the egg, no mood or xp text", async () => {
   const shown = await frame(
     () => (
       <ThemeProvider theme={TUI_THEME}>
-        <SidebarView name="Egg" session={session("hurt")} tamago={egg} clock={0} footer={FOOTER} heart={false} />
+        <SidebarView name="Egg" session={session("hurt")} tamago={egg} clock={0} heart={false} />
       </ThemeProvider>
     ),
     SIDEBAR,
   );
   expect(shown).not.toContain("ouch");
   expect(shown).not.toContain("egg · 0 xp");
-  expect(shown).toContain("~/projects/");
   expect(shown).toMatchSnapshot();
 });
 
@@ -77,15 +81,7 @@ test("a Bubble sits above the sprite; petting changes the drawn sprite", async (
     frame(
       () => (
         <ThemeProvider theme={TUI_THEME}>
-          <SidebarView
-            name="Tamago"
-            session={session("waiting")}
-            tamago={adult}
-            clock={0}
-            footer={FOOTER}
-            bubble={bubble}
-            heart={heart}
-          />
+          <SidebarView name="Tamago" session={session("waiting")} tamago={adult} clock={0} bubble={bubble} heart={heart} />
         </ThemeProvider>
       ),
       SIDEBAR,
@@ -103,7 +99,7 @@ test("a pending Draw changes the drawn sprite; none without one", async () => {
   const withoutDraw = await frame(
     () => (
       <ThemeProvider theme={TUI_THEME}>
-        <SidebarView name="Tamago" session={session("idle")} tamago={adult} clock={0} footer={FOOTER} heart={false} />
+        <SidebarView name="Tamago" session={session("idle")} tamago={adult} clock={0} heart={false} />
       </ThemeProvider>
     ),
     SIDEBAR,
@@ -111,7 +107,7 @@ test("a pending Draw changes the drawn sprite; none without one", async () => {
   const withDraw = await frame(
     () => (
       <ThemeProvider theme={TUI_THEME}>
-        <SidebarView name="Tamago" session={session("idle")} tamago={tamago(waiting)} clock={0} footer={FOOTER} heart={false} />
+        <SidebarView name="Tamago" session={session("idle")} tamago={tamago(waiting)} clock={0} heart={false} />
       </ThemeProvider>
     ),
     SIDEBAR,

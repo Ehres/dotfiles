@@ -15,8 +15,8 @@ export type BubbleView = { top: string; text: string; bottom: string; border: RG
 /**
  * The Sprite, and a Bubble above it when there is one. The Sprite is centred
  * in `width` when given (a sidebar rule); without one it sits flush left, as
- * the card and the home need it. Without a Bubble the block does not exist,
- * so the footer keeps today's height.
+ * the card needs it. Without a Bubble the block does not exist, so the
+ * footer keeps today's height.
  */
 export function Portrait(props: {
   tamago: Tamago;
@@ -28,7 +28,6 @@ export function Portrait(props: {
   badge: boolean;
   width?: number;
   bubble?: BubbleView;
-  children?: JSX.Element;
 }): JSX.Element {
   /** Left margin that centres the 21-cell Sprite in `width`; 0 when there is no room or no width. */
   const margin = () => Math.max(0, Math.floor(((props.width ?? SPRITE_WIDTH) - SPRITE_WIDTH) / 2));
@@ -45,23 +44,16 @@ export function Portrait(props: {
           </box>
         )}
       </Show>
-      <box flexDirection="row" gap={2}>
-        <box paddingLeft={margin()}>
-          <Sprite
-            tamago={props.tamago}
-            activity={props.activity}
-            clock={props.clock}
-            heart={props.heart}
-            variant={props.variant}
-            theme={props.theme}
-            badge={props.badge}
-          />
-        </box>
-        <Show when={props.children}>
-          <box flexDirection="column" justifyContent="center">
-            {props.children}
-          </box>
-        </Show>
+      <box paddingLeft={margin()}>
+        <Sprite
+          tamago={props.tamago}
+          activity={props.activity}
+          clock={props.clock}
+          heart={props.heart}
+          variant={props.variant}
+          theme={props.theme}
+          badge={props.badge}
+        />
       </box>
     </box>
   );
