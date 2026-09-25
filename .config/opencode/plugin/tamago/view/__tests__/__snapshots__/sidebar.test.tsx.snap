@@ -8,8 +8,8 @@ exports[`idle adult: the creature and the footer 1`] = `
         █████████▀▀▀█████████
          ███████▀▀▀▀▀███████
           ▀▀▀▀█▀▀▀▀▀▀▀█▀▀▀▀
-           ▄▀███████████▀▄▀██
-          ████████████████ ▀▀
+           ▄▀███████████▀▄ █
+          ████████████████ ▀
           █▀▀█       █▀▀█
 
 ~/projects/dotfiles:master
@@ -45,8 +45,8 @@ exports[`a Bubble sits above the sprite; petting changes the drawn sprite 1`] = 
         █████████▀▀▀█████████
          ███████▀▀▀▀▀███████
           ▀▀▀▀█▀▀▀▀▀▀▀█▀▀▀▀
-           ▄▀███████████▀▄▀██
-          ████████████████ ▀▀
+           ▄▀███████████▀▄ █
+          ████████████████ ▀
           █▀▀█       █▀▀█
 
 ~/projects/dotfiles:master
@@ -62,8 +62,8 @@ exports[`a pending Draw changes the drawn sprite; none without one 1`] = `
         ▀████████▀▀▀████████▀
          ███████▀▀▀▀▀███████
           ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
-           ▄▀███████████▀▄▀██
-          ██████████████▀▄▀▀█
+           ▄▀███████████▀▄ █
+          ██████████████▀▄ ▀
           █▀▀█       █▀▀█
 
 ~/projects/dotfiles:master

@@ -10,8 +10,8 @@ exports[`the card of an adult: title row, species, age, character, four bars, xp
   █████████▀▀▀█████████  adult · 9,166 xp
    ███████▀▀▀▀▀███████   12 days old
     ▀▀▀▀█▀▀▀▀▀▀▀█▀▀▀▀    chilling
-     ▄▀███████████▀▄▀██
-    ████████████████ ▀▀
+     ▄▀███████████▀▄ █
+    ████████████████ ▀
     █▀▀█       █▀▀█
 
   cheerful · bold shell
@@ -34,8 +34,8 @@ exports[`the card of an adult reads in French 1`] = `
   █████████▀▀▀█████████  adulte · 9 166 xp
    ███████▀▀▀▀▀███████   12 jours
     ▀▀▀▀█▀▀▀▀▀▀▀█▀▀▀▀    tranquille
-     ▄▀███████████▀▄▀██
-    ████████████████ ▀▀
+     ▄▀███████████▀▄ █
+    ████████████████ ▀
     █▀▀█       █▀▀█
 
   enjoué · mécano audacieux
@@ -79,8 +79,8 @@ exports[`the card lists the Traits held, with their marks 1`] = `
   █████████▀▀▀█████████  adult · 9,166 xp
    ███████▀▀▀▀▀███████   hatched today
     ▀▀▀▀█▀▀▀▀▀▀▀█▀▀▀▀    chilling
-     ▄▀███████████▀▄▀██
-    ████████████████ ▀▀
+     ▄▀███████████▀▄ █
+    ████████████████ ▀
     █▀▀█       █▀▀█
 
   cheerful · bold shell

@@ -13,8 +13,8 @@ exports[`the roster highlights the first line, moves with the arrows, selects wi
   █████████▀▀▀█████████  adult · 9,166 xp
    ███████▀▀▀▀▀███████   hatched today
     ▀▀▀▀█▀▀▀▀▀▀▀█▀▀▀▀    chilling
-     ▄▀███████████▀▄▀██
-    ████████████████ ▀▀
+     ▄▀███████████▀▄ █
+    ████████████████ ▀
     █▀▀█       █▀▀█
 
   cheerful · bold shell
@@ -66,8 +66,8 @@ exports[`the roster at five Careers: a known overflow, pinned here until it is d
   █████████▀▀▀█████████  adult · 9,166 xp
    ███████▀▀▀▀▀███████   hatched today
     ▀▀▀▀█▀▀▀▀▀▀▀█▀▀▀▀    chilling
-     ▄▀███████████▀▄▀██
-    ████████████████ ▀▀
+     ▄▀███████████▀▄ █
+    ████████████████ ▀
     █▀▀█       █▀▀█
 
   cheerful · bold shell
@@ -91,8 +91,8 @@ exports[`the roster reads in French 1`] = `
   █████████▀▀▀█████████  adulte · 9 166 xp
    ███████▀▀▀▀▀███████   éclos aujourd'hui
     ▀▀▀▀█▀▀▀▀▀▀▀█▀▀▀▀    tranquille
-     ▄▀███████████▀▄▀██
-    ████████████████ ▀▀
+     ▄▀███████████▀▄ █
+    ████████████████ ▀
     █▀▀█       █▀▀█
 
   enjoué · mécano audacieux
