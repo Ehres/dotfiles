@@ -68,9 +68,9 @@ test("shift throws when the rectangle leaves the map on the y axis", () => {
 
 test("a pixel at the rectangle's left edge is dropped when shifted by -1", () => {
   const rows = blank();
-  rows[4] = "a".padEnd(SPRITE_WIDTH, ".");
-  const moved = shift(rows, { x: 0, y: 4, w: 1, h: 1 }, -1);
-  assert.equal(moved[4]?.slice(0, 1), ".");
+  rows[4] = "..aa".padEnd(SPRITE_WIDTH, ".");
+  const moved = shift(rows, { x: 2, y: 4, w: 2, h: 1 }, -1);
+  assert.equal(moved[4]?.slice(1, 4), ".a.");
 });
 
 test("BLINK_EVERY and SWEEP.length are coprime", () => {
