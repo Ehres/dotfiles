@@ -8,7 +8,7 @@ accumulated across every session and project on the machine.
    .---.
   ( o o )   Tamago
    \ ^ /    young · 1,840 xp
-    '-'     working
+    '-'
 ```
 
 Zero upkeep: nothing to feed, nothing dies. The creature suffers in the moment
@@ -34,10 +34,11 @@ option on every later start.
 
 ## How it reacts
 
-The sprite appears in the sidebar footer of a session and under the prompt on
-the home screen. Each OpenCode session has its own mood, and the sidebar shows
-the mood of the session on screen. Subagent sessions never drive the mood: their
-tools still earn XP, their prompts do not count. Activity follows the session:
+The sprite appears alone, centred, in the sidebar footer of a session, and
+beside its name and stage under the prompt on the home screen. Each OpenCode
+session has its own mood, tinting and animating the sprite to show it.
+Subagent sessions never drive it: their tools still earn XP, their prompts do
+not count. Activity follows the session:
 
 | Activity   | Triggered by                                   | Ends                                  |
 | ---------- | ---------------------------------------------- | ------------------------------------- |
@@ -55,15 +56,20 @@ The 3 s and 120 s above are those of a median sheet. Each creature has its
 own: a sensitive one stays hurt longer, an energetic one stays awake longer
 and animates faster. See "Who it is".
 
-Colors come from the active OpenCode theme: accent by default, `error` when
-hurt, `warning` when waiting, `textMuted` when asleep.
+Colors come from the species' own palette, one colour per role (outline,
+primary, secondary, accent, eyes), in a dark and a light variant chosen by
+the OpenCode theme's mode. Idle, thinking and working leave it untouched;
+waiting, hurt and asleep tint it 45 % toward the theme's `warning`, `error`
+and `textMuted`. The trait mark, the draw badge and the pet's heart always use
+the theme's `success`, `warning` and `error`, whatever the species.
 
 ## How it talks
 
 A three-line bubble appears above the sprite in the sidebar for about five
-seconds when something notable happens in the session on screen. Phrases are
-local templates: no model, no network, and nothing read from prompts,
-messages, todo texts or diffs, only their counts.
+seconds when something notable happens in the session on screen, its tail
+always pointing down at the head rather than at the sidebar's own centre.
+Phrases are local templates: no model, no network, and nothing read from
+prompts, messages, todo texts or diffs, only their counts.
 
 | Cue          | When                                          |
 | ------------ | --------------------------------------------- |
@@ -116,25 +122,25 @@ whatever the creature is called; its Name only appears in their descriptions:
 | ----------------- | ------------------------------------------------------------------------------------------------- |
 | `toggle bubbles`  | mutes and unmutes; the choice is remembered across launches                                       |
 | `show card`       | opens a dialog with the sprite, species and rarity, stage, XP, age, character, stats and bar      |
-| `pet`             | the sprite wears a `♥` and its temperament's eyes for 2 s                                         |
+| `pet`             | the sprite wears a heart and its temperament's eyes for 2 s                                       |
 | `rename`          | asks for a new name, 16 characters at most; empty keeps the old                                   |
 | `hatch a new egg` | lays a fresh egg once every creature on the machine is `elder`                                    |
 | `roster`          | lists every creature of this machine with its card; Enter on a resting one brings it to the front |
 | `choose a trait`  | keeps one trait from the pending draw, if one is offered                                          |
 | `language`        | picks English or French, each named in its own language; the choice is remembered across launches |
 
-Petting counts nothing and changes nothing in the career. The heart is the
-only non-ASCII character in a sprite: it takes one column in most terminals,
-two in a few, where the top line overflows by one column while it shows.
+Petting counts nothing and changes nothing in the career. The heart is drawn
+the same way as the rest of the sprite: pixels, not a character, so nothing
+about it depends on the terminal's own column widths.
 
 At a milestone, today one per stage from `hatchling` on, the creature offers a
 draw of up to three traits and `choose a trait` keeps one; its description
-says how many choices are waiting, and a `★` after the Name is the same
-reminder in the sidebar and on the home screen. Like the heart, the badge
-takes one column in most terminals and two in a few. A trait is never a
-penalty: each one marks the sprite with a character, and either speaks cues the
-creature already had, so the species and the temperament stay quiet there, or
-opens a cue nothing else can speak. Traits held show on the card.
+says how many choices are waiting, and a small badge pulses in the sprite's
+top-right corner as the same reminder, in the sidebar and on the home screen.
+A trait is never a penalty: each one marks the sprite's top-left corner with
+its own pattern, and either speaks cues the creature already had, so the
+species and the temperament stay quiet there, or opens a cue nothing else can
+speak. Traits held show on the card.
 
 ## What it is
 
@@ -152,7 +158,7 @@ with the career. Twenty species, by rarity:
 The egg looks the same for every species; the creature shows at
 `hatchling`, with a toast and a bubble. A species never changes: the only way
 to meet another one is a new egg. Two eggs may hatch the same species: the
-draw has no memory. Each species lives whole, body and signature, in
+draw has no memory. Each species lives whole, maps, palette and signature, in
 `core/creature/species/<rarity>.ts`.
 
 | Rarity      | First egg | After one common elder | Cap    | Pace |
