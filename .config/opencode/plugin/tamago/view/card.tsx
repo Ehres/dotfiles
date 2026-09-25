@@ -24,7 +24,15 @@ export function CardBody(props: { tamago: Tamago; clock: number; heart: boolean;
   return (
     <box flexDirection="column" gap={1}>
       <box flexDirection="row" gap={2}>
-        <Sprite tamago={props.tamago} activity="idle" clock={props.clock} heart={props.heart} color={theme.current.accent} />
+        <Sprite
+          tamago={props.tamago}
+          activity="idle"
+          clock={props.clock}
+          heart={props.heart}
+          variant={theme.mode()}
+          theme={theme.current}
+          badge={props.tamago.choices.length > 0}
+        />
         <box flexDirection="column" justifyContent="center">
           <text fg={theme.current.textMuted}>{speciesLine(props.tamago, language())}</text>
           <text fg={theme.current.textMuted}>

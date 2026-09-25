@@ -2,8 +2,8 @@
 import { testRender, type JSX } from "@opentui/solid";
 
 export type Size = { width: number; height: number };
-/** Wide enough for the sidebar footer line, tall enough for a Bubble above the sprite. */
-export const SIDEBAR: Size = { width: 44, height: 14 };
+/** The real sidebar, measured 2026-09-25: tall enough for a Bubble above the centred sprite. */
+export const SIDEBAR: Size = { width: 37, height: 18 };
 export const DIALOG: Size = { width: 60, height: 20 };
 /** The home_bottom slot spans the terminal: wide enough for the 20-cell xp bar and its caption beside the sprite. */
 export const HOME: Size = { width: 80, height: 10 };

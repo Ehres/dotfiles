@@ -15,7 +15,15 @@ export function HomeView(props: { name: string; tamago: Tamago; clock: number; h
 
   return (
     <box paddingTop={1}>
-      <Portrait tamago={props.tamago} activity="idle" clock={props.clock} heart={props.heart} color={theme.current.accent}>
+      <Portrait
+        tamago={props.tamago}
+        activity="idle"
+        clock={props.clock}
+        heart={props.heart}
+        variant={theme.mode()}
+        theme={theme.current}
+        badge={props.tamago.choices.length > 0}
+      >
         <text fg={theme.current.text}>
           <b>{props.name}</b>
           <Show when={props.tamago.choices.length > 0}>

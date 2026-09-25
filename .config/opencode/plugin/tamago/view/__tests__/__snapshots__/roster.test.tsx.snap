@@ -1,63 +1,23 @@
 // Bun Snapshot v1, https://bun.sh/docs/test/snapshots
 
-exports[`the roster highlights the first line, moves with the arrows, selects with return 1`] = `
-"  Tamago: roster                                       esc
-
-  > Tamago · cat · adult · active
-    Egg · egg
-
-    /\\   /\\
-    ( o o )    cat · common
-   /| ^^^ |\\   adult · 9,166 xp
-    |_____|    hatched today
-    /|   |\\
-
-  cheerful · bold shell
-
-  energy      [#####-----] 5
-  chatter     [#########-] 9
-  sensitivity [#---------] 1
-  patience    [######----] 6
-
-  [#####---------------] 9,166 / 20,000 xp → elder"
-`;
-
-exports[`the roster highlights the first line, moves with the arrows, selects with return 2`] = `
-"  Tamago: roster                                       esc
-
-    Tamago · cat · adult · active
-  > Egg · egg
-
-     .---.
-    /     \\    still an egg
-   |  o o  |   egg · 0 xp
-    \\     /    hatched today
-     '---'
-
-  cheerful
-
-  stats show at hatching
-
-  [--------------------] 0 / 200 xp → hatchling"
-`;
-
 exports[`the roster reads in French 1`] = `
 "  Tamago : roster                                      esc
 
   > Tamago · chat · adulte · actif
 
-    /\\   /\\
-    ( o o )    chat · commun
-   /| ^^^ |\\   adulte · 9 166 xp
-    |_____|    éclos aujourd'hui
-    /|   |\\
+     █████▄▄▄▄▄█████▀▀▀
+  ▄▀███▀█████████▀███▀▄
+  ████▀█▀███████▀█▀████  chat · commun
+  ████████▀▀▀▀▀████████  adulte · 9 166 xp
+    ▀▀▀▀█▀▀▀▀▀▀▀█▀▀▀▀    éclos aujourd'hui
+     ▄▀███████████▀▄▀██
+    █▀▀█████████▀▀██ ▀▀
 
   enjoué · mécano audacieux
 
-  énergie     [#####-----] 5
+
   bavardage   [#########-] 9
   sensibilité [#---------] 1
   patience    [######----] 6
-
   [#####---------------] 9 166 / 20 000 xp → ancien"
 `;

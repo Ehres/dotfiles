@@ -1,62 +1,70 @@
 // Bun Snapshot v1, https://bun.sh/docs/test/snapshots
 
-exports[`idle adult: sprite, name, stage and xp, mood, footer 1`] = `
-"  /\\   /\\
-  ( o o )    Tamago ★
- /| ^^^ |\\   adult · 9,166 xp
-  |_____|    chilling
-  /|   |\\
+exports[`idle adult: the creature and the footer 1`] = `
+"           ▄▀▀▄       ▄▀▀▄█▀█
+           █████▄▄▄▄▄█████▀▀▀
+        ▄▀███▀█████████▀███▀▄
+        ████▀█▀███████▀█▀████
+        █████████▀▀▀█████████
+         ███████▀▀▀▀▀███████
+          ▀▀▀▀█▀▀▀▀▀▀▀█▀▀▀▀
+           ▄▀███████████▀▄▀██
+          ████████████████ ▀▀
+          █▀▀█       █▀▀█
 
 ~/projects/dotfiles:master
 
 • OpenCode 1.18.31"
 `;
 
-exports[`idle adult reads in French: mood and grouped xp 1`] = `
-"  /\\   /\\
-  ( o o )    Tamago ★
- /| ^^^ |\\   adulte · 9 166 xp
-  |_____|    tranquille
-  /|   |\\
+exports[`hurt egg: draws the egg, no mood or xp text, and the footer 1`] = `
+"               ▄█▀▀▄▄▄
+             ▄▀███████▀▄
+            ▄▀█████████▀▄
+            ██▀▀▀▀▀█▀▀▀██
+            ██▀█▀▀▀█▀▀▀██
+            ████████▀▀▀██
+            █████████████
+            █████████████
+             ███████████
+              ▀▀▀▀▀▀▀▀▀
 
 ~/projects/dotfiles:master
 
 • OpenCode 1.18.31"
 `;
 
-exports[`hurt egg says ouch and draws the egg 1`] = `
-"   .---.  *
-  /     \\    Egg
- |  x x  |   egg · 0 xp
-  \\     /    ouch
-   '---'
+exports[`a Bubble sits above the sprite; petting changes the drawn sprite 1`] = `
+"              .------.
+             ( May I? )
+              '---o--'
+           ▄▀▀▄  ▄ ▄  ▄▀▀▄█▀█
+           ███████████████▀▀▀
+        ▄▀██▀█▀██▀█▀██▀█▀██▀▄
+        █████▀█████████▀█████
+        █████████▀▀▀█████████
+         ███████▀▀▀▀▀███████
+          ▀▀▀▀█▀▀▀▀▀▀▀█▀▀▀▀
+           ▄▀███████████▀▄▀██
+          ████████████████ ▀▀
+          █▀▀█       █▀▀█
 
 ~/projects/dotfiles:master
 
 • OpenCode 1.18.31"
 `;
 
-exports[`a Bubble sits above the sprite, the heart replaces the eyes 1`] = `
-" .------.
-( May I? )
- '---o--'
-  /\\   /\\ ♥
-  ( ^ ^ )    Tamago ★
- /| ^^^ |\\   adult · 9,166 xp
-  |_____|    needs you
-  /|   |\\
-
-~/projects/dotfiles:master
-
-• OpenCode 1.18.31"
-`;
-
-exports[`a pending Draw puts a badge after the name; none without one 1`] = `
-"  \\|/ \\|/
-  ( o o )    Tamago ★
- /|~^^^~|\\   elder · 108,866 xp
-  |_____|    chilling
-  /|   |\\
+exports[`a pending Draw changes the drawn sprite; none without one 1`] = `
+"           ███▀▄     ▄▀████▀█
+           ██████▄▄▄██████▀▀▀
+        ▄▀███▀█████████▀███▀▄
+        ████▀█▀███████▀█▀████
+        ▀████████▀▀▀████████▀
+         ███████▀▀▀▀▀███████
+          ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+           ▄▀███████████▀▄▀██
+          ██████████████▀▄▀▀█
+          █▀▀█       █▀▀█
 
 ~/projects/dotfiles:master
 
