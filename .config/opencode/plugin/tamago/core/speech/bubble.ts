@@ -1,5 +1,3 @@
-import { SPRITE_WIDTH } from "../appearance/pixels.ts";
-
 /** Longest phrase a Bubble may hold, so it never wraps in a narrow sidebar. */
 export const MAX_TEXT = 24;
 /**
@@ -8,6 +6,13 @@ export const MAX_TEXT = 24;
  * up under the Sprite's own head.
  */
 export const TAIL_COLUMN = 5;
+
+/**
+ * Column the tail aims at: where the migrated maps put the head (old column 10
+ * plus the re-framing offset of 5). Task 4 replaces this with the Body's own
+ * `head` anchor, which is the whole reason a Species declares one.
+ */
+export const HEAD_COLUMN = 15;
 
 /**
  * Top and bottom borders of a bubble around `text`. Both are one column
@@ -34,10 +39,10 @@ export function bubbleFrame(text: string): readonly string[] {
 
 /**
  * How far from the Sprite's own left edge a Bubble starts, so its tail lands on the head. Never
- * negative in practice: the tail sits at column 5 at most (TAIL_COLUMN) and the head is at column
- * 10 (`Math.floor(SPRITE_WIDTH / 2)`), so no text length ever pushes the Bubble past the left edge.
+ * negative in practice: the tail sits at column 5 at most (TAIL_COLUMN) and the head is at
+ * HEAD_COLUMN, so no text length ever pushes the Bubble past the left edge.
  */
 export function tailOffset(text: string): number {
   const { bottom } = bubbleBorders(text);
-  return Math.floor(SPRITE_WIDTH / 2) - bottom.indexOf("o");
+  return HEAD_COLUMN - bottom.indexOf("o");
 }

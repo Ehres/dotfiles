@@ -11,13 +11,13 @@ function blank(): string[] {
   return filled(".");
 }
 
-test("the grid is 21 cells wide, 10 cells tall, 20 pixels tall", () => {
-  assert.equal(SPRITE_WIDTH, 21);
-  assert.equal(SPRITE_HEIGHT, 10);
-  assert.equal(PIXEL_HEIGHT, 20);
+test("the grid is 32 cells wide, 16 cells tall, 32 pixels tall", () => {
+  assert.equal(SPRITE_WIDTH, 32);
+  assert.equal(SPRITE_HEIGHT, 16);
+  assert.equal(PIXEL_HEIGHT, 32);
 });
 
-test("pack turns 20 pixel rows into 10 cell rows of 21 cells", () => {
+test("pack turns 32 pixel rows into 16 cell rows of 32 cells", () => {
   const frame = pack(filled("a"));
   assert.equal(frame.length, SPRITE_HEIGHT);
   for (const row of frame) assert.equal(row.length, SPRITE_WIDTH);
@@ -54,8 +54,8 @@ test("a character outside the alphabet throws, naming the row and column", () =>
 });
 
 test("a map of the wrong height or width throws", () => {
-  assert.throws(() => pack(filled("a").slice(0, 19)), /20 rows/);
-  assert.throws(() => pack(filled("a").map((row) => row.slice(0, 20))), /21 characters/);
+  assert.throws(() => pack(filled("a").slice(0, 31)), /32 rows/);
+  assert.throws(() => pack(filled("a").map((row) => row.slice(0, 31))), /32 characters/);
 });
 
 test("paint writes a pattern into a rectangle, '#' only", () => {
@@ -89,6 +89,6 @@ test("a pattern that does not fit its rectangle throws", () => {
 });
 
 test("a rectangle that leaves the map throws", () => {
-  assert.throws(() => paint(blank(), { x: 19, y: 0, w: 3, h: 1 }, ["###"], "eye"), /outside the map/);
-  assert.throws(() => paint(blank(), { x: 0, y: 19, w: 1, h: 3 }, ["#", "#", "#"], "eye"), /outside the map/);
+  assert.throws(() => paint(blank(), { x: 30, y: 0, w: 3, h: 1 }, ["###"], "eye"), /outside the map/);
+  assert.throws(() => paint(blank(), { x: 0, y: 30, w: 1, h: 3 }, ["#", "#", "#"], "eye"), /outside the map/);
 });

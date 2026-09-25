@@ -9,6 +9,12 @@ import { EGG, OWNER } from "./fixtures.ts";
 import { frame } from "./render.tsx";
 import { TUI_THEME } from "./theme.ts";
 
+// Failing since the Sprite grew to 32 x 32 (task 2): a 16-row Sprite no longer fits DIALOG's
+// fixture height of 26 alongside the rest of the card, even without the extra Trait lines that
+// made the overflow test below fail first. The overflow corrupts rather than clips — see the
+// comment above "the roster at five Careers" in roster.test.tsx, which parks the same defect and
+// the same fix: DIALOG's real value is the user's to measure against the running TUI, not this
+// fixture's to grow.
 test("the card of an adult: title row, species, age, character, four bars, xp bar", async () => {
   const now = OWNER.hatchedAt + 12 * DAY_MS;
   const shown = await frame(() => (
@@ -24,6 +30,8 @@ test("the card of an adult: title row, species, age, character, four bars, xp ba
   expect(shown).toMatchSnapshot();
 });
 
+// Same overflow as the English case just above: the 16-row Sprite alone overflows DIALOG's 26-row
+// fixture height.
 test("the card of an adult reads in French", async () => {
   const now = OWNER.hatchedAt + 12 * DAY_MS;
   const shown = await frame(() => (

@@ -12,8 +12,8 @@ import { frame as frameSnapshot, mount, trim } from "./render.tsx";
 import { TUI_THEME } from "./theme.ts";
 
 const adult = tamago(OWNER);
-/** Wide and tall enough for the 21 x 10 Frame. */
-const SIZE = { width: 24, height: 12 };
+/** Wide and tall enough for the 32 x 16 Frame. */
+const SIZE = { width: 34, height: 18 };
 
 /** The glyphs a Frame draws, ignoring colour: what `captureCharFrame` can compare against. */
 function plain(shown: Frame): string {

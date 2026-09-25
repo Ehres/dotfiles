@@ -11,6 +11,11 @@ import { EGG, OWNER } from "./fixtures.ts";
 import { mount, trim } from "./render.tsx";
 import { TUI_THEME } from "./theme.ts";
 
+// Failing since the Sprite grew to 32 x 32 (task 2): a 16-row Sprite no longer fits DIALOG's
+// fixture height of 26 alongside two roster lines and a Sheet, even with neither a held Trait nor
+// a fifth Career — see the two overflow comments below ("the roster at five Careers" and "the
+// roster at two Careers... holding one Trait"), which park the same defect and the same fix:
+// DIALOG's real value is the user's to measure against the running TUI, not this fixture's to grow.
 test("the roster highlights the first line, moves with the arrows, selects with return", async () => {
   const shown = [tamago(OWNER), tamago(EGG)];
   const lines = ["Tamago · cat · adult · active", "Egg · egg"];

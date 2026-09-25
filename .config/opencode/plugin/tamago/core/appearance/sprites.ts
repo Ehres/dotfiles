@@ -14,30 +14,42 @@ export { PIXEL_HEIGHT, SPRITE_HEIGHT, SPRITE_WIDTH, type Cell, type Frame, type 
 /** The egg every Species hatches from: what is inside only shows at hatchling. */
 const EGG: Body = {
   pixels: [
-    "........ooo..........",
-    ".......ooaaaoo.......",
-    "......oaaaaaaao......",
-    ".....oaaaaaaaaao.....",
-    ".....oaaaaaaaaao.....",
-    "....oaaaaaaaaaaao....",
-    "....oaaaaaaaaaaao....",
-    "....oaaabbbaaaaao....",
-    "....oaaabbbaaaaao....",
-    "....oaaaaaaabbbao....",
-    "....oaaaaaaabbbao....",
-    "....oaaaaaaaaaaao....",
-    "....oaaabbbaaaaao....",
-    "....oaaabbbaaaaao....",
-    "....oaaaaaaaaaaao....",
-    "....oaaaaaaaaaaao....",
-    ".....oaaaaaaaaao.....",
-    ".....oaaaaaaaaao.....",
-    "......oaaaaaaao......",
-    ".......ooooooo.......",
+    "................................",
+    "................................",
+    "................................",
+    "................................",
+    "................................",
+    "................................",
+    "................................",
+    "................................",
+    "................................",
+    "................................",
+    "................................",
+    "................................",
+    ".............ooo................",
+    "............ooaaaoo.............",
+    "...........oaaaaaaao............",
+    "..........oaaaaaaaaao...........",
+    "..........oaaaaaaaaao...........",
+    ".........oaaaaaaaaaaao..........",
+    ".........oaaaaaaaaaaao..........",
+    ".........oaaabbbaaaaao..........",
+    ".........oaaabbbaaaaao..........",
+    ".........oaaaaaaabbbao..........",
+    ".........oaaaaaaabbbao..........",
+    ".........oaaaaaaaaaaao..........",
+    ".........oaaabbbaaaaao..........",
+    ".........oaaabbbaaaaao..........",
+    ".........oaaaaaaaaaaao..........",
+    ".........oaaaaaaaaaaao..........",
+    "..........oaaaaaaaaao...........",
+    "..........oaaaaaaaaao...........",
+    "...........oaaaaaaao............",
+    "............ooooooo.............",
   ],
   eyes: [
-    { x: 6, y: 6, w: 3, h: 3 },
-    { x: 12, y: 6, w: 3, h: 3 },
+    { x: 11, y: 18, w: 3, h: 3 },
+    { x: 17, y: 18, w: 3, h: 3 },
   ],
 };
 
@@ -65,7 +77,7 @@ export const EYES: Record<Temperament, Pattern> = {
 export const PET_MS = 2_000;
 /** The heart drawn over the head while petted. Pixels now, not a character. */
 const HEART: Pattern = [".#.#.", "#####", "#####", ".###.", "..#.."];
-const HEART_AT = { x: 8, y: 1, w: 5, h: 5 };
+const HEART_AT = { x: 13, y: 13, w: 5, h: 5 };
 
 /** The body to draw: the common egg, else the Species' map, else the reference's. */
 function body(species: SpeciesId, stage: StageId): Body {

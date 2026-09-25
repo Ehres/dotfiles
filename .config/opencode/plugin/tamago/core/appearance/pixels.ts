@@ -1,6 +1,6 @@
 /** Cells across, and cells down. A cell is one pixel wide and two pixels tall. */
-export const SPRITE_WIDTH = 21;
-export const SPRITE_HEIGHT = 10;
+export const SPRITE_WIDTH = 32;
+export const SPRITE_HEIGHT = 16;
 /** Pixels down: two per cell. A cell being twice as tall as it is wide, these pixels are square on screen. */
 export const PIXEL_HEIGHT = SPRITE_HEIGHT * 2;
 
