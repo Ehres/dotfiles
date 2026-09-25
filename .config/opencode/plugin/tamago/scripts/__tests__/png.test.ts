@@ -140,3 +140,82 @@ test("an unrecognised filter byte is refused by name, with the row", () => {
   const bytes = buildPng({ width: 1, height: 1, colourType: 6, raw: [5, 0, 0, 0, 0] });
   assert.throws(() => decodePng(bytes), /filter 5/);
 });
+
+test("defilters Up: every byte predicts from the byte directly above, never the one beside it", () => {
+  // Row 0 (filter None): pixel (10,20,30,40) then (50,60,70,80).
+  // Row 1 (filter Up): a flat +2 on the first pixel's channels and +5 on the second's reconstructs
+  // to (12,22,32,42) then (55,65,75,85) — a and c play no part, so a bug that folded Up into Sub or
+  // Average would still pass the Paeth and Sub tests above but fail here.
+  const raw = [0, 10, 20, 30, 40, 50, 60, 70, 80, 2, 2, 2, 2, 2, 5, 5, 5, 5];
+  const image = decodePng(buildPng({ width: 2, height: 2, colourType: 6, raw }));
+  assert.deepEqual([...image.pixels.slice(8, 12)], [12, 22, 32, 42]);
+  assert.deepEqual([...image.pixels.slice(12, 16)], [55, 65, 75, 85]);
+});
+
+test("defilters Average: the floor of the left and above neighbours, not either alone", () => {
+  // Colour type 2 (RGB, 3 channels). Row 0 (filter None): pixel (10,20,30) then (50,60,70).
+  // Row 1 (filter Average): the first pixel has no left neighbour, so its predictor is above/2 —
+  // (10,20,30)/2 floored to (5,10,15) — reconstructing (14,24,34) from filtered (9,14,19). The
+  // second pixel's predictor mixes its own left neighbour with the byte above it: floor((14+50)/2)
+  // = 32, floor((24+60)/2) = 42, floor((34+70)/2) = 52, reconstructing (40,50,60) from (8,8,8).
+  const raw = [0, 10, 20, 30, 50, 60, 70, 3, 9, 14, 19, 8, 8, 8];
+  const image = decodePng(buildPng({ width: 2, height: 2, colourType: 2, raw }));
+  assert.deepEqual([...image.pixels.slice(8, 12)], [14, 24, 34, 255]);
+  assert.deepEqual([...image.pixels.slice(12, 16)], [40, 50, 60, 255]);
+});
+
+test("Paeth predicts the left neighbour when it, not the one above or the diagonal, is closest", () => {
+  // Colour type 3 (palette, 1 channel a pixel) makes the neighbours line up with pixels directly:
+  // a = the pixel to the left, b = above, c = above-left. paeth(a=0, b=3, c=6) picks `a` — verified
+  // by search over the predictor's own formula, not asserted from the implementation under test.
+  // Row 0 (filter None): indices 6, 3. Row 1 (filter Paeth): index 0 (from a flat-left predictor
+  // of b=6, since a=c=0 at the row's own left edge), then a filtered byte of 9 lands on index 9
+  // only if the predictor at that column really is `a` (0) — landing on 12 or 15 would mean the
+  // decoder used `b` (3) or `c` (6) instead.
+  const raw = [0, 6, 3, 4, 250, 9];
+  const plte = Array.from({ length: 10 }, (_, n) => [n, n, n]).flat();
+  const image = decodePng(buildPng({ width: 2, height: 2, colourType: 3, raw, plte }));
+  assert.deepEqual([...image.pixels.slice(0, 4)], [6, 6, 6, 255]);
+  assert.deepEqual([...image.pixels.slice(4, 8)], [3, 3, 3, 255]);
+  assert.deepEqual([...image.pixels.slice(8, 12)], [0, 0, 0, 255]);
+  assert.deepEqual([...image.pixels.slice(12, 16)], [9, 9, 9, 255]);
+});
+
+test("Paeth predicts the diagonal when it, not the one above or beside, is closest", () => {
+  // paeth(a=0, b=10, c=5) picks `c` — again verified against the predictor's own formula. Row 0
+  // (filter None): indices 5, 10. Row 1 (filter Paeth): index 0, then a filtered byte of 15 lands
+  // on index 20 only if the predictor really is `c` (5) — landing on 25 or 15 would mean the
+  // decoder used `b` (10) or `a` (0) instead.
+  const raw = [0, 5, 10, 4, 251, 15];
+  const plte = Array.from({ length: 21 }, (_, n) => [n, n, n]).flat();
+  const image = decodePng(buildPng({ width: 2, height: 2, colourType: 3, raw, plte }));
+  assert.deepEqual([...image.pixels.slice(0, 4)], [5, 5, 5, 255]);
+  assert.deepEqual([...image.pixels.slice(4, 8)], [10, 10, 10, 255]);
+  assert.deepEqual([...image.pixels.slice(8, 12)], [0, 0, 0, 255]);
+  assert.deepEqual([...image.pixels.slice(12, 16)], [20, 20, 20, 255]);
+});
+
+test("a single IDAT chunk large enough for a real sprite does not overflow the call stack", () => {
+  // Poorly-compressible pixel data (not a flat colour), sized like a genuine hand-drawn sprite: a
+  // 160 x 160 image of this pattern decodes today, a 192 x 192 one overflows the stack when the
+  // decoder spreads a chunk's bytes into a call — so this regression test sits comfortably past
+  // that line rather than near it.
+  const rgba = (x: number, y: number): readonly [number, number, number, number] => [(x * 7 + y * 13) % 256, (x * 3 + y * 5) % 256, (x * 11 + y) % 256, 255];
+  const image = decodePng(png(256, 256, rgba));
+  assert.equal(image.width, 256);
+  assert.equal(image.height, 256);
+  const [r, g, b, a] = rgba(200, 130);
+  const at = (200 + 130 * 256) * 4;
+  assert.deepEqual([...image.pixels.slice(at, at + 4)], [r, g, b, a]);
+});
+
+test("a decompressed row shorter than the header promises is refused by name, not zero-filled", () => {
+  // A 2 x 2 RGBA image needs two 9-byte rows (18 bytes); this IDAT only supplies one.
+  const bytes = buildPng({ width: 2, height: 2, colourType: 6, raw: [0, 10, 20, 30, 40, 50, 60, 70, 80] });
+  assert.throws(() => decodePng(bytes), /9 bytes.*needs 18/);
+});
+
+test("a palette index past the end of PLTE is refused by name, not decoded as black", () => {
+  const bytes = buildPng({ width: 1, height: 1, colourType: 3, raw: [0, 2], plte: [10, 20, 30] });
+  assert.throws(() => decodePng(bytes), /index 2 has no entry in a 1-entry PLTE/);
+});

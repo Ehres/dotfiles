@@ -2,7 +2,7 @@
 import { readFileSync } from "node:fs";
 import { MAP_ALPHABET, PIXEL_HEIGHT, SPRITE_WIDTH } from "../core/appearance/pixels.ts";
 import { PALETTE_MAX } from "../core/appearance/palette.ts";
-import { decodePng, type Image } from "./png.ts";
+import { decodePng, Refusal, type Image } from "./png.ts";
 
 /** Alpha is a cut, not a blend: under 128 the pixel is transparent, at or above it takes its RGB. */
 const OPAQUE = 128;
@@ -13,17 +13,35 @@ function colourAt(image: Image, i: number): string | undefined {
   return `#${hex(image.pixels[i * 4] ?? 0)}${hex(image.pixels[i * 4 + 1] ?? 0)}${hex(image.pixels[i * 4 + 2] ?? 0)}`;
 }
 
+/**
+ * Ranks colours by descending pixel count (ties by hex) and writes the
+ * ceiling refusal's body: which colours are there, how many pixels each
+ * holds, and what to do about it. Printed, not thrown blind, because a
+ * person staring at "32 colours" over a hand-drawn image has no way to tell
+ * a real 32-colour drawing from sixteen colours each anti-aliased into two —
+ * the counts make that visible at a glance.
+ */
+function ceilingMessage(counts: Map<string, number>): string {
+  const ranked = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  const lines = ranked.map(([colour, count]) => `  ${colour} x${count}`);
+  return [
+    `the image holds ${counts.size} colours, the ceiling is ${PALETTE_MAX}:`,
+    ...lines,
+    `reduce the image to ${PALETTE_MAX} colours or fewer in the editor — for instance, export with an indexed palette.`,
+  ].join("\n");
+}
+
 /** The map and the Palette an image becomes: colours ordered by descending pixel count, ties by hex. */
 export function toMap(image: Image, size: { width: number; height: number }): { pixels: string[]; palette: string[] } {
   if (image.width !== size.width || image.height !== size.height) {
-    throw new Error(`the image is ${image.width} x ${image.height}, expected ${size.width} x ${size.height}`);
+    throw new Refusal(`the image is ${image.width} x ${image.height}, expected ${size.width} x ${size.height}`);
   }
   const counts = new Map<string, number>();
   for (let i = 0; i < image.width * image.height; i++) {
     const colour = colourAt(image, i);
     if (colour !== undefined) counts.set(colour, (counts.get(colour) ?? 0) + 1);
   }
-  if (counts.size > PALETTE_MAX) throw new Error(`the image holds ${counts.size} colours, the ceiling is ${PALETTE_MAX}`);
+  if (counts.size > PALETTE_MAX) throw new Refusal(ceilingMessage(counts));
   const palette = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([colour]) => colour);
   const pixels: string[] = [];
   for (let y = 0; y < image.height; y++) {
@@ -37,28 +55,57 @@ export function toMap(image: Image, size: { width: number; height: number }): { 
   return { pixels, palette };
 }
 
+/** The two blocks exactly as pasted into a Species file. The only thing this tool writes to stdout, so piping it (to `pbcopy`, say) carries nothing else. */
+export function formatBlocks(map: { pixels: string[]; palette: string[] }): string {
+  const paletteLine = `palette: [${map.palette.map((colour) => `"${colour}"`).join(", ")}],`;
+  const pixelLines = map.pixels.map((row) => `  "${row}",`);
+  return [paletteLine, "pixels: [", ...pixelLines, "],"].join("\n");
+}
+
+/** The colour count, and a warning once the ceiling is reached. Reported, never pasted, so it belongs on stderr, not folded into formatBlocks. */
+export function formatSummary(colours: number): { count: string; warning: string | undefined } {
+  const count = `${colours} colour${colours === 1 ? "" : "s"}`;
+  const warning =
+    colours === PALETTE_MAX ? `warning: reached the ceiling of ${PALETTE_MAX} colours — the Species can hold no more` : undefined;
+  return { count, warning };
+}
+
+/** `--patch <anchor>` may land anywhere in argv; whatever is left is the path. */
+export function parseArgs(argv: readonly string[]): { path: string | undefined; anchor: string | undefined } {
+  const patchAt = argv.indexOf("--patch");
+  if (patchAt === -1) return { path: argv[0], anchor: undefined };
+  const anchor = argv[patchAt + 1];
+  if (anchor === undefined) throw new Refusal("--patch requires an anchor name");
+  const rest = argv.filter((_, i) => i !== patchAt && i !== patchAt + 1);
+  return { path: rest[0], anchor };
+}
+
 function main(): void {
-  const args = process.argv.slice(2);
-  const path = args[0];
+  const { path, anchor } = parseArgs(process.argv.slice(2));
   if (path === undefined) {
     console.error("usage: node scripts/import.ts <path-to-png> [--patch <anchor>]");
     process.exit(1);
   }
-  const patchAt = args.indexOf("--patch");
-  const anchor = patchAt === -1 ? undefined : args[patchAt + 1];
-  if (patchAt !== -1 && anchor === undefined) throw new Error("--patch requires an anchor name");
 
   const image = decodePng(Uint8Array.from(readFileSync(path)));
   const size = anchor === undefined ? { width: SPRITE_WIDTH, height: PIXEL_HEIGHT } : { width: image.width, height: image.height };
-  const { pixels, palette } = toMap(image, size);
+  const map = toMap(image, size);
 
   if (anchor !== undefined) console.log(`// patch: ${anchor} (${image.width} x ${image.height})`);
-  console.log(`palette: [${palette.map((colour) => `"${colour}"`).join(", ")}],`);
-  console.log("pixels: [");
-  for (const row of pixels) console.log(`  "${row}",`);
-  console.log("],");
-  console.log(`\n${palette.length} colour${palette.length === 1 ? "" : "s"}`);
-  if (palette.length === PALETTE_MAX) console.warn(`warning: reached the ceiling of ${PALETTE_MAX} colours — the Species can hold no more`);
+  console.log(formatBlocks(map));
+  const { count, warning } = formatSummary(map.palette.length);
+  console.error(`\n${count}`);
+  if (warning !== undefined) console.error(warning);
 }
 
-if (import.meta.main) main();
+if (import.meta.main) {
+  try {
+    main();
+  } catch (error) {
+    if (error instanceof Refusal) {
+      process.stderr.write(`${error.message}\n`);
+      process.exit(1);
+    }
+    throw error;
+  }
+}

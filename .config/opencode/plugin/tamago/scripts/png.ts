@@ -2,6 +2,15 @@ import { inflateSync } from "node:zlib";
 
 export type Image = { width: number; height: number; pixels: Uint8Array };
 
+/**
+ * A file or argument this tool intentionally does not read — the wrong size,
+ * too many colours, a PNG feature this decoder does not cover — as opposed to
+ * a bug in the tool itself. The CLI entry point in import.ts prints a
+ * Refusal's message alone; anything else keeps its stack, because that one
+ * was not supposed to happen.
+ */
+export class Refusal extends Error {}
+
 const SIGNATURE = [137, 80, 78, 71, 13, 10, 26, 10];
 
 function u32(bytes: Uint8Array, at: number): number {
@@ -25,7 +34,7 @@ function paeth(a: number, b: number, c: number): number {
  */
 export function decodePng(bytes: Uint8Array): Image {
   for (const [i, byte] of SIGNATURE.entries()) {
-    if (bytes[i] !== byte) throw new Error("not a PNG: the signature does not match");
+    if (bytes[i] !== byte) throw new Refusal("not a PNG: the signature does not match");
   }
   let at = 8;
   let width = 0;
@@ -35,7 +44,10 @@ export function decodePng(bytes: Uint8Array): Image {
   let interlace = 0;
   let plte: Uint8Array | undefined;
   let trns: Uint8Array | undefined;
-  const idat: number[] = [];
+  // Chunks are collected as buffers, not spread into an array: a real sprite's IDAT can run to
+  // tens of thousands of bytes, and Buffer.from(...idat) passes every byte as a call argument —
+  // past a couple hundred, that alone blows the call stack before any real work starts.
+  const idatChunks: Uint8Array[] = [];
   while (at + 8 <= bytes.length) {
     const length = u32(bytes, at);
     const type = String.fromCharCode(...bytes.slice(at + 4, at + 8));
@@ -49,20 +61,24 @@ export function decodePng(bytes: Uint8Array): Image {
       interlace = body[12] ?? 0;
     } else if (type === "PLTE") plte = body;
     else if (type === "tRNS") trns = body;
-    else if (type === "IDAT") idat.push(...body);
+    else if (type === "IDAT") idatChunks.push(body);
     else if (type === "IEND") break;
   }
-  if (depth !== 8) throw new Error(`this decoder reads 8 bits a channel, this PNG has ${depth}`);
-  if (interlace !== 0) throw new Error("this decoder does not read interlaced PNGs");
+  if (depth !== 8) throw new Refusal(`this decoder reads 8 bits a channel, this PNG has ${depth}`);
+  if (interlace !== 0) throw new Refusal("this decoder does not read interlaced PNGs");
   const channels = colour === 6 ? 4 : colour === 2 ? 3 : colour === 3 ? 1 : 0;
-  if (channels === 0) throw new Error(`this decoder reads colour types 2, 3 and 6, this PNG is type ${colour}`);
-  if (colour === 3 && plte === undefined) throw new Error("a palette PNG (colour type 3) with no PLTE chunk");
-  const raw = new Uint8Array(inflateSync(Buffer.from(idat)));
+  if (channels === 0) throw new Refusal(`this decoder reads colour types 2, 3 and 6, this PNG is type ${colour}`);
+  if (colour === 3 && plte === undefined) throw new Refusal("a palette PNG (colour type 3) with no PLTE chunk");
+  const raw = new Uint8Array(inflateSync(Buffer.concat(idatChunks)));
   const stride = width * channels;
+  const expected = height * (stride + 1);
+  if (raw.length < expected) {
+    throw new Refusal(`the image data decompresses to ${raw.length} bytes, a ${width} x ${height} image of this kind needs ${expected}`);
+  }
   const lines = new Uint8Array(height * stride);
   for (let y = 0; y < height; y++) {
     const filter = raw[y * (stride + 1)] ?? 0;
-    if (filter > 4) throw new Error(`unknown PNG filter ${filter} on row ${y}`);
+    if (filter > 4) throw new Refusal(`unknown PNG filter ${filter} on row ${y}`);
     for (let i = 0; i < stride; i++) {
       const x = raw[y * (stride + 1) + 1 + i] ?? 0;
       const a = i >= channels ? (lines[y * stride + i - channels] ?? 0) : 0;
@@ -79,6 +95,8 @@ export function decodePng(bytes: Uint8Array): Image {
     else if (colour === 2) pixels.set([...lines.slice(i * 3, i * 3 + 3), 255], i * 4);
     else {
       const index = lines[i] ?? 0;
+      const paletteSize = plte === undefined ? 0 : Math.floor(plte.length / 3);
+      if (index >= paletteSize) throw new Refusal(`palette index ${index} has no entry in a ${paletteSize}-entry PLTE`);
       const rgb = plte === undefined ? [] : [...plte.slice(index * 3, index * 3 + 3)];
       pixels.set([rgb[0] ?? 0, rgb[1] ?? 0, rgb[2] ?? 0, trns?.[index] ?? 255], i * 4);
     }
