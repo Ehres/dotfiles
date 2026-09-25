@@ -14,7 +14,8 @@
 
 - **No runtime dependencies.** `node_modules` holds devDependencies only; nothing under `core/`, `view/`, `shell/`, `adapter/` or `scripts/` may import one.
 - **Erasable syntax only.** No `enum`, no `namespace`, no constructor parameter properties. `import type` for every type-only import, and an explicit `.ts` / `.tsx` extension on every relative import.
-- **Three gates, all three green before any commit:** `pnpm test` (core and adapter, `node --test`), `pnpm test:view` (`bun test view shell`), `./node_modules/.bin/tsc --noEmit`.
+- **Three gates before any commit:** `pnpm test` (core and adapter, `node --test`), `pnpm test:view` (`bun test view shell`), `./node_modules/.bin/tsc --noEmit`.
+- **The baseline is two tests red, on purpose.** `bun test view shell` fails `"the card at four held Traits…"` and `"the roster at two Careers…"` on this branch before any of this work: commit `4d42a8e` added them deliberately red to pin a dialog overflow whose real size "is the user's to measure against the running TUI". The gate is therefore **these two and no others** — 40 pass, 2 fail. A third failure is yours. Never make these two pass by enlarging the `DIALOG` fixture: that hides the defect they exist to record.
 - **A changed snapshot is named in the commit message.** Snapshots live in `view/__tests__/__snapshots__/`.
 - **`core/` is total and never throws at render.** A mistuned table makes the creature silent; it never kills the window's event pipeline. Validation that would throw belongs in a catalog test, not in a render path.
 - **Commit messages are Angular, lowercase, imperative, no trailing period**, scope `opencode`: `feat(opencode): …`, `refactor(opencode): …`, `test(opencode): …`, `docs(opencode): …`.
@@ -338,7 +339,9 @@ export function tailOffset(text: string): number {
 
 - [ ] **Step 8: Widen the test viewports**
 
-`view/__tests__/render.tsx`: `SIDEBAR` becomes `{ width: 37, height: 24 }` and `DIALOG` `{ width: 60, height: 32 }` — the Sprite is six rows taller and the old heights clip it. `view/__tests__/sprite.test.tsx`: `const SIZE = { width: 34, height: 18 };`.
+`view/__tests__/render.tsx`: `SIDEBAR` becomes `{ width: 37, height: 24 }` — its height is a test viewport, and a real sidebar is as tall as the terminal. `view/__tests__/sprite.test.tsx`: `const SIZE = { width: 34, height: 18 };`.
+
+**`DIALOG` stays `{ width: 60, height: 26 }`.** Do not grow it. `4d42a8e` put two tests in the suite deliberately red to pin the card and roster overflow, and recorded that the fixture's real value is the user's to measure against the running TUI rather than this fixture's to assume. A 16-row Sprite in a 26-row dialog overflows harder than a 10-row one did, and the card and roster snapshots will record that. Recording it is the point: growing the fixture would turn two honest red tests green while the real dialog stayed exactly as cramped.
 
 - [ ] **Step 9: Run the three gates and update the snapshots**
 
@@ -647,21 +650,36 @@ The span style reads `colours().of(shown.fg)` and `colours().of(shown.bg)`, omit
 
 Remove `variant={theme.mode()}` from `view/sidebar.tsx` and `view/card.tsx`, and the `variant` prop from `view/portrait.tsx`. In `view/__tests__/sprite.test.tsx`, delete the `"the theme variant is part of what a painted Sprite depends on"` test and every `variant="dark"`; update the four `glyphOf` tests to indices (`{ top: 1, bottom: 1 }` and so on).
 
-- [ ] **Step 11: Fix `scripts/preview.ts` enough to compile**
+- [ ] **Step 11: Paint the eyes with a palette index**
+
+`build` and `heartFrame` still call `paint(rows, eye, face, "eye")`, and `"eye"` is no longer an `Ink`. The eyes are drawn in the colour the migration put at index 4 — the old `Skin.eye` — so add the constant beside them and pass it:
+
+```ts
+/**
+ * Where the migration put every Species' old eye colour. Task 4 deletes this
+ * along with the engine's shared Faces: once a Species owns its expressions,
+ * an eye is drawn in whatever colours that Species chose.
+ */
+const EYE_INDEX = 4;
+```
+
+Both call sites become `paint(rows, eye, face, EYE_INDEX)`.
+
+- [ ] **Step 12: Fix `scripts/preview.ts` enough to compile**
 
 Replace the `Skin`/`Role` imports with `Palette`/`Ink` and `EGG_PALETTE`; `colorOf(ink, palette)` returns `THEME_STAND_IN[ink]` for the three painted names and `palette[ink] ?? "#ff00ff"` for an index — magenta so a missing colour is visible rather than silent. Drop the `--light` flag and the `variant` line from its output.
 
-- [ ] **Step 12: Run the three gates**
+- [ ] **Step 13: Run the three gates**
 
 Run: `pnpm test && ./node_modules/.bin/tsc --noEmit && bun test view shell`
-Expected: green, **with no snapshot update**. Snapshots capture characters, not colours, and an eye packs to the same glyph whether it was `E` or `4`. If a snapshot moves, something other than colour changed — find it before going on.
+Expected: 452 core tests pass, tsc clean, and the view suite at its baseline of 40 pass / 2 fail — **with no snapshot update**. Snapshots capture characters, not colours, and an eye packs to the same glyph whether it was `E` or `4`. If a snapshot moves, something other than colour changed — find it before going on.
 
-- [ ] **Step 13: Look at it**
+- [ ] **Step 14: Look at it**
 
 Run: `node scripts/preview.ts duck adult` and `node scripts/preview.ts dragon egg`
 Expected: the duck is the same yellow bird as before; the two eggs of different Species are now the same colour as each other.
 
-- [ ] **Step 14: Delete the script and commit**
+- [ ] **Step 15: Delete the script and commit**
 
 ```bash
 rm scripts/repalette.mjs
