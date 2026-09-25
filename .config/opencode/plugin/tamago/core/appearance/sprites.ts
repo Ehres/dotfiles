@@ -1,7 +1,7 @@
 import { REFERENCE, known, mapsOf } from "../creature/catalog.ts";
 import type { Body } from "./bodies.ts";
 import { BADGE, BADGE_SLOT, MARK, MARK_SLOT } from "./marks.ts";
-import { blinksAt, shift, sweepAt } from "./motion.ts";
+import { BLINK_EVERY, SWEEP, blinksAt, shift, sweepAt } from "./motion.ts";
 import { PIXEL_HEIGHT, SPRITE_WIDTH, pack, paint, type Frame, type Pattern } from "./pixels.ts";
 import type { Temperament } from "../creature/sheet.ts";
 import type { SpeciesId } from "../creature/species.ts";
@@ -102,6 +102,23 @@ function cached(key: string, make: () => Frame): Frame {
   return built;
 }
 
+function gcd(a: number, b: number): number {
+  return b === 0 ? a : gcd(b, a % b);
+}
+
+function lcm(a: number, b: number): number {
+  return (a / gcd(a, b)) * b;
+}
+
+/**
+ * How many beats before the whole animation repeats: the Face cycle, the tail sweep and the blink
+ * cadence all wrap within it, and nothing past it can change a Frame. Computed, never hardcoded, so
+ * an Activity with a different Face count still gets the right period.
+ */
+function periodOf(activity: Activity): number {
+  return lcm(lcm(FACES[activity].length, SWEEP.length), BLINK_EVERY);
+}
+
 /** Every Frame of an Activity, in cadence order, for the callers that count them. */
 export function frames(species: SpeciesId, stage: StageId, activity: Activity): readonly Frame[] {
   return FACES[activity].map((_, index) => frameAt(species, stage, activity, index));
@@ -116,12 +133,17 @@ export function frameAt(
   badge = false,
 ): Frame {
   const faces = FACES[activity];
-  const beat = ((index % faces.length) + faces.length) % faces.length;
-  const key = `${keyOf(species, stage)}/${activity}/${index}/${mark ?? ""}/${badge}`;
+  const period = periodOf(activity);
+  // Wrapped once, up front: sweepAt and blinksAt already wrap internally on shorter periods that
+  // divide this one, so this changes nothing about the Frame while keeping the cache — and the
+  // clock-driven index passed in from the view — bounded instead of growing forever.
+  const wrapped = ((index % period) + period) % period;
+  const beat = wrapped % faces.length;
+  const key = `${keyOf(species, stage)}/${activity}/${wrapped}/${mark ?? ""}/${badge}`;
   return cached(key, () => {
     const one = body(species, stage);
-    const blinking = activity !== "sleeping" && blinksAt(index);
-    return build(one, blinking ? SHUT : (faces[beat] ?? SHUT), index, mark, badge);
+    const blinking = activity !== "sleeping" && blinksAt(wrapped);
+    return build(one, blinking ? SHUT : (faces[beat] ?? SHUT), wrapped, mark, badge);
   });
 }
 
