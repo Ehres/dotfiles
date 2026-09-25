@@ -69,7 +69,16 @@ export function decodePng(bytes: Uint8Array): Image {
   const channels = colour === 6 ? 4 : colour === 2 ? 3 : colour === 3 ? 1 : 0;
   if (channels === 0) throw new Refusal(`this decoder reads colour types 2, 3 and 6, this PNG is type ${colour}`);
   if (colour === 3 && plte === undefined) throw new Refusal("a palette PNG (colour type 3) with no PLTE chunk");
-  const raw = new Uint8Array(inflateSync(Buffer.concat(idatChunks)));
+  // A half-written export is a likelier way to meet this decoder than any PNG feature it refuses
+  // by name, and zlib's own errors ("incorrect header check", "unexpected end of file") carry a
+  // stack and no filename. Everything else here refuses by name; so does this.
+  let raw: Uint8Array;
+  try {
+    raw = new Uint8Array(inflateSync(Buffer.concat(idatChunks)));
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    throw new Refusal(`the image data does not decompress: ${reason} — the file is truncated or corrupt`);
+  }
   const stride = width * channels;
   const expected = height * (stride + 1);
   if (raw.length < expected) {

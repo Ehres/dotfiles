@@ -307,11 +307,19 @@ Drawing a Species: export a 32 x 32 PNG of at most sixteen flat colours — no
 gradient banding, no anti-aliased edges — and run `node scripts/import.ts
 <path>.png` to print the `palette:` and `pixels:` blocks to paste into its
 entry in `core/creature/species/<rarity>.ts`. `--patch <anchor>` prints a
-Patch instead, any size, for an Expression pinned to that Anchor — but it
-builds a fresh palette from just that patch image, so its printed indices do
-not line up with the Species' own Palette; remap them by hand before
-pasting. Past sixteen colours the tool refuses, listing every colour by
-pixel count so near-duplicate anti-aliased shades are visible.
+Patch instead, for an Expression pinned to that Anchor: any size up to the
+canvas, which is its bound rather than its size — anything larger fits under
+no anchor and is refused. Past sixteen colours the tool refuses, listing every
+colour by pixel count so near-duplicate anti-aliased shades are visible.
+
+A Species has one Palette and four Bodies, so only the first import invents an
+ordering: the palette is ranked by pixel count per image, and a second Body
+ranked on its own counts would index into the same colours in a different
+order. Pass the Species' Palette back in with
+`--palette "#2b1d12,#e8974a,..."` for every map after the first and for every
+Patch — that order is kept exactly, colours the image adds are appended and
+named with their pixel counts on stderr, and the ceiling of sixteen still
+holds.
 
 Layout:
 

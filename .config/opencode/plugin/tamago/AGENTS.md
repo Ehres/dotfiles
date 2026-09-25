@@ -117,15 +117,30 @@ Then `./node_modules/.bin/tsc --noEmit`, and launch OpenCode once for
 anything the snapshots cannot see: colors, the dialog stack, two instances
 side by side for persistence changes.
 
-`node scripts/import.ts <path-to-png> [--patch <anchor>]` turns a drawn PNG
-into a Species' `pixels:`/`palette:` block. Without `--patch` the PNG must be
-the full 32 x 32 map; with it, any size, for a Patch pinned to that Anchor —
-but `--patch` builds its own palette from just that image, so its indices do
-not line up with the Species' own Palette the Patch must index into; remap
-them by hand before pasting. The pasteable block (and, with `--patch`, a
-leading `// patch: <anchor>` comment) goes to stdout; a Species file is
-pasted into by hand from there, never rewritten by this tool. The colour
-count and the ceiling warning go to stderr instead.
+`node scripts/import.ts <path-to-png> [--patch <anchor>] [--palette "#rrggbb,..."]`
+turns a drawn PNG into a Species' `pixels:`/`palette:` block. Without
+`--patch` the PNG must be the full 32 x 32 map; with it, any size that fits
+inside the canvas, for a Patch pinned to that Anchor — 32 x 32 is the bound,
+not the size, since where a Patch reaches depends on its anchor, which this
+tool cannot know; anything wider or taller fits under no anchor at all and is
+refused by name rather than clipped in silence by `stamp()` at render.
+
+**The first Body of a Species establishes the palette ordering; import every
+later map with `--palette`.** Left alone, the tool orders the palette by
+descending pixel count *per image*, so the second, third and fourth Body of a
+Species — and every Patch — land on a different index order than the first and
+have to be re-indexed by hand, on a 32 x 32 grid of single characters, by eye.
+`--palette` takes the Species' Palette line as it stands in its file, keeps
+that order exactly, and appends any colour the image wears that the palette
+does not hold — still refusing past sixteen. An appended colour is named on
+stderr with its pixel count, the way the ceiling refusal names colours, so a
+shade that drifted through a resave is visible instead of silently taking a
+new index.
+
+The pasteable block (and, with `--patch`, a leading `// patch: <anchor>`
+comment) goes to stdout; a Species file is pasted into by hand from there,
+never rewritten by this tool. The colour count, the ceiling warning and the
+drift warning go to stderr instead.
 
 The ceiling is sixteen colours (`PALETTE_MAX`): past it, the tool refuses by
 name, listing every colour by descending pixel count, so near-duplicate shades

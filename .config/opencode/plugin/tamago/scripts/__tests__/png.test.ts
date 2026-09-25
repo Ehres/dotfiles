@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { deflateSync } from "node:zlib";
-import { decodePng } from "../png.ts";
+import { Refusal, decodePng } from "../png.ts";
 
 const SIGNATURE = [137, 80, 78, 71, 13, 10, 26, 10];
 
@@ -218,4 +218,21 @@ test("a decompressed row shorter than the header promises is refused by name, no
 test("a palette index past the end of PLTE is refused by name, not decoded as black", () => {
   const bytes = buildPng({ width: 1, height: 1, colourType: 3, raw: [0, 2], plte: [10, 20, 30] });
   assert.throws(() => decodePng(bytes), /index 2 has no entry in a 1-entry PLTE/);
+});
+
+// Everything else in this decoder refuses by name; a truncated or half-written export used to be
+// the exception, escaping as zlib's own "incorrect header check" or "unexpected end of file" with
+// a stack and no filename — and a half-written export is a likelier way to meet this decoder than
+// any PNG feature it refuses. Both shapes are tried: a stream cut in half, and a body that is not
+// a zlib stream at all.
+test("image data that does not decompress is refused by name, not as a zlib stack trace", () => {
+  const ihdr = Uint8Array.from([0, 0, 0, 2, 0, 0, 0, 2, 8, 6, 0, 0, 0]);
+  const whole = Uint8Array.from(deflateSync(Buffer.from(Array.from({ length: 18 }, (_, i) => (i % 9 === 0 ? 0 : i)))));
+  const build = (idat: Uint8Array): Uint8Array =>
+    Uint8Array.from([...SIGNATURE, ...chunk("IHDR", ihdr), ...chunk("IDAT", idat), ...chunk("IEND", Uint8Array.from([]))]);
+  assert.doesNotThrow(() => decodePng(build(whole)), "the same PNG whole must still decode");
+  for (const idat of [whole.slice(0, Math.floor(whole.length / 2)), Uint8Array.from([1, 2, 3, 4])]) {
+    assert.throws(() => decodePng(build(idat)), Refusal);
+    assert.throws(() => decodePng(build(idat)), /does not decompress[\s\S]*truncated or corrupt/);
+  }
 });
