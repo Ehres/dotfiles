@@ -1,9 +1,6 @@
 import type { TraitId } from "../career/pick.ts";
 import type { Phrase } from "../language.ts";
 
-/** The badge after the Name while a Draw awaits a Pick. One column. */
-export const CHOICE_BADGE = "★";
-
 /** The title of the Draw dialog and what to do there. */
 export const CHOOSE: { title: Phrase } = { title: { en: "Keep one", fr: "En garder un" } };
 

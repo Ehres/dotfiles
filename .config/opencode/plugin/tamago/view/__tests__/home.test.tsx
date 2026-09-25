@@ -2,7 +2,6 @@
 import { expect, test } from "bun:test";
 import { BADGE_SLOT } from "../../core/appearance/marks.ts";
 import { tamago } from "../../core/tamago.ts";
-import { CHOICE_BADGE } from "../../core/text/traits.ts";
 import { HomeView } from "../home.tsx";
 import { ThemeProvider } from "../theme.tsx";
 import { OWNER } from "./fixtures.ts";
@@ -74,7 +73,9 @@ test("a pending Draw shows on the Sprite, not beside the name", async () => {
   );
   expect(withoutDraw).toContain("Tamago · adult");
   expect(withDraw).toContain("Tamago · adult");
-  expect(withDraw).not.toContain(CHOICE_BADGE);
+  // The star that used to sit beside the Name (CHOICE_BADGE, pre-Task 10) is gone for good:
+  // the pending-Draw badge now lives only on the Sprite, checked below via badgeCorner.
+  expect(withDraw).not.toContain("★");
 
   const blank = "   |   ";
   expect(badgeCorner(withoutDraw)).toBe(blank);

@@ -20,8 +20,5 @@ export type Body = {
   motion?: Motion;
 };
 
-/** Four bodies per Species, one per Stage past the egg. */
+/** Four maps per Species, one per Stage past the egg. */
 export type Maps = Record<Grown, Body>;
-
-/** Kept until Task 14 deletes the last ASCII body. */
-export type Bodies = Record<Grown, (eyes: string, mark: string) => string[]>;

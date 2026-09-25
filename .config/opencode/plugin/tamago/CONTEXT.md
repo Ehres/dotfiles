@@ -302,16 +302,38 @@ _Avoid_: perk, upgrade, buff, card
 
 ### Appearance
 
+**Pixel**:
+Half a cell, square on screen because a cell is twice as tall as wide; a
+Sprite is 21 × 20 of them, drawn with `▀ ▄ █` and the space.
+_Avoid_: dot, point, cell (that is the character)
+
 **Sprite**:
-The ASCII drawing of the Tamago for a given Stage and Activity.
+The pixel drawing of the Tamago for a given Stage and Activity: the map for
+that Stage, shifted by its Motion and painted with the eyes, the Trait mark
+and the Draw badge, in the Species' Palette.
+_Avoid_: body (that was the map's name before this), ASCII (it draws in
+Pixels now)
 
 **Frame**:
-One image of a Sprite; a Sprite has one or more Frames that alternate to
-animate.
+One state of a Sprite, already packed into cells: the map's Pixels with the
+eyes, the Motion and the overlays applied. A Sprite has one or more Frames
+that alternate to animate.
 
 **Face**:
-The eyes and the mark beside the head that change with the Activity while
-the body stays the same for a Species and a Stage.
+The eyes for a given Activity: a 3 × 3 pattern painted into each eyes
+rectangle of the map, one or more per Activity that alternate by cadence,
+while the map itself stays the same for a Species and a Stage.
+
+**Role**:
+What a pixel is, never what colour it is: outline, primary, secondary,
+accent, eye, mark, badge, heart — a map carries the first four, the engine
+paints the rest.
+_Avoid_: layer, segment, class
+
+**Palette**:
+One colour per Role for one Species, in a dark variant and a light one
+chosen by the theme's mode, written in hexadecimal in the Species file.
+_Avoid_: theme (that is OpenCode's), skin, scheme
 
 **Portrait**:
 The Sprite and its text column, topped by the Bubble when there is one.

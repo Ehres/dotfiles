@@ -26,9 +26,20 @@ AGENTS.md. Vocabulary lives in `CONTEXT.md`; use those terms.
   stored. Anything that decides a Stage takes a `Paced` (counters plus
   Species), never bare counters.
 - Errors never change XP.
-- Every Frame of every Species and Stage has the same size; a body is a
-  `(eyes, mark) => lines` function so Faces and the pet work on every Species;
-  colors come from the theme.
+- Every map is 20 rows of 21 characters of `.oabc`, and only colour: the eyes,
+  what moves, the Trait mark and the Draw badge are rectangles declared beside
+  it. A Species' colours are its Palette, two variants, resolved in `view/`;
+  `core/` never names a colour.
+- A `motion` rectangle (a tail, or an ears) must be at least 2 pixels wide, so
+  `shift()` has a column to move its content into; its content must not sit
+  flush against the edge it shifts toward, since `shift()` drops any pixel
+  whose destination lands outside the rectangle's own width; and it must
+  bound a genuinely isolated, movable part of the drawing, never traced over
+  shared static art, since `shift()` moves every opaque pixel inside it,
+  ear or ridge alike. `sprites.test.ts` checks the first two for every
+  declared rectangle and every beat it actually uses; the third is a call to
+  make at the drawing board, since no test can tell a real ear from a
+  coincidence.
 - Every handler is wrapped by `guard`: the TUI never crashes because of this
   plugin.
 - Counters only grow; `merge` stays commutative and preserves `hatchedAt` and
@@ -51,10 +62,10 @@ AGENTS.md. Vocabulary lives in `CONTEXT.md`; use those terms.
   derived from a Career is derived there, once, and passed down as one
   prop. A new derived attribute is a new field of `Tamago`.
 - A new Species is one entry in `core/creature/species/<rarity>.ts`: id, label,
-  Rarity, Modifiers, four bodies and a full Signature. A missing body or
-  Signature does not compile; the order of the entries is the draw order and
-  never changes once shipped. The rarity weights live in
-  `core/creature/luck.ts`, never in the Species files.
+  Rarity, Modifiers, four maps, a Palette in both variants and a full
+  Signature. A missing map, Palette or Signature does not compile; the order
+  of the entries is the draw order and never changes once shipped. The rarity
+  weights live in `core/creature/luck.ts`, never in the Species files.
 - The voice never picks a phrase by rotation or by `Math.random`: `phrase`
   seeds from the hatch date, the Cue and its count, so every window agrees for
   the same occurrence of the Cue.

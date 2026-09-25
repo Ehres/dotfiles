@@ -1,4 +1,4 @@
-import type { Bodies, Maps } from "../appearance/bodies.ts";
+import type { Maps } from "../appearance/bodies.ts";
 import type { Palettes, Skin, Variant } from "../appearance/palette.ts";
 import type { Signature } from "../speech/signature.ts";
 import type { SpeciesDef, SpeciesId } from "./species.ts";
@@ -10,7 +10,7 @@ import { UNCOMMON } from "./species/uncommon.ts";
 
 /**
  * Every Species that can hatch, one file per Rarity, each entry complete:
- * Modifiers, bodies and Signature. A test bounds each Modifier to
+ * Modifiers, maps, Palettes and Signature. A test bounds each Modifier to
  * ±MODIFIER_MAX and their sum to MODIFIERS_SUM_MAX. Order within a Rarity is
  * the order of the draw: never reorder once shipped. Tune a `sheet` line
  * before that Species has hatched anywhere: the Sheet is derived, so
@@ -31,13 +31,6 @@ function entry(id: SpeciesId, table: readonly SpeciesDef[]): SpeciesDef | undefi
 /** Whether this build draws that Species itself; anything else draws as the reference. */
 export function known(id: SpeciesId, table: readonly SpeciesDef[] = SPECIES): boolean {
   return entry(id, table) !== undefined;
-}
-
-/** The bodies to draw: the Species' own, else the reference's for a Species this build does not know. Undefined once a Species draws pixel maps instead. */
-export function bodiesOf(id: SpeciesId, table: readonly SpeciesDef[] = SPECIES): Bodies | undefined {
-  const found = entry(id, table) ?? entry(REFERENCE, table);
-  if (found === undefined) throw new Error(`no reference Species "${REFERENCE}" in the table`);
-  return found.bodies;
 }
 
 /** The maps to draw: the Species' own, else the reference's for a Species this build does not draw. */

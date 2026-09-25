@@ -17,11 +17,7 @@ function lcm(a: number, b: number): number {
   return (a / gcd(a, b)) * b;
 }
 
-const drawn = SPECIES.filter((one) => one.maps !== undefined);
-
-test("at least the reference Species is drawn", () => {
-  assert.ok(drawn.some((one) => one.id === REFERENCE), "the reference has no maps");
-});
+const drawn = SPECIES;
 
 test("every drawn map is exactly 20 rows of 21 characters, all from the alphabet", () => {
   for (const one of drawn) {

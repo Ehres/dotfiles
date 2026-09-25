@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { STAGES } from "../../career/stage.ts";
 import { assertSayable } from "../../speech/__tests__/sayable.ts";
 import { CUES, type Cue } from "../../speech/cue.ts";
-import { REFERENCE, SPECIES, bodiesOf, known, signatureOf } from "../catalog.ts";
+import { REFERENCE, SPECIES, known, signatureOf } from "../catalog.ts";
 
 test("SPECIES keeps the draw order: common first, then by Rarity, twenty ids, the reference among the common", () => {
   assert.deepEqual(
@@ -13,8 +13,7 @@ test("SPECIES keeps the draw order: common first, then by Rarity, twenty ids, th
   assert.equal(SPECIES.find((one) => one.id === REFERENCE)?.rarity, "common");
 });
 
-test("bodiesOf falls back to the reference and known says which ids are the build's own; signatureOf has no fallback", () => {
-  assert.equal(bodiesOf("no-such-species"), bodiesOf(REFERENCE));
+test("known says which ids are the build's own; signatureOf has no fallback", () => {
   assert.equal(known("no-such-species"), false);
   assert.equal(known("__proto__"), false);
   assert.equal(known(REFERENCE), true);
@@ -22,20 +21,9 @@ test("bodiesOf falls back to the reference and known says which ids are the buil
   assert.notEqual(signatureOf(REFERENCE), undefined);
 });
 
-test("every body draws every Stage past the egg", () => {
-  for (const { id, bodies } of SPECIES) {
-    if (bodies === undefined) continue; // drawn as pixel maps instead
-    for (const { id: stage } of STAGES) {
-      if (stage === "egg") continue;
-      assert.equal(typeof bodies[stage], "function", `${id}/${stage}`);
-    }
-  }
-});
-
-test("no two drawn Species share a map at a Stage, and no Species draws two Stages alike", () => {
+test("no two Species share a map at a Stage, and no Species draws two Stages alike", () => {
   const seen = new Map<string, string>();
   for (const one of SPECIES) {
-    if (one.maps === undefined) continue;
     const own = new Set<string>();
     for (const { id: stage } of STAGES) {
       if (stage === "egg") continue;

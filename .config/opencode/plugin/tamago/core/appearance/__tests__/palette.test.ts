@@ -26,9 +26,8 @@ test("Skin's keys agree with SKIN_ROLES at runtime", () => {
   assert.deepEqual(keysFromType, rolesFromArray);
 });
 
-test("every Species that declares Palettes covers every Skin Role in both variants, in lowercase hex", () => {
+test("every Species covers every Skin Role in both variants, in lowercase hex", () => {
   for (const one of SPECIES) {
-    if (one.palettes === undefined) continue;
     for (const variant of ["dark", "light"] as const) {
       const skin: Skin = one.palettes[variant];
       for (const role of SKIN_ROLES) {
@@ -91,9 +90,11 @@ test("the two variants of a Species differ: a light theme is not the dark one", 
 });
 
 test("paletteOf throws when neither the requested Species nor the reference has Palettes", () => {
-  const EMPTY_FIXTURE: readonly SpeciesDef[] = [
+  // palettes is required on SpeciesDef now; this simulates a malformed table (a bad cast, bad
+  // data on disk) to prove paletteOf's defensive throw still fires instead of reading undefined.
+  const EMPTY_FIXTURE = [
     { ...SPECIES.find((one) => one.id === REFERENCE)!, palettes: undefined },
-  ];
+  ] as unknown as readonly SpeciesDef[];
   assert.throws(
     () => paletteOf("no-such-species", "dark", EMPTY_FIXTURE),
     /no Palettes on the reference Species/,
