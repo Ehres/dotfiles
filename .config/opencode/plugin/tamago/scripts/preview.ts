@@ -1,4 +1,4 @@
-// scripts/preview.ts — run: node scripts/preview.ts cat adult [--plain]
+// scripts/preview.ts — run: node scripts/preview.ts cat adult [--plain] [--light]
 import { SPECIES, mapsOf, paletteOf } from "../core/creature/catalog.ts";
 import { frameAt } from "../core/appearance/sprites.ts";
 import type { Cell, Frame, Rect, Role } from "../core/appearance/pixels.ts";
@@ -89,14 +89,15 @@ function summarize(id: string, stage: StageId): string {
 
 const args = process.argv.slice(2);
 const plain = args.includes("--plain");
-const [id = "cat", stage = "adult"] = args.filter((arg) => arg !== "--plain");
+const variant = args.includes("--light") ? "light" : "dark";
+const [id = "cat", stage = "adult"] = args.filter((arg) => arg !== "--plain" && arg !== "--light");
 
 if (!SPECIES.some((one) => one.id === id)) {
   console.error(`unknown Species "${id}". Known: ${SPECIES.map((one) => one.id).join(", ")}`);
   process.exit(1);
 }
 
-console.log(`${id} / ${stage}\n`);
+console.log(`${id} / ${stage} / ${variant}\n`);
 const frame = frameAt(id, stage as StageId, "idle", 0);
-console.log(plain ? drawPlain(frame) : draw(frame, paletteOf(id, "dark")));
+console.log(plain ? drawPlain(frame) : draw(frame, paletteOf(id, variant)));
 console.log(`\n${summarize(id, stage as StageId)}`);

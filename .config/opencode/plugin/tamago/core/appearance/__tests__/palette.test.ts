@@ -13,19 +13,6 @@ test("the Role partition is complete and correct: MAP, PAINTED, and SKIN lists",
   assert.deepEqual([...SKIN_ROLES], ["outline", "primary", "secondary", "accent", "eye"]);
 });
 
-test("Skin's keys agree with SKIN_ROLES at runtime", () => {
-  const skin: Skin = {
-    outline: "#111111",
-    primary: "#222222",
-    secondary: "#333333",
-    accent: "#444444",
-    eye: "#555555",
-  };
-  const keysFromType = Object.keys(skin).sort();
-  const rolesFromArray = [...SKIN_ROLES].sort();
-  assert.deepEqual(keysFromType, rolesFromArray);
-});
-
 test("every Species covers every Skin Role in both variants, in lowercase hex", () => {
   for (const one of SPECIES) {
     for (const variant of ["dark", "light"] as const) {
@@ -65,28 +52,12 @@ test("paletteOf falls back to the reference for a Species this build does not dr
 });
 
 test("the two variants of a Species differ: a light theme is not the dark one", () => {
-  const FIXTURE: readonly SpeciesDef[] = [
-    {
-      ...SPECIES.find((one) => one.id === REFERENCE)!,
-      palettes: {
-        dark: {
-          outline: "#111111",
-          primary: "#222222",
-          secondary: "#333333",
-          accent: "#444444",
-          eye: "#555555",
-        },
-        light: {
-          outline: "#aaaaaa",
-          primary: "#bbbbbb",
-          secondary: "#cccccc",
-          accent: "#dddddd",
-          eye: "#eeeeee",
-        },
-      },
-    },
-  ];
-  assert.notDeepEqual(paletteOf(REFERENCE, "dark", FIXTURE), paletteOf(REFERENCE, "light", FIXTURE));
+  // Against the real catalogue, not a hand-written fixture whose variants differ by construction:
+  // this is the only check that a Species' two Palettes were actually drawn as two, not one copied
+  // onto the other.
+  for (const one of SPECIES) {
+    assert.notDeepEqual(paletteOf(one.id, "dark"), paletteOf(one.id, "light"), one.id);
+  }
 });
 
 test("paletteOf throws when neither the requested Species nor the reference has Palettes", () => {
