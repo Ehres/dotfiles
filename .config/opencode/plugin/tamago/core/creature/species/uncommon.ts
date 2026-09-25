@@ -470,7 +470,7 @@ export const UNCOMMON: readonly SpeciesDef[] = [
           ".....................",
           ".....................",
         ],
-        eyes: [{ x: 4, y: 3, w: 3, h: 3 }, { x: 14, y: 3, w: 3, h: 3 }],
+        eyes: [{ x: 5, y: 3, w: 3, h: 3 }, { x: 13, y: 3, w: 3, h: 3 }],
       },
       elder: {
         pixels: [
@@ -495,12 +495,12 @@ export const UNCOMMON: readonly SpeciesDef[] = [
           ".....................",
           ".....................",
         ],
-        eyes: [{ x: 4, y: 3, w: 3, h: 3 }, { x: 14, y: 3, w: 3, h: 3 }],
+        eyes: [{ x: 5, y: 3, w: 3, h: 3 }, { x: 13, y: 3, w: 3, h: 3 }],
       },
     },
     palettes: {
-      dark: { outline: "#0f0a16", primary: "#3d3350", secondary: "#a89bc4", accent: "#e8dcc0", eye: "#120c1a" },
-      light: { outline: "#1c1428", primary: "#332a44", secondary: "#9686b8", accent: "#ded2b0", eye: "#171020" },
+      dark: { outline: "#0f0a16", primary: "#3d3350", secondary: "#a89bc4", accent: "#e8dcc0", eye: "#050307" },
+      light: { outline: "#1c1428", primary: "#332a44", secondary: "#9686b8", accent: "#ded2b0", eye: "#08060c" },
     },
     signature: {
       permission: [{ en: "Whisper: may I?", fr: "Tout bas : j'y vais ?" }, { en: "Dark says ask you.", fr: "Le noir dit : demande." }, { en: "Hang on. Allowed?", fr: "Suspendue. Permis ?" }],
