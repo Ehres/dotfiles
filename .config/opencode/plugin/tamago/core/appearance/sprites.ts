@@ -116,7 +116,7 @@ function stamp(rows: readonly string[], anchors: Anchors, look: Look): string[] 
 
 /** Builds one Frame: the map, moved, then the Look, then the overlays, then packed. */
 function build(one: Body, look: Look, beat: number, mark: TraitId | undefined, badge: boolean): Frame {
-  let rows: readonly string[] = one.pixels;
+  let rows: readonly string[] = one.frames?.[beat % one.frames.length] ?? one.pixels;
   const motion = one.motion;
   if (motion?.tail !== undefined) rows = shift(rows, motion.tail, sweepAt(beat));
   if (motion?.ears !== undefined && blinksAt(beat)) for (const ear of motion.ears) rows = shift(rows, ear, 1);
@@ -157,7 +157,8 @@ function lcm(a: number, b: number): number {
  */
 export function periodOf(species: SpeciesId, stage: StageId, activity: Activity, table: readonly SpeciesDef[] = SPECIES): number {
   const looks = Math.max(1, expressionOf(expressionsOf(species, stage, table), idOf(activity)).length);
-  return lcm(lcm(looks, SWEEP.length), BLINK_EVERY);
+  const frames = Math.max(1, body(species, stage, table).frames?.length ?? 1);
+  return lcm(lcm(lcm(looks, SWEEP.length), BLINK_EVERY), frames);
 }
 
 export function frameAt(

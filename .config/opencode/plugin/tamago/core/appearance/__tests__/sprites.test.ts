@@ -6,10 +6,13 @@ import { BADGE_SLOT, MARK_SLOT } from "../marks.ts";
 import { SWEEP, shift } from "../motion.ts";
 import { MAP_ALPHABET, PIXEL_HEIGHT, SPRITE_HEIGHT, SPRITE_WIDTH, type Frame, type Rect } from "../pixels.ts";
 import { EGG_PALETTE } from "../palette.ts";
+import type { Body } from "../bodies.ts";
+import { DEFAULT_EXPRESSIONS } from "../default-expressions.ts";
 import type { Expression, Expressions } from "../expressions.ts";
 import { EGG_PIXELS, HEART_HEIGHT, expressionsOf, frameAt, heartFrame, periodOf } from "../sprites.ts";
 import { STAGES } from "../../career/stage.ts";
 import { ACTIVITIES } from "../../moment/session.ts";
+import type { SpeciesDef } from "../../creature/species.ts";
 
 const drawn = SPECIES;
 
@@ -366,4 +369,52 @@ test("a heart Frame keeps the size, wears the heart and the Temperament's eyes",
     }
   }
   assert.notEqual(heartFrame("cat", "young", "cheerful"), heartFrame("cat", "young", "sarcastic"));
+});
+
+const BLANK = Array.from({ length: PIXEL_HEIGHT }, () => ".".repeat(SPRITE_WIDTH));
+/** A map whose only opaque row is `y`: two of them differ, and differ visibly. */
+function bar(y: number): readonly string[] {
+  return BLANK.map((row, at) => (at === y ? "1".repeat(SPRITE_WIDTH) : row));
+}
+const FRAME_A = bar(20);
+const FRAME_B = bar(21);
+const TWO_FRAMES = [FRAME_A, FRAME_B];
+
+const CAT = SPECIES.find((one) => one.id === "cat");
+if (CAT === undefined) throw new Error("the reference Species is missing from the catalog");
+
+const BODY: Body = {
+  pixels: FRAME_A,
+  frames: TWO_FRAMES,
+  anchors: { head: { x: 15, y: 18 }, left_eye: { x: 11, y: 18 }, right_eye: { x: 17, y: 18 } },
+};
+
+const FIXTURE: SpeciesDef = {
+  id: "test:framed",
+  label: { en: "framed", fr: "framed" },
+  gender: "m",
+  rarity: "common",
+  palette: ["#000000", "#ffffff", "#ff0000", "#00ff00", "#0000ff"],
+  expressions: DEFAULT_EXPRESSIONS,
+  signature: CAT.signature,
+  maps: { hatchling: BODY, young: BODY, adult: BODY, elder: BODY },
+};
+
+const TABLE = [...SPECIES, FIXTURE];
+
+test("a Body with frames alternates over them, and the period covers them", () => {
+  const first = frameAt("test:framed", "adult", "idle", 0, undefined, false, TABLE);
+  const second = frameAt("test:framed", "adult", "idle", 1, undefined, false, TABLE);
+  assert.notDeepEqual(first, second, "two frames should draw differently");
+  assert.deepEqual(frameAt("test:framed", "adult", "idle", 2, undefined, false, TABLE), first, "two frames around is the first again");
+  assert.equal(periodOf("test:framed", "adult", "idle", TABLE) % TWO_FRAMES.length, 0, "the period must cover the frame cycle");
+});
+
+test("a Body without frames draws its single map at every beat", () => {
+  const period = periodOf("cat", "adult", "idle");
+  const maps = new Set<string>();
+  for (let beat = 0; beat < period; beat++) {
+    maps.add(JSON.stringify(frameAt("cat", "adult", "idle", beat).map((row) => row.map((cell) => cell.top))));
+  }
+  assert.ok(maps.size <= period, "no beat may invent a map");
 });

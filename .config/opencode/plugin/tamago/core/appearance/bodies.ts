@@ -26,6 +26,8 @@ export type Body = {
   anchors: Anchors;
   expressions?: Partial<Expressions>;
   motion?: Motion;
+  /** Further whole maps for this Stage; the cadence alternates over them. `pixels` is frame zero and the only one a Species must give. */
+  frames?: readonly (readonly string[])[];
 };
 
 /** Four maps per Species, one per Stage past the egg. */
