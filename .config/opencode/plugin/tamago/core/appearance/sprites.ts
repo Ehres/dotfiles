@@ -113,15 +113,11 @@ function lcm(a: number, b: number): number {
 /**
  * How many beats before the whole animation repeats: the Face cycle, the tail sweep and the blink
  * cadence all wrap within it, and nothing past it can change a Frame. Computed, never hardcoded, so
- * an Activity with a different Face count still gets the right period.
+ * an Activity with a different Face count still gets the right period. Exported so a test can walk
+ * a whole period without duplicating the arithmetic.
  */
-function periodOf(activity: Activity): number {
+export function periodOf(activity: Activity): number {
   return lcm(lcm(FACES[activity].length, SWEEP.length), BLINK_EVERY);
-}
-
-/** Every Frame of an Activity, in cadence order, for the callers that count them. */
-export function frames(species: SpeciesId, stage: StageId, activity: Activity): readonly Frame[] {
-  return FACES[activity].map((_, index) => frameAt(species, stage, activity, index));
 }
 
 export function frameAt(

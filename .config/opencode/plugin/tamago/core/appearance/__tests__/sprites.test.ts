@@ -3,19 +3,11 @@ import assert from "node:assert/strict";
 import { TEMPERAMENTS } from "../../creature/sheet.ts";
 import { REFERENCE, SPECIES, mapsOf } from "../../creature/catalog.ts";
 import { BADGE_SLOT, MARK_SLOT } from "../marks.ts";
-import { BLINK_EVERY, SWEEP, shift } from "../motion.ts";
+import { SWEEP, shift } from "../motion.ts";
 import { MAP_ALPHABET, PIXEL_HEIGHT, SPRITE_HEIGHT, SPRITE_WIDTH, type Frame, type Rect } from "../pixels.ts";
-import { frameAt, frames, heartFrame } from "../sprites.ts";
+import { frameAt, heartFrame, periodOf } from "../sprites.ts";
 import { STAGES } from "../../career/stage.ts";
 import { ACTIVITIES } from "../../moment/session.ts";
-
-function gcd(a: number, b: number): number {
-  return b === 0 ? a : gcd(b, a % b);
-}
-
-function lcm(a: number, b: number): number {
-  return (a / gcd(a, b)) * b;
-}
 
 const drawn = SPECIES;
 
@@ -141,13 +133,18 @@ test("shifting a motion rectangle by any beat it actually uses never changes how
   }
 });
 
-test("every Frame is SPRITE_HEIGHT rows of SPRITE_WIDTH cells, for every Species, Stage and Activity", () => {
+// Walks a whole period, not just the Faces list: frames() (removed, it had no production caller)
+// only ever exercised beats 0 and 1, so this never touched a blink beat, a swept tail, a mark or a
+// badge together. mark and badge are held on throughout so the overlay stack is packed every beat.
+test("every Frame is SPRITE_HEIGHT rows of SPRITE_WIDTH cells, across a full period, mark and badge included", () => {
   for (const one of SPECIES) {
     for (const { id: stage } of STAGES) {
       for (const activity of ACTIVITIES) {
-        for (const frame of frames(one.id, stage, activity)) {
-          assert.equal(frame.length, SPRITE_HEIGHT, `${one.id}/${stage}/${activity}`);
-          for (const row of frame) assert.equal(row.length, SPRITE_WIDTH, `${one.id}/${stage}/${activity}`);
+        const period = periodOf(activity);
+        for (let beat = 0; beat < period; beat++) {
+          const frame = frameAt(one.id, stage, activity, beat, "hardy", true);
+          assert.equal(frame.length, SPRITE_HEIGHT, `${one.id}/${stage}/${activity}/${beat}`);
+          for (const row of frame) assert.equal(row.length, SPRITE_WIDTH, `${one.id}/${stage}/${activity}/${beat}`);
         }
       }
     }
@@ -165,8 +162,7 @@ test("frameAt wraps the beat by the Activity's Face count, not by the raw index"
 });
 
 test("the animation period repeats identity, so a clock that only advances never grows the cache", () => {
-  const facesLength = frames(REFERENCE, "adult", "idle").length;
-  const period = lcm(lcm(facesLength, SWEEP.length), BLINK_EVERY);
+  const period = periodOf("idle");
   assert.equal(frameAt(REFERENCE, "adult", "idle", 5), frameAt(REFERENCE, "adult", "idle", 5 + period), "one period later, the same object");
 
   const seen = new Set<Frame>();
@@ -174,7 +170,7 @@ test("the animation period repeats identity, so a clock that only advances never
   assert.ok(seen.size <= period, `saw ${seen.size} distinct Frames across ${period * 10} increasing indices, expected at most the period (${period})`);
 });
 
-test("frames and frameAt return the same objects for the same inputs, so memos stay stable", () => {
+test("frameAt returns the same objects for the same inputs, so memos stay stable", () => {
   assert.equal(frameAt("cat", "young", "idle", 0), frameAt("cat", "young", "idle", 0));
   assert.notEqual(frameAt("cat", "young", "idle", 0), frameAt("cat", "young", "idle", 1));
 });
