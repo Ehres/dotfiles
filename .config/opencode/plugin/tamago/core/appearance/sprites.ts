@@ -85,9 +85,11 @@ const HEART_AT = { x: 13, y: 13, w: 5, h: 5 };
 /**
  * Where the migration put every Species' old eye colour. Task 4 deletes this
  * along with the engine's shared Faces: once a Species owns its expressions,
- * an eye is drawn in whatever colours that Species chose.
+ * an eye is drawn in whatever colours that Species chose. Exported so a
+ * catalog test can assert every Species' own Palette (and EGG_PALETTE) still
+ * reaches this far.
  */
-const EYE_INDEX = 4;
+export const EYE_INDEX = 4;
 
 /** The body to draw: the common egg, else the Species' map, else the reference's. */
 function body(species: SpeciesId, stage: StageId): Body {

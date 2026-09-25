@@ -100,3 +100,9 @@ test("a rectangle that leaves the map throws", () => {
   assert.throws(() => paint(blank(), { x: 30, y: 0, w: 3, h: 1 }, ["###"], 0), /outside the map/);
   assert.throws(() => paint(blank(), { x: 0, y: 30, w: 1, h: 3 }, ["#", "#", "#"], 0), /outside the map/);
 });
+
+test("an index outside 0-15 throws, never writing a silent transparent pixel", () => {
+  assert.throws(() => paint(blank(), { x: 0, y: 0, w: 1, h: 1 }, ["#"], -1), /outside 0-15/);
+  assert.throws(() => paint(blank(), { x: 0, y: 0, w: 1, h: 1 }, ["#"], -2), /outside 0-15/);
+  assert.throws(() => paint(blank(), { x: 0, y: 0, w: 1, h: 1 }, ["#"], 16), /outside 0-15/);
+});

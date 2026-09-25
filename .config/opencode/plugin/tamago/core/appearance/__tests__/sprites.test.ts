@@ -6,15 +6,19 @@ import { BADGE_SLOT, MARK_SLOT } from "../marks.ts";
 import { SWEEP, shift } from "../motion.ts";
 import { MAP_ALPHABET, PIXEL_HEIGHT, SPRITE_HEIGHT, SPRITE_WIDTH, type Frame, type Rect } from "../pixels.ts";
 import { EGG_PALETTE } from "../palette.ts";
-import { EGG_PIXELS, frameAt, heartFrame, periodOf } from "../sprites.ts";
+import { EGG_PIXELS, EYE_INDEX, frameAt, heartFrame, periodOf } from "../sprites.ts";
 import { STAGES } from "../../career/stage.ts";
 import { ACTIVITIES } from "../../moment/session.ts";
 
 const drawn = SPECIES;
 
-test("every index a map writes has a colour behind it", () => {
+test("every index a map writes, and the eye it paints, has a colour behind it", () => {
   for (const one of drawn) {
     const palette = paletteOf(one.id);
+    assert.ok(
+      EYE_INDEX >= 0 && EYE_INDEX < palette.length,
+      `${one.id} has ${palette.length} colours but the eye paints at index ${EYE_INDEX}`,
+    );
     for (const { id: stage } of STAGES) {
       if (stage === "egg") continue;
       const { pixels } = mapsOf(one.id)[stage];
@@ -32,12 +36,31 @@ test("every index a map writes has a colour behind it", () => {
   }
 });
 
-test("the egg's map never reads a Species' palette", () => {
+// Walks what is actually painted (every Activity's full period, and heartFrame for every
+// Temperament), not just the static map: the map alone cannot see the eye the engine overlays at
+// EYE_INDEX, which is exactly the defect that slipped through the first version of this test.
+test("the egg's painted Frame never reads a Species' palette", () => {
   for (const [y, row] of EGG_PIXELS.entries()) {
     for (const [x, char] of [...row].entries()) {
       if (char === ".") continue;
       const index = MAP_ALPHABET.indexOf(char) - 1;
-      assert.ok(index >= 0 && index < EGG_PALETTE.length, `the egg writes "${char}" at ${x},${y}, outside its own ${EGG_PALETTE.length} colours`);
+      assert.ok(index >= 0 && index < EGG_PALETTE.length, `the egg's map writes "${char}" at ${x},${y}, outside its own ${EGG_PALETTE.length} colours`);
+    }
+  }
+  const inks = (frame: Frame) => frame.flatMap((row) => row.flatMap((cell) => [cell.top, cell.bottom]));
+  for (const activity of ACTIVITIES) {
+    const period = periodOf(activity);
+    for (let beat = 0; beat < period; beat++) {
+      for (const ink of inks(frameAt(REFERENCE, "egg", activity, beat))) {
+        if (typeof ink !== "number") continue;
+        assert.ok(ink >= 0 && ink < EGG_PALETTE.length, `egg/${activity}/${beat} paints index ${ink}, outside its own ${EGG_PALETTE.length} colours`);
+      }
+    }
+  }
+  for (const temperament of TEMPERAMENTS) {
+    for (const ink of inks(heartFrame(REFERENCE, "egg", temperament))) {
+      if (typeof ink !== "number") continue;
+      assert.ok(ink >= 0 && ink < EGG_PALETTE.length, `egg heart/${temperament} paints index ${ink}, outside its own ${EGG_PALETTE.length} colours`);
     }
   }
 });

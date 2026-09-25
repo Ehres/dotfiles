@@ -34,9 +34,9 @@ function inkAt(rows: readonly string[], x: number, y: number): Ink | null {
   return index - 1;
 }
 
-/** The character an Ink is written as. */
+/** The character an Ink is written as. Empty for an out-of-range index, so paint() can throw loudly. */
 function charOf(ink: Ink): string {
-  return typeof ink === "number" ? (MAP_ALPHABET[ink + 1] ?? "") : PAINT_OF[ink];
+  return typeof ink === "number" ? (ink >= 0 ? (MAP_ALPHABET[ink + 1] ?? "") : "") : PAINT_OF[ink];
 }
 
 /** Packs PIXEL_HEIGHT rows of map characters into SPRITE_HEIGHT rows of Cells. */
