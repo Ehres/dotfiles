@@ -80,6 +80,23 @@ export function parseArgs(argv: readonly string[]): { path: string | undefined; 
   return { path: rest[0], anchor };
 }
 
+/**
+ * Reads the PNG at `path`, naming the path in the refusal on failure — a
+ * typo'd filename or the wrong working directory is the single most likely
+ * refusal this tool will ever produce, far more likely than a PNG feature it
+ * does not cover, so it is a Refusal like every other one, not a stack dump.
+ */
+export function readPng(path: string): Uint8Array {
+  let bytes: Buffer;
+  try {
+    bytes = readFileSync(path);
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    throw new Refusal(`cannot read "${path}": ${reason}`);
+  }
+  return Uint8Array.from(bytes);
+}
+
 function main(): void {
   const { path, anchor } = parseArgs(process.argv.slice(2));
   if (path === undefined) {
@@ -87,7 +104,7 @@ function main(): void {
     process.exit(1);
   }
 
-  const image = decodePng(Uint8Array.from(readFileSync(path)));
+  const image = decodePng(readPng(path));
   const size = anchor === undefined ? { width: SPRITE_WIDTH, height: PIXEL_HEIGHT } : { width: image.width, height: image.height };
   const map = toMap(image, size);
 

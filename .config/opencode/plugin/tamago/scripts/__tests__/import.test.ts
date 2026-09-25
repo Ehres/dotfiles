@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { formatBlocks, formatSummary, parseArgs, toMap } from "../import.ts";
+import { formatBlocks, formatSummary, parseArgs, readPng, toMap } from "../import.ts";
 import { Refusal } from "../png.ts";
 import { PALETTE_MAX } from "../../core/appearance/palette.ts";
 
@@ -77,4 +77,10 @@ test("parseArgs finds --patch and its anchor wherever they land, and takes what'
 
 test("parseArgs refuses --patch with no anchor name", () => {
   assert.throws(() => parseArgs(["duck.png", "--patch"]), /anchor name/);
+});
+
+test("readPng refuses a missing file by name, naming the path, not a stack dump", () => {
+  const path = "/nonexistent/does-not-exist.png";
+  assert.throws(() => readPng(path), Refusal);
+  assert.throws(() => readPng(path), /does-not-exist\.png/);
 });
