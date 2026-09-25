@@ -27,7 +27,7 @@ export function Portrait(props: {
   width?: number;
   bubble?: BubbleView;
 }): JSX.Element {
-  /** Left margin that centres the 21-cell Sprite in `width`; 0 when there is no room or no width. */
+  /** Left margin that centres the 32-cell Sprite in `width`; 0 when there is no room or no width. */
   const margin = () => Math.max(0, Math.floor(((props.width ?? SPRITE_WIDTH) - SPRITE_WIDTH) / 2));
   return (
     <box flexDirection="column">

@@ -25,38 +25,56 @@ function entries(table: Expressions): readonly (readonly [string, Expression])[]
   return Object.entries(table);
 }
 
+/**
+ * Every map a Body draws. `pixels` is frame zero and `frames` are maps in the very same format —
+ * `build()` hands whichever the beat picks to the same `pack()` — so every check that guards a map
+ * owes them the same walk. A ragged row or a stray character in an extra frame is not a wrong
+ * colour: it is a `pack()` throw on one beat, in the running TUI, on the path `core/` promises
+ * never to throw on.
+ */
+function maps(body: Body): readonly (readonly string[])[] {
+  return [body.pixels, ...(body.frames ?? [])];
+}
+
+/** Which map a failure is in: frame zero is `pixels` and says so by staying silent about it. */
+function where(id: string, stage: string, frame: number): string {
+  return frame === 0 ? `${id}/${stage}` : `${id}/${stage} frame ${frame}`;
+}
+
 test("every index a map writes, and every index its expressions paint, has a colour behind it", () => {
   for (const one of drawn) {
     const palette = paletteOf(one.id);
-    // The successor of the shared EYE_INDEX check: an eye colour now lives in the Species' own
-    // patches, so a table reaching past its own Palette is the same defect in a new place.
-    for (const [id, expression] of entries(expressionsOf(one.id))) {
-      for (const look of expression) {
-        for (const patch of look) {
-          for (const row of patch.pixels) {
-            for (const char of row) {
-              if (char === ".") continue;
-              const index = MAP_ALPHABET.indexOf(char) - 1;
-              assert.ok(
-                index >= 0 && index < palette.length,
-                `${one.id}/${id} patch at ${patch.at} writes "${char}" (index ${index}) but the palette holds ${palette.length} colours`,
-              );
+    for (const { id: stage } of STAGES) {
+      if (stage === "egg") continue;
+      // The merged table, not the Species' own: a Body's override enters at render exactly like the
+      // shared table does, and the patch-bounds test beside this one already walks it merged. An
+      // index past the palette in an override is the same defect, one Stage deeper.
+      for (const [id, expression] of entries(expressionsOf(one.id, stage))) {
+        for (const look of expression) {
+          for (const patch of look) {
+            for (const row of patch.pixels) {
+              for (const char of row) {
+                if (char === ".") continue;
+                const index = MAP_ALPHABET.indexOf(char) - 1;
+                assert.ok(
+                  index >= 0 && index < palette.length,
+                  `${one.id}/${stage}/${id} patch at ${patch.at} writes "${char}" (index ${index}) but the palette holds ${palette.length} colours`,
+                );
+              }
             }
           }
         }
       }
-    }
-    for (const { id: stage } of STAGES) {
-      if (stage === "egg") continue;
-      const { pixels } = mapsOf(one.id)[stage];
-      for (const [y, row] of pixels.entries()) {
-        for (const [x, char] of [...row].entries()) {
-          if (char === ".") continue;
-          const index = MAP_ALPHABET.indexOf(char) - 1;
-          assert.ok(
-            index >= 0 && index < palette.length,
-            `${one.id}/${stage} row ${y} column ${x} writes "${char}" (index ${index}) but the palette holds ${palette.length} colours`,
-          );
+      for (const [frame, pixels] of maps(mapsOf(one.id)[stage]).entries()) {
+        for (const [y, row] of pixels.entries()) {
+          for (const [x, char] of [...row].entries()) {
+            if (char === ".") continue;
+            const index = MAP_ALPHABET.indexOf(char) - 1;
+            assert.ok(
+              index >= 0 && index < palette.length,
+              `${where(one.id, stage, frame)} row ${y} column ${x} writes "${char}" (index ${index}) but the palette holds ${palette.length} colours`,
+            );
+          }
         }
       }
     }
@@ -96,12 +114,18 @@ test("every drawn map is exactly 32 rows of 32 characters, all from the alphabet
   for (const one of drawn) {
     for (const { id: stage } of STAGES) {
       if (stage === "egg") continue;
-      const { pixels } = mapsOf(one.id)[stage];
-      assert.equal(pixels.length, PIXEL_HEIGHT, `${one.id}/${stage} height`);
-      for (const [y, row] of pixels.entries()) {
-        assert.equal(row.length, SPRITE_WIDTH, `${one.id}/${stage} row ${y}: ${JSON.stringify(row)}`);
-        for (const [x, char] of [...row].entries()) {
-          assert.ok(MAP_ALPHABET.includes(char), `${one.id}/${stage} row ${y} column ${x}: "${char}" is not a map character`);
+      const body = mapsOf(one.id)[stage];
+      // An empty list is not an absent one: `build()` falls back to `pixels` and nothing animates,
+      // so the Stage would silently draw still while declaring that it moves.
+      assert.ok(body.frames === undefined || body.frames.length > 0, `${one.id}/${stage} declares frames but lists none`);
+      for (const [frame, pixels] of maps(body).entries()) {
+        const at = where(one.id, stage, frame);
+        assert.equal(pixels.length, PIXEL_HEIGHT, `${at} height`);
+        for (const [y, row] of pixels.entries()) {
+          assert.equal(row.length, SPRITE_WIDTH, `${at} row ${y}: ${JSON.stringify(row)}`);
+          for (const [x, char] of [...row].entries()) {
+            assert.ok(MAP_ALPHABET.includes(char), `${at} row ${y} column ${x}: "${char}" is not a map character`);
+          }
         }
       }
     }
@@ -112,11 +136,12 @@ test("MARK_SLOT and BADGE_SLOT are transparent in every drawn map", () => {
   for (const one of drawn) {
     for (const { id: stage } of STAGES) {
       if (stage === "egg") continue;
-      const { pixels } = mapsOf(one.id)[stage];
-      for (const slot of [MARK_SLOT, BADGE_SLOT]) {
-        for (let dy = 0; dy < slot.h; dy++) {
-          for (let dx = 0; dx < slot.w; dx++) {
-            assert.equal(pixels[slot.y + dy]?.[slot.x + dx], ".", `${one.id}/${stage} fills ${slot.x + dx},${slot.y + dy}`);
+      for (const [frame, pixels] of maps(mapsOf(one.id)[stage]).entries()) {
+        for (const slot of [MARK_SLOT, BADGE_SLOT]) {
+          for (let dy = 0; dy < slot.h; dy++) {
+            for (let dx = 0; dx < slot.w; dx++) {
+              assert.equal(pixels[slot.y + dy]?.[slot.x + dx], ".", `${where(one.id, stage, frame)} fills ${slot.x + dx},${slot.y + dy}`);
+            }
           }
         }
       }
@@ -202,22 +227,21 @@ test("every patch fits inside the canvas from its anchor", () => {
 
 // An Expression with no Look makes periodOf zero, and `index % 0` is NaN: one frozen Frame under a
 // NaN cache key, for ever. periodOf's Math.max(1, …) refuses to melt; this refuses the table.
-test("no Expression is empty, so a period is never zero", () => {
+test("no Expression is empty or missing, so a period is never zero and `open` is always there", () => {
   for (const one of drawn) {
     for (const [id, expression] of entries(expressionsOf(one.id))) {
       assert.ok(expression.length > 0, `${one.id}/${id} has no Look`);
     }
     // A Body's override is merged in wholesale, so an empty Expression can enter there too.
+    //
+    // `undefined` can too, and worse: `Partial<Expressions>` admits `{ open: undefined }`, which
+    // typechecks, spreads over the required `open` and leaves `expressionOf` returning undefined
+    // for every Activity — `periodOf` then reads `.length` of it and the window goes down. The
+    // type cannot refuse the key without exactOptionalPropertyTypes, so the table is refused here.
     for (const { id: stage } of STAGES) {
       for (const [id, expression] of entries(expressionsOf(one.id, stage))) {
+        assert.ok(expression !== undefined, `${one.id}/${stage}/${id} is present but undefined, which erases the Species' own`);
         assert.ok(expression.length > 0, `${one.id}/${stage}/${id} has no Look`);
-      }
-    }
-  }
-  for (const one of drawn) {
-    for (const { id: stage } of STAGES) {
-      for (const activity of ACTIVITIES) {
-        assert.ok(periodOf(one.id, stage, activity) > 0, `${one.id}/${stage}/${activity} has a period of zero`);
       }
     }
   }
@@ -232,6 +256,9 @@ test("every head anchor leaves room for the heart above it", () => {
       if (stage === "egg") continue;
       const { head } = mapsOf(one.id)[stage].anchors;
       assert.ok(head.y >= HEART_HEIGHT, `${one.id}/${stage} head at y=${head.y} leaves no room for the ${HEART_HEIGHT}-row heart`);
+      // And from below: the heart's rectangle ends at head.y, so a head past the last row takes
+      // paint() — and the window — down on a pet just as surely as a head too near the top.
+      assert.ok(head.y <= PIXEL_HEIGHT, `${one.id}/${stage} head at y=${head.y} is below the ${PIXEL_HEIGHT}-row canvas`);
       assert.ok(head.x - 2 >= 0 && head.x + 3 <= SPRITE_WIDTH, `${one.id}/${stage} head at x=${head.x} pushes the heart off the canvas`);
     }
   }
@@ -274,24 +301,29 @@ test("shifting a motion rectangle by any beat it actually uses never changes how
   for (const one of drawn) {
     for (const { id: stage } of STAGES) {
       if (stage === "egg") continue;
-      const { pixels, motion } = mapsOf(one.id)[stage];
-      if (motion?.tail !== undefined) {
-        const rect = motion.tail;
-        const rest = countOpaque(pixels, rect);
-        // tail shifts by sweepAt(beat), which ranges over the whole of SWEEP: both directions occur.
-        for (const dx of new Set(SWEEP)) {
-          if (dx === 0) continue;
-          const after = countOpaque(shift(pixels, rect, dx), rect);
-          assert.equal(after, rest, `${one.id}/${stage} tail ${JSON.stringify(rect)} loses pixels at dx=${dx}: ${rest} -> ${after}`);
+      const { motion } = mapsOf(one.id)[stage];
+      // Every frame, not only `pixels`: `build()` shifts whichever map the beat picked, so a tail
+      // drawn flush against its rectangle in frame two empties on exactly the beats that show it.
+      for (const [frame, pixels] of maps(mapsOf(one.id)[stage]).entries()) {
+        const at = where(one.id, stage, frame);
+        if (motion?.tail !== undefined) {
+          const rect = motion.tail;
+          const rest = countOpaque(pixels, rect);
+          // tail shifts by sweepAt(beat), which ranges over the whole of SWEEP: both directions occur.
+          for (const dx of new Set(SWEEP)) {
+            if (dx === 0) continue;
+            const after = countOpaque(shift(pixels, rect, dx), rect);
+            assert.equal(after, rest, `${at} tail ${JSON.stringify(rect)} loses pixels at dx=${dx}: ${rest} -> ${after}`);
+          }
         }
-      }
-      // ears shifts by a hardcoded dx = 1 on blink (see build() in sprites.ts) — never -1 — so only
-      // that one direction is ever exercised; testing the direction it never travels would flag
-      // rects that are perfectly fine and send a repair chasing a beat that never happens.
-      for (const [index, rect] of (motion?.ears ?? []).entries()) {
-        const rest = countOpaque(pixels, rect);
-        const after = countOpaque(shift(pixels, rect, 1), rect);
-        assert.equal(after, rest, `${one.id}/${stage} ears[${index}] ${JSON.stringify(rect)} loses pixels on blink (dx=1): ${rest} -> ${after}`);
+        // ears shifts by a hardcoded dx = 1 on blink (see build() in sprites.ts) — never -1 — so only
+        // that one direction is ever exercised; testing the direction it never travels would flag
+        // rects that are perfectly fine and send a repair chasing a beat that never happens.
+        for (const [index, rect] of (motion?.ears ?? []).entries()) {
+          const rest = countOpaque(pixels, rect);
+          const after = countOpaque(shift(pixels, rect, 1), rect);
+          assert.equal(after, rest, `${at} ears[${index}] ${JSON.stringify(rect)} loses pixels on blink (dx=1): ${rest} -> ${after}`);
+        }
       }
     }
   }
@@ -425,4 +457,30 @@ test("a Body without frames draws its single map at every beat", () => {
     maps.add(JSON.stringify(frameAt("cat", "adult", "idle", beat).map((row) => row.map((cell) => cell.top))));
   }
   assert.ok(maps.size <= period, "no beat may invent a map");
+});
+
+/** The same id as FIXTURE, drawing a different row: what a cache keyed on the id alone would confuse. */
+const OTHER_BODY: Body = { ...BODY, pixels: bar(10), frames: undefined };
+
+const OTHER: SpeciesDef = {
+  ...FIXTURE,
+  maps: { hatchling: OTHER_BODY, young: OTHER_BODY, adult: OTHER_BODY, elder: OTHER_BODY },
+};
+
+const OTHER_TABLE = [...SPECIES, OTHER];
+
+// The table parameter is a production render signature widened so a test can inject a Species. That
+// only holds if the cache can tell two tables apart: keyed on the id and the Stage alone, whichever
+// table rendered first would serve its Frames to the other for the rest of the process — a test
+// passing against a map it never declared, which is the worst kind of green. Both cached entry
+// points are checked: frameAt and heartFrame build their keys separately.
+test("two tables holding the same Species id never share a cached Frame", () => {
+  const mine = frameAt("test:framed", "adult", "idle", 0, undefined, false, TABLE);
+  const theirs = frameAt("test:framed", "adult", "idle", 0, undefined, false, OTHER_TABLE);
+  assert.notDeepEqual(mine, theirs, "two tables sharing an id must not share a Frame");
+  assert.deepEqual(frameAt("test:framed", "adult", "idle", 0, undefined, false, TABLE), mine, "and each table keeps its own");
+
+  const mineHeart = heartFrame("test:framed", "adult", "stoic", undefined, false, TABLE);
+  const theirsHeart = heartFrame("test:framed", "adult", "stoic", undefined, false, OTHER_TABLE);
+  assert.notDeepEqual(mineHeart, theirsHeart, "the heart Frame keys on the table too");
 });

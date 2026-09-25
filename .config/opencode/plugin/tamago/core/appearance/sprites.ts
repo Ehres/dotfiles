@@ -69,10 +69,33 @@ function body(species: SpeciesId, stage: StageId, table: readonly SpeciesDef[] =
   return mapsOf(species, table)[stage];
 }
 
-/** The cache key: every egg shares one entry, an unknown Species shares the reference's. */
+/**
+ * A serial number per table object, so two tables holding the same Species id never share a cache
+ * entry. Identity, not content: hashing eighty maps on every frame would cost more than building
+ * one, and the only caller that passes a table other than SPECIES is a test, which holds its table
+ * for the whole run. A WeakMap so a table a test drops is collected with its number.
+ */
+const TABLE_IDS = new WeakMap<readonly SpeciesDef[], number>();
+let tables = 0;
+
+/** Empty for the shipped catalog, so its keys read as they did before a table could be injected. */
+function tableKey(table: readonly SpeciesDef[]): string {
+  if (table === SPECIES) return "";
+  const seen = TABLE_IDS.get(table);
+  if (seen !== undefined) return `@${seen}`;
+  tables += 1;
+  TABLE_IDS.set(table, tables);
+  return `@${tables}`;
+}
+
+/**
+ * The cache key: every egg shares one entry whatever the table (the egg is EGG and
+ * DEFAULT_EXPRESSIONS, neither of which a table can change), an unknown Species shares the
+ * reference's, and two tables never share one.
+ */
 function keyOf(species: SpeciesId, stage: StageId, table: readonly SpeciesDef[] = SPECIES): string {
   if (stage === "egg") return "egg";
-  return `${known(species, table) ? species : REFERENCE}/${stage}`;
+  return `${known(species, table) ? species : REFERENCE}/${stage}${tableKey(table)}`;
 }
 
 /**
@@ -80,10 +103,12 @@ function keyOf(species: SpeciesId, stage: StageId, table: readonly SpeciesDef[] 
  * that Stage. The egg takes the migrated table whatever hatches from it: its
  * map and its eyes are drawn in EGG_PALETTE, where a redrawn Species' own
  * indices would mean nothing, and every egg has to stay the one same Frame
- * because they all share one cache key.
+ * because they all share one cache key. EGG's own override is merged over that
+ * table like any other Body's — it is empty today, and the day the egg is
+ * redrawn it must not be a field that silently does nothing.
  */
 export function expressionsOf(species: SpeciesId, stage?: StageId, table: readonly SpeciesDef[] = SPECIES): Expressions {
-  if (stage === "egg") return DEFAULT_EXPRESSIONS;
+  if (stage === "egg") return { ...DEFAULT_EXPRESSIONS, ...(EGG.expressions ?? {}) };
   const own = tableOf(species, table);
   if (stage === undefined) return own;
   return { ...own, ...(mapsOf(species, table)[stage].expressions ?? {}) };
