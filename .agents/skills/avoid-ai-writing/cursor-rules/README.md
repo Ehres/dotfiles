@@ -28,4 +28,4 @@ If you're on a Cursor version that still uses `.cursorrules` (single file at rep
 
 ## Updating
 
-This file is a copy of [`SKILL.md`](../SKILL.md) with Cursor-specific frontmatter. When the upstream skill updates, this file should be re-synced. There's no automated sync between them today — open an issue if drift becomes a problem.
+This file and [`dist/avoid-ai-writing.md`](../dist/avoid-ai-writing.md) are generated from `SKILL.md` plus `references/patterns.md`. Run `bash scripts/sync-cursor-rules.sh` after editing either source. The generator first builds the lossless `SKILL.full.md`, then applies six anchored portability rewrites so copied instructions use manual fallbacks where bundled commands are unavailable. CI regenerates all artifacts and fails on drift. Do not edit generated files.

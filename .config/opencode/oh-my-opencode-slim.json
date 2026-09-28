@@ -6,6 +6,7 @@
     "openai": {
       "orchestrator": {
         "model": "openai/gpt-6-sol-fast",
+        "variant": "low",
         "skills": ["*"],
         "mcps": ["*", "!context7"]
       },
@@ -36,7 +37,11 @@
       "fixer": {
         "model": "openai/gpt-6-luna",
         "variant": "high",
-        "skills": ["vercel-react-best-practices", "vercel-composition-patterns", "building-components"],
+        "skills": [
+          "vercel-react-best-practices",
+          "vercel-composition-patterns",
+          "building-components"
+        ],
         "mcps": []
       }
     },

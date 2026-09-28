@@ -66,6 +66,82 @@ test('every type referenced in the tables is a real detector type', () => {
   );
 });
 
+// #242 establishes a ratchet without taking the newcomer fixtures from #213
+// or the phrase-level false-positive follow-ups. This is a name-presence guard,
+// not proof of assertions or runtime coverage. Remove an exception when its
+// fixture lands; new types must never be added to this historical list.
+const LEGACY_UNCOVERED_TYPES = [
+  'false-concession',
+  'lets-construction',
+  'novelty-inflation',
+  'rhetorical-question',
+  'significance-inflation',
+  'sycophantic',
+  'template-phrase',
+  'tier1-clarity',
+  'vague-attribution',
+];
+
+test('every detector type has a named fixture or an explicit legacy gap', () => {
+  const fixtures = fs.readFileSync(path.join(__dirname, 'patterns.test.js'), 'utf8');
+  const missing = typeKeys.filter(type =>
+    !fixtures.includes(`'${type}'`) && !fixtures.includes(`"${type}"`)
+  ).sort();
+  assert.deepEqual(missing, LEGACY_UNCOVERED_TYPES,
+    'Fixture coverage changed: add a fixture for a new/missing type, or remove ' +
+    'a legacy exception whose fixture has landed. Do not expand the exception list.');
+});
+
+// The engine's `type` total is a DERIVED fact: the true value is
+// TYPE_LABELS.length, and every sentence that states a number is a copy of it.
+// Copies rot. The README sat at 45 through the two releases that took the real
+// total to 47, because nothing compared the prose to the code. This test has
+// the true value in hand already, so it is the cheapest place to compare.
+//
+// Each site is a file plus a regex with ONE capture group around the number.
+// A regex that stops matching FAILS rather than passing: a reworded sentence
+// has to re-register here instead of silently dropping its own guard. That is
+// the same rule scripts/check-pattern-count.sh applies to its README bullets.
+//
+// Do not add a site that floors or approximates the number ("40+ categories").
+// A floored number is a looser fact and would fail on every release.
+const COUNT_SITES = [
+  ['../README.md', /engine implements (\d+) `type` categories/],
+  ['CATEGORIES.md', /engine exposes (\d+) issue `type`s/],
+  ['CATEGORIES.md', /the engine's \*\*(\d+) `type`s\*\*/],
+];
+
+// One test per site, so breaking three sites reports three failures rather
+// than aborting on the first.
+for (const [rel, regex] of COUNT_SITES) {
+  test(`${rel} states the engine type total, and it matches TYPE_LABELS (${regex.source.slice(0, 28)}…)`, () => {
+    const text = fs.readFileSync(path.join(__dirname, rel), 'utf8');
+    const matches = [...text.matchAll(new RegExp(regex.source, 'g'))];
+    assert.ok(
+      matches.length,
+      `${rel}: ${regex} no longer matches — the sentence was reworded or ` +
+        'removed. Re-point COUNT_SITES in this file at the new wording, or ' +
+        'drop the entry only if the number is gone from that file entirely.'
+    );
+    // Deliberately NOT asserting the regex matches exactly once. This repo
+    // records corrections by quoting the superseded wording (see the 3.22.0
+    // CHANGELOG entry), so a quoted historical number is an expected, correct
+    // thing to find in a guarded file — and README.md's live statement is
+    // itself inside a blockquote, so filtering quotes out removes the site.
+    // A uniqueness assert therefore reddens a repo with no drift in it, which
+    // is worse than the hole it closes: each regex is anchored on distinctive
+    // backtick-and-bold syntax, and the value assertion below is the real
+    // check. Keep new sites specific enough that the first match is the live
+    // one.
+    assert.equal(
+      Number(matches[0][1]),
+      typeKeys.length,
+      `${rel} (${regex.source}) says ${matches[0][1]} detector types, ` +
+        `TYPE_LABELS has ${typeKeys.length}`
+    );
+  });
+}
+
 if (failed > 0) {
   console.error(`\n${failed} contract check(s) failed.`);
   process.exit(1);
