@@ -55,6 +55,10 @@ Mesuré sur le chat, le 2026-09-29 :
 - **Retoucher ici plutôt qu'éditer.** Un œil raté ou une queue en trop se
   corrigent en quelques pixels sur le PNG — un œil recopié en miroir, une zone
   effacée — là où `edit` redessine toute l'image.
+- **Juger sur le rendu importé.** La palette commune garde les 16 couleurs les
+  plus employées : une couleur rare disparaît à l'import. Les yeux bleus de
+  l'adulte grenouille et le ventre jaune de son young y sont passés. Montrer
+  les quatre stades importés avant d'écrire l'espèce, pas seulement les PNG.
 
 ## Le bloc de style
 
@@ -207,30 +211,32 @@ Brown owl in old age, bleached ragged feathers, half-closed eyes, one ear tuft b
 
 ### 3. frog — grenouille
 
-- [ ] adult  - [ ] hatchling  - [ ] young  - [ ] elder
+- [x] adult  - [x] hatchling  - [x] young  - [x] elder
+
+Tirages et retouches : `docs/sprites/frog/SOURCES.md`.
 
 **adult**
 
 ```
-Green frog, wide round body, bulging cheeks, long folded hind legs, webbed toes, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Green frog, wide round body, bulging cheeks, long folded hind legs, webbed toes, sitting, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
 ```
 
 **hatchling**
 
 ```
-Green frog as a tadpole, no legs at all, a long flat tail, a smooth round head, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Green tadpole, just a round green blob like a big droplet with two eyes on top and a thin tail curling to one side, no legs, no arms, no body, super chibi, front view, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
 ```
 
 **young**
 
 ```
-Green frog as a froglet, hind legs grown, small front legs, a short tail stub still attached, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Green frog as a tadpole seen from the front, a big round head with a small wiggly tail curling to one side, no legs at all, super chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
 ```
 
 **elder**
 
 ```
-Green frog in old age, dull mottled skin, heavy jowls, slouched posture, drooping eyelids, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Green frog in old age, dull mottled skin, heavy jowls, slouched posture, drooping eyelids, sitting, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
 ```
 
 ### 4. duck — canard
