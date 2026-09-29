@@ -81,6 +81,48 @@ Pour refaire un seul stade plus tard sans toucher à la palette déjà en place 
 node scripts/import.ts elder.png --palette "#rrggbb,#rrggbb,…"
 ```
 
+## Après l'import
+
+L'import donne la palette et les quatre dessins. Une espèce redessinée a besoin
+de trois choses de plus dans son entrée, dans
+`core/creature/species/<rareté>.ts`.
+
+**1. Les ancres de chaque stade** : `head`, `left_eye`, `right_eye`, en
+pixels. Dans le dessin imprimé, le numéro de la ligne est `y` et la position du
+caractère est `x`, tous deux comptés à partir de 0. Un œil s'ancre sur son coin
+en haut à gauche. La tête s'ancre sur un point du visage, à la ligne 5 au plus
+tôt : le cœur du câlin se dessine dans les cinq lignes au-dessus.
+
+**2. Ses propres expressions**, à la place de `expressions:
+DEFAULT_EXPRESSIONS`. Celles par défaut peignent avec la couleur n°5 de la
+palette, qui était l'œil des anciens dessins et n'est plus rien de précis :
+sans ce remplacement, un carré de couleur au hasard apparaît sur les yeux à
+chaque clignement. Le minimum :
+
+```ts
+expressions: {
+  open: [[]], // les yeux tels qu'ils sont dessinés
+  shut: [[
+    { at: "left_eye", pixels: ["111", "000", "111"] },
+    { at: "right_eye", pixels: ["111", "000", "111"] },
+  ]],
+},
+```
+
+Les chiffres sont des indices de la palette de l'espèce : ici `1` pour la
+couleur du pelage, `0` pour celle du contour. Le patch prend la taille de
+l'œil qu'il recouvre. Les autres expressions (`hurt`, `sleeping`, `waiting`…)
+sont facultatives et reprennent `open` quand elles manquent. Si les yeux d'un
+stade ont une autre taille, ce stade peut porter ses propres `expressions`.
+
+**3. Les zones qui bougent** (`motion` : la queue, les oreilles). Retire celles
+héritées des anciens dessins, ou replace-les sur le nouveau : une zone mal
+placée fait glisser un morceau du corps à chaque battement.
+
+Puis `pnpm test`, qui refuse une ancre manquante, un patch qui sort du cadre,
+une tête trop haute ou un coin réservé occupé, et
+`node scripts/preview.ts cat adult` pour voir le résultat.
+
 ---
 
 ## common
