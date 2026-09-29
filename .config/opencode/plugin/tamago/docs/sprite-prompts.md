@@ -80,6 +80,10 @@ Mesuré sur le chat, le 2026-09-29 :
   « grey muzzle », « heavy-lidded eyes » n'ont rien changé : le hamster
   sortait doré et bien réveillé. Une canne et des taches grises en ont fait
   un vieux du premier coup.
+- **`edit` réussit une retouche localisée.** Sur l'escargot, « mets un œil au
+  bout de chaque antenne, enlève celui de la tête » a été suivi deux fois sans
+  abîmer le reste. Il rend toujours 32 couleurs ; l'import les ramène à la
+  palette commune. Il reste à éviter pour tout ce qui touche l'image entière.
 
 ## Le bloc de style
 
@@ -342,30 +346,34 @@ Old golden hamster, faded pale beige fur with grey patches, bushy white eyebrows
 
 ### 6. snail — escargot
 
-- [ ] adult  - [ ] hatchling  - [ ] young  - [ ] elder
+- [x] adult  - [x] hatchling  - [x] young  - [x] elder
 
-**adult**
+Tirages, `edit` et retouches : `docs/sprites/snail/SOURCES.md`. De profil vers
+la droite, les yeux au bout des antennes ; hatchling en 20 × 20, young en
+26 × 26.
+
+**adult** — puis un `edit` pour les yeux
 
 ```
 Pale snail with a shell on its back, a thick spiral shell, two long eye stalks, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
 ```
 
-**hatchling**
+**hatchling** — tiré en `20 × 20`
 
 ```
-Pale snail with a shell on its back as a baby, a smooth shell barely coiled, a tiny body, very short eye stalks, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Pale snail with a shell on its back as a tiny baby snail, a smooth shell barely coiled, very short eye stalks with one big round black eye on the tip of each, side view facing right, super chibi, full body, thick dark outline, solid flat colour areas, no shading
 ```
 
-**young**
+**young** — tiré en `26 × 26`
 
 ```
-Pale snail with a shell on its back as a young snail, one clear spiral turn in the shell, a longer body, eye stalks fully out, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Pale snail with a shell on its back as a young snail, a plain spiral shell with one clear turn, a longer body, eye stalks fully out with one big round black eye on the tip of each, side view facing right, chibi, full body, thick dark outline, solid flat colour areas, no shading
 ```
 
-**elder**
+**elder** — puis un `edit` pour les yeux
 
 ```
-Pale snail with a shell on its back in old age, a mossy cracked shell, a shrunken body, drooping eye stalks, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Old snail, faded grey cracked shell with green moss patches, pale wrinkled body, drooping eye stalks with one big round black eye on the tip of each, bushy white eyebrows, side view facing right, chibi, full body, thick dark outline, solid flat colour areas, no shading
 ```
 
 ---
