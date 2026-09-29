@@ -45,7 +45,16 @@ Mesuré sur le chat, le 2026-09-29 :
   coins réservés à la marque et au badge sortent libres d'eux-mêmes, et le
   test du catalogue les vérifie de toute façon.
 - **Les liens expirent en moins d'une heure.** Télécharge l'image dès que le
-  tirage est fini.
+  tirage est fini, et note l'identifiant du tirage dans le `SOURCES.md` de
+  l'espèce : c'est lui qui servira à la retoucher ou à l'animer.
+- **Une posture commune.** Sans `sitting upright`, l'adulte est sorti couché et
+  de trois quarts, à côté de trois stades assis de face.
+- **Le young reste un chaton.** `lanky adolescent` et `long legs` ont donné un
+  chat plus mûr que l'adulte ; `super chibi, big round head on a small slim
+  body` le place entre le hatchling et l'adulte.
+- **Retoucher ici plutôt qu'éditer.** Un œil raté ou une queue en trop se
+  corrigent en quelques pixels sur le PNG — un œil recopié en miroir, une zone
+  effacée — là où `edit` redessine toute l'image.
 
 ## Le bloc de style
 
@@ -129,12 +138,14 @@ une tête trop haute ou un coin réservé occupé, et
 
 ### 1. cat — chat
 
-- [ ] adult  - [ ] hatchling  - [ ] young  - [ ] elder
+- [x] adult  - [x] hatchling  - [x] young  - [x] elder
+
+Tirages et retouches : `docs/sprites/cat/SOURCES.md`.
 
 **adult**
 
 ```
-Grey tabby cat, round body, pointed ears, short striped tail curled at its side, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Grey tabby cat, round body, pointed ears, short striped tail curled at its side, sitting upright, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
 ```
 
 **hatchling**
@@ -146,7 +157,7 @@ Grey tabby cat as a newborn kitten, head twice as large as its tiny body, ears f
 **young**
 
 ```
-Grey tabby cat as a lanky adolescent, ears upright and oversized, long legs, tail thin and straight, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Grey tabby cat as a playful half-grown kitten, super chibi, big round head on a small slim body, oversized upright ears, thin legs, thin straight tail, sitting, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
 ```
 
 **elder**
