@@ -428,6 +428,14 @@ sans changement. Restent deux chantiers.
 - **Les quatre-vingts dessins.** Méthode, réglages et prompts dans
   `docs/sprite-prompts.md` ; les PNG sources dans
   `docs/sprites/<espèce>/<stade>.png`.
+- **Des « Zzz » sur le sprite endormi.** Aujourd'hui une créature qui dort a les
+  yeux fermés (`sleeping`) et un sprite assombri (`TINT` dans
+  `view/sprite.tsx`), rien au-dessus de la tête. Un petit motif de Z en pixels,
+  peint comme le cœur de la caresse au-dessus de l'ancre `head` (les cinq
+  lignes y sont déjà garanties libres), dans une couleur du thème : une
+  fonctionnalité du moteur, pour toutes les espèces à la fois. Commencer fixe :
+  la cadence `sleeping` n'a pas de `frame` exprès, pour qu'une créature
+  endormie ne coûte rien, et des Z qui montent la réveilleraient.
 
 ## Ordre recommandé
 
