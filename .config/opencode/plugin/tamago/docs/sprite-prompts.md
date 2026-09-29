@@ -9,8 +9,9 @@ Pour chaque espèce : **quatre tirages**, un par stade, puis **une commande
 d'import** qui déduit la palette commune des quatre images et les ramène
 toutes dessus.
 
-Le générateur est limité à cinq tirages par jour : quatre pour une espèce,
-un en réserve pour une reprise. Une espèce par jour.
+Une image coûte un crédit à `count: 1`. La formule gratuite en donne cinq
+par jour, soit une espèce par jour avec une reprise ; l'abonnement à 8 $ en
+donne 800 par mois, assez pour les vingt espèces en une fois.
 
 ## Réglages de l'outil
 
@@ -22,10 +23,29 @@ Ils ne s'écrivent pas dans le prompt :
 | `width` / `height` | `32` / `32` |
 | `maxColors` | `12` |
 | `transparent` | `true` |
-| `count` | `1` |
+| `count` | `3` avec l'abonnement, `1` en gratuit |
 
-`maxColors: 12` force des aplats : à 16 le modèle garde des dégradés, à 8 il
-perd des traits comme la couleur des yeux.
+Avec `count: 3`, garde la meilleure des trois. Le coût d'un tirage à trois
+variantes n'a pas encore été vérifié : regarde le compteur de crédits au
+premier.
+
+## Ce qu'on a appris sur pixler
+
+Mesuré sur le chat, le 2026-09-29 :
+
+- **12 couleurs.** À 16, le modèle garde ses ombres : dix des seize couleurs du
+  premier chat étaient des nuances presque identiques. À 8, il perd des traits
+  réels : le turquoise des yeux avait disparu.
+- **Pas de transformation.** L'outil de modification d'image (`edit`) n'a pas
+  de réglage de couleurs, redessine librement, et a abîmé le chaton. Quatre
+  tirages séparés donnent quatre images propres ; c'est l'import qui leur
+  donne une palette commune.
+- **Pas de consigne négative.** « Laisse le haut vide » n'a jamais été
+  respecté : le modèle ne sait pas s'abstenir de dessiner quelque part. Les
+  coins réservés à la marque et au badge sortent libres d'eux-mêmes, et le
+  test du catalogue les vérifie de toute façon.
+- **Les liens expirent en moins d'une heure.** Télécharge l'image dès que le
+  tirage est fini.
 
 ## Le bloc de style
 
@@ -46,10 +66,12 @@ créature : ne le change pas d'un stade à l'autre.
 
 ## Import
 
-Une commande par espèce, les quatre images ensemble :
+Range les images dans `docs/sprites/<espèce>/<stade>.png` : ce sont les
+sources, versionnées pour pouvoir réimporter si le format ou la palette change
+un jour. Puis une commande par espèce, les quatre images ensemble :
 
 ```sh
-node scripts/import.ts adult.png hatchling.png young.png elder.png
+node scripts/import.ts docs/sprites/cat/{adult,hatchling,young,elder}.png
 ```
 
 L'outil imprime la palette une fois, puis les quatre dessins, prêts à coller.

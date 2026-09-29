@@ -409,6 +409,26 @@ porte désormais `en` et `fr` obligatoires (environ 1 000 phrases écrites),
 et la Species porte un genre pour l'accord ; une phrase française n'est
 jamais écrite deux fois dans le catalogue.
 
+### 14. Sprites 32 × 32 : les dessins et les dialogues
+
+Le moteur est prêt, sur la branche `tamago-sprite-engine` (spec
+`docs/superpowers/specs/2026-09-25-tamago-sprite-engine-design.md`) : toile
+32 × 32, une palette par espèce, ancres et expressions propres à chaque
+espèce. Les vingt espèces tournent encore avec leurs anciens dessins, recadrés
+sans changement. Restent deux chantiers.
+
+- **Le débordement de la carte et du roster.** Un sprite de 16 lignes ne tient
+  plus dans ces deux dialogues à côté des stats, et OpenTUI supprime des lignes
+  au milieu plutôt que de couper en bas : le roster perd « Tamago 4 » entre le
+  3 et le 5, sans aucun signe. Sept tests de vue échouent exprès pour le
+  garder visible (liste dans `AGENTS.md`). Avant tout correctif, mesurer dans
+  un vrai OpenCode la hauteur réelle du dialogue `xlarge` : selon le résultat,
+  soit le fixture `DIALOG` était faux, soit la carte doit montrer moins, soit
+  un sprite plus petit. La fusion de la branche attend cette mesure.
+- **Les quatre-vingts dessins.** Méthode, réglages et prompts dans
+  `docs/sprite-prompts.md` ; les PNG sources dans
+  `docs/sprites/<espèce>/<stade>.png`.
+
 ## Ordre recommandé
 
 1. ~~Bulle avec templates locaux, plus mode muet.~~ Fait.
@@ -420,9 +440,12 @@ jamais écrite deux fois dans le catalogue.
 6. ~~Gamification (idée 11) : le premier Milestone et le `DialogSelect` ; les
    Traits de Voice s'écriront contre la feuille.~~ Fait.
 7. ~~Language : anglais et français (idée 13).~~ Fait.
-8. Achievements et streak, avec le journal (idée 8), après une semaine d'usage
+8. Mesurer le dialogue `xlarge`, régler le débordement de la carte et du
+   roster, fusionner la branche `tamago-sprite-engine` (idée 14).
+9. Dessiner les vingt espèces en 32 × 32 (idée 14).
+10. Achievements et streak, avec le journal (idée 8), après une semaine d'usage
    réel des Species.
-9. Enrichissements Species (idée 12, lot 4), accessoires et couleur (idées 4
+11. Enrichissements Species (idée 12, lot 4), accessoires et couleur (idées 4
    et 10) sur la `Frame` en segments.
 
 ## Références
