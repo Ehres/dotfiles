@@ -59,6 +59,16 @@ Mesuré sur le chat, le 2026-09-29 :
   plus employées : une couleur rare disparaît à l'import. Les yeux bleus de
   l'adulte grenouille et le ventre jaune de son young y sont passés. Montrer
   les quatre stades importés avant d'écrire l'espèce, pas seulement les PNG.
+- **Le jaune fait un poussin.** Un canard jaune sort en poussin à tous les
+  stades ; un colvert adulte (tête verte, corps gris) se lit tout de suite
+  comme un adulte, et son caneton jaune comme un bébé. Choisir les couleurs
+  de l'adulte pour qu'elles ne soient pas celles du petit.
+- **Certains animaux ne se dessinent pas de face.** Le colvert demandé
+  « facing the viewer » est sorti trois fois de trois quarts. Garder la pose
+  que pixler réussit, la même pour les quatre stades, plutôt que payer des
+  tirages contre elle ; un tirage tourné du mauvais côté se retourne en
+  miroir, gratuitement.
+- **300 caractères au plus** par prompt : pixler refuse au-delà.
 
 ## Le bloc de style
 
@@ -259,30 +269,33 @@ Green frog in old age, dull mottled skin, heavy jowls, slouched posture, droopin
 
 ### 4. duck — canard
 
-- [ ] adult  - [ ] hatchling  - [ ] young  - [ ] elder
+- [x] adult  - [x] hatchling  - [x] young  - [x] elder
+
+Tirages et retouches : `docs/sprites/duck/SOURCES.md`. Un colvert de trois
+quarts, un seul œil visible : voir ce fichier pour le pourquoi.
 
 **adult**
 
 ```
-Yellow duck, round fluffy body, small wings at its sides, orange beak and webbed feet, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Mallard duck, glossy green head, white neck ring, brown chest, grey body, yellow bill, orange webbed feet, facing the viewer, both eyes visible, standing upright, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
 ```
 
 **hatchling**
 
 ```
-Yellow duck as a newly hatched chick, head twice as large as its tiny body, no wings, one curl of down on top, sitting, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Mallard duck as a newly hatched duckling, fluffy yellow down with brown patches, tiny wings, small neat orange bill with a dark outline, head twice as large as its tiny body, three-quarter view facing left, standing, super chibi, full body, thick dark outline, solid flat colour areas, no shading
 ```
 
 **young**
 
 ```
-Yellow duck as a half-grown duckling, head and body the same size, short wings held out, standing tall, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Young mallard drake, green head coming in, thin white neck ring, brown chest, grey body with a few tufts of yellow down left, short wings, yellow bill, three-quarter view facing left, standing, chibi, full body, thick dark outline, solid flat colour areas, no shading, big round black eye
 ```
 
 **elder**
 
 ```
-Yellow duck in old age, pale faded plumage, drooping eyelids, hunched back, dulled beak, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Old mallard drake, faded dull green head, greying chest and body, ragged feathers, heavy drooping eyelid, hunched, yellow bill, three-quarter view facing left, standing, chibi, full body, thick dark outline, solid flat colour areas, no shading
 ```
 
 ### 5. hamster — hamster
