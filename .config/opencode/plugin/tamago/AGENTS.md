@@ -117,35 +117,26 @@ Then `./node_modules/.bin/tsc --noEmit`, and launch OpenCode once for
 anything the snapshots cannot see: colors, the dialog stack, two instances
 side by side for persistence changes.
 
-`node scripts/import.ts <path-to-png> [--patch <anchor>] [--palette "#rrggbb,..."]`
-turns a drawn PNG into a Species' `pixels:`/`palette:` block. Without
-`--patch` the PNG must be the full 32 x 32 map; with it, any size that fits
-inside the canvas, for a Patch pinned to that Anchor — 32 x 32 is the bound,
-not the size, since where a Patch reaches depends on its anchor, which this
-tool cannot know; anything wider or taller fits under no anchor at all and is
-refused by name rather than clipped in silence by `stamp()` at render.
+`node scripts/import.ts <image.png>... [--palette "#rrggbb,..."] [--patch <anchor>]`
+turns drawn PNGs into the `palette:` and `pixels:` blocks of a Species entry.
+It prints them and never rewrites a Species file.
 
-**The first Body of a Species establishes the palette ordering; import every
-later map with `--palette`.** Left alone, the tool orders the palette by
-descending pixel count *per image*, so the second, third and fourth Body of a
-Species — and every Patch — land on a different index order than the first and
-have to be re-indexed by hand, on a 32 x 32 grid of single characters, by eye.
-`--palette` takes the Species' Palette line as it stands in its file, keeps
-that order exactly, and appends any colour the image wears that the palette
-does not hold — still refusing past sixteen. An appended colour is named on
-stderr with its pixel count, the way the ceiling refusal names colours, so a
-shade that drifted through a resave is visible instead of silently taking a
-new index.
+A Species has one Palette shared by its four Bodies, so its four images are
+imported together: `node scripts/import.ts adult.png hatchling.png young.png elder.png`.
+The tool pools the colours of every image, merges those within
+`MERGE_DISTANCE` of a more used one, keeps the sixteen most used
+(`PALETTE_MAX`), and maps every pixel of every image to the nearest colour of
+that palette. It prints the palette once, then each map labelled with its file.
 
-The pasteable block (and, with `--patch`, a leading `// patch: <anchor>`
-comment) goes to stdout; a Species file is pasted into by hand from there,
-never rewritten by this tool. The colour count, the ceiling warning and the
-drift warning go to stderr instead.
+`--palette` maps onto a palette already in a Species file instead of deducing
+one — to redraw a single stage later without shifting the indices of the
+others. `--patch <anchor>` imports one Patch for an Expression: any size up to
+the canvas.
 
-The ceiling is sixteen colours (`PALETTE_MAX`): past it, the tool refuses by
-name, listing every colour by descending pixel count, so near-duplicate shades
-from anti-aliasing are visible rather than a bare "N colours". Art for this
-engine must be flat: no gradient banding, no anti-aliased edges.
+Only the pasteable blocks go to stdout, so the output can be piped to the
+clipboard; a one-line summary — colours in, colours in the palette, largest
+colour correction — goes to stderr. A large correction is the cue to look at
+the result in `scripts/preview.ts`.
 
 The decoder (`scripts/png.ts`) is hand-written on top of `node:zlib`'s inflate
 — chunk parsing, the five PNG filters (None, Sub, Up, Average, Paeth), colour

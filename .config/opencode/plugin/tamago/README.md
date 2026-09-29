@@ -303,23 +303,14 @@ snapshot-tested headless under Bun; the adapter and the colors are verified by
 launching OpenCode: open two instances side by side, run some tools in one,
 and watch the other's XP follow.
 
-Drawing a Species: export a 32 x 32 PNG of at most sixteen flat colours — no
-gradient banding, no anti-aliased edges — and run `node scripts/import.ts
-<path>.png` to print the `palette:` and `pixels:` blocks to paste into its
-entry in `core/creature/species/<rarity>.ts`. `--patch <anchor>` prints a
-Patch instead, for an Expression pinned to that Anchor: any size up to the
-canvas, which is its bound rather than its size — anything larger fits under
-no anchor and is refused. Past sixteen colours the tool refuses, listing every
-colour by pixel count so near-duplicate anti-aliased shades are visible.
-
-A Species has one Palette and four Bodies, so only the first import invents an
-ordering: the palette is ranked by pixel count per image, and a second Body
-ranked on its own counts would index into the same colours in a different
-order. Pass the Species' Palette back in with
-`--palette "#2b1d12,#e8974a,..."` for every map after the first and for every
-Patch — that order is kept exactly, colours the image adds are appended and
-named with their pixel counts on stderr, and the ceiling of sixteen still
-holds.
+Drawing a Species: generate four 32 x 32 PNGs, one per Stage, and import them
+together — `node scripts/import.ts adult.png hatchling.png young.png elder.png`.
+The tool deduces one palette of at most sixteen colours from the four images,
+maps each onto it, and prints the `palette:` line and the four `pixels:`
+blocks to paste into the Species entry in `core/creature/species/<rarity>.ts`.
+`--palette "#rrggbb,..."` redraws one stage onto a palette already in place;
+`--patch <anchor>` imports a Patch for an Expression. The prompts used to
+generate the twenty Species are in `docs/sprite-prompts.md`.
 
 Layout:
 

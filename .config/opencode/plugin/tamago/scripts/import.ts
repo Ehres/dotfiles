@@ -1,5 +1,10 @@
-// scripts/import.ts — run: node scripts/import.ts /path/to/duck.png [--patch <anchor>] [--palette "#rrggbb,..."]
+// scripts/import.ts — turns PNG sprites into the palette and maps pasted into a Species file.
+//
+//   node scripts/import.ts adult.png hatchling.png young.png elder.png   one Species, one shared palette
+//   node scripts/import.ts elder.png --palette "#rrggbb,..."             redraw a stage, keep the palette
+//   node scripts/import.ts eye.png --patch left_eye --palette "..."      an expression patch
 import { readFileSync } from "node:fs";
+import { basename } from "node:path";
 import { MAP_ALPHABET, PIXEL_HEIGHT, SPRITE_WIDTH } from "../core/appearance/pixels.ts";
 import { PALETTE_MAX } from "../core/appearance/palette.ts";
 import { decodePng, Refusal, type Image } from "./png.ts";
@@ -7,138 +12,124 @@ import { decodePng, Refusal, type Image } from "./png.ts";
 /** Alpha is a cut, not a blend: under 128 the pixel is transparent, at or above it takes its RGB. */
 const OPAQUE = 128;
 
+/**
+ * Two colours closer than this are the same colour. An AI regeneration drifts every colour of its
+ * source by up to about 33 — measured on a cat and the kitten derived from it — while a genuinely
+ * different feature, turquoise eyes on a grey coat, sat 46 or more away. 35 merges the first and
+ * keeps the second apart.
+ */
+export const MERGE_DISTANCE = 35;
+
+/**
+ * What an image's size is measured against. A whole map is the canvas exactly; a Patch is pinned
+ * to an anchor and has no fixed size, but nothing larger than the canvas fits under any anchor.
+ */
+export type Bound = { width: number; height: number; fit: "exactly" | "at most" };
+
 function colourAt(image: Image, i: number): string | undefined {
   if ((image.pixels[i * 4 + 3] ?? 0) < OPAQUE) return undefined;
   const hex = (value: number): string => value.toString(16).padStart(2, "0");
   return `#${hex(image.pixels[i * 4] ?? 0)}${hex(image.pixels[i * 4 + 1] ?? 0)}${hex(image.pixels[i * 4 + 2] ?? 0)}`;
 }
 
-/**
- * What the image's size is measured against. A whole map is the canvas
- * exactly; a Patch has no fixed size — it is pinned to an anchor, and how far
- * it reaches depends on where that anchor sits, which this tool cannot know —
- * but it still has a bound, because nothing wider or taller than the canvas
- * can fit under any anchor at all. `stamp()` clips the rest at render, in
- * silence, which is the failure this refusal exists to make loud.
- */
-export type Bound = { width: number; height: number; fit: "exactly" | "at most" };
-
-/** A colour the image wears that the given palette did not hold, and how many pixels wear it. */
-export type Drift = { colour: string; count: number };
-
-/** What an image becomes: a map of palette indices, the Palette those index into, and what drifted. */
-export type Drawn = { pixels: string[]; palette: string[]; added: readonly Drift[] };
-
-/** Colours by descending pixel count, ties by hex: the order every refusal and every fresh Palette reads in. */
-function ranked(counts: Map<string, number>): readonly Drift[] {
-  return [...counts.entries()]
-    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-    .map(([colour, count]) => ({ colour, count }));
+/** Euclidean RGB distance between two `#rrggbb` colours. */
+export function distance(a: string, b: string): number {
+  const channel = (colour: string, at: number): number => parseInt(colour.slice(at, at + 2), 16);
+  const dr = channel(a, 1) - channel(b, 1);
+  const dg = channel(a, 3) - channel(b, 3);
+  const db = channel(a, 5) - channel(b, 5);
+  return Math.sqrt(dr * dr + dg * dg + db * db);
 }
 
-function listed(drifts: readonly Drift[]): readonly string[] {
-  return drifts.map(({ colour, count }) => `  ${colour} x${count}`);
+export function checkSize(image: Image, bound: Bound): void {
+  const wrong =
+    bound.fit === "exactly"
+      ? image.width !== bound.width || image.height !== bound.height
+      : image.width > bound.width || image.height > bound.height;
+  if (wrong) throw new Refusal(`the image is ${image.width} x ${image.height}, expected ${bound.fit} ${bound.width} x ${bound.height}`);
 }
 
-/**
- * The ceiling refusal's body: which colours are there, how many pixels each
- * holds, and what to do about it. Printed, not thrown blind, because a
- * person staring at "32 colours" over a hand-drawn image has no way to tell
- * a real 32-colour drawing from sixteen colours each anti-aliased into two —
- * the counts make that visible at a glance.
- */
-function ceilingMessage(counts: Map<string, number>): string {
-  return [
-    `the image holds ${counts.size} colours, the ceiling is ${PALETTE_MAX}:`,
-    ...listed(ranked(counts)),
-    `reduce the image to ${PALETTE_MAX} colours or fewer in the editor — for instance, export with an indexed palette.`,
-  ].join("\n");
-}
-
-/** The same refusal for a given palette: the ceiling is reached together, so the drift is what to look at. */
-function driftCeilingMessage(given: readonly string[], added: readonly Drift[]): string {
-  return [
-    `the given palette holds ${given.length} colours and the image wears ${added.length} more, past the ceiling of ${PALETTE_MAX}:`,
-    ...listed(added),
-    `recolour those to colours the Species already holds, or drop one from the palette you passed.`,
-  ].join("\n");
-}
-
-/**
- * The map and the Palette an image becomes. With no `given` palette the
- * colours are ordered by descending pixel count, ties by hex — the ordering
- * the first Body of a Species establishes. With one, that ordering is kept
- * exactly as passed and every colour the image wears that it does not hold is
- * appended after it, so the second, third and fourth Body of a Species index
- * into the same Palette as the first instead of each inventing its own.
- */
-export function toMap(image: Image, bound: Bound, given: readonly string[] = []): Drawn {
-  const oversize = image.width > bound.width || image.height > bound.height;
-  const wrong = bound.fit === "exactly" ? image.width !== bound.width || image.height !== bound.height : oversize;
-  if (wrong) {
-    throw new Refusal(`the image is ${image.width} x ${image.height}, expected ${bound.fit} ${bound.width} x ${bound.height}`);
-  }
+/** Every opaque colour across `images`, with its pixel count summed over all of them. */
+export function pooled(images: readonly Image[]): Map<string, number> {
   const counts = new Map<string, number>();
-  for (let i = 0; i < image.width * image.height; i++) {
-    const colour = colourAt(image, i);
-    if (colour !== undefined) counts.set(colour, (counts.get(colour) ?? 0) + 1);
+  for (const image of images) {
+    for (let i = 0; i < image.width * image.height; i++) {
+      const colour = colourAt(image, i);
+      if (colour !== undefined) counts.set(colour, (counts.get(colour) ?? 0) + 1);
+    }
   }
-  const held = new Set(given);
-  const added = ranked(counts).filter(({ colour }) => !held.has(colour));
-  if (given.length === 0 && counts.size > PALETTE_MAX) throw new Refusal(ceilingMessage(counts));
-  if (given.length > 0 && given.length + added.length > PALETTE_MAX) throw new Refusal(driftCeilingMessage(given, added));
-  const palette = given.length === 0 ? added.map(({ colour }) => colour) : [...given, ...added.map(({ colour }) => colour)];
+  return counts;
+}
+
+/**
+ * The one Palette a Species' images share, deduced from all of them at once: colours taken by
+ * descending pixel count, each joining the first kept colour within MERGE_DISTANCE, and at most
+ * PALETTE_MAX kept — the most used, in descending order of use.
+ */
+export function sharedPalette(images: readonly Image[]): string[] {
+  const ranked = [...pooled(images).entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  const kept: { colour: string; count: number }[] = [];
+  for (const [colour, count] of ranked) {
+    const home = kept.find((one) => distance(one.colour, colour) <= MERGE_DISTANCE);
+    if (home === undefined) kept.push({ colour, count });
+    else home.count += count;
+  }
+  kept.sort((a, b) => b.count - a.count || a.colour.localeCompare(b.colour));
+  return kept.slice(0, PALETTE_MAX).map(({ colour }) => colour);
+}
+
+/** An image drawn on `palette`: every opaque pixel takes the nearest colour, and how far the furthest one moved. */
+export function mapOnto(image: Image, palette: readonly string[]): { pixels: string[]; correction: number } {
+  const resolved = new Map<string, { index: number; distance: number }>();
+  const nearest = (colour: string): { index: number; distance: number } => {
+    const known = resolved.get(colour);
+    if (known !== undefined) return known;
+    let best = { index: 0, distance: Infinity };
+    for (const [index, candidate] of palette.entries()) {
+      const d = distance(colour, candidate);
+      if (d < best.distance) best = { index, distance: d };
+    }
+    resolved.set(colour, best);
+    return best;
+  };
+  let correction = 0;
   const pixels: string[] = [];
   for (let y = 0; y < image.height; y++) {
     let row = "";
     for (let x = 0; x < image.width; x++) {
       const colour = colourAt(image, y * image.width + x);
-      row += colour === undefined ? "." : (MAP_ALPHABET[palette.indexOf(colour) + 1] ?? ".");
+      if (colour === undefined) {
+        row += ".";
+        continue;
+      }
+      const { index, distance: moved } = nearest(colour);
+      correction = Math.max(correction, moved);
+      row += MAP_ALPHABET[index + 1] ?? ".";
     }
     pixels.push(row);
   }
-  return { pixels, palette, added: given.length === 0 ? [] : added };
+  return { pixels, correction };
 }
 
-/** The two blocks exactly as pasted into a Species file. The only thing this tool writes to stdout, so piping it (to `pbcopy`, say) carries nothing else. */
-export function formatBlocks(map: { pixels: readonly string[]; palette: readonly string[] }): string {
-  const paletteLine = `palette: [${map.palette.map((colour) => `"${colour}"`).join(", ")}],`;
-  const pixelLines = map.pixels.map((row) => `  "${row}",`);
-  return [paletteLine, "pixels: [", ...pixelLines, "],"].join("\n");
+/** What is pasted into a Species file: the palette once, then each map, labelled when there is more than one. The only thing written to stdout. */
+export function formatBlocks(palette: readonly string[], maps: readonly { label: string | undefined; pixels: readonly string[] }[]): string {
+  const lines = [`palette: [${palette.map((colour) => `"${colour}"`).join(", ")}],`];
+  for (const { label, pixels } of maps) {
+    if (label !== undefined) lines.push(`// ${label}`);
+    lines.push("pixels: [", ...pixels.map((row) => `  "${row}",`), "],");
+  }
+  return lines.join("\n");
 }
 
-/**
- * What the image wore that the given palette did not, by name and pixel count.
- * Appending silently would be the same defect the per-image ordering already
- * is — indices that drifted without anyone being told — so the drift is named
- * the way the ceiling refusal names colours: a person can see at a glance
- * whether it is a genuinely new colour or a shade that survived a resave.
- * Undefined when nothing drifted, and when no palette was given, where every
- * colour is new by definition.
- */
-export function formatDrift(added: readonly Drift[]): string | undefined {
-  if (added.length === 0) return undefined;
-  const one = added.length === 1;
-  return [
-    `warning: ${added.length} colour${one ? "" : "s"} of this image ${one ? "is" : "are"} not in the palette you gave, appended after it:`,
-    ...added.map(({ colour, count }) => `  ${colour} x${count}`),
-  ].join("\n");
-}
-
-/** The colour count, and a warning once the ceiling is reached. Reported, never pasted, so it belongs on stderr, not folded into formatBlocks. */
-export function formatSummary(colours: number): { count: string; warning: string | undefined } {
-  const count = `${colours} colour${colours === 1 ? "" : "s"}`;
-  const warning =
-    colours === PALETTE_MAX ? `warning: reached the ceiling of ${PALETTE_MAX} colours — the Species can hold no more` : undefined;
-  return { count, warning };
+/** One line for stderr: how many colours went in, how many came out, and how far the furthest pixel moved. */
+export function formatSummary(source: number, palette: number, correction: number): string {
+  const plural = (n: number): string => `${n} colour${n === 1 ? "" : "s"}`;
+  return `${plural(source)} in, ${plural(palette)} in the palette, largest correction ${correction.toFixed(1)}`;
 }
 
 /**
- * The Species' existing Palette, exactly as written in its file: `#rrggbb`
- * entries, comma-separated, in the order the first Body established. Refused
- * rather than repaired, because a typo silently shifts every index after it —
- * and a repeated colour would give one colour two indices, which is the same
- * defect with no typo in sight.
+ * A Species' existing Palette, exactly as written in its file. Refused rather than repaired: a
+ * typo or a repeated colour would shift every index after it.
  */
 export function parsePalette(text: string): string[] {
   const colours = text
@@ -149,18 +140,14 @@ export function parsePalette(text: string): string[] {
   for (const colour of colours) {
     if (!/^#[0-9a-f]{6}$/.test(colour)) throw new Refusal(`"${colour}" is not a #rrggbb colour`);
   }
-  const seen = new Set<string>();
-  for (const colour of colours) {
-    if (seen.has(colour)) throw new Refusal(`the given palette lists ${colour} twice, so one colour would hold two indices`);
-    seen.add(colour);
-  }
+  if (new Set(colours).size !== colours.length) throw new Refusal("the given palette lists a colour twice, so one colour would hold two indices");
   if (colours.length > PALETTE_MAX) throw new Refusal(`the given palette holds ${colours.length} colours, the ceiling is ${PALETTE_MAX}`);
   return colours;
 }
 
-/** `--patch <anchor>` and `--palette <list>` may land anywhere in argv; whatever is left is the path. */
+/** `--patch <anchor>` and `--palette <list>` may land anywhere in argv; everything else is an image path. */
 export function parseArgs(argv: readonly string[]): {
-  path: string | undefined;
+  paths: readonly string[];
   anchor: string | undefined;
   palette: readonly string[] | undefined;
 } {
@@ -169,54 +156,50 @@ export function parseArgs(argv: readonly string[]): {
     const at = rest.indexOf(flag);
     if (at === -1) return undefined;
     const value = rest[at + 1];
-    // A flag where the value should be is a forgotten argument, not a value: taking it would
-    // import a Patch pinned to an anchor named "--palette".
+    // A flag where the value should be is a forgotten argument, not a value.
     if (value === undefined || value.startsWith("--")) throw new Refusal(`${flag} requires ${wants}`);
     rest = rest.filter((_, i) => i !== at && i !== at + 1);
     return value;
   }
   const anchor = take("--patch", "an anchor name");
   const given = take("--palette", "a comma-separated list of #rrggbb colours");
-  return { path: rest[0], anchor, palette: given === undefined ? undefined : parsePalette(given) };
+  return { paths: rest, anchor, palette: given === undefined ? undefined : parsePalette(given) };
 }
 
-/**
- * Reads the PNG at `path`, naming the path in the refusal on failure — a
- * typo'd filename or the wrong working directory is the single most likely
- * refusal this tool will ever produce, far more likely than a PNG feature it
- * does not cover, so it is a Refusal like every other one, not a stack dump.
- */
+/** Reads the PNG at `path`; a missing or unreadable file is a Refusal naming the path, not a stack dump. */
 export function readPng(path: string): Uint8Array {
-  let bytes: Buffer;
   try {
-    bytes = readFileSync(path);
+    return Uint8Array.from(readFileSync(path));
   } catch (error) {
     const reason = error instanceof Error ? error.message : String(error);
     throw new Refusal(`cannot read "${path}": ${reason}`);
   }
-  return Uint8Array.from(bytes);
 }
 
 function main(): void {
-  const { path, anchor, palette } = parseArgs(process.argv.slice(2));
-  if (path === undefined) {
-    console.error('usage: node scripts/import.ts <path-to-png> [--patch <anchor>] [--palette "#rrggbb,#rrggbb,..."]');
+  const { paths, anchor, palette: given } = parseArgs(process.argv.slice(2));
+  if (paths.length === 0) {
+    console.error('usage: node scripts/import.ts <image.png>... [--palette "#rrggbb,..."] [--patch <anchor>]');
     process.exit(1);
   }
+  if (anchor !== undefined && paths.length > 1) throw new Refusal("--patch takes a single image");
 
-  const image = decodePng(readPng(path));
-  // A whole map is the canvas exactly; a Patch is bounded by it, never sized by itself — measuring
-  // it against its own dimensions is a check that cannot fail.
   const bound: Bound = { width: SPRITE_WIDTH, height: PIXEL_HEIGHT, fit: anchor === undefined ? "exactly" : "at most" };
-  const map = toMap(image, bound, palette);
+  const images = paths.map((path) => {
+    const image = decodePng(readPng(path));
+    checkSize(image, bound);
+    return image;
+  });
 
-  if (anchor !== undefined) console.log(`// patch: ${anchor} (${image.width} x ${image.height})`);
-  console.log(formatBlocks(map));
-  const { count, warning } = formatSummary(map.palette.length);
-  console.error(`\n${count}`);
-  if (warning !== undefined) console.error(warning);
-  const drift = formatDrift(map.added);
-  if (drift !== undefined) console.error(drift);
+  const palette = given ?? sharedPalette(images);
+  const maps = images.map((image) => mapOnto(image, palette));
+  const labelled = paths.length > 1;
+  const label = (path: string): string | undefined =>
+    anchor !== undefined ? `patch: ${anchor}` : labelled ? basename(path) : undefined;
+
+  console.log(formatBlocks(palette, maps.map(({ pixels }, i) => ({ label: label(paths[i] ?? ""), pixels }))));
+  const correction = Math.max(0, ...maps.map(({ correction: moved }) => moved));
+  console.error(`\n${formatSummary(pooled(images).size, palette.length, correction)}`);
 }
 
 if (import.meta.main) {
