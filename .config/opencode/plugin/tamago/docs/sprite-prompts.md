@@ -44,6 +44,9 @@ Mesuré sur le chat, le 2026-09-29 :
   respecté : le modèle ne sait pas s'abstenir de dessiner quelque part. Les
   coins réservés à la marque et au badge sortent libres d'eux-mêmes, et le
   test du catalogue les vérifie de toute façon.
+- **Juger chaque tirage à la taille réelle.** `node scripts/preview.ts --png
+  a.png b.png` dessine les PNG bruts côte à côte, deux pixels par caractère
+  comme dans OpenCode, avant tout import.
 - **Les liens expirent en moins d'une heure.** Télécharge l'image dès que le
   tirage est fini, et note l'identifiant du tirage dans le `SOURCES.md` de
   l'espèce : c'est lui qui servira à la retoucher ou à l'animer.

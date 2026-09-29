@@ -2,6 +2,7 @@
 //
 //   node scripts/preview.ts frog --stages [look]    the four grown Stages side by side, at real size
 //   node scripts/preview.ts frog --live [look|all]  the same, animated; `all` walks every look in turn
+//   node scripts/preview.ts --png a.png b.png ...   raw PNGs side by side at real size, before any import
 //
 // A look is an Activity (idle, thinking, working, waiting, hurt, sleeping) or pet:<Temperament>,
 // the still Frame a pet holds under the heart. Stop --live with Ctrl-C.
@@ -9,6 +10,9 @@ import { SPECIES, mapsOf, paletteOf } from "../core/creature/catalog.ts";
 import { expressionsOf, frameAt, headOf, heartFrame } from "../core/appearance/sprites.ts";
 import { ACTIVITIES, type Activity } from "../core/moment/session.ts";
 import { TEMPERAMENTS, type Temperament } from "../core/creature/sheet.ts";
+import { basename } from "node:path";
+import { decodePng, Refusal, type Image } from "./png.ts";
+import { readPng } from "./import.ts";
 import type { Cell, Frame, Ink, Rect } from "../core/appearance/pixels.ts";
 import type { Point } from "../core/appearance/expressions.ts";
 import { EGG_PALETTE, type Palette } from "../core/appearance/palette.ts";
@@ -144,7 +148,58 @@ function header(look: string): string {
   return GROWN.map((stage) => stage.padEnd(32)).join("   ") + `  ${look}`;
 }
 
+/**
+ * A decoded PNG as terminal lines, two pixels a character like the view, straight from its RGBA:
+ * a pixler draw has not been mapped onto a Palette yet, and may hold more colours than one allows.
+ */
+function pngLines(image: Image): string[] {
+  const at = (x: number, y: number): string | null => {
+    if (y >= image.height) return null;
+    const i = (y * image.width + x) * 4;
+    if ((image.pixels[i + 3] ?? 0) < 128) return null;
+    return `${image.pixels[i] ?? 0};${image.pixels[i + 1] ?? 0};${image.pixels[i + 2] ?? 0}`;
+  };
+  const lines: string[] = [];
+  for (let y = 0; y < image.height; y += 2) {
+    let line = "";
+    for (let x = 0; x < image.width; x++) {
+      const top = at(x, y);
+      const bottom = at(x, y + 1);
+      if (top !== null && bottom !== null) line += `\x1b[38;2;${top}m\x1b[48;2;${bottom}m${GLYPH.top}${RESET}`;
+      else if (top !== null) line += `\x1b[38;2;${top}m${GLYPH.top}${RESET}`;
+      else if (bottom !== null) line += `\x1b[38;2;${bottom}m${GLYPH.bottom}${RESET}`;
+      else line += GLYPH.none;
+    }
+    lines.push(line);
+  }
+  return lines;
+}
+
 const args = process.argv.slice(2);
+
+if (args[0] === "--png") {
+  const paths = args.slice(1);
+  if (paths.length === 0) {
+    console.error("usage: node scripts/preview.ts --png <image.png>...");
+    process.exit(1);
+  }
+  let images: Image[];
+  try {
+    images = paths.map((path) => decodePng(readPng(path)));
+  } catch (error) {
+    // a missing file or a PNG this decoder refuses is named in one line, like the importer does, never a stack dump
+    if (!(error instanceof Refusal)) throw error;
+    console.error(error.message);
+    process.exit(1);
+  }
+  const width = Math.max(...images.map((image) => image.width));
+  console.log(paths.map((path) => basename(path).padEnd(width)).join("   "));
+  const drawn = images.map(pngLines);
+  const rows = Math.max(...drawn.map((lines) => lines.length));
+  for (let row = 0; row < rows; row++) console.log(drawn.map((lines) => lines[row] ?? " ".repeat(width)).join("   "));
+  process.exit(0);
+}
+
 const plain = args.includes("--plain");
 const stages = args.includes("--stages");
 const live = args.includes("--live");

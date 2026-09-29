@@ -164,7 +164,9 @@ around it — on a dark-rimmed eye that is the rim, so name the skin.
 `node scripts/preview.ts <species> --stages [look]` draws the four grown
 Stages side by side at real size; `--live [look|all]` animates them, `all`
 walking every Activity and every pet in turn, the look's name in the header.
-It is the preview to keep open in a pane while drawing a Species.
+It is the preview to keep open in a pane while drawing a Species. `--png <image.png>...`
+draws raw PNGs side by side at real size, straight from their RGBA, before
+any import: the preview for judging a pixler draw the moment it lands.
 
 The decoder (`scripts/png.ts`) is hand-written on top of `node:zlib`'s inflate
 — chunk parsing, the five PNG filters (None, Sub, Up, Average, Paeth), colour
