@@ -72,6 +72,14 @@ Mesuré sur le chat, le 2026-09-29 :
   tirages contre elle ; un tirage tourné du mauvais côté se retourne en
   miroir, gratuitement.
 - **300 caractères au plus** par prompt : pixler refuse au-delà.
+- **Pixler remplit toujours la toile.** Un bébé tiré en 32 × 32 a la taille
+  de l'adulte, quel que soit le prompt. Pour un stade plus petit, tirer sur
+  une toile plus petite (le hatchling hamster en 20 × 20) puis le poser dans
+  le cadre, centré, sur la même ligne du bas que les autres stades.
+- **L'âge se dessine par des objets et des couleurs.** « Bare pink skin »,
+  « grey muzzle », « heavy-lidded eyes » n'ont rien changé : le hamster
+  sortait doré et bien réveillé. Une canne et des taches grises en ont fait
+  un vieux du premier coup.
 
 ## Le bloc de style
 
@@ -303,30 +311,33 @@ Old mallard drake, faded dull green head, greying chest and body, ragged feather
 
 ### 5. hamster — hamster
 
-- [ ] adult  - [ ] hatchling  - [ ] young  - [ ] elder
+- [x] adult  - [x] hatchling  - [x] young  - [x] elder
+
+Tirages et retouches : `docs/sprites/hamster/SOURCES.md`. Le hatchling est
+tiré en 20 × 20, le young vient d'un prompt de nouveau-né, l'elder a une canne.
 
 **adult**
 
 ```
-Golden hamster, round body, tiny round ears, full cheek pouches, small pink paws, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Golden hamster, round body, tiny round ears, full cheek pouches, small pink paws, sitting upright, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
 ```
 
-**hatchling**
+**hatchling** — tiré en `20 × 20`
 
 ```
-Golden hamster as a newborn pup, bare pink skin, almost no fur, ears sealed flat, curled up, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Golden hamster as a tiny baby hamster, pale cream fluffy fur, huge head on a tiny round body, stubby paws, no tail, sitting upright, super chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
 ```
 
 **young**
 
 ```
-Golden hamster as a young hamster, short thin fur, empty flat cheek pouches, ears large for its head, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Golden hamster as a tiny newborn pup, bare pink skin, almost no fur, ears sealed flat, sitting upright, super chibi, head twice as large as its tiny body, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
 ```
 
 **elder**
 
 ```
-Golden hamster in old age, thin patchy fur, heavy-lidded eyes, slack empty pouches, rounded back, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Old golden hamster, faded pale beige fur with grey patches, bushy white eyebrows, half-closed sleepy eyes, hunched, leaning on a tiny wooden cane, sitting upright, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading
 ```
 
 ### 6. snail — escargot
