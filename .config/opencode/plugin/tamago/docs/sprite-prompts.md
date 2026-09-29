@@ -141,9 +141,27 @@ point à lui (`left_gaze`, `right_gaze`). Le chat en donne l'exemple.
 héritées des anciens dessins, ou replace-les sur le nouveau : une zone mal
 placée fait glisser un morceau du corps à chaque battement.
 
+Deux commandes font le gros du travail sur les yeux, décrites dans
+`AGENTS.md` :
+
+```sh
+node scripts/eyes.ts frog --check --ink 0,c,d          # chaque cadre tient-il tout l'œil ?
+node scripts/eyes.ts frog young cross --size 5x5 --ink 0,c,d --skin 7
+```
+
+La première mesure l'œil dessiné depuis chaque ancre et nomme les cadres trop
+petits ; elle a trouvé cinq cadres sur huit trop courts sur la grenouille. La
+seconde imprime les patches d'un regard (`shut`, `cross`, `caret`, `arc`,
+`lid`, `shine`, `glance`) sans jamais toucher au contour de la silhouette.
+Donne toujours `--skin` quand l'œil est cerné de foncé : sans lui, l'œil
+effacé prend la couleur du cerne.
+
 Puis `pnpm test`, qui refuse une ancre manquante, un patch qui sort du cadre,
-une tête trop haute ou un coin réservé occupé, et
-`node scripts/preview.ts cat adult` pour voir le résultat.
+une tête trop haute ou un coin réservé occupé, et, pour voir le résultat :
+
+```sh
+node scripts/preview.ts frog --live all    # les quatre stades animés, chaque regard à tour de rôle
+```
 
 ---
 

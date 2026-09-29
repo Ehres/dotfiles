@@ -86,7 +86,7 @@ AGENTS.md. Vocabulary lives in `CONTEXT.md`; use those terms.
 ## Verify
 
 `pnpm test` runs `node --test` over core, the adapter and `scripts/__tests__`
-(the PNG importer): 496 tests, all passing.
+(the PNG importer and the eye tool): 505 tests, all passing.
 
 `bun test view shell` for the views and the shell (Bun compiles the Solid
 JSX; the frames are snapshots under `__snapshots__/`, and a changed snapshot
@@ -137,6 +137,29 @@ Only the pasteable blocks go to stdout, so the output can be piped to the
 clipboard; a one-line summary — colours in, colours in the palette, largest
 colour correction — goes to stderr. A large correction is the cue to look at
 the result in `scripts/preview.ts`.
+
+`node scripts/eyes.ts <species> --check --ink <chars>` measures every drawn eye
+of every Stage, following its ink from the anchor's frame (the frame is the
+size of the Stage's `shut` patch), and names each frame too small to hold its
+eye; it exits non-zero when one is. `--ink` lists the map characters an eye is
+drawn in, dark and highlight. The measure follows ink wherever it touches, so
+a beak or a nostril drawn in the same colour against the eye reads as eye: a
+frame it calls too small is a pixel to look at, not a verdict.
+
+`node scripts/eyes.ts <species> <stage> <look> --size WxH --ink <chars>
+[--skin <char>] [--light <char>] [--dark <char>] [--down <n>]` prints the two
+patches of one look, pasteable as an Expression: `shut`, `cross`, `caret` (^),
+`arc` (‿), `lid`, `shine` (two Looks, a 2 x 2 highlight moving between two
+corners; needs `--light`) and `glance` (one column wider, the eye moved right).
+No patch ever paints a pixel of the silhouette's border, and a glyph that
+cannot be centred in an eye of even width leans toward the face on both
+sides. Without `--skin`, an erased eye pixel takes the commonest colour
+around it — on a dark-rimmed eye that is the rim, so name the skin.
+
+`node scripts/preview.ts <species> --stages [look]` draws the four grown
+Stages side by side at real size; `--live [look|all]` animates them, `all`
+walking every Activity and every pet in turn, the look's name in the header.
+It is the preview to keep open in a pane while drawing a Species.
 
 The decoder (`scripts/png.ts`) is hand-written on top of `node:zlib`'s inflate
 — chunk parsing, the five PNG filters (None, Sub, Up, Average, Paeth), colour

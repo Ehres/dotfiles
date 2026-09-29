@@ -1,6 +1,14 @@
 // scripts/preview.ts — run: node scripts/preview.ts cat adult [--plain]
+//
+//   node scripts/preview.ts frog --stages [look]    the four grown Stages side by side, at real size
+//   node scripts/preview.ts frog --live [look|all]  the same, animated; `all` walks every look in turn
+//
+// A look is an Activity (idle, thinking, working, waiting, hurt, sleeping) or pet:<Temperament>,
+// the still Frame a pet holds under the heart. Stop --live with Ctrl-C.
 import { SPECIES, mapsOf, paletteOf } from "../core/creature/catalog.ts";
-import { expressionsOf, frameAt, headOf } from "../core/appearance/sprites.ts";
+import { expressionsOf, frameAt, headOf, heartFrame } from "../core/appearance/sprites.ts";
+import { ACTIVITIES, type Activity } from "../core/moment/session.ts";
+import { TEMPERAMENTS, type Temperament } from "../core/creature/sheet.ts";
 import type { Cell, Frame, Ink, Rect } from "../core/appearance/pixels.ts";
 import type { Point } from "../core/appearance/expressions.ts";
 import { EGG_PALETTE, type Palette } from "../core/appearance/palette.ts";
@@ -111,22 +119,84 @@ function summarize(id: string, stage: StageId): string {
   return lines.join("\n");
 }
 
+const GROWN: readonly Grown[] = ["hatchling", "young", "adult", "elder"];
+
+/** Every look a Sprite can wear: the six Activities, then a pet for each Temperament. */
+const LOOK_NAMES: readonly string[] = [...ACTIVITIES, ...TEMPERAMENTS.map((one) => `pet:${one}`)];
+
+/** The Frame of one look at one tick, through the same functions the view calls. */
+function frameOf(id: string, stage: Grown, look: string, tick: number): Frame {
+  if (look.startsWith("pet:")) return heartFrame(id, stage, look.slice(4) as Temperament);
+  return frameAt(id, stage, look as Activity, tick);
+}
+
+/** Frames side by side, `gap` columns apart, as terminal lines. */
+function sideBySide(frames: readonly Frame[], palette: Palette, gap = 3): string[] {
+  const height = Math.max(...frames.map((frame) => frame.length));
+  const lines: string[] = [];
+  for (let row = 0; row < height; row++) {
+    lines.push(frames.map((frame) => (frame[row] ?? []).map((cell) => drawCell(cell, palette)).join("") + RESET).join(" ".repeat(gap)));
+  }
+  return lines;
+}
+
+function header(look: string): string {
+  return GROWN.map((stage) => stage.padEnd(32)).join("   ") + `  ${look}`;
+}
+
 const args = process.argv.slice(2);
 const plain = args.includes("--plain");
-const [id = "cat", stage = "adult"] = args.filter((arg) => arg !== "--plain");
+const stages = args.includes("--stages");
+const live = args.includes("--live");
+const [id = "cat", second] = args.filter((arg) => !arg.startsWith("--"));
+const stage = second ?? "adult";
 
 if (!SPECIES.some((one) => one.id === id)) {
   console.error(`unknown Species "${id}". Known: ${SPECIES.map((one) => one.id).join(", ")}`);
   process.exit(1);
 }
 
-if (!STAGES.some((one) => one.id === stage)) {
-  console.error(`unknown Stage "${stage}". Known: ${STAGES.map((one) => one.id).join(", ")}`);
-  process.exit(1);
-}
+if (stages || live) {
+  const wanted = second ?? (live ? "all" : "idle");
+  if (wanted !== "all" && !LOOK_NAMES.includes(wanted)) {
+    console.error(`unknown look "${wanted}". Known: ${LOOK_NAMES.join(", ")}, all`);
+    process.exit(1);
+  }
+  const palette = paletteOf(id);
+  if (!live) {
+    console.log(header(wanted));
+    console.log(sideBySide(GROWN.map((one) => frameOf(id, one, wanted, 0)), palette).join("\n"));
+  } else {
+    // Every look shows for about five seconds, a pet for two and a half: long enough to see a blink or an alternation.
+    const scenes = (wanted === "all" ? LOOK_NAMES : [wanted]).map((look) => ({ look, ticks: look.startsWith("pet:") ? 6 : 12 }));
+    let scene = 0;
+    let beat = 0;
+    let tick = 0;
+    process.stdout.write("\x1b[2J\x1b[?25l");
+    process.on("SIGINT", () => {
+      process.stdout.write("\x1b[?25h\n");
+      process.exit(0);
+    });
+    setInterval(() => {
+      const { look, ticks } = scenes[scene] ?? { look: "idle", ticks: 12 };
+      const lines = sideBySide(GROWN.map((one) => frameOf(id, one, look, tick)), palette);
+      process.stdout.write(`\x1b[H${header(look)}\x1b[K\n${lines.join("\n")}`);
+      tick++;
+      if (++beat >= ticks) {
+        beat = 0;
+        scene = (scene + 1) % scenes.length;
+      }
+    }, 400);
+  }
+} else {
+  if (!STAGES.some((one) => one.id === stage)) {
+    console.error(`unknown Stage "${stage}". Known: ${STAGES.map((one) => one.id).join(", ")}`);
+    process.exit(1);
+  }
 
-console.log(`${id} / ${stage}\n`);
-const frame = frameAt(id, stage as StageId, "idle", 0);
-const palette = stage === "egg" ? EGG_PALETTE : paletteOf(id);
-console.log(plain ? drawPlain(frame) : draw(frame, palette));
-console.log(`\n${summarize(id, stage as StageId)}`);
+  console.log(`${id} / ${stage}\n`);
+  const frame = frameAt(id, stage as StageId, "idle", 0);
+  const palette = stage === "egg" ? EGG_PALETTE : paletteOf(id);
+  console.log(plain ? drawPlain(frame) : draw(frame, palette));
+  console.log(`\n${summarize(id, stage as StageId)}`);
+}
