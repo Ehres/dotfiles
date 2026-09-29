@@ -99,7 +99,10 @@ de trois choses de plus dans son entrée, dans
 **1. Les ancres de chaque stade** : `head`, `left_eye`, `right_eye`, en
 pixels. Dans le dessin imprimé, le numéro de la ligne est `y` et la position du
 caractère est `x`, tous deux comptés à partir de 0. Un œil s'ancre sur son coin
-en haut à gauche. La tête s'ancre sur un point du visage, à la ligne 5 au plus
+en haut à gauche, et ses patchs doivent couvrir tout l'œil dessiné, reflets et
+bas de l'œil compris : mesure-le sur ses quatre côtés. Un cadre trop court
+d'une ligne laisse cette ligne visible sous chaque expression — c'est arrivé à
+l'adulte et à l'elder du chat. La tête s'ancre sur un point du visage, à la ligne 5 au plus
 tôt : le cœur du câlin se dessine dans les cinq lignes au-dessus.
 
 **2. Ses propres expressions**, à la place de `expressions:
@@ -121,8 +124,14 @@ expressions: {
 Les chiffres sont des indices de la palette de l'espèce : ici `1` pour la
 couleur du pelage, `0` pour celle du contour. Le patch prend la taille de
 l'œil qu'il recouvre. Les autres expressions (`hurt`, `sleeping`, `waiting`…)
-sont facultatives et reprennent `open` quand elles manquent. Si les yeux d'un
-stade ont une autre taille, ce stade peut porter ses propres `expressions`.
+sont facultatives et reprennent `open` quand elles manquent — `sleeping` compris :
+sans elle, la créature dort les yeux ouverts. Si les yeux d'un stade ont une
+autre taille, ce stade peut porter ses propres `expressions`.
+
+Pour un regard qui bouge (`thinking`), déplacer l'œil dessiné d'un pixel
+marche mieux que le redessiner plus petit : il garde sa forme. Le patch est
+alors plus grand que l'œil d'une ligne et d'une colonne, et s'ancre sur un
+point à lui (`left_gaze`, `right_gaze`). Le chat en donne l'exemple.
 
 **3. Les zones qui bougent** (`motion` : la queue, les oreilles). Retire celles
 héritées des anciens dessins, ou replace-les sur le nouveau : une zone mal
@@ -168,30 +177,32 @@ Grey tabby cat in old age, grey muzzle, heavy-lidded eyes, sagging belly, thin r
 
 ### 2. owl — chouette
 
-- [ ] adult  - [ ] hatchling  - [ ] young  - [ ] elder
+- [x] adult  - [x] hatchling  - [x] young  - [x] elder
+
+Tirages et retouches : `docs/sprites/owl/SOURCES.md`.
 
 **adult**
 
 ```
-Brown owl, round body, tufted ears, small hooked beak, folded wings, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Brown owl, round body, tufted ears, small hooked beak, folded wings, standing upright, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
 ```
 
 **hatchling**
 
 ```
-Brown owl as a chick, a ball of pale grey down, no ear tufts, no wings showing, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Brown owl as a tiny newborn chick, a small fluffy ball of pale grey down, huge head, no ear tufts, no wings showing, standing upright, super chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
 ```
 
 **young**
 
 ```
-Brown owl as a fledgling, patchy down among brown feathers, ear tufts just appearing, short wings, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Brown owl as a fledgling, patchy down among brown feathers, ear tufts just appearing, short wings, standing upright, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
 ```
 
 **elder**
 
 ```
-Brown owl in old age, bleached ragged feathers, half-closed eyes, one ear tuft bent, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Brown owl in old age, bleached ragged feathers, half-closed eyes, one ear tuft bent, standing upright, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
 ```
 
 ### 3. frog — grenouille
