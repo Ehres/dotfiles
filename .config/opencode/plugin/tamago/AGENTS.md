@@ -86,7 +86,7 @@ AGENTS.md. Vocabulary lives in `CONTEXT.md`; use those terms.
 ## Verify
 
 `pnpm test` runs `node --test` over core, the adapter and `scripts/__tests__`
-(the PNG importer and the eye tool): 505 tests, all passing.
+(the PNG importer and the eye tool): 507 tests, all passing.
 
 `bun test view shell` for the views and the shell (Bun compiles the Solid
 JSX; the frames are snapshots under `__snapshots__/`, and a changed snapshot
@@ -149,8 +149,13 @@ frame it calls too small is a pixel to look at, not a verdict.
 `node scripts/eyes.ts <species> <stage> <look> --size WxH --ink <chars>
 [--skin <char>] [--light <char>] [--dark <char>] [--down <n>]` prints the two
 patches of one look, pasteable as an Expression: `shut`, `cross`, `caret` (^),
-`arc` (‿), `lid`, `shine` (two Looks, a 2 x 2 highlight moving between two
-corners; needs `--light`) and `glance` (one column wider, the eye moved right).
+`caret3` and `arc3` (the 3-pixel ^ and ‿, for small eyes), `arc` (‿),
+`chevron` (>, a squeezed eye, the pain of a single eye seen in profile),
+`lid`, `shine` (two Looks, a highlight moving between two corners; needs
+`--light`, and `--spot 1` makes it a single pixel) and `glance` (one column
+wider, the eye moved right). A Species drawn in three-quarter view has a
+single `eye` anchor instead of `left_eye` and `right_eye`; both commands
+follow whichever the Body declares.
 No patch ever paints a pixel of the silhouette's border, and a glyph that
 cannot be centred in an eye of even width leans toward the face on both
 sides. Without `--skin`, an erased eye pixel takes the commonest colour

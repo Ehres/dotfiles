@@ -12,9 +12,13 @@ import type { Grown } from "../core/appearance/bodies.ts";
 import type { Rect } from "../core/appearance/pixels.ts";
 import { Refusal } from "./png.ts";
 
-export type Side = "left" | "right";
+/** Which eye a patch covers; `only` is the single eye of a Species drawn in three-quarter view. */
+export type Side = "left" | "right" | "only";
 
-export const LOOKS = ["shut", "cross", "caret", "arc", "lid", "shine", "glance"] as const;
+/** The anchor each Side is pinned to. */
+export const ANCHOR: Record<Side, string> = { left: "left_eye", right: "right_eye", only: "eye" };
+
+export const LOOKS = ["shut", "cross", "caret", "caret3", "arc", "arc3", "chevron", "lid", "shine", "glance"] as const;
 export type LookKind = (typeof LOOKS)[number];
 
 export type LookOptions = {
@@ -28,6 +32,8 @@ export type LookOptions = {
   skin?: string;
   /** Rows to move the glyph down from its centred place. */
   down?: number;
+  /** The side of `shine`'s square highlight: 2 by default, 1 for an eye too small to hold a 2 x 2. */
+  spot?: 1 | 2;
 };
 
 const NEIGHBOURS: readonly (readonly [number, number])[] = [
@@ -104,10 +110,14 @@ export function skinAround(map: readonly string[], x: number, y: number, eye: Re
   return ".";
 }
 
-const GLYPHS: Record<"cross" | "caret" | "arc", readonly string[]> = {
+const GLYPHS: Record<"cross" | "caret" | "caret3" | "arc" | "arc3" | "chevron", readonly string[]> = {
   cross: ["1.1", ".1.", "1.1"],
   caret: [".11.", "1..1"],
   arc: ["1..1", ".11."],
+  // the 3-pixel ^ and ‿, for an eye too small to hold the 4-pixel ones
+  caret3: [".1.", "1.1"],
+  arc3: ["1.1", ".1."],
+  chevron: ["1..", ".1.", "1.."],
 };
 
 type Cell = { x: number; y: number; row: number; col: number; eye: boolean; border: boolean };
@@ -157,7 +167,7 @@ export function lookPatches(map: readonly string[], box: Rect, side: Side, kind:
     ];
   }
 
-  if (kind === "cross" || kind === "caret" || kind === "arc") {
+  if (kind === "cross" || kind === "caret" || kind === "caret3" || kind === "arc" || kind === "arc3" || kind === "chevron") {
     const glyph = GLYPHS[kind];
     const width = glyph[0]?.length ?? 0;
     const ox = side === "left" ? Math.ceil((box.w - width) / 2) : Math.floor((box.w - width) / 2);
@@ -190,7 +200,7 @@ export function lookPatches(map: readonly string[], box: Rect, side: Side, kind:
     const [x, y] = cell.split(",").map(Number) as [number, number];
     if (dim(x + 1, y) && dim(x, y + 1) && dim(x + 1, y + 1)) blocks.push([x, y]);
   }
-  const size = blocks.length >= 2 ? 2 : 1;
+  const size = options.spot === 1 || blocks.length < 2 ? 1 : 2;
   const pool = size === 2 ? blocks : [...eye].map((cell) => cell.split(",").map(Number) as [number, number]);
   if (pool.length === 0) throw new Refusal("shine found no eye ink in the frame");
   const byCorner = [...pool].sort((a, b) => a[0] + a[1] - (b[0] + b[1]));
@@ -204,11 +214,13 @@ export function lookPatches(map: readonly string[], box: Rect, side: Side, kind:
 }
 
 /** A look for both eyes, as pasted into an Expressions table: one Look per patch pair. */
-export function formatLook(left: readonly (readonly string[])[], right: readonly (readonly string[])[], leftAt = "left_eye", rightAt = "right_eye"): string {
+export function formatLook(eyes: readonly { at: string; looks: readonly (readonly string[])[] }[]): string {
   const quote = (rows: readonly string[]): string => `[${rows.map((row) => JSON.stringify(row)).join(", ")}]`;
-  const looks = left.map(
-    (patch, i) => `  [\n    { at: "${leftAt}", pixels: ${quote(patch)} },\n    { at: "${rightAt}", pixels: ${quote(right[i] ?? [])} },\n  ],`,
-  );
+  const count = Math.max(0, ...eyes.map((eye) => eye.looks.length));
+  const looks = Array.from({ length: count }, (_, i) => {
+    const patches = eyes.map((eye) => `    { at: "${eye.at}", pixels: ${quote(eye.looks[i] ?? [])} },`);
+    return `  [\n${patches.join("\n")}\n  ],`;
+  });
   return `[\n${looks.join("\n")}\n]`;
 }
 
@@ -221,9 +233,9 @@ export function check(id: string, ink: ReadonlySet<string>): Report[] {
   for (const stage of ["hatchling", "young", "adult", "elder"] as const) {
     const body = maps[stage];
     const shut = expressionsOf(id, stage).shut[0] ?? [];
-    for (const side of ["left", "right"] as const) {
-      const anchor = body.anchors[`${side}_eye`];
-      const patch = shut.find((one) => one.at === `${side}_eye`);
+    for (const side of ["left", "right", "only"] as const) {
+      const anchor = body.anchors[ANCHOR[side]];
+      const patch = shut.find((one) => one.at === ANCHOR[side]);
       if (anchor === undefined || patch === undefined) continue;
       const frame = { x: anchor.x, y: anchor.y, w: patch.pixels[0]?.length ?? 0, h: patch.pixels.length };
       const eye = measureEye(body.pixels, frame, ink);
@@ -268,10 +280,13 @@ export function parseArgs(argv: readonly string[]): Args {
   const light = take("--light");
   const skin = take("--skin");
   const down = take("--down");
+  const spot = take("--spot");
   if (dark !== undefined) options.dark = dark;
   if (light !== undefined) options.light = light;
   if (skin !== undefined) options.skin = skin;
   if (down !== undefined) options.down = Number(down);
+  if (spot === "1" || spot === "2") options.spot = spot === "1" ? 1 : 2;
+  else if (spot !== undefined) throw new Refusal("--spot is 1 or 2");
   const sizeArg = take("--size");
   const [id, stage, kind] = rest;
   if (id === undefined || !SPECIES.some((one) => one.id === id)) throw new Refusal(`unknown Species "${id ?? ""}"`);
@@ -292,12 +307,13 @@ function main(): void {
     return;
   }
   const body = mapsOf(args.id)[args.stage];
-  const patches = (["left", "right"] as const).map((side) => {
-    const anchor = body.anchors[`${side}_eye`];
-    if (anchor === undefined) throw new Refusal(`${args.stage} has no ${side}_eye anchor`);
-    return lookPatches(body.pixels, { x: anchor.x, y: anchor.y, ...args.size }, side, args.kind, args.options);
+  const sides = (["left", "right", "only"] as const).filter((side) => body.anchors[ANCHOR[side]] !== undefined);
+  if (sides.length === 0) throw new Refusal(`${args.stage} has no eye anchor: left_eye and right_eye, or eye`);
+  const eyes = sides.map((side) => {
+    const anchor = body.anchors[ANCHOR[side]] ?? { x: 0, y: 0 };
+    return { at: ANCHOR[side], looks: lookPatches(body.pixels, { x: anchor.x, y: anchor.y, ...args.size }, side, args.kind, args.options) };
   });
-  console.log(formatLook(patches[0] ?? [], patches[1] ?? []));
+  console.log(formatLook(eyes));
 }
 
 if (import.meta.main) {

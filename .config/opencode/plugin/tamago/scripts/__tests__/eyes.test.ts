@@ -112,3 +112,13 @@ test("parseArgs refuses a look without --ink or --size, and reads a check", () =
     assert.equal(look.options.skin, "0");
   }
 });
+
+test("the single eye of a three-quarter Species leans nowhere: an off-centre glyph starts at its frame's left", () => {
+  const [only] = lookPatches(FACE, { x: 2, y: 2, w: 4, h: 3 }, "only", "cross", { ink: INK, skin: "7" });
+  assert.equal(only?.[0]?.[0], "0");
+});
+
+test("shine's spot option draws a single-pixel highlight even where a 2 x 2 fits", () => {
+  const [a] = lookPatches(FACE, { x: 2, y: 2, w: 3, h: 4 }, "left", "shine", { ink: INK, light: "c", spot: 1 });
+  assert.equal((a ?? []).join("").split("c").length - 1, 1);
+});
