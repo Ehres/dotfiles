@@ -25,6 +25,7 @@ node_modules
 # Repo documentation and artefacts: these describe the repo, they are not
 # configuration that belongs in $HOME.
 ^/README\.md$
+^/\.config/opencode/README\.md$
 ^/docs$
 ^/tests$
 ^/VirtualDefy\.json$
