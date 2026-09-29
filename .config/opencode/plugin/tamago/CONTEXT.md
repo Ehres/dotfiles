@@ -304,39 +304,55 @@ _Avoid_: perk, upgrade, buff, card
 
 **Pixel**:
 Half a cell, square on screen because a cell is twice as tall as wide; a
-Sprite is 21 × 20 of them, drawn with `▀ ▄ █` and the space.
+Sprite is 32 × 32 of them, drawn with `▀ ▄ █` and the space.
 _Avoid_: dot, point, cell (that is the character)
 
 **Sprite**:
 The pixel drawing of the Tamago for a given Stage and Activity: the map for
-that Stage, shifted by its Motion and painted with the eyes, the Trait mark
-and the Draw badge, in the Species' Palette. "Body" names the per-Stage
-record that holds it (`bodies.ts`'s `Body`: pixels, eyes, motion); the map is
-specifically its pixel rows, not the whole record — the two words are not
-interchangeable.
+that Stage, shifted by its Motion, stamped with a Look and painted with the
+Trait mark and the Draw badge, in the Species' Palette. "Body" names the
+per-Stage record that holds it (`bodies.ts`'s `Body`: pixels, anchors,
+motion, an optional per-Stage expressions override, and optional further
+frames — whole drawn maps the cadence alternates over, the pixels above
+being frame zero and the only one a Species owes); the map is specifically
+its pixel rows, not the whole record — the two words are not interchangeable.
 _Avoid_: ASCII (it draws in Pixels now)
 
 **Frame**:
 One state of a Sprite, already packed into cells: the map's Pixels with the
-eyes, the Motion and the overlays applied. A Sprite has one or more Frames
+Motion, a Look and the overlays applied. A Sprite has one or more Frames
 that alternate to animate.
 
-**Face**:
-The eyes for a given Activity: a 3 × 3 pattern painted into each eyes
-rectangle of the map, one or more per Activity that alternate by cadence,
-while the map itself stays the same for a Species and a Stage.
+**Anchor**:
+A named point of a Body — `head`, `left_eye`, whatever the creature has —
+that a Patch is pinned to. `head` is required: the heart and the Bubble's
+tail are aimed at it. A creature can have one eye or three; the engine knows
+only the names its Species uses.
+_Avoid_: eye rectangle (an eye is no longer a rectangle the engine owns)
 
-**Role**:
-What a pixel is, never what colour it is: outline, primary, secondary,
-accent, eye, mark, badge, heart — a map carries the first four, the engine
-paints the rest.
-_Avoid_: layer, segment, class
+**Patch**:
+Rows of map characters pinned to an Anchor, its top-left pixel landing on
+that point. `.` leaves what is under it alone, so a Patch redraws only what
+it means to. Its characters are indices into the Species' own Palette.
+
+**Look**:
+Everything redrawn for one beat: the Patches stamped together.
+
+**Expression**:
+One or more Looks that alternate by cadence, declared by the Species rather
+than shared by the engine, so a cat and a dragon blink differently. Eleven
+ids: `open`, `shut`, the five Activities and the four pet Temperaments. Only
+`open` and `shut` are owed; the rest fall back to `open`, so a Species is
+enriched over time instead of blocked on eleven drawings. A Body may
+override its Species' table for one Stage, merged over it, and rarely does.
+_Avoid_: Face (the engine no longer has one to share)
 
 **Palette**:
-One colour per Role for one Species, in a dark variant and a light one
-chosen by the theme's mode, written in hexadecimal in the Species file. A
-"Skin" is one of the two variants alone (`palette.ts`'s `Skin`: one colour
-per Role, one variant); the Palette is both together.
+One indexed list of up to sixteen colours for one Species, written in
+hexadecimal in the Species file. A map's characters, and a Patch's, are
+indices into it; there is no light or dark variant to choose between. The
+egg keeps its own Palette (`palette.ts`'s `EGG_PALETTE`), never a Species',
+so it reveals nothing about what will hatch.
 _Avoid_: theme (that is OpenCode's), scheme
 
 **Portrait**:
@@ -362,8 +378,8 @@ _Avoid_: card, widget
 - A **Career** is identified by its hatch date: two Careers of one machine
   never hatch in the same millisecond, since a Hatch needs the whole Roster
   to be `elder`
-- The sidebar, the home and the card show the **active** Career; the
-  **Voices** are its
+- The sidebar and the card show the **active** Career; the **Voices** are
+  its
 - An older build knows only the **active** Career: its Deltas credit it,
   whichever it is at Flush time
 - Each OpenCode window has exactly one **Window**, which holds one **Delta**
@@ -381,8 +397,6 @@ _Avoid_: card, widget
   **Stage** threshold
 - A **Session** has exactly one **Voice**; a **Voice** holds at most one
   **Bubble**; a **Bubble** comes from exactly one **Cue**
-- The home screen has no **Voice**: without an OpenCode session there is no
-  **Cue**
 - A **Career** has exactly one **Sheet**, derived from its hatch date and its
   **Species**; two windows compute the same one
 - A **Sheet** has exactly eight **Stats**: four of Temperament, four of
@@ -406,8 +420,8 @@ _Avoid_: card, widget
   its **Species**, **Stage**, **XP**, **Growth**, **Sheet**, **Temperament**,
   **Behavior**, **Character** and Speaker together; the views receive that
   and derive nothing themselves
-- The **Voice** speaks with the **Temperament**; the **Face** of a pet wears
-  it; the card states the whole **Character**
+- The **Voice** speaks with the **Temperament**; the **Expression** of a pet
+  wears it; the card states the whole **Character**
 - The **Voice** draws a **Register** for each **Cue** it speaks: the
   **Signature** of the **Species** most often, a **Temperament** at the
   weight of its **Stat**, the neutral phrases rarely; at the hatch it is

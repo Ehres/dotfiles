@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test \"core/**/__tests__/*.test.ts\" \"adapter/__tests__/*.test.ts\"",
+    "test": "node --test \"core/**/__tests__/*.test.ts\" \"adapter/__tests__/*.test.ts\" \"scripts/__tests__/*.test.ts\"",
     "test:view": "bun test view shell",
     "test:all": "pnpm test && pnpm test:view",
     "typecheck": "tsc --noEmit"

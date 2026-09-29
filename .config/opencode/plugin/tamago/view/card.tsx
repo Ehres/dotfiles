@@ -31,7 +31,6 @@ export function CardBody(props: { tamago: Tamago; clock: number; heart: boolean;
           activity="idle"
           clock={props.clock}
           heart={props.heart}
-          variant={theme.mode()}
           theme={theme.current}
           badge={props.tamago.choices.length > 0}
         />

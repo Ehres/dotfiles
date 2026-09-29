@@ -4,7 +4,7 @@ import type { Pattern, Rect } from "./pixels.ts";
 /** Where a mark is written: the top-left 3 x 3, transparent in every map. */
 export const MARK_SLOT: Rect = { x: 0, y: 0, w: 3, h: 3 };
 /** Where a pending Draw is shown: the top-right 3 x 3, transparent in every map. */
-export const BADGE_SLOT: Rect = { x: 18, y: 0, w: 3, h: 3 };
+export const BADGE_SLOT: Rect = { x: 29, y: 0, w: 3, h: 3 };
 
 /**
  * A key into OpenCode's theme, named here so a Trait can be given one without core resolving it to

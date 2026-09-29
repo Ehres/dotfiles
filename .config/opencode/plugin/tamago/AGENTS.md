@@ -26,13 +26,19 @@ AGENTS.md. Vocabulary lives in `CONTEXT.md`; use those terms.
   stored. Anything that decides a Stage takes a `Paced` (counters plus
   Species), never bare counters.
 - Errors never change XP.
-- Every map is 20 rows of 21 characters of `.oabc`, and only colour: the eyes,
-  what moves, the Trait mark and the Draw badge are rectangles declared beside
-  it. A Species' colours are its Palette, two variants, written in
-  hexadecimal in the Species file; `core/` may name a colour there, and a
-  theme key for a Trait's mark (`core/appearance/marks.ts`'s `ThemeColor`),
-  but it never resolves one to an actual colour value — that happens once,
-  in `view/`.
+- Every map is 32 rows of 32 characters of `MAP_ALPHABET` (a Palette index, or
+  `.` for transparent), and only colour: what moves, the Trait mark and the
+  Draw badge are rectangles declared beside it, and the points a Species'
+  Expressions are pinned to are its named anchors. A Species' colours are its
+  Palette, written in hexadecimal in the Species file; `core/` may name a
+  colour there, and a theme key for a Trait's mark
+  (`core/appearance/marks.ts`'s `ThemeColor`), but it never resolves one to an
+  actual colour value — that happens once, in `view/`.
+- `sprites.test.ts` checks four things beyond the map format: an anchor named
+  by an Expression but absent from a Body, a Patch that runs off the canvas
+  from its anchor, an Expression with no Look, and a head anchor with no room
+  for the heart above it. Anchor names are plain strings, not a closed union,
+  so this test — not `tsc` — is where a typo in one is caught.
 - A `motion` rectangle (a tail, or an ears) must be at least 2 pixels wide, so
   `shift()` has a column to move its content into; its content must not sit
   flush against the edge it shifts toward, since `shift()` drops any pixel
@@ -65,10 +71,11 @@ AGENTS.md. Vocabulary lives in `CONTEXT.md`; use those terms.
   derived from a Career is derived there, once, and passed down as one
   prop. A new derived attribute is a new field of `Tamago`.
 - A new Species is one entry in `core/creature/species/<rarity>.ts`: id, label,
-  Rarity, Modifiers, four maps, a Palette in both variants and a full
-  Signature. A missing map, Palette or Signature does not compile; the order
-  of the entries is the draw order and never changes once shipped. The rarity
-  weights live in `core/creature/luck.ts`, never in the Species files.
+  Rarity, Modifiers, four maps, a Palette, an Expressions table and a full
+  Signature. A missing map, Palette, Expressions table or Signature does not
+  compile; the order of the entries is the draw order and never changes once
+  shipped. The rarity weights live in `core/creature/luck.ts`, never in the
+  Species files.
 - The voice never picks a phrase by rotation or by `Math.random`: `phrase`
   seeds from the hatch date, the Cue and its count, so every window agrees for
   the same occurrence of the Cue.
@@ -78,12 +85,93 @@ AGENTS.md. Vocabulary lives in `CONTEXT.md`; use those terms.
 
 ## Verify
 
-`node --test "core/**/__tests__/*.test.ts" "adapter/__tests__/*.test.ts"` for the
-core and the adapter, `bun test view shell` for the views and the shell (Bun
-compiles the Solid JSX; the frames are snapshots under `__snapshots__/`, and a
-changed snapshot is named in the commit), and `./node_modules/.bin/tsc --noEmit`.
-Then launch OpenCode once for anything the snapshots cannot see: colors, the
-dialog stack, two instances side by side for persistence changes.
+`pnpm test` runs `node --test` over core, the adapter and `scripts/__tests__`
+(the PNG importer and the eye tool): 507 tests, all passing.
+
+`bun test view shell` for the views and the shell (Bun compiles the Solid
+JSX; the frames are snapshots under `__snapshots__/`, and a changed snapshot
+is named in the commit) is expected at **34 pass, 7 fail**, not 41 pass: once
+the Sprite grew to 32 x 32, its 16-row height alone overflows the 26-row
+`DIALOG` test fixture, and the overflow corrupts rather than clips. `DIALOG`
+is frozen on purpose — its value is the owner's, to measure against a running
+TUI, and widening it would turn these seven honest failures green while the
+real dialog stayed just as cramped. The seven, by their test names:
+
+- `the card of an adult: title row, species, age, character, four bars, xp bar`
+- `the card of an adult reads in French`
+- `the card lists the Traits held, with their marks`
+- `the card at four held Traits: every Trait's title, every Sheet bar and the xp bar`
+- `the roster highlights the first line, moves with the arrows, selects with return`
+- `the roster at two Careers, the selected one holding one Trait: both roster lines and every Sheet bar`
+- `the roster reads in French`
+
+The last two of the card's and the roster's used to pass: they asserted on a
+line the overflow happens to spare, so the render went green and their
+snapshots were regenerated around a Sheet missing its `energy` bar. Recording
+the damage as correct is worse than failing at it, so they assert on every
+Sheet bar now and their snapshot entries are deleted until the overflow is
+settled. See the comments in `view/__tests__/card.test.tsx` and
+`roster.test.tsx` for which and why.
+
+Then `./node_modules/.bin/tsc --noEmit`, and launch OpenCode once for
+anything the snapshots cannot see: colors, the dialog stack, two instances
+side by side for persistence changes.
+
+`node scripts/import.ts <image.png>... [--palette "#rrggbb,..."] [--patch <anchor>]`
+turns drawn PNGs into the `palette:` and `pixels:` blocks of a Species entry.
+It prints them and never rewrites a Species file.
+
+A Species has one Palette shared by its four Bodies, so its four images are
+imported together: `node scripts/import.ts adult.png hatchling.png young.png elder.png`.
+The tool pools the colours of every image, merges those within
+`MERGE_DISTANCE` of a more used one, keeps the sixteen most used
+(`PALETTE_MAX`), and maps every pixel of every image to the nearest colour of
+that palette. It prints the palette once, then each map labelled with its file.
+
+`--palette` maps onto a palette already in a Species file instead of deducing
+one — to redraw a single stage later without shifting the indices of the
+others. `--patch <anchor>` imports one Patch for an Expression: any size up to
+the canvas.
+
+Only the pasteable blocks go to stdout, so the output can be piped to the
+clipboard; a one-line summary — colours in, colours in the palette, largest
+colour correction — goes to stderr. A large correction is the cue to look at
+the result in `scripts/preview.ts`.
+
+`node scripts/eyes.ts <species> --check --ink <chars>` measures every drawn eye
+of every Stage, following its ink from the anchor's frame (the frame is the
+size of the Stage's `shut` patch), and names each frame too small to hold its
+eye; it exits non-zero when one is. `--ink` lists the map characters an eye is
+drawn in, dark and highlight. The measure follows ink wherever it touches, so
+a beak or a nostril drawn in the same colour against the eye reads as eye: a
+frame it calls too small is a pixel to look at, not a verdict.
+
+`node scripts/eyes.ts <species> <stage> <look> --size WxH --ink <chars>
+[--skin <char>] [--light <char>] [--dark <char>] [--down <n>]` prints the two
+patches of one look, pasteable as an Expression: `shut`, `cross`, `caret` (^),
+`caret3` and `arc3` (the 3-pixel ^ and ‿, for small eyes), `arc` (‿),
+`chevron` (>, a squeezed eye, the pain of a single eye seen in profile),
+`lid`, `shine` (two Looks, a highlight moving between two corners; needs
+`--light`, and `--spot 1` makes it a single pixel) and `glance` (one column
+wider, the eye moved right). A Species drawn in three-quarter view has a
+single `eye` anchor instead of `left_eye` and `right_eye`; both commands
+follow whichever the Body declares.
+No patch ever paints a pixel of the silhouette's border, and a glyph that
+cannot be centred in an eye of even width leans toward the face on both
+sides. Without `--skin`, an erased eye pixel takes the commonest colour
+around it — on a dark-rimmed eye that is the rim, so name the skin.
+
+`node scripts/preview.ts <species> --stages [look]` draws the four grown
+Stages side by side at real size; `--live [look|all]` animates them, `all`
+walking every Activity and every pet in turn, the look's name in the header.
+It is the preview to keep open in a pane while drawing a Species. `--png <image.png>...`
+draws raw PNGs side by side at real size, straight from their RGBA, before
+any import: the preview for judging a pixler draw the moment it lands.
+
+The decoder (`scripts/png.ts`) is hand-written on top of `node:zlib`'s inflate
+— chunk parsing, the five PNG filters (None, Sub, Up, Average, Paeth), colour
+types 2/3/6 — because the project carries no runtime dependency and the
+plugin never imports it; resist replacing it with a library.
 
 ## Scope
 

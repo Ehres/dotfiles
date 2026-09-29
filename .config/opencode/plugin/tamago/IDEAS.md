@@ -6,11 +6,12 @@ avant implémentation.
 
 ## État des lieux
 
-Ce que Tamago fait aujourd'hui, relu le 2026-09-19 :
+Ce que Tamago fait aujourd'hui, relu le 2026-09-25 :
 
-- Sprite ASCII 11×5 par Species et par Stage (`core/appearance/sprites.ts`),
-  5 stades pilotés par le Growth, l'XP fois le Pace de la Species
-  (`core/career/stage.ts`) : egg → hatchling → young → adult → elder.
+- Sprite en pixels 32×32 par Species et par Stage, dessiné en demi-blocs
+  (`▀ ▄ █`) (`core/appearance/sprites.ts`), 5 stades pilotés par le Growth,
+  l'XP fois le Pace de la Species (`core/career/stage.ts`) : egg → hatchling
+  → young → adult → elder.
 - 6 activités de session (`core/moment/session.ts`) : idle, thinking, working,
   waiting, hurt, sleeping. Animation des yeux et d'une "marque" à côté de la
   tête.
@@ -18,11 +19,11 @@ Ce que Tamago fait aujourd'hui, relu le 2026-09-19 :
   `core/career/count.ts`), translator SDK → événements internes ciblés par
   session (`adapter/translate.ts`), persistance multi-instances avec lock et
   rename atomique (`adapter/store.ts`, `core/career/career.ts`).
-- Quatre surfaces Solid : sidebar (`view/sidebar.tsx`, slot `sidebar_footer`),
-  home (`view/home.tsx`, slot `home_bottom`), carte et roster en dialogues
-  (`view/card.tsx`, `view/roster.tsx`), sur les composants partagés
-  `view/sprite.tsx`, `view/portrait.tsx`, `view/dialog.tsx` et le thème en
-  contexte (`view/theme.tsx`). Un toast à chaque évolution.
+- Trois surfaces Solid : sidebar (`view/sidebar.tsx`, slot `sidebar_footer`),
+  carte et roster en dialogues (`view/card.tsx`, `view/roster.tsx`), sur les
+  composants partagés `view/sprite.tsx`, `view/portrait.tsx`,
+  `view/dialog.tsx` et le thème en contexte (`view/theme.tsx`). Un toast à
+  chaque évolution.
 - Le shell ne fait que câbler (`index.tsx`) : miroir Window → signaux,
   boucles de tick et de flush, actions, dialogues, palette et slots vivent
   dans `shell/`, seule couche qui touche `api.*` et les timers.
@@ -244,11 +245,9 @@ du seul toast. Une animation d'éclosion au premier lancement.
 
 ### 8. Vue home enrichie
 
-Aujourd'hui sprite + barre d'XP. Ajouter un journal court : "Hier : 42 prompts,
-13 fichiers, 2 erreurs", plus l'âge en jours depuis `hatchedAt`.
-
-Nécessite un historique par jour dans `career.json` (fenêtre glissante de 30
-jours) et sa règle de merge.
+**Abandonnée le 2026-09-25.** La vue home a été supprimée (plus de
+`view/home.tsx`, plus de slot `home_bottom`) : un journal enrichi
+demanderait d'abord une surface pour l'accueillir.
 
 ### 9. Sons et notifications
 
@@ -258,12 +257,15 @@ l'erreur, ronflement à l'endormissement. À limiter à l'évolution et à
 
 ### 10. Rendu et couleur
 
-Le sprite est monochrome par activité. OpenTUI permet des `<span>` colorés :
-yeux d'une couleur, corps d'une autre, accessoire en `theme.warning`. Les stades
-supérieurs pourraient utiliser des caractères de dessin de boîte, avec repli
-ASCII si nécessaire.
+**Couleur : fait le 2026-09-25**, voir
+`docs/superpowers/specs/2026-09-25-tamago-sprite-engine-design.md`. Chaque
+Species a désormais sa propre Palette indexée, jusqu'à seize couleurs : un
+pixel du corps, des yeux et d'un accessoire peuvent déjà être trois couleurs
+différentes, en plus de la teinte que l'Activity applique par-dessus.
 
-Même préalable que l'idée 4 : la `Frame` en segments.
+Reste ouvert : les stades supérieurs pourraient utiliser des caractères de
+dessin de boîte, avec repli ASCII si nécessaire. Même préalable que l'idée 4 :
+la `Frame` en segments.
 
 ### 11. Gamification : Milestones, Draws, Picks et Traits
 
@@ -379,10 +381,15 @@ Quatre lots :
      s'apprend à l'éclosion, seulement ; l'œuf ne révèle rien, et c'est une
      règle, pas un manque.
    - Gardées pour plus tard, dictées le 2026-09-17 : revoir les sprites et
-     leur affichage dans la barre latérale, dimensions comprises ; du loot et
-     des accessoires (lunettes, chapeau, baguette, badges) gagnés puis portés
-     par le sprite, sur la Frame en segments, ce qui suppose une tête à place
-     fixe dans toutes les Species, déjà le cas.
+     leur affichage dans la barre latérale, dimensions comprises — **fait le
+     2026-09-25**, voir
+     `docs/superpowers/specs/2026-09-25-tamago-sprite-engine-design.md`
+     (canvas 32 x 32, Palette indexée par Species, import PNG). Reste
+     ouvert : du loot et des accessoires (lunettes, chapeau, baguette,
+     badges) gagnés puis portés par le sprite, sur la Frame en segments —
+     ils pendront désormais des Anchors que ce lot introduit (`head`, etc.)
+     plutôt que de supposer une tête à place fixe dans toutes les Species :
+     une tête est déclarée, non plus supposée.
 
 Contraintes qui tiennent : aucune Species n'est une punition, pas de lecture
 de contenu, merge commutatif, pas de re-roll, jamais de retrait sur la Career,
@@ -402,6 +409,34 @@ porte désormais `en` et `fr` obligatoires (environ 1 000 phrases écrites),
 et la Species porte un genre pour l'accord ; une phrase française n'est
 jamais écrite deux fois dans le catalogue.
 
+### 14. Sprites 32 × 32 : les dessins et les dialogues
+
+Le moteur est prêt, sur la branche `tamago-sprite-engine` (spec
+`docs/superpowers/specs/2026-09-25-tamago-sprite-engine-design.md`) : toile
+32 × 32, une palette par espèce, ancres et expressions propres à chaque
+espèce. Les vingt espèces tournent encore avec leurs anciens dessins, recadrés
+sans changement. Restent deux chantiers.
+
+- **Le débordement de la carte et du roster.** Un sprite de 16 lignes ne tient
+  plus dans ces deux dialogues à côté des stats, et OpenTUI supprime des lignes
+  au milieu plutôt que de couper en bas : le roster perd « Tamago 4 » entre le
+  3 et le 5, sans aucun signe. Sept tests de vue échouent exprès pour le
+  garder visible (liste dans `AGENTS.md`). Avant tout correctif, mesurer dans
+  un vrai OpenCode la hauteur réelle du dialogue `xlarge` : selon le résultat,
+  soit le fixture `DIALOG` était faux, soit la carte doit montrer moins, soit
+  un sprite plus petit. La fusion de la branche attend cette mesure.
+- **Les quatre-vingts dessins.** Méthode, réglages et prompts dans
+  `docs/sprite-prompts.md` ; les PNG sources dans
+  `docs/sprites/<espèce>/<stade>.png`.
+- **Des « Zzz » sur le sprite endormi.** Aujourd'hui une créature qui dort a les
+  yeux fermés (`sleeping`) et un sprite assombri (`TINT` dans
+  `view/sprite.tsx`), rien au-dessus de la tête. Un petit motif de Z en pixels,
+  peint comme le cœur de la caresse au-dessus de l'ancre `head` (les cinq
+  lignes y sont déjà garanties libres), dans une couleur du thème : une
+  fonctionnalité du moteur, pour toutes les espèces à la fois. Commencer fixe :
+  la cadence `sleeping` n'a pas de `frame` exprès, pour qu'une créature
+  endormie ne coûte rien, et des Z qui montent la réveilleraient.
+
 ## Ordre recommandé
 
 1. ~~Bulle avec templates locaux, plus mode muet.~~ Fait.
@@ -413,9 +448,12 @@ jamais écrite deux fois dans le catalogue.
 6. ~~Gamification (idée 11) : le premier Milestone et le `DialogSelect` ; les
    Traits de Voice s'écriront contre la feuille.~~ Fait.
 7. ~~Language : anglais et français (idée 13).~~ Fait.
-8. Achievements et streak, avec le journal (idée 8), après une semaine d'usage
+8. Mesurer le dialogue `xlarge`, régler le débordement de la carte et du
+   roster, fusionner la branche `tamago-sprite-engine` (idée 14).
+9. Dessiner les vingt espèces en 32 × 32 (idée 14).
+10. Achievements et streak, avec le journal (idée 8), après une semaine d'usage
    réel des Species.
-9. Enrichissements Species (idée 12, lot 4), accessoires et couleur (idées 4
+11. Enrichissements Species (idée 12, lot 4), accessoires et couleur (idées 4
    et 10) sur la `Frame` en segments.
 
 ## Références

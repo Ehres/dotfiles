@@ -1,21 +1,21 @@
-import type { Role } from "./pixels.ts";
+/**
+ * A Species' colours, index 0 to 15, lowercase `#rrggbb`. A map's characters
+ * are indices into this list. One list per Species: the Sprite is tuned for a
+ * dark theme and read as-is on a light one.
+ */
+export type Palette = readonly string[];
 
-/** The Roles a hand-drawn map can carry. */
-export const MAP_ROLES = ["outline", "primary", "secondary", "accent"] as const;
-/** The Roles the engine paints: never in a map. */
-export const PAINTED_ROLES = ["eye", "mark", "badge", "heart"] as const;
-/** The Roles a Species colours: the map's, plus the eye, which is the Species' too. */
-export const SKIN_ROLES = [...MAP_ROLES, "eye"] as const;
+/** The ceiling, and what the import script passes as `maxColors`. */
+export const PALETTE_MAX = 16;
 
-/** One colour per Role a map can carry, plus the eye, which is the Species' too. Lowercase `#rrggbb`. */
-export type Skin = Record<(typeof SKIN_ROLES)[number], string>;
-
-/** Which theme a Skin is for. `theme.mode()` picks. */
-export type Variant = "dark" | "light";
-
-/** Both Skins of one Species. */
-export type Palettes = Record<Variant, Skin>;
-
-/** Every Role belongs to exactly one list. A new Role that joins neither is a compile error here. */
-type Unplaced = Exclude<Role, (typeof MAP_ROLES)[number] | (typeof PAINTED_ROLES)[number]>;
-const _everyRoleIsPlaced: Unplaced extends never ? true : never = true;
+/**
+ * The egg's own colours, never a Species'. Every egg looks the same whatever
+ * hatches from it: the Rarity and the Species are learned at the hatch, and
+ * the egg reveals neither.
+ *
+ * The egg's map writes only indices 0 to 2. Indices 3 and 4 exist for the
+ * patches: the egg takes DEFAULT_EXPRESSIONS, the migrated table that draws an
+ * eye at index 4, so index 3 is a placeholder holding index 4 in place. Both
+ * go when the egg is redrawn with a table of its own.
+ */
+export const EGG_PALETTE: Palette = ["#4c4438", "#d9cdb8", "#efe7d6", "#4c4438", "#2a2520"];

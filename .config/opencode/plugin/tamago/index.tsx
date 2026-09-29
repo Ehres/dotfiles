@@ -7,7 +7,6 @@ import { createSignal } from "solid-js";
 import { createErrorLog } from "./adapter/log.ts";
 import { createStore, type Loaded } from "./adapter/store.ts";
 import { SUBSCRIBED, createTranslator } from "./adapter/translate.ts";
-import { footerPath } from "./core/appearance/footer.ts";
 import { freshCareer, isEmpty } from "./core/career/career.ts";
 import { MEDIAN, behavior } from "./core/creature/behavior.ts";
 import { resolveLanguage, say } from "./core/language.ts";
@@ -25,7 +24,6 @@ import { createMirror } from "./shell/mirror.ts";
 import { createPalette } from "./shell/palette.ts";
 import { registerSlots } from "./shell/slots.tsx";
 import { createTicker } from "./shell/tick.ts";
-import type { FooterInfo } from "./view/sidebar.tsx";
 
 const id = "opencode-tamago";
 const DATA_DIR = join(homedir(), ".local", "share", "opencode-tamago");
@@ -139,13 +137,7 @@ const tui: TuiPlugin = async (api, options) => {
     });
     flusher.start();
 
-    const footer = (sessionID: string): FooterInfo => {
-      const info = api.state.session.get(sessionID);
-      const dir = info?.directory || api.state.path.directory;
-      const branch = info?.directory === api.state.path.directory ? api.state.vcs?.branch : undefined;
-      return { ...footerPath(dir, homedir(), branch), version: api.app.version };
-    };
-    registerSlots({ api, mirror, actions, clock, footer });
+    registerSlots({ api, mirror, actions, clock });
 
     api.lifecycle.onDispose(
       guard(() => {

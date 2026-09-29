@@ -58,12 +58,12 @@ test("a blink lands once every eleven beats and never on the resting beat", () =
 
 test("shift throws when the rectangle leaves the map on the x axis", () => {
   const rows = blank();
-  assert.throws(() => shift(rows, { x: 18, y: 0, w: 5, h: 1 }, 0), /outside the map/);
+  assert.throws(() => shift(rows, { x: 29, y: 0, w: 5, h: 1 }, 0), /outside the map/);
 });
 
 test("shift throws when the rectangle leaves the map on the y axis", () => {
   const rows = blank();
-  assert.throws(() => shift(rows, { x: 0, y: 18, w: 1, h: 5 }, 0), /outside the map/);
+  assert.throws(() => shift(rows, { x: 0, y: 29, w: 1, h: 5 }, 0), /outside the map/);
 });
 
 test("a pixel at the rectangle's left edge is dropped when shifted by -1", () => {

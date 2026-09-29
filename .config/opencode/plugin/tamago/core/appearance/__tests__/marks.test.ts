@@ -24,7 +24,7 @@ test("no two Traits are given the same colour: pattern alone never has to carry 
 
 test("the two slots are 3 x 3, in opposite top corners, and do not overlap", () => {
   assert.deepEqual(MARK_SLOT, { x: 0, y: 0, w: 3, h: 3 });
-  assert.deepEqual(BADGE_SLOT, { x: 18, y: 0, w: 3, h: 3 });
+  assert.deepEqual(BADGE_SLOT, { x: 29, y: 0, w: 3, h: 3 });
   assert.ok(MARK_SLOT.x + MARK_SLOT.w <= BADGE_SLOT.x, "the slots overlap");
 });
 

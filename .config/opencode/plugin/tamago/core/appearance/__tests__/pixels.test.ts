@@ -11,40 +11,48 @@ function blank(): string[] {
   return filled(".");
 }
 
-test("the grid is 21 cells wide, 10 cells tall, 20 pixels tall", () => {
-  assert.equal(SPRITE_WIDTH, 21);
-  assert.equal(SPRITE_HEIGHT, 10);
-  assert.equal(PIXEL_HEIGHT, 20);
+test("the grid is 32 cells wide, 16 cells tall, 32 pixels tall", () => {
+  assert.equal(SPRITE_WIDTH, 32);
+  assert.equal(SPRITE_HEIGHT, 16);
+  assert.equal(PIXEL_HEIGHT, 32);
 });
 
-test("pack turns 20 pixel rows into 10 cell rows of 21 cells", () => {
+test("pack turns 32 pixel rows into 16 cell rows of 32 cells", () => {
   const frame = pack(filled("a"));
   assert.equal(frame.length, SPRITE_HEIGHT);
   for (const row of frame) assert.equal(row.length, SPRITE_WIDTH);
 });
 
+test("every alphabet character maps to its palette index", () => {
+  const rows = filled(".");
+  rows[0] = "0159af".padEnd(SPRITE_WIDTH, ".");
+  const frame = pack(rows);
+  assert.deepEqual(
+    [0, 1, 2, 3, 4, 5].map((i) => frame[0]?.[i]?.top),
+    [0, 1, 5, 9, 10, 15],
+  );
+});
+
 test("a cell carries the pixel above it and the pixel below it", () => {
   const rows = filled(".");
-  rows[0] = "o".padEnd(SPRITE_WIDTH, ".");
-  rows[1] = "a".padEnd(SPRITE_WIDTH, ".");
+  rows[0] = "0".padEnd(SPRITE_WIDTH, ".");
+  rows[1] = "1".padEnd(SPRITE_WIDTH, ".");
   const frame = pack(rows);
-  assert.deepEqual(frame[0]?.[0], { top: "outline", bottom: "primary" });
+  assert.deepEqual(frame[0]?.[0], { top: 0, bottom: 1 });
   assert.deepEqual(frame[0]?.[1], { top: null, bottom: null });
+});
+
+test("paint writes an index as its own character, and an engine role as its letter", () => {
+  const indexed = paint(blank(), { x: 2, y: 4, w: 1, h: 1 }, ["#"], 11);
+  assert.equal(indexed[4]?.[2], "b");
+  const painted = paint(blank(), { x: 2, y: 4, w: 1, h: 1 }, ["#"], "badge");
+  assert.equal(painted[4]?.[2], "G");
+  assert.equal(pack(painted)[2]?.[2]?.top, "badge");
 });
 
 test("a dot is transparent on both halves", () => {
   const frame = pack(filled("."));
   for (const row of frame) for (const cell of row) assert.deepEqual(cell, { top: null, bottom: null });
-});
-
-test("every alphabet character maps to its Role", () => {
-  const rows = filled(".");
-  rows[0] = "oabc".padEnd(SPRITE_WIDTH, ".");
-  const frame = pack(rows);
-  assert.deepEqual(
-    [frame[0]?.[0]?.top, frame[0]?.[1]?.top, frame[0]?.[2]?.top, frame[0]?.[3]?.top],
-    ["outline", "primary", "secondary", "accent"],
-  );
 });
 
 test("a character outside the alphabet throws, naming the row and column", () => {
@@ -54,26 +62,26 @@ test("a character outside the alphabet throws, naming the row and column", () =>
 });
 
 test("a map of the wrong height or width throws", () => {
-  assert.throws(() => pack(filled("a").slice(0, 19)), /20 rows/);
-  assert.throws(() => pack(filled("a").map((row) => row.slice(0, 20))), /21 characters/);
+  assert.throws(() => pack(filled("a").slice(0, 31)), /32 rows/);
+  assert.throws(() => pack(filled("a").map((row) => row.slice(0, 31))), /32 characters/);
 });
 
 test("paint writes a pattern into a rectangle, '#' only", () => {
-  const rows = paint(blank(), { x: 2, y: 4, w: 3, h: 3 }, [".#.", "###", ".#."], "eye");
-  assert.equal(rows[4]?.slice(2, 5), ".E.");
-  assert.equal(rows[5]?.slice(2, 5), "EEE");
-  assert.equal(rows[6]?.slice(2, 5), ".E.");
+  const rows = paint(blank(), { x: 2, y: 4, w: 3, h: 3 }, [".#.", "###", ".#."], 0);
+  assert.equal(rows[4]?.slice(2, 5), ".0.");
+  assert.equal(rows[5]?.slice(2, 5), "000");
+  assert.equal(rows[6]?.slice(2, 5), ".0.");
 });
 
 test("paint leaves everything outside the rectangle alone", () => {
-  const rows = paint(blank(), { x: 2, y: 4, w: 3, h: 3 }, ["###", "###", "###"], "eye");
+  const rows = paint(blank(), { x: 2, y: 4, w: 3, h: 3 }, ["###", "###", "###"], 0);
   assert.equal(rows[3], ".".repeat(SPRITE_WIDTH));
   assert.equal(rows[7], ".".repeat(SPRITE_WIDTH));
   assert.equal(rows[4]?.[1], ".");
   assert.equal(rows[4]?.[5], ".");
 });
 
-test("a painted pixel packs to its Role", () => {
+test("a painted pixel packs to its Ink", () => {
   const frame = pack(paint(blank(), { x: 0, y: 0, w: 1, h: 1 }, ["#"], "badge"));
   assert.equal(frame[0]?.[0]?.top, "badge");
 });
@@ -85,10 +93,16 @@ test("paint does not mutate the rows it is given", () => {
 });
 
 test("a pattern that does not fit its rectangle throws", () => {
-  assert.throws(() => paint(blank(), { x: 0, y: 0, w: 2, h: 2 }, ["###", "###"], "eye"), /2 x 2/);
+  assert.throws(() => paint(blank(), { x: 0, y: 0, w: 2, h: 2 }, ["###", "###"], 0), /2 x 2/);
 });
 
 test("a rectangle that leaves the map throws", () => {
-  assert.throws(() => paint(blank(), { x: 19, y: 0, w: 3, h: 1 }, ["###"], "eye"), /outside the map/);
-  assert.throws(() => paint(blank(), { x: 0, y: 19, w: 1, h: 3 }, ["#", "#", "#"], "eye"), /outside the map/);
+  assert.throws(() => paint(blank(), { x: 30, y: 0, w: 3, h: 1 }, ["###"], 0), /outside the map/);
+  assert.throws(() => paint(blank(), { x: 0, y: 30, w: 1, h: 3 }, ["#", "#", "#"], 0), /outside the map/);
+});
+
+test("an index outside 0-15 throws, never writing a silent transparent pixel", () => {
+  assert.throws(() => paint(blank(), { x: 0, y: 0, w: 1, h: 1 }, ["#"], -1), /outside 0-15/);
+  assert.throws(() => paint(blank(), { x: 0, y: 0, w: 1, h: 1 }, ["#"], -2), /outside 0-15/);
+  assert.throws(() => paint(blank(), { x: 0, y: 0, w: 1, h: 1 }, ["#"], 16), /outside 0-15/);
 });

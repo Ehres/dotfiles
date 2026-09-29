@@ -11,6 +11,14 @@ import { EGG, OWNER } from "./fixtures.ts";
 import { mount, trim } from "./render.tsx";
 import { TUI_THEME } from "./theme.ts";
 
+// Failing since the Sprite grew to 32 x 32 (task 2): a 16-row Sprite no longer fits DIALOG's
+// fixture height of 26 alongside two roster lines and a Sheet, even with neither a held Trait nor
+// a fifth Career — see the two overflow comments below ("the roster at five Careers" and "the
+// roster at two Careers... holding one Trait"), which park the same defect and the same fix:
+// DIALOG's real value is the user's to measure against the running TUI, not this fixture's to grow.
+// This test throws before reaching either of its two toMatchSnapshot calls, so task 2's
+// --update-snapshots run deleted both of its committed snapshot entries rather than updating them;
+// they return once the overflow is settled, not before.
 test("the roster highlights the first line, moves with the arrows, selects with return", async () => {
   const shown = [tamago(OWNER), tamago(EGG)];
   const lines = ["Tamago · cat · adult · active", "Egg · egg"];
@@ -79,6 +87,7 @@ test("the roster at two Careers, the selected one holding one Trait: both roster
   const activeId = idOf(OWNER);
   const shown = careers.map((career) => tamago(career));
   const lines = careers.map((career, i) => line(career, `Tamago ${i + 1}`, activeId, "en"));
+  const selected = shown[0] ?? tamago(kept);
   const { frame } = await mount(() => (
     <ThemeProvider theme={TUI_THEME}>
       <RosterView tamagos={shown} lines={lines} clock={0} now={0} onSelect={() => {}} />
@@ -86,12 +95,18 @@ test("the roster at two Careers, the selected one holding one Trait: both roster
   ));
   const shownFrame = trim(await frame());
   for (const text of lines) expect(shownFrame).toContain(text);
-  for (const bar of sheetLines(shown[0]!, "en")) expect(shownFrame).toContain(bar);
-  expect(shownFrame).toContain(progress(shown[0]!, BAR_WIDTH, "en"));
+  for (const bar of sheetLines(selected, "en")) expect(shownFrame).toContain(bar);
+  expect(shownFrame).toContain(progress(selected, BAR_WIDTH, "en"));
 });
 
+// Overflowing too, and this one used to pass: a roster of one Career drops "énergie" just as the
+// two-Career case above drops "energy", but nothing asserted on the Sheet, so the snapshot was
+// regenerated around the missing bar and recorded the damage as correct. It asserts on every Sheet
+// bar and the xp bar now, like its English neighbour, so it fails for the same honest reason. Its
+// snapshot entry is deleted rather than kept: it comes back when the overflow is settled.
 test("the roster reads in French", async () => {
-  const shown = [tamago(OWNER)];
+  const one = tamago(OWNER);
+  const shown = [one];
   const lines = [line(OWNER, "Tamago", OWNER.hatchedAt, "fr")];
   const { frame } = await mount(() => (
     <ThemeProvider theme={TUI_THEME}>
@@ -103,5 +118,7 @@ test("the roster reads in French", async () => {
   const shownFrame = trim(await frame());
   expect(shownFrame).toContain("Tamago · chat · adulte · actif");
   expect(shownFrame).toContain("chat · commun");
+  for (const bar of sheetLines(one, "fr")) expect(shownFrame).toContain(bar);
+  expect(shownFrame).toContain(progress(one, BAR_WIDTH, "fr"));
   expect(shownFrame).toMatchSnapshot();
 });

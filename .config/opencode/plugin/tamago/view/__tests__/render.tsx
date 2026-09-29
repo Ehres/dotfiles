@@ -2,13 +2,12 @@
 import { testRender, type JSX } from "@opentui/solid";
 
 export type Size = { width: number; height: number };
-/** The real sidebar, measured 2026-09-25: tall enough for a Bubble above the centred sprite. */
-export const SIDEBAR: Size = { width: 37, height: 18 };
+/** The width is the real sidebar, measured 2026-09-25; the height is a test viewport, raised from
+ * 18 to fit a Bubble above the taller, 16-cell sprite — a real sidebar is as tall as the terminal. */
+export const SIDEBAR: Size = { width: 37, height: 24 };
 /** Grown to fit the card, not measured: the real dialog is sized by preset (see shell/dialogs.tsx's
  * `setSize("xlarge")`), and that preset's actual row count is for the user to read off the running TUI. */
 export const DIALOG: Size = { width: 60, height: 26 };
-/** The home_bottom slot spans the terminal: wide enough for the 20-cell xp bar and its caption beside the sprite. */
-export const HOME: Size = { width: 80, height: 14 };
 
 /** Renders once and returns the setup plus a `frame()` that renders again and captures the characters. */
 export async function mount(node: () => JSX.Element, size: Size = DIALOG) {
