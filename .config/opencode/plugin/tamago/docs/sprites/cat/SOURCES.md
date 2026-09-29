@@ -15,7 +15,7 @@ recevoir à nouveau.
 | --- | --- | --- | --- |
 | hatchling | `gen_2f0d3b4e-c6ae-4854-a15b-a946c866cd90` | 0 | l'œil gauche (x 8 à 11, y 11 à 14) remplacé par l'œil droit en miroir autour de x = 14 |
 | young | `gen_2007308e-501a-491b-8b15-ba5f0e15f4f2` | 0 | aucune |
-| adult | `gen_17ff69af-8b2b-4114-9f78-cb399d0e0b37` | 0 | aucune |
+| adult | `gen_17ff69af-8b2b-4114-9f78-cb399d0e0b37` | 0 | le pixel (x 19, y 11) qui dépassait à gauche de l'œil droit, repeint en pelage |
 | elder | `gen_cec0ed33-b36a-4fd7-96ba-d024eea5530b` | 0 | la deuxième queue, en bas à gauche, effacée : x 0 à 4 des lignes 26 à 29, et les lignes 30 et 31 entières |
 
 Les coordonnées sont en pixels, comptées à partir de 0 depuis le coin en haut

@@ -50,6 +50,37 @@ export const COMMON: readonly SpeciesDef[] = [
             { at: "left_eye", pixels: ["0000", "0000", "1111", "0000"] },
             { at: "right_eye", pixels: ["0000", "0000", "1111", "0000"] },
           ]],
+          thinking: [
+            [],
+            [
+              { at: "left_eye", pixels: ["01a1", "0111", "0011", "0000"] },
+              { at: "right_eye", pixels: ["01a1", "0111", "0011", "0000"] },
+            ],
+          ],
+          waiting: [[
+            { at: "left_eye", pixels: ["1aa1", "1a11", "11a1", "0110"] },
+            { at: "right_eye", pixels: ["1aa1", "1a11", "11a1", "0110"] },
+          ]],
+          hurt: [[
+            { at: "left_eye", pixels: ["1001", "0110", "0110", "1001"] },
+            { at: "right_eye", pixels: ["1001", "0110", "0110", "1001"] },
+          ]],
+          "pet:cheerful": [[
+            { at: "left_eye", pixels: ["0000", "0110", "1001", "0000"] },
+            { at: "right_eye", pixels: ["0000", "0110", "1001", "0000"] },
+          ]],
+          "pet:sarcastic": [[
+            { at: "left_eye", pixels: ["0000", "1111", "....", "...."] },
+            { at: "right_eye", pixels: ["0000", "1111", "....", "...."] },
+          ]],
+          "pet:dreamy": [[
+            { at: "left_eye", pixels: ["0000", "1001", "0110", "0000"] },
+            { at: "right_eye", pixels: ["0000", "1001", "0110", "0000"] },
+          ]],
+          sleeping: [[
+            { at: "left_eye", pixels: ["0000", "0000", "1111", "0000"] },
+            { at: "right_eye", pixels: ["0000", "0000", "1111", "0000"] },
+          ]],
         },
       },
       young: {
@@ -87,9 +118,40 @@ export const COMMON: readonly SpeciesDef[] = [
           "..........1111030100111.........",
           "...............1................",
         ],
-        anchors: { head: { x: 16, y: 5 }, left_eye: { x: 11, y: 10 }, right_eye: { x: 19, y: 10 } },
+        anchors: { head: { x: 16, y: 5 }, left_eye: { x: 11, y: 10 }, right_eye: { x: 19, y: 10 }, left_gaze: { x: 11, y: 9 }, right_gaze: { x: 19, y: 9 } },
         expressions: {
           shut: [[
+            { at: "left_eye", pixels: ["0000", "0000", "1111", "0000"] },
+            { at: "right_eye", pixels: ["0000", "0000", "1111", "0000"] },
+          ]],
+          thinking: [
+            [],
+            [
+              { at: "left_gaze", pixels: ["..11.", ".11a1", "01111", "01551", "0000."] },
+              { at: "right_gaze", pixels: [".1a1.", "0111.", "0111.", "015a.", "000.."] },
+            ],
+          ],
+          waiting: [[
+            { at: "left_eye", pixels: ["1aa1", "1a11", "11a1", "0110"] },
+            { at: "right_eye", pixels: ["1aa1", "1a11", "11a1", "0110"] },
+          ]],
+          hurt: [[
+            { at: "left_eye", pixels: ["1001", "0110", "0110", "1001"] },
+            { at: "right_eye", pixels: ["1001", "0110", "0110", "1001"] },
+          ]],
+          "pet:cheerful": [[
+            { at: "left_eye", pixels: ["0000", "0110", "1001", "0000"] },
+            { at: "right_eye", pixels: ["0000", "0110", "1001", "0000"] },
+          ]],
+          "pet:sarcastic": [[
+            { at: "left_eye", pixels: ["0000", "1111", "....", "...."] },
+            { at: "right_eye", pixels: ["0000", "1111", "....", "...."] },
+          ]],
+          "pet:dreamy": [[
+            { at: "left_eye", pixels: ["0000", "1001", "0110", "0000"] },
+            { at: "right_eye", pixels: ["0000", "1001", "0110", "0000"] },
+          ]],
+          sleeping: [[
             { at: "left_eye", pixels: ["0000", "0000", "1111", "0000"] },
             { at: "right_eye", pixels: ["0000", "0000", "1111", "0000"] },
           ]],
@@ -108,7 +170,7 @@ export const COMMON: readonly SpeciesDef[] = [
           ".........10000000000000000......",
           "........1200a1100000a111002.....",
           "........1201a1110000aa11101.....",
-          "........1201111100011111101.....",
+          "........1201111100001111101.....",
           "........22311111000011111221....",
           "......11000144130003144130021...",
           ".......1200331333033311300211...",
@@ -130,7 +192,16 @@ export const COMMON: readonly SpeciesDef[] = [
           "...........11111111111111.......",
           "................................",
         ],
-        anchors: { head: { x: 17, y: 5 }, left_eye: { x: 11, y: 9 }, right_eye: { x: 20, y: 9 } },
+        anchors: { head: { x: 17, y: 5 }, left_eye: { x: 11, y: 9 }, right_eye: { x: 20, y: 9 }, left_gaze: { x: 11, y: 8 }, right_gaze: { x: 20, y: 8 } },
+        expressions: {
+          thinking: [
+            [],
+            [
+              { at: "left_gaze", pixels: ["..a11.", ".1a111", "011111", "011111", "01441.", "0000.."] },
+              { at: "right_gaze", pixels: [".a111.", "0aa111", "011111", "011111", "01441.", "0000.."] },
+            ],
+          ],
+        },
       },
       elder: {
         pixels: [
@@ -167,15 +238,46 @@ export const COMMON: readonly SpeciesDef[] = [
           "................................",
           "................................",
         ],
-        anchors: { head: { x: 16, y: 5 }, left_eye: { x: 10, y: 9 }, right_eye: { x: 19, y: 9 } },
+        anchors: { head: { x: 16, y: 5 }, left_eye: { x: 10, y: 8 }, right_eye: { x: 19, y: 8 } },
       },
     },
     palette: ["#788f98", "#071126", "#3c4d5d", "#cbcdd1", "#576671", "#1d2c3d", "#97a7a7", "#ec837c", "#a75475", "#f7dad6", "#fcfbfc", "#982d4b", "#f05878", "#b6b1b4", "#420b14", "#57212a"],
     expressions: {
       open: [[]],
       shut: [[
-        { at: "left_eye", pixels: ["00000", "00000", "11111", "00000"] },
-        { at: "right_eye", pixels: ["00000", "00000", "11111", "00000"] },
+        { at: "left_eye", pixels: ["00000", "00000", "11111", "00000", "0000."] },
+        { at: "right_eye", pixels: ["00000", "00000", "11111", "00000", "0000."] },
+      ]],
+      thinking: [
+        [],
+        [
+          { at: "left_eye", pixels: ["01a11", "01111", "00111", "00000", "0000."] },
+          { at: "right_eye", pixels: ["01a11", "01111", "00111", "00000", "0000."] },
+        ],
+      ],
+      waiting: [[
+        { at: "left_eye", pixels: ["01110", "1aa11", "1a111", "111a1", "0111."] },
+        { at: "right_eye", pixels: ["01110", "1aa11", "1a111", "111a1", "0111."] },
+      ]],
+      hurt: [[
+        { at: "left_eye", pixels: ["00000", "01010", "00100", "01010", "0000."] },
+        { at: "right_eye", pixels: ["00000", "01010", "00100", "01010", "0000."] },
+      ]],
+      "pet:cheerful": [[
+        { at: "left_eye", pixels: ["00000", "00100", "01010", "10001", "0000."] },
+        { at: "right_eye", pixels: ["00000", "00100", "01010", "10001", "0000."] },
+      ]],
+      "pet:sarcastic": [[
+        { at: "left_eye", pixels: ["00000", "00000", "11111", ".....", "....."] },
+        { at: "right_eye", pixels: ["00000", "00000", "11111", ".....", "....."] },
+      ]],
+      "pet:dreamy": [[
+        { at: "left_eye", pixels: ["00000", "00000", "10001", "01110", "0000."] },
+        { at: "right_eye", pixels: ["00000", "00000", "10001", "01110", "0000."] },
+      ]],
+      sleeping: [[
+        { at: "left_eye", pixels: ["00000", "00000", "11111", "00000", "0000."] },
+        { at: "right_eye", pixels: ["00000", "00000", "11111", "00000", "0000."] },
       ]],
     },
     signature: {
