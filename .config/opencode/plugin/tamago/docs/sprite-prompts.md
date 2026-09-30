@@ -84,6 +84,16 @@ Mesuré sur le chat, le 2026-09-29 :
   bout de chaque antenne, enlève celui de la tête » a été suivi deux fois sans
   abîmer le reste. Il rend toujours 32 couleurs ; l'import les ramène à la
   palette commune. Il reste à éviter pour tout ce qui touche l'image entière.
+- **La couleur porte l'âge.** Sur le renard, un orange vif fait un jeune, un
+  roux profond un adulte, un orange pâle aux oreilles grises un vieux. Un
+  premier adulte orange vif est devenu le young.
+- **16 couleurs pour le détail.** Le propriétaire a voulu plus de détail et
+  des dégradés sur l'adulte renard : `maxColors: 16`, sans « flat colour, no
+  shading » dans le prompt. L'import en garde une partie : juger sur le
+  rendu importé.
+- **Des yeux qui regardent devant.** Deux yeux en miroir parfait louchent
+  (chacun regarde de son côté) ; les deux reflets du même côté, et deux yeux
+  de même forme, les font regarder devant.
 
 ## Le bloc de style
 
@@ -382,30 +392,33 @@ Old snail, faded grey cracked shell with green moss patches, pale wrinkled body,
 
 ### 7. fox — renard
 
-- [ ] adult  - [ ] hatchling  - [ ] young  - [ ] elder
+- [x] adult  - [x] hatchling  - [x] young  - [x] elder
 
-**adult**
+Tirages, `edit` et retouches : `docs/sprites/fox/SOURCES.md`. Le young est un
+tirage d'adult, l'adult et l'elder sont à 16 couleurs avec des dégradés.
 
-```
-Orange fox, pointed snout, large triangular ears, thick white-tipped tail, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
-```
-
-**hatchling**
+**adult** — `maxColors: 16`, puis un `edit` des yeux
 
 ```
-Orange fox as a cub, fluffy coat, small rounded ears, a short stubby tail, a blunt muzzle, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Adult red fox, detailed fur, deep rust red coat with soft colour gradients, white cheeks, cream chest bib, black ear backs, black socks, long slender snout, almond eyes, bushy tail shading to a white tip, sitting upright, chibi, front view, full body, thick dark outline
 ```
 
-**young**
+**hatchling** — tiré en `20 × 20`
 
 ```
-Orange fox as a young fox, ears grown large, long thin legs, tail long but thin, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Tiny baby fox cub, soft pale orange very fluffy fur, cream face, huge head on a tiny round body, small rounded ears, short stubby tail, sitting upright, super chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
 ```
 
-**elder**
+**young** — un tirage d'adult
 
 ```
-Orange fox in old age, a white muzzle, a dull thinning coat, a sparse tail, sunken cheeks, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Orange fox, pointed snout, large triangular ears, thick white-tipped tail, sitting upright, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+```
+
+**elder** — `maxColors: 16`
+
+```
+Old fox, pale faded orange coat streaked with grey, soft colour gradients, grey white muzzle, bushy white eyebrows, sly half-closed eyes, holding a small wooden cane in its front paw, slight three-quarter view, sitting upright, chibi, full body, thick dark outline
 ```
 
 ### 8. penguin — manchot
