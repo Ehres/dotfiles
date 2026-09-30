@@ -171,3 +171,8 @@ export PATH="$HOME/.local/bin:$PATH"
 # powerlevel10k and leaks stray `}}` plus blank lines into the prompt. It also
 # bought nothing under tmux: notify-on-command-finish needs OSC 133, and tmux
 # absorbs OSC 133 instead of relaying it to the terminal.
+
+# >>> oh-my-opencode-slim background subagents >>>
+export OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true
+export OPENCODE_ENABLE_EXA=1
+# <<< oh-my-opencode-slim background subagents <<<
