@@ -5,7 +5,7 @@
   "presets": {
     "openai": {
       "orchestrator": {
-        "model": "openai/gpt-6-sol-fast",
+        "model": "openai/gpt-6.1-sol-fast",
         "variant": "low",
         "skills": ["*"],
         "mcps": ["*", "!context7"]
