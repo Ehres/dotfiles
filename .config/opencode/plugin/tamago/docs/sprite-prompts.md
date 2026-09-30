@@ -415,7 +415,7 @@ Tiny baby fox cub, soft pale orange very fluffy fur, cream face, huge head on a 
 Orange fox, pointed snout, large triangular ears, thick white-tipped tail, sitting upright, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
 ```
 
-**elder** — `maxColors: 16`
+**elder** — `maxColors: 16`, puis un `edit` des yeux
 
 ```
 Old fox, pale faded orange coat streaked with grey, soft colour gradients, grey white muzzle, bushy white eyebrows, sly half-closed eyes, holding a small wooden cane in its front paw, slight three-quarter view, sitting upright, chibi, full body, thick dark outline
