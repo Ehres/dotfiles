@@ -1,26 +1,37 @@
 {
   "$schema": "https://unpkg.com/oh-my-opencode-slim@latest/oh-my-opencode-slim.schema.json",
   "preset": "openai",
-  "disabled_mcps": ["context7"],
+  "disabled_mcps": [
+    "context7"
+  ],
   "presets": {
     "openai": {
       "orchestrator": {
         "model": "openai/gpt-6.1-sol-fast",
         "variant": "low",
-        "skills": ["*"],
-        "mcps": ["*", "!context7"]
+        "skills": [
+          "*"
+        ],
+        "mcps": [
+          "*",
+          "!context7"
+        ]
       },
       "oracle": {
         "model": "openai/gpt-6-astra",
         "variant": "high",
-        "skills": ["simplify"],
+        "skills": [
+          "simplify"
+        ],
         "mcps": []
       },
       "librarian": {
         "model": "openai/gpt-6-luna",
         "variant": "low",
         "skills": [],
-        "mcps": ["gh_grep"]
+        "mcps": [
+          "gh_grep"
+        ]
       },
       "explorer": {
         "model": "openai/gpt-6-luna",
@@ -31,7 +42,10 @@
       "designer": {
         "model": "openai/gpt-6-luna",
         "variant": "medium",
-        "skills": ["make-interfaces-feel-better", "accessibility"],
+        "skills": [
+          "make-interfaces-feel-better",
+          "accessibility"
+        ],
         "mcps": []
       },
       "fixer": {
@@ -49,13 +63,20 @@
       "orchestrator": {
         "model": "opencode-go/minimax-m3",
         "variant": "thinking",
-        "skills": ["*"],
-        "mcps": ["*", "!context7"]
+        "skills": [
+          "*"
+        ],
+        "mcps": [
+          "*",
+          "!context7"
+        ]
       },
       "oracle": {
         "model": "opencode-go/qwen3.7-max",
         "variant": "max",
-        "skills": ["simplify"],
+        "skills": [
+          "simplify"
+        ],
         "mcps": []
       },
       "explorer": {
@@ -68,7 +89,9 @@
         "model": "opencode-go/deepseek-v4-flash",
         "variant": "high",
         "skills": [],
-        "mcps": ["gh_grep"]
+        "mcps": [
+          "gh_grep"
+        ]
       },
       "designer": {
         "model": "opencode-go/kimi-k2.7-code",
@@ -96,6 +119,52 @@
       "orchestratorPrompt": "Delegate to @fast-generic for routine mechanical command work: git status/diff/log reconnaissance, normal commit preparation, explicitly requested commits and pushes, and no-edit validation such as lint, typecheck, tests, or builds. Require it to inspect diffs before committing, stage only intended files, avoid secrets, preserve repository commit-message style, and report commit hashes or push results. Never delegate commits or pushes without explicit user authorization. Do not use it for code edits, design, architecture, debugging strategy, documentation research, or destructive git history operations unless explicitly requested.",
       "skills": [],
       "mcps": []
+    },
+    "code-reviewer": {
+      "model": "openai/gpt-6-astra",
+      "variant": "high",
+      "description": "Read-only code reviewer for correctness, regressions, repository rules, and applicable performance concerns.",
+      "prompt": "You are a read-only code reviewer. Review the supplied change; do not edit files, propose patches as if applied, or perform implementation work. Treat the diff as the entry point, not the review boundary: inspect relevant surrounding code and call sites as needed, including applicable AGENTS.md instructions at the repository root and nested in affected directories.\n\nFocus on concrete bugs, regressions, correctness, explicit repository-rule violations, and performance issues. Apply React-specific skill guidance only when the changed code is React/UI; do not apply it to scripts or backend code. Load the relevant assigned skill and only the pertinent references; do not reproduce skill contents. Prefer version-aware, evidence-based reasoning. Repository rules take precedence over generic guidance. Do not turn every skill recommendation into a finding, and do not report existing debt unless the change introduces or worsens it. Do not force findings when none are warranted.\n\nReport only actionable findings with file and line, category (defect, explicit rule violation, or optional suggestion), the violated rule or concrete scenario, impact, and a concise suggested direction. Separate optional suggestions from defects and rule violations. State assumptions and uncertainty. Do not claim to have verified behavior you could not execute.",
+      "orchestratorPrompt": "@code-reviewer\n- Lane: Read-only code review.\n- Delegate for nontrivial changes involving relevant code; skip trivial changes and docs-only changes. Ask it to review the complete change context, not only the diff.\n- The reviewer must load vercel-react-best-practices only when React code is relevant.\n- Do not use it for implementation or visual design. Reconcile and deduplicate its findings with other reviewers.",
+      "skills": [
+        "vercel-react-best-practices"
+      ],
+      "mcps": [],
+      "permission": {
+        "*": "deny",
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "list": "allow",
+        "lsp": "allow",
+        "codesearch": "allow",
+        "ast_grep_search": "allow",
+        "skill": "allow"
+      }
+    },
+    "component-reviewer": {
+      "model": "openai/gpt-6-astra",
+      "variant": "high",
+      "description": "Read-only UI component reviewer for APIs, composition, behavior, and accessibility.",
+      "prompt": "You are a read-only UI component reviewer. Review the supplied change; do not edit files, propose patches as if applied, or perform implementation work. Treat the diff as the entry point, not the review boundary: inspect relevant component implementation, call sites, representative callers when usage changes, and applicable root and nested AGENTS.md instructions. Load the relevant assigned skill and only pertinent references; do not reproduce skill contents.\n\nFor changed or newly added UI APIs and interactions, examine API and composition quality, controlled/uncontrolled state, semantic HTML, keyboard and focus behavior, accessible names, and whether actual usage exposes an abstraction mismatch. Support mismatch findings with concrete usage or branch evidence. Repository rules take precedence over generic guidance. Use version-aware guidance, avoid stylistic blanket mandates, and do not report existing debt unless introduced or worsened by the change. Do not force findings when none are warranted.\n\nReport actionable findings with file and line, category (defect, explicit rule violation, or optional suggestion), the concrete rule/scenario, impact, and a concise suggested direction. Separate optional suggestions from defects and rule violations. Clearly distinguish source-code inspection from browser-verified evidence; make no WCAG compliance claims. If browser verification is unavailable, list relevant interaction checks that remain unverified. State assumptions and uncertainty.",
+      "orchestratorPrompt": "@component-reviewer\n- Lane: Read-only review of UI component APIs, interactions, composition, and accessibility.\n- Delegate for new or changed UI APIs/interactions, or when changed usage may expose an abstraction limitation. Skip unrelated changes.\n- Ask it to inspect the implementation and representative relevant callers when usage changes, beyond the diff.\n- It must load relevant skills from vercel-composition-patterns, building-components, and accessibility, plus only pertinent references.\n- Do not use it for implementation or visual redesign. Reconcile and deduplicate its findings with other reviewers.",
+      "skills": [
+        "vercel-composition-patterns",
+        "building-components",
+        "accessibility"
+      ],
+      "mcps": [],
+      "permission": {
+        "*": "deny",
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "list": "allow",
+        "lsp": "allow",
+        "codesearch": "allow",
+        "ast_grep_search": "allow",
+        "skill": "allow"
+      }
     }
   }
 }
