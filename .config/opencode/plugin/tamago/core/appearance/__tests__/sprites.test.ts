@@ -8,7 +8,7 @@ import { MAP_ALPHABET, PIXEL_HEIGHT, SPRITE_HEIGHT, SPRITE_WIDTH, type Frame, ty
 import { EGG_PALETTE } from "../palette.ts";
 import type { Body } from "../bodies.ts";
 import { DEFAULT_EXPRESSIONS } from "../default-expressions.ts";
-import type { Expression, Expressions } from "../expressions.ts";
+import { ERASE, type Expression, type Expressions } from "../expressions.ts";
 import { EGG_PIXELS, HEART_HEIGHT, expressionsOf, frameAt, heartFrame, periodOf } from "../sprites.ts";
 import { STAGES } from "../../career/stage.ts";
 import { ACTIVITIES } from "../../moment/session.ts";
@@ -54,7 +54,7 @@ test("every index a map writes, and every index its expressions paint, has a col
           for (const patch of look) {
             for (const row of patch.pixels) {
               for (const char of row) {
-                if (char === ".") continue;
+                if (char === "." || char === ERASE) continue;
                 const index = MAP_ALPHABET.indexOf(char) - 1;
                 assert.ok(
                   index >= 0 && index < palette.length,
@@ -469,6 +469,8 @@ const OTHER: SpeciesDef = {
 
 const OTHER_TABLE = [...SPECIES, OTHER];
 
+const OTHER_BODY20: Body = { ...BODY, pixels: bar(20), frames: undefined, anchors: { ...BODY.anchors, head: { x: 15, y: 20 } } };
+
 // The table parameter is a production render signature widened so a test can inject a Species. That
 // only holds if the cache can tell two tables apart: keyed on the id and the Stage alone, whichever
 // table rendered first would serve its Frames to the other for the rest of the process — a test
@@ -484,3 +486,20 @@ test("two tables holding the same Species id never share a cached Frame", () => 
   const theirsHeart = heartFrame("test:framed", "adult", "stoic", undefined, false, OTHER_TABLE);
   assert.notDeepEqual(mineHeart, theirsHeart, "the heart Frame keys on the table too");
 });
+
+/** A bar on row 20 whose hurt erases the two pixels at the head: an eye closing by shrinking. */
+const ERASING: SpeciesDef = {
+  ...FIXTURE,
+  id: "test:erasing",
+  expressions: { ...DEFAULT_EXPRESSIONS, hurt: [[{ at: "head", pixels: [`${ERASE}.${ERASE}`] }]] },
+  maps: { hatchling: OTHER_BODY20, young: OTHER_BODY20, adult: OTHER_BODY20, elder: OTHER_BODY20 },
+};
+
+test("ERASE in a patch makes the pixel under it transparent, and `.` beside it leaves the map alone", () => {
+  const frame = frameAt("test:erasing", "adult", "hurt", 0, undefined, false, [...SPECIES, ERASING]);
+  const row = frame[10]; // pixel row 20 is the top half of cell row 10
+  assert.equal(row?.[15]?.top, null, "the erased pixel is transparent");
+  assert.equal(row?.[17]?.top, null, "and so is the second one");
+  assert.notEqual(row?.[16]?.top, null, "the `.` between them keeps the bar");
+});
+

@@ -1,7 +1,7 @@
 import { REFERENCE, SPECIES, known, mapsOf, tableOf } from "../creature/catalog.ts";
 import type { Anchors, Body } from "./bodies.ts";
 import { DEFAULT_EXPRESSIONS } from "./default-expressions.ts";
-import { expressionOf, idOf, petIdOf, type Expressions, type Look, type Point } from "./expressions.ts";
+import { ERASE, expressionOf, idOf, petIdOf, type Expressions, type Look, type Point } from "./expressions.ts";
 import { BADGE, BADGE_SLOT, MARK, MARK_SLOT } from "./marks.ts";
 import { BLINK_EVERY, SWEEP, blinksAt, shift, sweepAt } from "./motion.ts";
 import { PIXEL_HEIGHT, SPRITE_WIDTH, pack, paint, type Frame, type Pattern } from "./pixels.ts";
@@ -119,7 +119,7 @@ export function headOf(species: SpeciesId, stage: StageId, table: readonly Speci
   return stage === "egg" ? EGG.anchors.head : mapsOf(species, table)[stage].anchors.head;
 }
 
-/** Stamps a Look onto the rows: each patch at its anchor, `.` leaving what is under it alone. */
+/** Stamps a Look onto the rows: each patch at its anchor, `.` leaving what is under it alone, ERASE clearing it. */
 function stamp(rows: readonly string[], anchors: Anchors, look: Look): string[] {
   const next = rows.slice();
   for (const patch of look) {
@@ -131,7 +131,7 @@ function stamp(rows: readonly string[], anchors: Anchors, look: Look): string[] 
       const chars = row.split("");
       for (const [dx, char] of [...line].entries()) {
         if (char === ".") continue;
-        if (at.x + dx < SPRITE_WIDTH) chars[at.x + dx] = char;
+        if (at.x + dx < SPRITE_WIDTH) chars[at.x + dx] = char === ERASE ? "." : char;
       }
       next[at.y + dy] = chars.join("");
     }

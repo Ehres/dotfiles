@@ -3,8 +3,14 @@ import type { Temperament } from "../creature/sheet.ts";
 
 export type Point = { x: number; y: number };
 
-/** A patch pinned to an anchor: its top-left pixel lands on that anchor. `.` leaves what is under it alone. */
+/**
+ * A patch pinned to an anchor: its top-left pixel lands on that anchor. `.` leaves what is under it
+ * alone; ERASE makes it transparent, for an eye drawn against the edge of the silhouette.
+ */
 export type Patch = { at: string; pixels: readonly string[] };
+
+/** The patch character that clears a pixel: a snail's eye sits at the tip of a stalk and can only close by shrinking. */
+export const ERASE = " ";
 
 /** One look: everything redrawn for one beat. */
 export type Look = readonly Patch[];

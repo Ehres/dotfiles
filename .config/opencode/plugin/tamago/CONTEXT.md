@@ -333,7 +333,9 @@ _Avoid_: eye rectangle (an eye is no longer a rectangle the engine owns)
 **Patch**:
 Rows of map characters pinned to an Anchor, its top-left pixel landing on
 that point. `.` leaves what is under it alone, so a Patch redraws only what
-it means to. Its characters are indices into the Species' own Palette.
+it means to, and a space erases the pixel under it: an eye at the tip of a
+stalk can only close by shrinking. Its other characters are indices into the
+Species' own Palette.
 
 **Look**:
 Everything redrawn for one beat: the Patches stamped together.
