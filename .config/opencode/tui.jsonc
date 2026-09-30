@@ -8,6 +8,12 @@
   // OpenCode Quota: loads the TUI sidebar, compact status, and local commands.
   "plugin": [
     "@slkiser/opencode-quota@latest",
-    ["./plugin/tamago/index.tsx", { "name": "Tamago" }]
+    [
+      "./plugin/tamago/index.tsx",
+      {
+        "name": "Tamago"
+      }
+    ],
+    "oh-my-opencode-slim"
   ]
 }

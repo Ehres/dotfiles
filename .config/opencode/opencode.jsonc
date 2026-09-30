@@ -51,8 +51,8 @@
     "superpowers@git+https://github.com/obra/superpowers.git",
     "opencode-scheduler",
     "@slkiser/opencode-quota@latest",
-    "oh-my-opencode-slim",
     "opencode-mermaid-renderer@0.0.1",
+    "oh-my-opencode-slim",
   ],
   "username": "Ehres",
   "provider": {
