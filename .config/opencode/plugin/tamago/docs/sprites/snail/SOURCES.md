@@ -13,15 +13,16 @@ corrigés par un `edit`, qui a cette fois fait ce qu'on lui demandait sans
 abîmer le reste. Le hatchling et le young sont gardés tels que tirés.
 
 Le hatchling et le young sont tirés sur une toile plus petite (20 × 20 et
-26 × 26), puis posés dans le cadre 32 × 32, centrés sur leurs colonnes, leur
-dernière ligne sur la ligne 29 comme l'adult.
+26 × 26), puis posés dans le cadre 32 × 32, centrés sur leurs colonnes. Les
+quatre stades posent sur la ligne 30 : à la ligne 29, l'œil droit de l'adult
+entrait dans la case du badge, en haut à droite.
 
 | Stade | Tirage | Image | Taille | Retouche locale |
 | --- | --- | --- | --- | --- |
-| hatchling | `gen_6ff8cafe-5eec-4add-b413-9c8a4e94e88d` | 1 | 20 × 20 | posé dans le 32 × 32, décalé de (6, 14) |
-| young | `gen_6a9031c6-eadd-4baa-b1fa-3dea39103715` | 2 | 26 × 26 | posé dans le 32 × 32, décalé de (3, 9) |
-| adult | `gen_918f797b-8936-4210-8b5d-4d6d6e34890d` | 0 | 32 × 32 | aucune ; c'est l'`edit` de `gen_13ae2ee3-ba40-4431-acdf-b72bf9d590fa` image 1 |
-| elder | `gen_f0876bbb-0742-4c57-a6e5-d1b7dfd707a3` | 0 | 32 × 32 | descendu de 3 pixels, sa dernière ligne sur la ligne 29 ; c'est l'`edit` de `gen_a53e1526-c415-46fe-94a3-f7a84d8ba111` image 2 |
+| hatchling | `gen_6ff8cafe-5eec-4add-b413-9c8a4e94e88d` | 1 | 20 × 20 | posé dans le 32 × 32, décalé de (6, 15) |
+| young | `gen_6a9031c6-eadd-4baa-b1fa-3dea39103715` | 2 | 26 × 26 | posé dans le 32 × 32, décalé de (3, 10) ; un reflet `#fdfbfa` ajouté au bout de l'antenne droite, en (27, 19), pour qu'elle cligne comme la gauche |
+| adult | `gen_918f797b-8936-4210-8b5d-4d6d6e34890d` | 0 | 32 × 32 | c'est l'`edit` de `gen_13ae2ee3-ba40-4431-acdf-b72bf9d590fa` image 1 ; descendu d'un pixel ; un reflet `#fdfbfa` ajouté à l'œil gauche, en (24, 4), qui n'en avait pas |
+| elder | `gen_f0876bbb-0742-4c57-a6e5-d1b7dfd707a3` | 0 | 32 × 32 | c'est l'`edit` de `gen_a53e1526-c415-46fe-94a3-f7a84d8ba111` image 2 ; descendu de 4 pixels ; les deux reflets, que le détourage avait rendus transparents, rebouchés en `#fdfbfa`, en (24, 10) et (29, 11) |
 
 Les coordonnées sont en pixels, comptées à partir de 0 depuis le coin en haut
 à gauche. Tous les tirages sont faits à `maxColors: 12`, `transparent: true`,
