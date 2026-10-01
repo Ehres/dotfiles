@@ -26,8 +26,6 @@ My GitHub username is `Ehres`.
 
 Use the GitHub CLI (`gh`) for GitHub-related tasks whenever possible.
 
-Until further notice, do not write release notes in PR descriptions. Where a release message field is required, set it to `> N/A`.
-
 ## Project conventions
 
 When designing changes or reviewing code, check and apply the project's documented coding rules, guidelines, and standards.
@@ -43,6 +41,11 @@ When creating a Linear issue, assign it to `maxime.grebauval` in the `OMN` team 
 When creating Git worktrees, always place them beside the main repository using `<repo>.worktree/<branch>`. For example, worktrees for `/Users/maxime.grebauval/projects/orus-monorepo` belong under `/Users/maxime.grebauval/projects/orus-monorepo.worktree/`.
 
 Never commit specifications or implementation plans created by Superpowers skills unless the user explicitly requests it.
+
+## Release notes
+
+- Only add a release note when the branch or PR changes behavior, content, or functionality perceptible to the end user. Assess the complete PR, not individual commits.
+- Do not add a release note for purely internal changes with no end-user impact, such as refactoring, maintenance, logs, or error messages never exposed to the end user.
 
 ## Collaboration
 
