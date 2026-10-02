@@ -54,6 +54,14 @@ Never commit specifications or implementation plans created by Superpowers skill
 - Surface nearby inconsistencies, risks, and suspicious behavior discovered during work.
 - When the user says "Rappelle-toi de ...", persist the requested instruction in this global `AGENTS.md` file unless they specify another scope.
 
+## TODO comments
+
+- For new or updated TODO comments in code, use `TODO[tag-in-kebab-case]: actionable explanation`, within the language's native comment syntax. This convention applies to code comments, not task lists.
+- Treat the tag as a stable category of deferred work, like a lint rule name, not a unique occurrence ID. Search for existing tags in the project and reuse a matching one before introducing a new tag.
+- Keep the explanation specific to the occurrence: state what must change and, when relevant, why it is deferred or what condition will unblock it. Example: `// TODO[missing-design-token]: replace this hardcoded spacing with the card-gap token once it exists.`
+- Before modifying or refactoring code, inspect TODO comments in the affected code and relevant occurrences of their tags in related code. Reassess them after the change: resolve those within scope, update inaccurate explanations, and remove obsolete TODOs.
+- Do not expand the task to unrelated TODOs or mass-convert legacy comments. Report relevant deferred work that remains; link a tracking issue when independent planning is needed, but do not create one without authorization.
+
 ## Frontend rules
 
 - Do not add front-end unit tests that assert Tailwind CSS classes or other visual styling details. Unit tests must validate user-observable behavior and functionality, not visual implementation.
