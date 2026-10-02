@@ -94,6 +94,18 @@ Mesuré sur le chat, le 2026-09-29 :
 - **Des yeux qui regardent devant.** Deux yeux en miroir parfait louchent
   (chacun regarde de son côté) ; les deux reflets du même côté, et deux yeux
   de même forme, les font regarder devant.
+- **Le bébé à taille normale.** Le propriétaire n'aime pas les petits
+  hatchlings en 20 × 20 : ils perdent leur détail. Sur le manchot, un
+  hatchling en 32 × 32 « extremely chibi, giant round head on a tiny body »
+  dit bébé par ses proportions, pas par sa taille.
+- **Un stade tiré d'un autre par `edit`.** Quand les tirages d'adult sortent
+  trop bébés ou d'un autre style, un `edit` de l'elder qui retire la canne et
+  rajeunit le plumage donne un adulte du même dessin.
+- **Choisir la palette à la main.** Les 32 couleurs d'un `edit` peuvent
+  évincer de la palette commune des couleurs rares mais visibles des autres
+  stades (la canne, un bec). Partir de la palette sans l'`edit`, y remplacer
+  les couleurs les moins employées par celles de l'image éditée, et importer
+  chaque stade avec `--palette`.
 
 ## Le bloc de style
 
@@ -423,30 +435,33 @@ Old fox, pale faded orange coat streaked with grey, soft colour gradients, grey 
 
 ### 8. penguin — manchot
 
-- [ ] adult  - [ ] hatchling  - [ ] young  - [ ] elder
+- [x] adult  - [x] hatchling  - [x] young  - [x] elder
 
-**adult**
+Tirages, `edit`, palette choisie à la main : `docs/sprites/penguin/SOURCES.md`.
+Le young est un tirage d'adult, l'adult un `edit` de l'elder.
 
-```
-Black and white penguin, round belly, short flippers at its sides, orange beak and feet, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
-```
-
-**hatchling**
+**adult** — un `edit` de l'elder
 
 ```
-Black and white penguin as a chick, a ball of grey down, no flippers showing, a tiny dark beak, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Remove the cane and make it stand straight as a younger adult: glossy blue black plumage, bright white belly, vivid yellow neck patch; keep the face, the eyes and the proportions unchanged
 ```
 
-**young**
+**hatchling** — `32 × 32`, chibi très prononcé
 
 ```
-Black and white penguin as a juvenile, mottled grey and white plumage, short flippers, a pale beak, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Baby emperor penguin chick, extremely chibi, giant round head on a tiny fluffy body, fluffy silver grey down all over, black head cap, white face mask, tiny dark beak, stubby flippers, big round shiny black eyes with white highlights, sitting, front view, full body, thick dark outline
+```
+
+**young** — un tirage d'adult
+
+```
+Adult emperor penguin, glossy black back and head with soft gradients, white face and belly, yellow neck patch, short flippers, orange beak and feet, standing upright facing the viewer, both eyes open, big round shiny black eyes with white highlights, chibi, front view, full body, thick dark outline
 ```
 
 **elder**
 
 ```
-Black and white penguin in old age, worn dull plumage, a stooped back, a faded beak, drooping eyelids, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Old emperor penguin, faded greyish black plumage with soft gradients, worn white belly, pale yellow neck patch, bushy white eyebrows, slightly hunched, leaning on a tiny wooden cane, both eyes open, round black eyes with white highlights, chibi, front view, full body, thick dark outline
 ```
 
 ### 9. octopus — pieuvre
