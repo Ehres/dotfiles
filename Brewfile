@@ -77,10 +77,8 @@ cask "google-chrome"               # Second browser, also drives chrome-devtools
 cask "slack"                       # Work chat; skhd binds it to ctrl+shift+cmd - s
 cask "linear"                      # Issue tracker; skhd binds it to ctrl+shift+cmd - l
 cask "signal"                      # Encrypted messaging
-cask "granola"                     # Meeting notes
 cask "figma"                       # Design
 cask "orbstack"                    # Containers and Linux VMs
-cask "superwhisper"                # Local dictation
 cask "1password-cli"               # `op` CLI
 cask "github@beta"                 # GitHub Desktop (beta channel)
 cask "bazecor"                     # Dygma Defy keyboard configurator (see VirtualDefy.json)
