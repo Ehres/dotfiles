@@ -19,8 +19,8 @@ Les quatre stades posent sur la ligne 31.
 | --- | --- | --- | --- |
 | hatchling | `gen_83057211-c813-4a1e-a9f5-a2302f291898` | 0 | descendu d'un pixel |
 | young | `gen_5be08c94-20ea-4da3-97fc-81d62013246a` | 0 | aucune |
-| adult | `gen_26f41370-3e0d-4e36-abfe-1ca432ec4223` | 0 | descendu d'un pixel ; c'est l'`edit` de l'elder, `gen_3e4a3d29-19bc-4f7c-98a4-19882cb2c335` image 2 |
-| elder | `gen_3e4a3d29-19bc-4f7c-98a4-19882cb2c335` | 2 | aucune |
+| adult | `gen_26f41370-3e0d-4e36-abfe-1ca432ec4223` | 0 | c'est l'`edit` de l'elder, `gen_3e4a3d29-19bc-4f7c-98a4-19882cb2c335` image 2 ; descendu d'un pixel ; puis (11,8) peint en `#050620` : l'œil gauche, en L, devient un 2 × 2 comme le droit et ne cligne plus |
+| elder | `gen_3e4a3d29-19bc-4f7c-98a4-19882cb2c335` | 2 | (12,7) peint en `#050620` : l'œil gauche, en L, devient un 2 × 2 comme le droit |
 
 ## La palette
 
