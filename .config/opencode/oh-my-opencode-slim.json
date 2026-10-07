@@ -1,36 +1,25 @@
 {
   "$schema": "https://unpkg.com/oh-my-opencode-slim@latest/oh-my-opencode-slim.schema.json",
-  "preset": "rapide",
-  "disabled_mcps": [
-    "context7"
-  ],
+  "preset": "approfondi",
+  "disabled_mcps": ["context7"],
   "presets": {
     "openai": {
       "orchestrator": {
         "model": "openai/gpt-6.1-sol-fast",
-        "skills": [
-          "*"
-        ],
-        "mcps": [
-          "*",
-          "!context7"
-        ]
+        "skills": ["*"],
+        "mcps": ["*", "!context7"]
       },
       "oracle": {
         "model": "openai/gpt-6-astra",
         "variant": "high",
-        "skills": [
-          "simplify"
-        ],
+        "skills": ["simplify"],
         "mcps": []
       },
       "librarian": {
         "model": "openai/gpt-6-luna",
         "variant": "low",
         "skills": [],
-        "mcps": [
-          "gh_grep"
-        ]
+        "mcps": ["gh_grep"]
       },
       "explorer": {
         "model": "openai/gpt-6-luna",
@@ -41,10 +30,7 @@
       "designer": {
         "model": "openai/gpt-6-luna",
         "variant": "medium",
-        "skills": [
-          "make-interfaces-feel-better",
-          "accessibility"
-        ],
+        "skills": ["make-interfaces-feel-better", "accessibility"],
         "mcps": []
       },
       "fixer": {
@@ -74,20 +60,13 @@
       "orchestrator": {
         "model": "opencode-go/minimax-m3",
         "variant": "thinking",
-        "skills": [
-          "*"
-        ],
-        "mcps": [
-          "*",
-          "!context7"
-        ]
+        "skills": ["*"],
+        "mcps": ["*", "!context7"]
       },
       "oracle": {
         "model": "opencode-go/qwen3.7-max",
         "variant": "max",
-        "skills": [
-          "simplify"
-        ],
+        "skills": ["simplify"],
         "mcps": []
       },
       "explorer": {
@@ -100,9 +79,7 @@
         "model": "opencode-go/deepseek-v4-flash",
         "variant": "high",
         "skills": [],
-        "mcps": [
-          "gh_grep"
-        ]
+        "mcps": ["gh_grep"]
       },
       "designer": {
         "model": "opencode-go/kimi-k2.7-code",
@@ -137,29 +114,20 @@
       "orchestrator": {
         "model": "openai/gpt-6.1-sol-fast",
         "variant": "low",
-        "skills": [
-          "*"
-        ],
-        "mcps": [
-          "*",
-          "!context7"
-        ]
+        "skills": ["*"],
+        "mcps": ["*", "!context7"]
       },
       "oracle": {
         "model": "openai/gpt-6.1-sol",
         "variant": "medium",
-        "skills": [
-          "simplify"
-        ],
+        "skills": ["simplify"],
         "mcps": []
       },
       "librarian": {
         "model": "openai/gpt-6-luna",
         "variant": "low",
         "skills": [],
-        "mcps": [
-          "gh_grep"
-        ]
+        "mcps": ["gh_grep"]
       },
       "explorer": {
         "model": "openai/gpt-6-luna",
@@ -170,10 +138,7 @@
       "designer": {
         "model": "openai/gpt-6-luna",
         "variant": "medium",
-        "skills": [
-          "make-interfaces-feel-better",
-          "accessibility"
-        ],
+        "skills": ["make-interfaces-feel-better", "accessibility"],
         "mcps": []
       },
       "fixer": {
@@ -203,29 +168,20 @@
       "orchestrator": {
         "model": "openai/gpt-6.1-sol",
         "variant": "medium",
-        "skills": [
-          "*"
-        ],
-        "mcps": [
-          "*",
-          "!context7"
-        ]
+        "skills": ["*"],
+        "mcps": ["*", "!context7"]
       },
       "oracle": {
         "model": "openai/gpt-6.1-sol",
         "variant": "high",
-        "skills": [
-          "simplify"
-        ],
+        "skills": ["simplify"],
         "mcps": []
       },
       "librarian": {
         "model": "openai/gpt-6-luna",
         "variant": "low",
         "skills": [],
-        "mcps": [
-          "gh_grep"
-        ]
+        "mcps": ["gh_grep"]
       },
       "explorer": {
         "model": "openai/gpt-6-luna",
@@ -236,10 +192,7 @@
       "designer": {
         "model": "openai/gpt-6-luna",
         "variant": "medium",
-        "skills": [
-          "make-interfaces-feel-better",
-          "accessibility"
-        ],
+        "skills": ["make-interfaces-feel-better", "accessibility"],
         "mcps": []
       },
       "fixer": {
@@ -269,29 +222,20 @@
       "orchestrator": {
         "model": "openai/gpt-6.1-sol",
         "variant": "high",
-        "skills": [
-          "*"
-        ],
-        "mcps": [
-          "*",
-          "!context7"
-        ]
+        "skills": ["*"],
+        "mcps": ["*", "!context7"]
       },
       "oracle": {
         "model": "openai/gpt-6-astra",
         "variant": "high",
-        "skills": [
-          "simplify"
-        ],
+        "skills": ["simplify"],
         "mcps": []
       },
       "librarian": {
         "model": "openai/gpt-6-luna",
         "variant": "low",
         "skills": [],
-        "mcps": [
-          "gh_grep"
-        ]
+        "mcps": ["gh_grep"]
       },
       "explorer": {
         "model": "openai/gpt-6-luna",
@@ -302,10 +246,7 @@
       "designer": {
         "model": "openai/gpt-6-luna",
         "variant": "medium",
-        "skills": [
-          "make-interfaces-feel-better",
-          "accessibility"
-        ],
+        "skills": ["make-interfaces-feel-better", "accessibility"],
         "mcps": []
       },
       "fixer": {
@@ -319,12 +260,12 @@
         "mcps": []
       },
       "react-reviewer": {
-        "model": "openai/gpt-6-astra",
-        "variant": "high"
+        "model": "openai/gpt-6.1-sol",
+        "variant": "medium"
       },
       "ui-reviewer": {
-        "model": "openai/gpt-6-astra",
-        "variant": "high"
+        "model": "openai/gpt-6.1-sol",
+        "variant": "medium"
       },
       "fast-generic": {
         "model": "openai/gpt-6-luna",
@@ -337,9 +278,7 @@
       "description": "Read-only React and Next.js reviewer for correctness, regressions, state, effects, data fetching, performance, and applicable repository rules.",
       "prompt": "You are a read-only React and Next.js code reviewer. Review the supplied change; do not edit files, propose patches as if applied, or perform implementation work. Review only React/Next.js logic and code with a direct React/Next.js connection. Skip scripts, backend, and other unrelated code. Treat the diff as the entry point, not the review boundary: inspect relevant surrounding implementation and call sites as needed, including applicable root and nested AGENTS.md instructions.\n\nFocus on concrete correctness defects and regressions in React/Next.js behavior, especially state, effects, data fetching, and performance. Apply repository rules where they govern the relevant React/Next.js change. Load vercel-react-best-practices and only pertinent references when applicable; do not reproduce skill contents. Use version-aware, evidence-based reasoning. Do not turn every skill recommendation into a finding, and do not report existing debt unless the change introduces or worsens it. Do not force findings when none are warranted.\n\nReport actionable findings with file and line, category (defect, explicit rule violation, or optional suggestion), the concrete rule or scenario, impact, and a concise suggested direction. Separate optional suggestions from defects and rule violations. State assumptions and uncertainty; do not claim behavior was verified if it was not. Escalate uncertain transverse redesign questions to the orchestrator as a recommendation to consult the oracle; do not launch nested tasks.",
       "orchestratorPrompt": "@react-reviewer\n- Lane: Read-only review of React/Next.js logic, including state, effects, data fetching, performance, and applicable repository rules.\n- Delegate for nontrivial changes with relevant React/Next.js code; skip trivial, docs-only, scripts, backend, and unrelated changes unless they have a direct React/Next.js connection. Ask it to review relevant implementation and call sites beyond the diff.\n- Ask it to load vercel-react-best-practices and pertinent references only when applicable.\n- Do not use it for implementation or visual design. Reconcile and deduplicate findings with other reviewers. Route uncertain transverse redesign questions to the oracle through the orchestrator, not nested tasks.",
-      "skills": [
-        "vercel-react-best-practices"
-      ],
+      "skills": ["vercel-react-best-practices"],
       "mcps": [],
       "permission": {
         "*": "deny",
