@@ -8,11 +8,13 @@ APP_NAME=${1:?usage: yabai-focus-app <application-name>}
 
 # shellcheck disable=SC2016
 WINDOW_JSON=$("$YABAI_BIN" -m query --windows | "$JQ_BIN" -c --arg app "$APP_NAME" '
-	map(select(
+	[.[] | select(
 		.app == $app and
 		."is-minimized" == false and
 		."is-hidden" == false
-	)) | first
+	)] as $eligible |
+	([$eligible[] | select(.subrole == "AXStandardWindow" and ."is-sticky" != true)] +
+	 [$eligible[] | select(.subrole != "AXStandardWindow" or ."is-sticky" == true)]) | first
 ')
 
 if [ -z "$WINDOW_JSON" ] || [ "$WINDOW_JSON" = "null" ]; then
