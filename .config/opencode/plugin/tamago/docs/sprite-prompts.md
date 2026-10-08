@@ -106,6 +106,10 @@ Mesuré sur le chat, le 2026-09-29 :
   stades (la canne, un bec). Partir de la palette sans l'`edit`, y remplacer
   les couleurs les moins employées par celles de l'image éditée, et importer
   chaque stade avec `--palette`.
+- **De face plutôt que de trois quarts.** De trois quarts, l'œil éloigné ne
+  fait que quelques pixels : sur le hérisson, ni trois `edit` ni deux
+  retouches à la main ne l'ont rendu lisible. Demander « front view facing
+  the viewer, two identical eyes » quand l'animal s'y prête.
 
 ## Le bloc de style
 
@@ -522,30 +526,27 @@ Dark purple bat in old age, torn wing membranes, grizzled grey fur, squinting ey
 
 ### 11. hedgehog — hérisson
 
-- [ ] adult  - [ ] hatchling  - [ ] young  - [ ] elder
+- [x] adult  - [x] hatchling  - [x] young  - [x] elder
 
-**adult**
+Tirages : `docs/sprites/hedgehog/SOURCES.md`. Le young et l'adult viennent du
+même tirage d'adult.
+
+**adult** et **young** — le même tirage
 
 ```
-Brown hedgehog, round body covered in short spines, a small pointed snout, tiny paws, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Adult hedgehog, chibi, big tufts of brown spines with soft gradients, cream face and belly, pink ears and blush, small black nose, two identical detailed eyes with brown iris, black pupil and white highlights, sitting, front view facing the viewer, full body, thick dark outline
 ```
 
 **hatchling**
 
 ```
-Brown hedgehog as a hoglet, pink skin, soft white spines barely showing, curled up, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
-```
-
-**young**
-
-```
-Brown hedgehog as a young hedgehog, short brown spines, a small snout, oversized paws, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Baby hedgehog, extremely chibi, giant round head on a tiny body, soft pale cream and light pink spine tufts with soft gradients, cream face, pink ears and blush, tiny black nose, two identical big round black eyes with highlights, sitting, front view, full body, thick dark outline
 ```
 
 **elder**
 
 ```
-Brown hedgehog in old age, grey spines with several missing, a drooping snout, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Old hedgehog, chibi, tufts of silver grey spines with soft gradients, pale cream face, bushy white eyebrows, pink ears, black nose, leaning on a tiny wooden cane, two identical round black eyes with highlights, sitting, front view, full body, thick dark outline
 ```
 
 ### 12. axolotl — axolotl
