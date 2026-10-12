@@ -1,5 +1,5 @@
 /** @jsxImportSource @opentui/solid */
-import type { TuiThemeCurrent } from "@opencode-ai/plugin/tui";
+import type { ThemeColors } from "./theme.tsx";
 import type { RGBA } from "@opentui/core";
 import type { JSX } from "@opentui/solid";
 import { Show } from "solid-js";
@@ -22,7 +22,7 @@ export function Portrait(props: {
   activity: Activity;
   clock: number;
   heart: boolean;
-  theme: TuiThemeCurrent;
+  theme: ThemeColors;
   badge: boolean;
   width?: number;
   bubble?: BubbleView;

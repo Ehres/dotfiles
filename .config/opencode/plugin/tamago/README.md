@@ -14,14 +14,12 @@ when something fails and recovers a few seconds later.
 
 ## Install
 
-The plugin is a local `.tsx` file loaded by OpenCode without a build step.
-It is referenced from `.config/opencode/tui.jsonc`:
-
-```jsonc
-{
-  "plugin": [["./plugin/tamago/index.tsx", { "name": "Tamago" }]]
-}
-```
+The plugin is a local folder loaded by OpenCode 2 without a build step. OpenCode
+discovers it under `.config/opencode/plugin/tamago/`, with no config entry: it
+loads `index.ts` in the background service, where tamago does nothing, and
+`tui.tsx` in the terminal, where it lives. The devDependencies give the editor
+and the tests OpenCode's own types and OpenTUI; at runtime OpenCode provides
+both.
 
 `name` and `language` are the two options. `name` is the label shown next to
 the sprite and in toasts until you rename the creature from the palette; a
@@ -315,8 +313,9 @@ generate the twenty Species are in `docs/sprite-prompts.md`.
 Layout:
 
 ```
-index.tsx           wires the layers
-shell/              the only layer touching api.* and timers: Window mirror, tick and flush loops, actions, dialogs, palette, slots
+index.ts            the empty background-service half OpenCode 2 loads
+tui.tsx             wires the layers
+shell/              the only layer touching the plugin context and timers: Window mirror, tick and flush loops, actions, dialogs, palette, slots
 core/window.ts      what one window does with an event, a tick, a flush or a command
 core/tamago.ts      the Tamago read from a Career once: Species, Stage, XP, Sheet, Behavior, Character
 core/creature/      what a Tamago is at hatch: the Species catalog, Luck, Sheet, Behavior, Character
@@ -328,7 +327,7 @@ core/roster/        every Career of the machine
 core/appearance/    how it is drawn: Sprite assembly, frames, anchors, expressions, formatting
 core/text/          every phrase the user reads: card, roster lines, toasts, dialogs, palette commands, Moods
 core/store/         the pure decisions of the store: lock, retry
-adapter/            the only layer touching SDK event shapes and the disk
+adapter/            the only layer touching OpenCode event shapes and the disk
 view/               Solid components taking plain props, returning JSX
 ```
 

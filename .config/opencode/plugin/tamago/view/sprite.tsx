@@ -1,5 +1,5 @@
 /** @jsxImportSource @opentui/solid */
-import type { TuiThemeCurrent } from "@opencode-ai/plugin/tui";
+import type { ThemeColors } from "./theme.tsx";
 import { RGBA } from "@opentui/core";
 import type { JSX } from "@opentui/solid";
 import { Index, createMemo } from "solid-js";
@@ -37,7 +37,7 @@ export function mixed(from: string, towards: string, amount: number): string {
 
 /**
  * Which theme colour an Activity pulls the Palette toward, and how far. Only
- * the three keys `TuiThemeCurrent` actually offers here are legal, so
+ * the three keys `ThemeColors` offers here are legal, so
  * `props.theme[tint.color]` is an `RGBA` with no cast needed.
  */
 type Tint = { color: "warning" | "error" | "textMuted"; amount: number };
@@ -70,7 +70,7 @@ export function Sprite(props: {
   activity: Activity;
   clock: number;
   heart: boolean;
-  theme: TuiThemeCurrent;
+  theme: ThemeColors;
   badge: boolean;
 }): JSX.Element {
   const frame = createMemo((): Frame => {

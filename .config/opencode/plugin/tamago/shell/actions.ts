@@ -1,4 +1,4 @@
-import type { TuiPluginApi } from "@opencode-ai/plugin/tui";
+import type { Context } from "@opencode/plugin/tui/context";
 import { createSignal, type Accessor } from "solid-js";
 import type { Store } from "../adapter/store.ts";
 import { PET_MS } from "../core/appearance/sprites.ts";
@@ -34,18 +34,21 @@ export type Actions = {
   dispose(): void;
 };
 
+/** The window-and-machine preferences, kept in OpenCode's plugin storage, never in the Career. */
+export type Prefs = { muted: boolean; language?: Language };
+
 /** What the palette does to the store and the Window. */
 export function createActions(deps: {
-  api: TuiPluginApi;
+  api: Context;
   store: Store;
   mirror: Mirror;
   warnCorrupt: () => void;
   guard: Guard;
   now?: () => number;
-  /** The palette titles carry the Language's own words, fixed at registration: a switch must rebuild them. */
-  onLanguage: () => void;
+  /** Writes a preference to OpenCode's durable plugin storage. */
+  savePrefs: (mutation: (draft: Prefs) => void) => void;
 }): Actions {
-  const { api, store, mirror, warnCorrupt, guard, onLanguage } = deps;
+  const { api, store, mirror, warnCorrupt, guard, savePrefs } = deps;
   const now = deps.now ?? Date.now;
   const [heart, setHeart] = createSignal(false);
 
@@ -71,7 +74,7 @@ export function createActions(deps: {
   /** The Delta must reach its own Career before the active one changes. False, with a toast, when the disk is busy; disk errors throw and `guard` logs them. */
   const settle = (): boolean => {
     if (persist()) return true;
-    api.ui.toast({ variant: "warning", title: mirror.name(), message: say(BUSY, mirror.language()) });
+    api.ui.toast.show({ variant: "warning", title: mirror.name(), message: say(BUSY, mirror.language()) });
     return false;
   };
 
@@ -80,9 +83,9 @@ export function createActions(deps: {
     if (id === mirror.current().career.hatchedAt) return; // another window brought it to the front while we flushed
     const result = store.switch(id);
     if (result.outcome === "written") mirror.run(flushed(mirror.current(), result.career, now()));
-    else if (result.outcome === "missing") api.ui.toast({ variant: "warning", title: mirror.name(), message: say(GONE, mirror.language()) });
+    else if (result.outcome === "missing") api.ui.toast.show({ variant: "warning", title: mirror.name(), message: say(GONE, mirror.language()) });
     else if (result.outcome === "corrupt") warnCorrupt();
-    else api.ui.toast({ variant: "warning", title: mirror.name(), message: say(BUSY, mirror.language()) });
+    else api.ui.toast.show({ variant: "warning", title: mirror.name(), message: say(BUSY, mirror.language()) });
   };
 
   const lay = () => {
@@ -90,7 +93,7 @@ export function createActions(deps: {
     const result = store.hatch(now());
     if (result.outcome === "written") mirror.run(flushed(mirror.current(), result.career, now()));
     else if (result.outcome === "corrupt") warnCorrupt();
-    else api.ui.toast({ variant: "warning", title: mirror.name(), message: say(BUSY, mirror.language()) });
+    else api.ui.toast.show({ variant: "warning", title: mirror.name(), message: say(BUSY, mirror.language()) });
   };
 
   /** A rename is a Delta: shown at once here, flushed like the counters, latest wins across windows. */
@@ -101,7 +104,9 @@ export function createActions(deps: {
 
   const setMute = (value: boolean) => {
     mirror.commit(muteWindow(mirror.current(), value));
-    api.kv.set("tamago.muted", value);
+    savePrefs((draft) => {
+      draft.muted = value;
+    });
   };
 
   /** The Language is a window-and-machine preference, never a Delta: it does not touch the Career and never reaches the disk. */
@@ -109,8 +114,9 @@ export function createActions(deps: {
     const current = mirror.current();
     if (current.language === value) return;
     mirror.commit(languageWindow(current, value));
-    api.kv.set("tamago.language", value);
-    onLanguage();
+    savePrefs((draft) => {
+      draft.language = value;
+    });
   };
 
   /** The heart is drawn wherever the sprite is, in this window; petting counts nothing. */

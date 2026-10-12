@@ -13,9 +13,9 @@ export type Mirror = {
   sessions: Accessor<Record<string, Session>>;
   /** One Voice per root OpenCode session, keyed like `sessions`. Never persisted. */
   voices: Accessor<Record<string, Voice>>;
-  /** Persisted through api.kv; when muted no Cue is heard and every Bubble is cleared. */
+  /** Persisted in OpenCode's plugin storage; when muted no Cue is heard and every Bubble is cleared. */
   muted: Accessor<boolean>;
-  /** Persisted through api.kv; every phrase the user reads is said in it. */
+  /** Persisted in OpenCode's plugin storage; every phrase the user reads is said in it. */
   language: Accessor<Language>;
   /** The active Tamago, read from the Career once per change: Stage, Sheet, Behavior, Character. Derived, never stored; every window computes the same. */
   active: Accessor<Tamago>;

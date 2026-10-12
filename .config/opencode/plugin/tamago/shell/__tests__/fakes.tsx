@@ -1,65 +1,62 @@
-/** @jsxImportSource @opentui/solid */
-import type { TuiPluginApi } from "@opencode-ai/plugin/tui";
+import type { Context, DialogSelectOptions } from "@opencode/plugin/tui/context";
 import type { JSX } from "@opentui/solid";
+import type { Prefs } from "../actions.ts";
 
 export type Toast = { variant?: string; title?: string; message: string };
-export type SelectOption = { title: string; value: string; description?: string };
-type SelectProps = { title: string; options: SelectOption[]; onSelect?: (option: SelectOption) => void };
-export type Kv = { get(key: string): unknown; set(key: string, value: unknown): void };
-
-/** A `kv` backed by a plain Map, standing in for OpenCode's own persisted store. */
-function fakeKv(): Kv {
-  const store = new Map<string, unknown>();
-  return {
-    get: (key) => store.get(key),
-    set: (key, value) => {
-      store.set(key, value);
-    },
-  };
-}
+/** The latest select OpenCode was asked for, and how to answer it the way a person picking an option would. */
+export type Select = { options: DialogSelectOptions<string>; answer(value: string | undefined): void };
 
 /**
- * The slice of the api these tests touch: toasts, the dialog stack, `kv`,
- * and a DialogSelect standing in for OpenCode's own. Everything else is left
- * undefined on purpose, so a test that needs more has to say so. `select`
- * exposes the latest DialogSelect props, once the dialog has been rendered,
- * so a test can drive `onSelect` the way a person picking an option would.
+ * The slice of the plugin context these tests touch: toasts and the dialog
+ * stack. Everything else is left undefined on purpose, so a test that needs
+ * more has to say so. `select` exposes the latest select, still open, so a
+ * test can answer it; clearing the dialog answers it with nothing, as
+ * OpenCode does.
  */
 export function fakeApi(): {
-  api: TuiPluginApi;
+  api: Context;
   toasts: Toast[];
-  kv: Kv;
   shown: () => (() => JSX.Element) | undefined;
-  select: () => SelectProps | undefined;
+  select: () => Select | undefined;
 } {
   const toasts: Toast[] = [];
-  const kv = fakeKv();
   let node: (() => JSX.Element) | undefined;
-  let selected: SelectProps | undefined;
+  let selected: Select | undefined;
+  const clear = () => {
+    node = undefined;
+    const open = selected;
+    selected = undefined;
+    open?.answer(undefined);
+  };
   const api = {
     ui: {
-      toast: (input: Toast) => toasts.push(input),
+      toast: { show: (input: Toast) => toasts.push(input) },
       dialog: {
-        replace: (next: () => JSX.Element) => {
+        show: (next: () => JSX.Element) => {
+          clear();
           node = next;
         },
-        clear: () => {
-          node = undefined;
-        },
-      },
-      DialogSelect: (props: SelectProps) => {
-        selected = props;
-        return (
-          <box flexDirection="column">
-            <text>{props.title}</text>
-            {props.options.map((option) => (
-              <text>{option.title}</text>
-            ))}
-          </box>
-        );
+        set: () => {},
+        clear,
+        select: (options: DialogSelectOptions<string>) =>
+          new Promise<string | undefined>((resolve) => {
+            clear();
+            selected = {
+              options,
+              answer: (value) => {
+                if (selected?.options === options) selected = undefined;
+                resolve(value);
+              },
+            };
+          }),
       },
     },
-    kv,
-  } as unknown as TuiPluginApi;
-  return { api, toasts, kv, shown: () => node, select: () => selected };
+  } as unknown as Context;
+  return { api, toasts, shown: () => node, select: () => selected };
+}
+
+/** Preferences as OpenCode's plugin storage would keep them: `save` applies the mutation in place. */
+export function fakePrefs(): { prefs: Prefs; save: (mutation: (draft: Prefs) => void) => void } {
+  const prefs: Prefs = { muted: false };
+  return { prefs, save: (mutation) => mutation(prefs) };
 }

@@ -1,6 +1,6 @@
 /** @jsxImportSource @opentui/solid */
-import type { TuiPluginApi } from "@opencode-ai/plugin/tui";
-import { createEffect, createMemo, type Accessor } from "solid-js";
+import type { Context } from "@opencode/plugin/tui/context";
+import { createEffect, createRoot, type Accessor } from "solid-js";
 import type { Store } from "../adapter/store.ts";
 import { isLanguage, LANGUAGES, say } from "../core/language.ts";
 import { blockers, idOf, ordered } from "../core/roster/roster.ts";
@@ -12,7 +12,7 @@ import { CHOOSE, CHOSEN_ELSEWHERE, NOTHING_TO_CHOOSE, TRAIT_TEXT } from "../core
 import { CardView } from "../view/card.tsx";
 import { LanguageProvider } from "../view/language.tsx";
 import { RosterView } from "../view/roster.tsx";
-import { ThemeProvider } from "../view/theme.tsx";
+import { ThemeProvider, type Theme } from "../view/theme.tsx";
 import type { Actions } from "./actions.ts";
 import type { Guard } from "./guard.ts";
 import type { Mirror } from "./mirror.ts";
@@ -26,9 +26,10 @@ export type Dialogs = {
   askLanguage(): void;
 };
 
-/** The six dialogs of the plugin. Each root posts the theme so no view threads it down. */
+/** The six dialogs of the plugin. Each JSX root posts the theme so no view threads it down. */
 export function createDialogs(deps: {
-  api: TuiPluginApi;
+  api: Context;
+  theme: Theme;
   store: Store;
   mirror: Mirror;
   actions: Actions;
@@ -38,33 +39,39 @@ export function createDialogs(deps: {
   warnCorrupt: () => void;
   guard: Guard;
 }): Dialogs {
-  const { api, store, mirror, actions, clock, started, defaultName, warnCorrupt, guard } = deps;
+  const { api, theme, store, mirror, actions, clock, started, defaultName, warnCorrupt, guard } = deps;
+
+  /** OpenCode's own dialogs answer with a promise: `then` runs guarded, and a rejection is logged by the same guard. */
+  const answer = <T,>(asked: Promise<T>, then: (value: T) => void): void => {
+    asked.then(
+      guard(then),
+      guard((err: unknown) => {
+        throw err;
+      }),
+    );
+  };
 
   /** The dialog stack wraps the card in OpenCode's own centered Dialog; nothing to position here. */
   const showCard = () => {
-    api.ui.dialog.setSize("xlarge");
-    api.ui.dialog.replace(() => (
-      <ThemeProvider theme={api.theme}>
+    api.ui.dialog.show(() => (
+      <ThemeProvider theme={theme}>
         <LanguageProvider language={mirror.language()}>
           <CardView name={mirror.name()} tamago={mirror.active()} clock={clock()} heart={actions.heart()} now={started + clock()} />
         </LanguageProvider>
       </ThemeProvider>
     ));
+    api.ui.dialog.set({ size: "xlarge" });
   };
 
   const askName = () => {
-    api.ui.dialog.replace(() => (
-      <api.ui.DialogPrompt
-        title={say(RENAME.title, mirror.language())}
-        placeholder={say(RENAME.placeholder, mirror.language())}
-        value={mirror.name()}
-        onConfirm={guard((value: string) => {
-          api.ui.dialog.clear();
-          actions.rename(value);
-        })}
-        onCancel={() => api.ui.dialog.clear()}
-      />
-    ));
+    const asked = api.ui.dialog.prompt({
+      title: say(RENAME.title, mirror.language()),
+      placeholder: say(RENAME.placeholder, mirror.language()),
+      value: mirror.name(),
+    });
+    answer(asked, (value) => {
+      if (value !== undefined) actions.rename(value);
+    });
   };
 
   /** The roster dialog: every Tamago of the machine, the highlighted one's card underneath; Enter on a resting one is a Switch. */
@@ -78,9 +85,8 @@ export function createDialogs(deps: {
     const shown = careers.map((one) => tamago(one));
     const activeId = idOf(roster.active);
     const lines = careers.map((one) => line(one, defaultName, activeId, mirror.language()));
-    api.ui.dialog.setSize("xlarge");
-    api.ui.dialog.replace(() => (
-      <ThemeProvider theme={api.theme}>
+    api.ui.dialog.show(() => (
+      <ThemeProvider theme={theme}>
         <LanguageProvider language={mirror.language()}>
           <RosterView
             tamagos={shown}
@@ -95,6 +101,7 @@ export function createDialogs(deps: {
         </LanguageProvider>
       </ThemeProvider>
     ));
+    api.ui.dialog.set({ size: "xlarge" });
   };
 
   const askHatch = () => {
@@ -106,71 +113,67 @@ export function createDialogs(deps: {
     }
     const first = blockers(roster)[0];
     if (first !== undefined) {
-      api.ui.toast({ variant: "warning", title: mirror.name(), message: blocked(first, defaultName, mirror.language()) });
+      api.ui.toast.show({ variant: "warning", title: mirror.name(), message: blocked(first, defaultName, mirror.language()) });
       return;
     }
-    const confirm = () => hatchConfirm(mirror.name(), mirror.language());
-    api.ui.dialog.replace(() => (
-      <api.ui.DialogConfirm
-        title={confirm().title}
-        message={confirm().message}
-        onConfirm={guard(() => {
-          api.ui.dialog.clear();
-          actions.lay();
-        })}
-        onCancel={() => api.ui.dialog.clear()}
-      />
-    ));
+    const { title, message } = hatchConfirm(mirror.name(), mirror.language());
+    answer(api.ui.dialog.confirm({ title, message }), (confirmed) => {
+      if (confirmed === true) actions.lay();
+    });
   };
 
-  /** The Draw of the first pending Milestone. It closes itself when another window picks first, and a Pick of ours is never mistaken for theirs. */
+  /**
+   * The Draw of the first pending Milestone. It closes itself when another window picks first, and a
+   * Pick of ours is never mistaken for theirs: whichever settles first, the select or the watch, the
+   * other then stands down.
+   */
   const askChoice = () => {
     const first = mirror.active().choices[0];
     if (first === undefined) {
-      api.ui.toast({ variant: "info", title: mirror.name(), message: say(NOTHING_TO_CHOOSE, mirror.language()) });
+      api.ui.toast.show({ variant: "info", title: mirror.name(), message: say(NOTHING_TO_CHOOSE, mirror.language()) });
       return;
     }
     const milestone = first.milestone.id;
-    let ours = false;
-    api.ui.dialog.replace(() => {
-      const offered = createMemo(() => mirror.active().choices.find((one) => one.milestone.id === milestone));
+    const language = mirror.language();
+    let settled = false;
+    createRoot((dispose) => {
       createEffect(() => {
-        if (offered() !== undefined || ours) return;
+        const offered = mirror.active().choices.some((one) => one.milestone.id === milestone);
+        if (offered || settled) return;
+        settled = true;
+        dispose();
         api.ui.dialog.clear();
-        api.ui.toast({ variant: "info", title: mirror.name(), message: say(CHOSEN_ELSEWHERE, mirror.language()) });
+        api.ui.toast.show({ variant: "info", title: mirror.name(), message: say(CHOSEN_ELSEWHERE, mirror.language()) });
       });
-      return (
-        <api.ui.DialogSelect
-          title={say(CHOOSE.title, mirror.language())}
-          skipFilter
-          options={(offered()?.draw ?? []).map((trait) => ({
-            title: say(TRAIT_TEXT[trait]?.title ?? { en: trait, fr: trait }, mirror.language()),
-            value: trait,
-            description: say(TRAIT_TEXT[trait]?.description ?? { en: "", fr: "" }, mirror.language()),
-          }))}
-          onSelect={guard((option: { value: string }) => {
-            ours = true;
-            api.ui.dialog.clear();
-            actions.choose(milestone, option.value);
-          })}
-        />
-      );
+      const asked = api.ui.dialog.select({
+        title: say(CHOOSE.title, language),
+        options: first.draw.map((trait) => ({
+          title: say(TRAIT_TEXT[trait]?.title ?? { en: trait, fr: trait }, language),
+          value: trait,
+          description: say(TRAIT_TEXT[trait]?.description ?? { en: "", fr: "" }, language),
+        })),
+        search: (_query, options) => options,
+      });
+      answer(asked, (trait) => {
+        if (settled) return;
+        settled = true;
+        dispose();
+        if (trait !== undefined) actions.choose(milestone, trait);
+      });
     });
   };
 
   /** The Languages, each named in its own. Two rows today; a select is the shape that survives a third. */
   const askLanguage = () => {
-    api.ui.dialog.replace(() => (
-      <api.ui.DialogSelect
-        title={say(LANGUAGE_TITLE, mirror.language())}
-        skipFilter
-        options={LANGUAGES.map((one) => ({ title: LANGUAGE_NAME[one], value: one }))}
-        onSelect={guard((option: { value: string }) => {
-          api.ui.dialog.clear();
-          if (isLanguage(option.value)) actions.setLanguage(option.value);
-        })}
-      />
-    ));
+    const asked = api.ui.dialog.select({
+      title: say(LANGUAGE_TITLE, mirror.language()),
+      options: LANGUAGES.map((one) => ({ title: LANGUAGE_NAME[one], value: one })),
+      current: mirror.language(),
+      search: (_query, options) => options,
+    });
+    answer(asked, (value) => {
+      if (value !== undefined && isLanguage(value)) actions.setLanguage(value);
+    });
   };
 
   return { showCard, askName, askHatch, showRoster, askChoice, askLanguage };

@@ -1,18 +1,17 @@
-import type { TuiPluginApi } from "@opencode-ai/plugin/tui";
+import type { Context } from "@opencode/plugin/tui/context";
 import { COMMAND_IDS, PALETTE, command, type CommandId } from "../core/text/commands.ts";
 import type { Actions } from "./actions.ts";
 import type { Dialogs } from "./dialogs.tsx";
 import type { Guard } from "./guard.ts";
 import type { Mirror } from "./mirror.ts";
 
-/** The eight palette commands. `register` is called again after a rename, a Switch, a Pick, an Evolution, or a Language change: the descriptions carry the Name and the choice count, both fixed at registration. */
-export function createPalette(deps: {
-  api: TuiPluginApi;
-  mirror: Mirror;
-  actions: Actions;
-  dialogs: Dialogs;
-  guard: Guard;
-}): { register(): void; dispose(): void } {
+/**
+ * The eight palette commands, in one keymap layer. The layer is reactive: its
+ * descriptions carry the Name, the choice count and the Language, and OpenCode
+ * re-reads the factory whenever one of them changes. The layer goes when the
+ * plugin is disabled or reloaded.
+ */
+export function registerPalette(deps: { api: Context; mirror: Mirror; actions: Actions; dialogs: Dialogs; guard: Guard }): void {
   const { api, mirror, actions, dialogs, guard } = deps;
 
   const RUN: Record<CommandId, () => void> = {
@@ -26,23 +25,17 @@ export function createPalette(deps: {
     language: dialogs.askLanguage,
   };
 
-  let unregisterCommands: (() => void) | undefined;
-  return {
-    register(): void {
-      unregisterCommands?.();
-      const who = mirror.name();
-      unregisterCommands = api.keymap.registerLayer({
-        commands: COMMAND_IDS.map((id) => ({
-          ...command(id, who, mirror.active().choices.length, mirror.language()),
-          category: PALETTE,
-          /** What lists a command in the palette; OpenCode's own commands carry it. */
-          namespace: "palette",
-          run: guard(RUN[id]),
-        })),
-      });
-    },
-    dispose(): void {
-      unregisterCommands?.();
-    },
-  };
+  api.keymap.layer(() => {
+    const who = mirror.name();
+    const choices = mirror.active().choices.length;
+    const language = mirror.language();
+    return {
+      // The palette is its own input mode: a layer left in the default `base` mode is unreachable from it.
+      mode: "global",
+      commands: COMMAND_IDS.map((id) => {
+        const { name, title, description } = command(id, who, choices, language);
+        return { id: name, title, description, group: PALETTE, palette: true, run: guard(RUN[id]) };
+      }),
+    };
+  });
 }

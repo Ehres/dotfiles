@@ -6,10 +6,10 @@ AGENTS.md. Vocabulary lives in `CONTEXT.md`; use those terms.
 ## Rules
 
 - `core/` is pure data and strings, tested with `node:test`. `adapter/` is the
-  only layer that reads SDK event shapes or touches the disk. `shell/` is the
-  only layer that touches `api.*` and timers, one module per loop or surface
+  only layer that reads OpenCode event shapes or touches the disk. `shell/` is the
+  only layer that touches the plugin context and timers, one module per loop or surface
   (`mirror`, `tick`, `flush`, `actions`, `dialogs`, `palette`, `slots`);
-  `index.tsx` only wires them. Views take plain props (the Solid compiler
+  `tui.tsx` only wires them. Views take plain props (the Solid compiler
   makes each a getter, so `props.x` read in JSX is reactive) and return JSX.
 - A dialog of our own reads its keys with `useKeyboard` from `@opentui/solid`;
   the key → action table lives in `core/roster/` (`ROSTER_KEYS`), tested, so a key
