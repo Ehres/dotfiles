@@ -48,10 +48,7 @@
     },
   },
   "plugin": [
-    "@franlol/opencode-md-table-formatter@0.0.3",
-    "opencode-scheduler",
     "@slkiser/opencode-quota@latest",
-    "opencode-mermaid-renderer@0.0.1",
     "oh-my-opencode-slim",
   ],
   "username": "Ehres",
