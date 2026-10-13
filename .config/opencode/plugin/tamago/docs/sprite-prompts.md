@@ -470,30 +470,32 @@ Old emperor penguin, faded greyish black plumage with soft gradients, worn white
 
 ### 9. octopus — pieuvre
 
-- [ ] adult  - [ ] hatchling  - [ ] young  - [ ] elder
+- [x] adult  - [x] hatchling  - [x] young  - [x] elder
+
+Tirages : `docs/sprites/octopus/SOURCES.md`.
 
 **adult**
 
 ```
-Purple octopus, round domed head, eight short curling arms, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Adult octopus, chibi, large round domed purple head with soft gradients filling the frame, eight curling arms spread wide to the edges, light lilac belly, pink blush, two identical big round black eyes with white highlights, front view facing the viewer, full body, thick dark outline
 ```
 
 **hatchling**
 
 ```
-Purple octopus as a hatchling, a tiny head, only four short stubby arms, pale lilac, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Baby octopus, extremely chibi, giant round head on a tiny body, pale lilac and soft pink with soft gradients, a few tiny stubby curled arms, pink blush, two identical big round black eyes with white highlights, front view facing the viewer, full body, thick dark outline
 ```
 
 **young**
 
 ```
-Purple octopus as a young octopus, six longer thinner arms, the head still small for them, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Young octopus, chibi, big round head with soft gradients, bright lavender and lilac, six short curling arms, pink blush, two identical big round black eyes with white highlights, front view facing the viewer, full body, thick dark outline
 ```
 
 **elder**
 
 ```
-Purple octopus in old age, pale mottled skin, slack drooping arms, a sagging head, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Old octopus, chibi, round head with soft gradients, faded dusty mauve purple skin, slightly paler and muted than a young purple octopus, eight curling arms, pink blush, two identical round black eyes with white highlights, front view facing the viewer, full body, thick dark outline
 ```
 
 ### 10. bat — chauve-souris
