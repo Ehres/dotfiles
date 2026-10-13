@@ -2,7 +2,7 @@
 -- mini.icons tries the longest dotted extension first ("test.tsx" before "tsx").
 local test = { glyph = "󰙨", hl = "MiniIconsYellow" }
 local story = { glyph = "󰗚", hl = "MiniIconsPurple" }
-local story_doc = { glyph = "", hl = "MiniIconsPurple" }
+local story_doc = { glyph = "", hl = "MiniIconsPurple" }
 
 local extension = { mdx = story_doc }
 for _, ext in ipairs({ "ts", "tsx", "js", "jsx" }) do
