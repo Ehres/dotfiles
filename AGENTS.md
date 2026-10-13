@@ -110,6 +110,9 @@ Commit messages use **Angular format**: `type(scope): description`
 - **Types**: `feat`, `fix`, `refactor`, `chore`, `docs`, `style`
 - **Scopes**: tool name — `sketchybar`, `nvim`, `tmux`, `terminal`, `brewfile`,
   `raycast`, `git`, `opencode`, etc.
+- Tamago (`.config/opencode/plugin/tamago`) takes the `tamago` scope, not
+  `opencode`, so its commits stay apart from the OpenCode config's. Commits
+  before 2026-10-13 still say `opencode`.
 - Messages are lowercase, imperative, no trailing period
 - Examples from history:
   - `feat(brewfile): create file`
