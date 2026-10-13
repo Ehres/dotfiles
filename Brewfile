@@ -4,6 +4,7 @@
 # Taps
 tap "FelixKratz/formulae"          # For SketchyBar and JankyBorders
 tap "asmvik/formulae"              # Yabai + Skhd (taken over from koekeishiya in 2025)
+tap "rtk-ai/tap"                   # rtk releases land here before homebrew-core
 
 # Core Tools
 brew "stow"                        # Symlink manager for dotfiles
@@ -48,7 +49,7 @@ brew "stylua"                      # Lua formatter for .config/nvim
 brew "shellcheck"                  # Shell linter enforcing the AGENTS.md shell rules
 
 # Agent Tooling
-brew "rtk"                         # Token-reduction rewriter used by the opencode plugin
+brew "rtk-ai/tap/rtk"              # Token-reduction rewriter used by the opencode plugin
 brew "uv"                          # Python package and tool manager; installs Headroom CLI
 
 # Preview Dependencies (for yazi and other tools)
