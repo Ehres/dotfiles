@@ -168,9 +168,20 @@ It is the preview to keep open in a pane while drawing a Species. `--png <image.
 draws raw PNGs side by side at real size, straight from their RGBA, before
 any import: the preview for judging a pixler draw the moment it lands.
 
+`node scripts/retouch.ts frame <in.png> <out.png> [--bottom <row>]` moves a
+draw onto a transparent 32 x 32 canvas, centred on its drawn columns, its
+lowest drawn row on the last one (or on `--bottom`): what a pixler draw needs
+when it lands off-centre. `node scripts/retouch.ts patch <in.png> <out.png>
+"x,y=#rrggbb;x,y=clear"` paints or erases single pixels. Both write a new PNG
+for `import.ts` to read; neither touches a Species file.
+
+`node scripts/show-import.ts import.txt` draws what `import.ts` printed (saved
+to a file) back side by side at real size, Stages in order: the check that the
+shared palette did not flatten a draw, before its blocks are pasted.
+
 The decoder (`scripts/png.ts`) is hand-written on top of `node:zlib`'s inflate
 — chunk parsing, the five PNG filters (None, Sub, Up, Average, Paeth), colour
-types 2/3/6 — because the project carries no runtime dependency and the
+types 2/3/6 — and so is its encoder (RGBA, filter None, for `retouch.ts`), because the project carries no runtime dependency and the
 plugin never imports it; resist replacing it with a library.
 
 ## Scope

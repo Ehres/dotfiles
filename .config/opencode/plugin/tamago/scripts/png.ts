@@ -1,4 +1,4 @@
-import { inflateSync } from "node:zlib";
+import { deflateSync, inflateSync } from "node:zlib";
 
 export type Image = { width: number; height: number; pixels: Uint8Array };
 
@@ -111,4 +111,44 @@ export function decodePng(bytes: Uint8Array): Image {
     }
   }
   return { width, height, pixels };
+}
+
+const CRC_TABLE = Array.from({ length: 256 }, (_, n) => {
+  let c = n;
+  for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+  return c >>> 0;
+});
+
+function crc32(bytes: Uint8Array): number {
+  let c = 0xffffffff;
+  for (const byte of bytes) c = (CRC_TABLE[(c ^ byte) & 0xff] ?? 0) ^ (c >>> 8);
+  return (c ^ 0xffffffff) >>> 0;
+}
+
+function chunk(type: string, body: Uint8Array): Buffer {
+  const typed = Buffer.concat([Buffer.from(type, "ascii"), body]);
+  const length = Buffer.alloc(4);
+  length.writeUInt32BE(body.length);
+  const crc = Buffer.alloc(4);
+  crc.writeUInt32BE(crc32(typed));
+  return Buffer.concat([length, typed, crc]);
+}
+
+/**
+ * The reverse of decodePng, for the retouch tools: always 8-bit RGBA, no interlace, filter None on
+ * every row. A 32 x 32 sprite gains nothing from the other filters.
+ */
+export function encodePng(image: Image): Uint8Array {
+  const { width, height, pixels } = image;
+  const ihdr = Buffer.alloc(13);
+  ihdr.writeUInt32BE(width, 0);
+  ihdr.writeUInt32BE(height, 4);
+  ihdr[8] = 8;
+  ihdr[9] = 6;
+  const stride = width * 4;
+  const raw = Buffer.alloc(height * (stride + 1));
+  for (let y = 0; y < height; y++) raw.set(pixels.subarray(y * stride, (y + 1) * stride), y * (stride + 1) + 1);
+  return new Uint8Array(
+    Buffer.concat([Buffer.from(SIGNATURE), chunk("IHDR", ihdr), chunk("IDAT", deflateSync(raw)), chunk("IEND", new Uint8Array())]),
+  );
 }
