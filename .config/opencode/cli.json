@@ -6,7 +6,7 @@
   "diffs": {
     "wrap": "word",
     "single": true,
-    "view": "unified"
+    "view": "split"
   },
   "session": {
     "sidebar": "auto",
