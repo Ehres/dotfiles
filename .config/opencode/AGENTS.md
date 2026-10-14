@@ -50,6 +50,7 @@ Never commit specifications or implementation plans created by Superpowers skill
 ## Collaboration
 
 - Challenge architectural decisions and ambiguous approaches before implementation.
+- Seek a balanced trade-off between simplicity and robustness. When a solution adds substantial complexity, challenge whether its benefit justifies it and propose a simpler alternative before implementing, especially for defensive handling of edge cases.
 - Verify plans, assumptions, and external information against the current source of truth before presenting them as fact.
 - Surface nearby inconsistencies, risks, and suspicious behavior discovered during work.
 - When the user says "Rappelle-toi de ...", persist the requested instruction in this global `AGENTS.md` file unless they specify another scope.
