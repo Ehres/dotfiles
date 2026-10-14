@@ -1,15 +1,6 @@
 {
   "version": 3,
   "skills": {
-    "brainstorming": {
-      "source": "obra/superpowers",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/obra/superpowers.git",
-      "skillPath": "skills/brainstorming/SKILL.md",
-      "skillFolderHash": "03d4c6657cd20ba0fce9d270fc688150bd191c3b",
-      "installedAt": "2026-04-16T14:56:42.858Z",
-      "updatedAt": "2026-09-25T07:56:20.307Z"
-    },
     "find-skills": {
       "source": "vercel-labs/skills",
       "sourceType": "github",
@@ -18,15 +9,6 @@
       "skillFolderHash": "76a98a285cb0434f3d39e1a873823556330e398b",
       "installedAt": "2026-04-16T14:56:46.292Z",
       "updatedAt": "2026-09-25T07:56:23.794Z"
-    },
-    "writing-plans": {
-      "source": "obra/superpowers",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/obra/superpowers.git",
-      "skillPath": "skills/writing-plans/SKILL.md",
-      "skillFolderHash": "bcaac5df52c27d16685a35932c17a1c418d8ce98",
-      "installedAt": "2026-04-21T14:34:51.550Z",
-      "updatedAt": "2026-09-25T07:56:21.728Z"
     },
     "adr-skill": {
       "source": "vercel/ai",
@@ -144,15 +126,6 @@
       "skillFolderHash": "90b7b38a892c625d19408df411e46cca7ff3819d",
       "installedAt": "2026-06-23T10:01:14.127Z",
       "updatedAt": "2026-09-25T07:56:42.025Z"
-    },
-    "subagent-driven-development": {
-      "source": "obra/superpowers",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/obra/superpowers.git",
-      "skillPath": "skills/subagent-driven-development/SKILL.md",
-      "skillFolderHash": "5d44ced88725298e847c62c67a726dcc29e20d00",
-      "installedAt": "2026-06-29T16:37:37.974Z",
-      "updatedAt": "2026-09-25T07:56:23.184Z"
     },
     "avoid-ai-writing": {
       "source": "conorbronsdon/avoid-ai-writing",
