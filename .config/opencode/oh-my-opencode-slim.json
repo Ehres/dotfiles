@@ -1,6 +1,6 @@
 {
   "$schema": "https://unpkg.com/oh-my-opencode-slim@latest/oh-my-opencode-slim.schema.json",
-  "preset": "approfondi",
+  "preset": "openai",
   "disabled_mcps": ["context7"],
   "presets": {
     "openai": {
