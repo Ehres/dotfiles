@@ -6,6 +6,9 @@ window-decoration = true
 macos-titlebar-style = hidden
 # keybind = global:cmd+/=toggle_quick_terminal
 macos-option-as-alt = false
+# Send distinct extended Tab sequences; unbind alone does not forward these keys.
+keybind = ctrl+tab=text:\x1b[27;5;9~
+keybind = ctrl+shift+tab=text:\x1b[27;6;9~
 background = #1b1d2a
 window-padding-y = 4,0
 window-padding-color = background
