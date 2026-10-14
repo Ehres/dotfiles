@@ -47,44 +47,6 @@
       "security *": "ask",
     },
   },
-  "plugin": [
-    "@slkiser/opencode-quota@latest",
-    "oh-my-opencode-slim",
-  ],
+  "plugin": ["@slkiser/opencode-quota@latest", "oh-my-opencode-slim"],
   "username": "Ehres",
-  "provider": {
-    "headroom": {
-      "npm": "@ai-sdk/openai-compatible",
-      "name": "Headroom Proxy",
-      "options": {
-        "baseURL": "http://127.0.0.1:8787/v1",
-      },
-    },
-  },
-  "agent": {
-    "plan": {
-      "permission": {
-        "skill": {
-          "*": "allow",
-          "brainstorming": "deny",
-          "writing-plans": "deny",
-        },
-      },
-    },
-    "build": {
-      "permission": {
-        "skill": {
-          "*": "allow",
-          "brainstorming": "deny",
-          "writing-plans": "deny",
-        },
-      },
-    },
-    "explore": {
-      "disable": true,
-    },
-    "general": {
-      "disable": true,
-    },
-  },
 }
