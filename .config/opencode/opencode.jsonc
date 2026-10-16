@@ -1,52 +1,50 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "autoupdate": true,
-  "lsp": true,
+  "update": "auto",
   "mcp": {
-    "figma": {
-      "type": "remote",
-      "url": "http://127.0.0.1:3845/mcp",
-      "oauth": false,
-      "enabled": true,
-    },
-    "google-drive": {
-      "type": "local",
-      "command": ["npx", "-y", "@piotr-agier/google-drive-mcp@2.6.0"],
-      "environment": {
-        "GOOGLE_DRIVE_OAUTH_CREDENTIALS": "/Users/maxime.grebauval/client_secret_1067784221910-7ckhspsri5f4qoda23v2hc857c69d2ih.apps.googleusercontent.com.json",
-        "GOOGLE_DRIVE_MCP_SCOPES": "drive.file,presentations",
+    "servers": {
+      "figma": {
+        "type": "remote",
+        "url": "http://127.0.0.1:3845/mcp",
+        "oauth": false,
+        "disabled": false,
       },
-      "enabled": false,
-    },
-    "chrome-devtools": {
-      "type": "local",
-      "command": [
-        "npx",
-        "-y",
-        "chrome-devtools-mcp@latest",
-        "--no-usage-statistics",
-        "--no-performance-crux",
-      ],
-      "enabled": false,
-    },
-    "notion": {
-      "type": "remote",
-      "url": "https://mcp.notion.com/mcp",
-      "enabled": false,
-    },
-  },
-  "permission": {
-    "question": "allow",
-    "external_directory": {
-      "~/Library/Application Support/rtk/tee/**": "allow",
-    },
-    "bash": {
-      "*": "allow",
-      "rm -rf *": "ask",
-      "kubectl * delete *": "ask",
-      "security *": "ask",
+      "google-drive": {
+        "type": "local",
+        "command": ["npx", "-y", "@piotr-agier/google-drive-mcp@2.6.0"],
+        "environment": {
+          "GOOGLE_DRIVE_OAUTH_CREDENTIALS": "/Users/maxime.grebauval/client_secret_1067784221910-7ckhspsri5f4qoda23v2hc857c69d2ih.apps.googleusercontent.com.json",
+          "GOOGLE_DRIVE_MCP_SCOPES": "drive.file,presentations",
+        },
+        "disabled": true,
+      },
+      "chrome-devtools": {
+        "type": "local",
+        "command": [
+          "npx",
+          "-y",
+          "chrome-devtools-mcp@latest",
+          "--no-usage-statistics",
+          "--no-performance-crux",
+        ],
+        "disabled": true,
+      },
+      "notion": {
+        "type": "remote",
+        "url": "https://mcp.notion.com/mcp",
+        "disabled": true,
+      },
     },
   },
-  "plugin": ["@slkiser/opencode-quota@latest", "oh-my-opencode-slim"],
+  "permissions": [
+    { "action": "question", "resource": "*", "effect": "allow" },
+    { "action": "external_directory", "resource": "*", "effect": "ask" },
+    { "action": "external_directory", "resource": "~/Library/Application Support/rtk/tee/**", "effect": "allow" },
+    { "action": "shell", "resource": "*", "effect": "allow" },
+    { "action": "shell", "resource": "rm -rf *", "effect": "ask" },
+    { "action": "shell", "resource": "kubectl * delete *", "effect": "ask" },
+    { "action": "shell", "resource": "security *", "effect": "ask" },
+  ],
+  "plugins": ["@slkiser/opencode-quota@latest", "oh-my-opencode-slim"],
   "username": "Ehres",
 }
