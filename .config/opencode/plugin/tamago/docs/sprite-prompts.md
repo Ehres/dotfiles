@@ -500,30 +500,27 @@ Old octopus, chibi, round head with soft gradients, faded dusty mauve purple ski
 
 ### 10. bat — chauve-souris
 
-- [ ] adult  - [ ] hatchling  - [ ] young  - [ ] elder
+- [x] adult  - [x] hatchling  - [x] young  - [x] elder
+
+Tirages : `docs/sprites/bat/SOURCES.md`. Le hatchling et le young viennent du
+même tirage d'adult.
 
 **adult**
 
 ```
-Dark purple bat, round furry body, huge ears, small folded wings, two tiny fangs, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Adult bat, chibi, deep violet fur with soft gradients, big body filling the whole frame, large wings raised up beside its head, big pointed ears with pink insides, two tiny white fangs, two identical round black eyes with white highlights, front view, full body, thick dark outline
 ```
 
-**hatchling**
+**hatchling** et **young** — le même tirage
 
 ```
-Dark purple bat as a pup, bare pink skin, ears folded down, wings tucked tight, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
-```
-
-**young**
-
-```
-Dark purple bat as a young bat, fur grown in, oversized upright ears, small thin wings, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Adult bat, chibi, round fluffy dark purple body with soft gradients, huge pointed ears with pink insides, small folded wings, two tiny white fangs, pink blush, two identical big round black eyes with white highlights, front view facing the viewer, full body, thick dark outline
 ```
 
 **elder**
 
 ```
-Dark purple bat in old age, torn wing membranes, grizzled grey fur, squinting eyes, a worn ear, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Old bat, chibi, faded dusty violet fur with soft gradients, white tufts on its head, large wings raised up beside its head with a small tear, big pointed ears with pink insides, two identical round black eyes with white highlights, front view, full body, thick dark outline
 ```
 
 ### 11. hedgehog — hérisson
