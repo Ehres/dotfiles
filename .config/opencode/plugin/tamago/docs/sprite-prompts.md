@@ -550,30 +550,32 @@ Old hedgehog, chibi, tufts of silver grey spines with soft gradients, pale cream
 
 ### 12. axolotl — axolotl
 
-- [ ] adult  - [ ] hatchling  - [ ] young  - [ ] elder
+- [x] adult  - [x] hatchling  - [x] young  - [x] elder
+
+Tirages : `docs/sprites/axolotl/SOURCES.md`.
 
 **adult**
 
 ```
-Pale pink axolotl, round body, feathery red gills fanning from its head, tiny legs, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Adult axolotl, chibi, sitting upright, soft pink skin with soft gradients, three feathery magenta gills on each side of its wide head, wide gentle smile, pale pink belly, small legs, pink blush, two identical round black eyes with white highlights, front view, full body, thick dark outline
 ```
 
 **hatchling**
 
 ```
-Pale pink axolotl as a larva, no legs, stubby gill buds, a long flat tail, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Baby axolotl, extremely chibi, giant round head on a tiny body, pale pastel pink skin with soft gradients, three small soft pink gills on each side of its head, tiny smile, pink blush, two identical big round black eyes with white highlights, sitting, front view, full body, thick dark outline
 ```
 
 **young**
 
 ```
-Pale pink axolotl as a juvenile, front legs only, gills half grown, a slender body, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Young axolotl, chibi, sitting upright, big round head, bright pink skin with soft gradients, three feathery pink gills on each side of its head, small smile, pale belly, pink blush, two identical round black eyes with white highlights, front view, full body, thick dark outline
 ```
 
 **elder**
 
 ```
-Pale pink axolotl in old age, dull grey-pink skin, thin drooping gills, a scarred tail, chibi, front view, full body, thick dark outline, solid flat colour areas, no shading, big round black eyes set wide apart
+Old axolotl, chibi, sitting upright, faded dusty rose skin with soft gradients, bushy white eyebrows, a droopy white moustache, faded pink gills with white tips on each side of its head, pink blush, two identical round black eyes with white highlights, front view, full body, thick dark outline
 ```
 
 ---
