@@ -1,6 +1,6 @@
 prSections:
   - title: My Pull Requests
-    filters: is:open repo:orus-tech/orus-monorepo author:@me
+    filters: -head:chore-pharaoh-adoption-method is:open repo:orus-tech/orus-monorepo author:@me
   - title: Front
     # Paste the gh-prs-by-path output here at runtime with / to narrow this
     # down to the PRs touching the front-end paths: gh-dash filters cannot
