@@ -12,29 +12,32 @@ else
 	left="$(echo "$DEVICES" | jq -r .device_batteryLevelLeft)"
 	right="$(echo "$DEVICES" | jq -r .device_batteryLevelRight)"
 	case_lvl="$(echo "$DEVICES" | jq -r .device_batteryLevelCase)"
+	left="${left//[^0-9]/}"
+	right="${right//[^0-9]/}"
+	case_lvl="${case_lvl//[^0-9]/}"
 
 	# Build label with battery icons, track minimum level for color
 	label=""
 	min_pct=100
 
 	# Left AirPod
-	if [[ "$left" != "null" ]]; then
-		num="${left/\%/}"
+	if [[ -n "$left" ]]; then
+		num="$left"
 		label="$(battery_discharge_icon "$left")"
 		[[ "$num" -lt "$min_pct" ]] && min_pct="$num"
 	fi
 
 	# Case (only if available)
-	if [[ "$case_lvl" != "null" ]]; then
-		num="${case_lvl/\%/}"
+	if [[ -n "$case_lvl" ]]; then
+		num="$case_lvl"
 		[[ -n "$label" ]] && label="$label "
 		label="$label$(battery_discharge_icon "$case_lvl")"
 		[[ "$num" -lt "$min_pct" ]] && min_pct="$num"
 	fi
 
 	# Right AirPod
-	if [[ "$right" != "null" ]]; then
-		num="${right/\%/}"
+	if [[ -n "$right" ]]; then
+		num="$right"
 		[[ -n "$label" ]] && label="$label "
 		label="$label$(battery_discharge_icon "$right")"
 		[[ "$num" -lt "$min_pct" ]] && min_pct="$num"
