@@ -4,5 +4,13 @@ rex.bind("leader/ctrl+b", "pane.send_key", { key = "ctrl+b" })
 rex.bind("leader/n", "client.tab.next")
 rex.bind("leader/p", "client.tab.previous")
 rex.bind("leader/s", "session.switch")
+rex.bind("leader/r", "client.mode.enter", { name = "resize" })
 rex.unbind("cmd+shift+p")
 rex.bind("leader/shift+;", "client.palette.toggle") -- : on the ABC layout
+
+rex.mode("resize", { exclusive = true })
+rex.bind("resize/h", "pane.resize", { direction = "left" })
+rex.bind("resize/j", "pane.resize", { direction = "down" })
+rex.bind("resize/k", "pane.resize", { direction = "up" })
+rex.bind("resize/l", "pane.resize", { direction = "right" })
+rex.bind("resize/=", "pane.balance")
