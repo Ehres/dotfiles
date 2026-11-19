@@ -23,17 +23,13 @@ import type { RepoFacts, SessionRow, Target } from "./types.ts";
 // resolve() tests above never exercise.
 const mainScript = fileURLToPath(new URL("./main.ts", import.meta.url));
 
-// TMUX is stripped unconditionally, not just when a test expects to hit it:
-// the whole point of these subprocess tests is that a broken fix could send
-// one further than the test expects, and the child must land on "not inside
-// tmux" in that case rather than on a real tmux binary — the developer
-// running this suite may well be inside tmux themselves.
+// Subprocess tests must never open a pane in the developer's Rex session.
 function runMain(
   argv: string[],
   cwd: string,
   opts: { timeout?: number } = {},
 ): { exitCode: number | null; signal: NodeJS.Signals | null; stdout: string; stderr: string } {
-  const { TMUX: _tmux, ...env } = process.env;
+  const { REX_SESSION: _session, REX_BLOCK: _block, ...env } = process.env;
   const result = spawnSync(process.execPath, [mainScript, ...argv], {
     cwd,
     env,
@@ -194,7 +190,7 @@ test("a working tree dirty only with untracked files still launches", () => {
 });
 
 // Important 4, second half: a path filter that matches nothing must not open
-// a popup with nothing to show — verified live in the review as exit 0 with
+// a pane with nothing to show — verified live in the review as exit 0 with
 // "stat: no textual changes", which main.ts must instead turn into emptyReason.
 test("a path filter matching nothing in scope is empty, not a launch with nothing to show", () => {
   const repo = makeRepo();
@@ -306,7 +302,7 @@ test("pr inside a repository never reports a detected base", () => {
 test("--help prints usage and exits ok, without touching a repository", () => {
   const { exitCode, stdout } = runMain(["--help"], "/");
   assert.equal(exitCode, EXIT.ok);
-  assert.match(stdout, /open-review — open a tuicr review in a focused, non-modal, 60%-width right-side tmux pane/);
+  assert.match(stdout, /open-review — open a tuicr review in a focused, non-modal, 60%-width right-side Rex pane/);
 });
 
 test("outside a repository, main errors out", () => {
@@ -352,8 +348,8 @@ test("a clean tree with no commits to review exits with EXIT.nothing", () => {
 // Important 4, at the process boundary: the emptyReason check in main() runs
 // before launch() is ever called (EXIT.nothing is not returned from inside
 // launch() anywhere in this file), so exit 2 here is itself the proof the
-// popup opener was never reached — no fake needed, and no tmux touched.
-test("-p matching nothing in scope exits EXIT.nothing before ever reaching the popup", () => {
+// pane opener was never reached, so no Rex mock is needed.
+test("-p matching nothing in scope exits EXIT.nothing before opening a pane", () => {
   const repo = makeRepo();
   try {
     repo.write("a.txt", "a\n");
@@ -369,7 +365,7 @@ test("-p matching nothing in scope exits EXIT.nothing before ever reaching the p
   }
 });
 
-test("-r bogus..HEAD exits EXIT.nothing before ever reaching the popup", () => {
+test("-r bogus..HEAD exits EXIT.nothing before opening a pane", () => {
   const repo = makeRepo();
   try {
     repo.write("a.txt", "a\n");
@@ -450,25 +446,6 @@ test("--plan with no launch in flight errors out rather than hanging forever", (
   }
 });
 
-// launch()'s wiring, in-process with fake dependencies. This is the seam
-// Important 2, 3 and 5 all live behind: every exit-code decision below is
-// asserted directly, with no tmux and no tuicr ever touched. `insideTmux()`
-// itself is not injectable — it only reads process.env["TMUX"], so it is
-// toggled directly, restored in a finally, and never causes a real tmux
-// binary to run either way.
-
-async function withTmuxEnv<T>(value: string | undefined, fn: () => Promise<T>): Promise<T> {
-  const original = process.env["TMUX"];
-  if (value === undefined) delete process.env["TMUX"];
-  else process.env["TMUX"] = value;
-  try {
-    return await fn();
-  } finally {
-    if (original === undefined) delete process.env["TMUX"];
-    else process.env["TMUX"] = original;
-  }
-}
-
 function fakeFacts(gitDir: string): RepoFacts {
   return {
     root: gitDir,
@@ -508,11 +485,9 @@ function launchDir(): string {
 
 function readyLaunchDeps(overrides: Partial<LaunchDeps> = {}): LaunchDeps {
   return {
-    currentPane: () => "%1",
-    reviewSessionAlive: () => false,
-    openReviewPane: () => "%2",
-    waitForReviewStarted: async () => "started",
-    waitForReviewSessionGone: async () => {},
+    rexAnchor: () => ({ session: "session:test", block: "block:test" }),
+    reviewAlreadyOpen: async () => false,
+    runReviewPane: async () => {},
     listSessions: () => [],
     readComments: () => [],
     writeLastReviewed: () => {},
@@ -520,38 +495,16 @@ function readyLaunchDeps(overrides: Partial<LaunchDeps> = {}): LaunchDeps {
   };
 }
 
-// Important 2, exit 1 of 3: not inside tmux.
-test("launch: not inside tmux clears the plan before erroring", async () => {
+test("launch: missing Rex anchor clears the plan without opening a pane", async () => {
   const gitDir = launchDir();
   try {
     writePlan(gitDir, "mode: test");
-    const exitCode = await withTmuxEnv(undefined, () =>
-      launch(gitDir, fakeTarget(), fakeFacts(gitDir), "launch"),
-    );
+    const exitCode = await launch(gitDir, fakeTarget(), fakeFacts(gitDir), "launch", readyLaunchDeps({
+      rexAnchor: () => null,
+      runReviewPane: async () => assert.fail("must not open a pane"),
+    }));
     assert.equal(exitCode, EXIT.error);
     assert.equal(existsSync(planPath(gitDir)), false);
-  } finally {
-    rmSync(gitDir, { recursive: true, force: true });
-  }
-});
-
-test("launch: no invoking tmux pane clears the plan before erroring", async () => {
-  const gitDir = launchDir();
-  let opened = false;
-  try {
-    writePlan(gitDir, "mode: test");
-    const exitCode = await withTmuxEnv("fake-tmux-socket", () =>
-      launch(gitDir, fakeTarget(), fakeFacts(gitDir), "launch", readyLaunchDeps({
-        currentPane: () => null,
-        openReviewPane: () => {
-          opened = true;
-          return "%2";
-        },
-      })),
-    );
-    assert.equal(exitCode, EXIT.error);
-    assert.equal(existsSync(planPath(gitDir)), false);
-    assert.equal(opened, false);
   } finally {
     rmSync(gitDir, { recursive: true, force: true });
   }
@@ -561,11 +514,10 @@ test("launch: a review already open clears the plan before reporting busy", asyn
   const gitDir = launchDir();
   try {
     writePlan(gitDir, "mode: test");
-    const exitCode = await withTmuxEnv("fake-tmux-socket", () =>
-      launch(gitDir, fakeTarget(), fakeFacts(gitDir), "launch", readyLaunchDeps({
-        reviewSessionAlive: () => true,
-      })),
-    );
+    const exitCode = await launch(gitDir, fakeTarget(), fakeFacts(gitDir), "launch", readyLaunchDeps({
+      reviewAlreadyOpen: async () => true,
+      runReviewPane: async () => assert.fail("must not replace an active review"),
+    }));
     assert.equal(exitCode, EXIT.busy);
     assert.equal(existsSync(planPath(gitDir)), false);
   } finally {
@@ -573,67 +525,40 @@ test("launch: a review already open clears the plan before reporting busy", asyn
   }
 });
 
-test("launch: pane creation failure clears the plan and never waits for startup", async () => {
+test("launch: failed Rex command clears the plan without marking the review done", async () => {
   const gitDir = launchDir();
-  let waitedForStart = false;
+  let listed = 0;
+  let marked = false;
   try {
     writePlan(gitDir, "mode: test");
-    const exitCode = await withTmuxEnv("fake-tmux-socket", () =>
-      launch(gitDir, fakeTarget(), fakeFacts(gitDir), "launch", readyLaunchDeps({
-        openReviewPane: () => null,
-        waitForReviewStarted: async () => {
-          waitedForStart = true;
-          return "started";
-        },
-      })),
-    );
+    const exitCode = await launch(gitDir, fakeTarget(), fakeFacts(gitDir), "launch", readyLaunchDeps({
+      runReviewPane: async () => { throw new Error("Rex split failed"); },
+      listSessions: () => { listed++; return []; },
+      writeLastReviewed: () => { marked = true; },
+    }));
     assert.equal(exitCode, EXIT.error);
     assert.equal(existsSync(planPath(gitDir)), false);
-    assert.equal(waitedForStart, false);
+    assert.equal(listed, 1);
+    assert.equal(marked, false);
   } finally {
     rmSync(gitDir, { recursive: true, force: true });
   }
 });
 
-for (const start of ["pane-gone", "timeout"] as const) {
-  test(`launch: ${start} before a live session clears the plan and never waits for completion`, async () => {
-    const gitDir = launchDir();
-    let waitedForCompletion = false;
-    try {
-      writePlan(gitDir, "mode: test");
-      const exitCode = await withTmuxEnv("fake-tmux-socket", () =>
-        launch(gitDir, fakeTarget(), fakeFacts(gitDir), "launch", readyLaunchDeps({
-          waitForReviewStarted: async () => start,
-          waitForReviewSessionGone: async () => {
-            waitedForCompletion = true;
-          },
-        })),
-      );
-      assert.equal(exitCode, EXIT.error);
-      assert.equal(existsSync(planPath(gitDir)), false);
-      assert.equal(waitedForCompletion, false);
-    } finally {
-      rmSync(gitDir, { recursive: true, force: true });
-    }
-  });
-}
-
-test("launch: a session that appears as its pane closes still waits and reads back", async () => {
+test("launch: reads comments only after the Rex child exits", async () => {
   const gitDir = launchDir();
-  let sessionAliveCalls = 0;
-  let waited = false;
   let readCommentsCalled = false;
+  let listed = 0;
+  const launched = Promise.withResolvers<void>();
+  const exited = Promise.withResolvers<void>();
   const session = fakeSession({ path: "/sessions/survived.json", comment_count: 1 });
   try {
-    let listCall = 0;
-    const exitCode = await withTmuxEnv("fake-tmux-socket", () =>
-      launch(gitDir, fakeTarget(), fakeFacts(gitDir), "launch", readyLaunchDeps({
-        reviewSessionAlive: () => ++sessionAliveCalls > 1,
-        waitForReviewStarted: async () => "pane-gone",
-        waitForReviewSessionGone: async () => {
-          waited = true;
+    const review = launch(gitDir, fakeTarget(), fakeFacts(gitDir), "launch", readyLaunchDeps({
+        runReviewPane: async () => {
+          launched.resolve();
+          await exited.promise;
         },
-        listSessions: () => (listCall++ === 0 ? [] : [session]),
+        listSessions: () => (listed++ === 0 ? [] : [session]),
         readComments: (path) => {
           readCommentsCalled = true;
           assert.equal(path, session.path);
@@ -647,9 +572,12 @@ test("launch: a session that appears as its pane closes still waits and reads ba
             content: "hi",
           }];
         },
-      })),
-    );
-    assert.equal(waited, true);
+    }));
+    await launched.promise;
+    assert.equal(listed, 1);
+    assert.equal(readCommentsCalled, false);
+    exited.resolve();
+    const exitCode = await review;
     assert.equal(readCommentsCalled, true);
     assert.equal(exitCode, EXIT.ok);
   } finally {
@@ -668,15 +596,13 @@ test("launch: a reused session with an unchanged comment count is not presented 
     const before = [fakeSession({ path: "/sessions/reused.json", updated_at: "t1", comment_count: 3 })];
     const after = [fakeSession({ path: "/sessions/reused.json", updated_at: "t2", comment_count: 3 })];
     let listCall = 0;
-    const exitCode = await withTmuxEnv("fake-tmux-socket", () =>
-      launch(gitDir, fakeTarget(), fakeFacts(gitDir), "launch", readyLaunchDeps({
+    const exitCode = await launch(gitDir, fakeTarget(), fakeFacts(gitDir), "launch", readyLaunchDeps({
         listSessions: () => (listCall++ === 0 ? before : after),
         readComments: () => {
           readCommentsCalled = true;
           return [];
         },
-      })),
-    );
+    }));
     // Before the fix, only `elected.comment_count === 0` was checked, so this
     // returned EXIT.ok and presented all 3 comments as this review's output.
     assert.equal(exitCode, EXIT.noComments);

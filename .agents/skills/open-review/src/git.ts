@@ -215,7 +215,7 @@ function probeRef(cwd: string, ref: string, head: string): RefInfo {
   return { ref, sha, mergeBase, distance: count === null ? null : Number(count) };
 }
 
-/** The path filter is appended here so the stat and the popup always agree. */
+/** The path filter is appended here so the stat and tuicr always agree. */
 function diffArgs(spec: Extract<StatSpec, { kind: "diff" }>, pathFilter: string | null): string[] {
   return pathFilter === null ? [...spec.args] : [...spec.args, "--", pathFilter];
 }

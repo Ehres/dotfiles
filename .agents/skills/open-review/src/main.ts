@@ -11,14 +11,7 @@ import {
 import { renderPlan } from "./plan.ts";
 import { electSession, renderCommentIndex } from "./session.ts";
 import { awaitPlan, clearPlan, readLastReviewed, writeLastReviewed, writePlan } from "./state.ts";
-import {
-  currentPane,
-  insideTmux,
-  openReviewPane,
-  reviewSessionAlive,
-  waitForReviewSessionGone,
-  waitForReviewStarted,
-} from "./tmux.ts";
+import { reviewAlreadyOpen, rexAnchor, runReviewPane } from "./rex.ts";
 import { execInPlace, listSessions, readComments } from "./tuicr.ts";
 import { buildPrTarget, buildTarget } from "./target.ts";
 import { EXIT, LIST_LIMIT } from "./constants.ts";
@@ -37,7 +30,7 @@ export type Resolution = {
  * `known` lets a caller that has already collected the facts hand them over:
  * collecting costs ~0.6 s on a large repository, and `main` needs them before
  * it can clear the plan file, so collecting twice would double the wait before
- * the popup appears. Tests omit it and let it collect.
+ * the side pane appears. Tests omit it and let it collect.
  */
 export function resolve(cwd: string, argv: string[], known?: RepoFacts): Resolution {
   const intent = parseArgs(argv);
@@ -77,7 +70,7 @@ export function resolve(cwd: string, argv: string[], known?: RepoFacts): Resolut
       // (a working tree dirty only with untracked files is still a real
       // review — that case never reaches here, since untrackedPaths is
       // nonempty for it). Caught here rather than left to open an empty
-      // popup: the session then dies at once and gets reported as "closed
+      // review: the session then dies at once and gets reported as "closed
       // with no comments", which reads as the human's own choice.
       const reason = "no changes in scope";
       target = { ...target, stat: { kind: "none", reason }, emptyReason: reason };
@@ -129,7 +122,7 @@ function readLastReviewedState(cwd: string, facts: RepoFacts): LastReviewed | nu
   };
 }
 
-const USAGE = `open-review — open a tuicr review in a focused, non-modal, 60%-width right-side tmux pane
+const USAGE = `open-review — open a tuicr review in a focused, non-modal, 60%-width right-side Rex pane
 
   open-review                 auto: this branch's commits and/or working tree
   open-review --since-last    only what changed since the last review
@@ -141,7 +134,7 @@ const USAGE = `open-review — open a tuicr review in a focused, non-modal, 60%-
 
   open-review --plan          print the plan of the launch in flight
   open-review --dry-run       resolve and print, no pane
-  open-review --exec          resolve, then exec tuicr in place (tmux binding)`;
+  open-review --exec          resolve, then run tuicr in the current terminal`;
 
 export async function main(argv: string[], cwd: string): Promise<number> {
   let intent;
@@ -192,7 +185,7 @@ export async function main(argv: string[], cwd: string): Promise<number> {
       `mode: ${target.description}\ntuicr: ${target.tuicrArgs.join(" ")}\nstat: pass-through, no local stat\n`,
     );
     // Same short-circuit as the with-facts path below: --dry-run resolves and
-    // prints, and must never reach the popup. `launch` only special-cases
+    // prints, and must never open a pane. `launch` only special-cases
     // "exec", so without this a dry run outside a repository would open one.
     if (intent.action === "dry-run") return EXIT.ok;
     return await launch(cwd, target, null, intent.action);
@@ -218,21 +211,19 @@ export async function main(argv: string[], cwd: string): Promise<number> {
 
 /**
  * Terminal and tuicr side effects used by launch(). Every field is optional so
- * tests can drive one lifecycle decision without touching tmux or tuicr.
+ * tests can drive one lifecycle decision without touching Rex or tuicr.
  */
 export type LaunchDeps = {
-  currentPane?: typeof currentPane;
-  reviewSessionAlive?: typeof reviewSessionAlive;
-  openReviewPane?: typeof openReviewPane;
-  waitForReviewStarted?: typeof waitForReviewStarted;
-  waitForReviewSessionGone?: typeof waitForReviewSessionGone;
+  rexAnchor?: typeof rexAnchor;
+  reviewAlreadyOpen?: typeof reviewAlreadyOpen;
+  runReviewPane?: typeof runReviewPane;
   listSessions?: typeof listSessions;
   readComments?: typeof readComments;
   writeLastReviewed?: typeof writeLastReviewed;
 };
 
 /**
- * Opens the review side pane, waits for the persistent session to end, and
+ * Opens the review side pane, waits for tuicr to exit, and
  * reads its comments back. `facts` is null only on the repository-less pr path.
  */
 export async function launch(
@@ -242,11 +233,9 @@ export async function launch(
   action: Action,
   deps: LaunchDeps = {},
 ): Promise<number> {
-  const doCurrentPane = deps.currentPane ?? currentPane;
-  const doReviewSessionAlive = deps.reviewSessionAlive ?? reviewSessionAlive;
-  const doOpenReviewPane = deps.openReviewPane ?? openReviewPane;
-  const doWaitForReviewStarted = deps.waitForReviewStarted ?? waitForReviewStarted;
-  const doWaitForReviewSessionGone = deps.waitForReviewSessionGone ?? waitForReviewSessionGone;
+  const getAnchor = deps.rexAnchor ?? rexAnchor;
+  const isReviewOpen = deps.reviewAlreadyOpen ?? reviewAlreadyOpen;
+  const runPane = deps.runReviewPane ?? runReviewPane;
   const doListSessions = deps.listSessions ?? listSessions;
   const doReadComments = deps.readComments ?? readComments;
   const doWriteLastReviewed = deps.writeLastReviewed ?? writeLastReviewed;
@@ -258,63 +247,34 @@ export async function launch(
   };
 
   if (action === "exec") {
-    // The tmux binding's path: the human owns the popup, so there is nothing
-    // to wait for and nothing to read back.
+    // A manual launch owns its terminal and does not need comment read-back.
     execInPlace(target.tuicrArgs);
     return EXIT.ok;
   }
 
-  if (!insideTmux()) {
+  const anchor = getAnchor();
+  if (anchor === null) {
     clearPlanIfLive();
     process.stderr.write(
-      `open-review: not inside tmux — run 'tuicr ${target.tuicrArgs.join(" ")}' directly\n`,
+      "open-review: no Rex session or block — launch from Rex, or use open-review --exec in a terminal\n",
     );
     return EXIT.error;
   }
 
-  // tmux-popup attaches an existing session and ignores the command it was
-  // given, so a live review would silently stand in for the requested one.
-  if (doReviewSessionAlive()) {
+  let before;
+  try {
+    if (await isReviewOpen(anchor)) {
+      clearPlanIfLive();
+      process.stderr.write("open-review: a review is already open in this Rex session — finish it with :wq\n");
+      return EXIT.busy;
+    }
+    before = doListSessions();
+    await runPane(root, anchor, target.tuicrArgs);
+  } catch (error) {
     clearPlanIfLive();
-    process.stderr.write(
-      "open-review: a review is already open — close it with C-q, or reattach with prefix + R\n",
-    );
-    return EXIT.busy;
-  }
-
-  const before = doListSessions();
-  const sourcePane = doCurrentPane();
-  if (sourcePane === null) {
-    clearPlanIfLive();
-    process.stderr.write(
-      `open-review: no tmux pane target — run 'tuicr ${target.tuicrArgs.join(" ")}' directly\n`,
-    );
+    process.stderr.write(`open-review: Rex review failed: ${error instanceof Error ? error.message : String(error)}\n`);
     return EXIT.error;
   }
-
-  const paneId = doOpenReviewPane(root, sourcePane, target.tuicrArgs);
-  if (paneId === null) {
-    clearPlanIfLive();
-    process.stderr.write(
-      `open-review: could not open the review pane — run 'tuicr ${target.tuicrArgs.join(" ")}' directly\n`,
-    );
-    return EXIT.error;
-  }
-
-  const start = await doWaitForReviewStarted(paneId);
-  // The session is checked once more after a reported startup failure. It may
-  // have appeared between the startup poll's final check and this branch.
-  if (start !== "started" && !doReviewSessionAlive()) {
-    clearPlanIfLive();
-    process.stderr.write(
-      start === "pane-gone"
-        ? "open-review: review pane closed before tuicr started\n"
-        : "open-review: timed out waiting for the tuicr session\n",
-    );
-    return EXIT.error;
-  }
-
-  await doWaitForReviewSessionGone();
 
   const after = doListSessions();
   const elected = electSession(before, after);

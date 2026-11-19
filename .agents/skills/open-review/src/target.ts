@@ -178,7 +178,7 @@ function finish(
   const tuicrArgs = [...parts.args];
   if (pathFilter !== null) tuicrArgs.push("-p", pathFilter);
   tuicrArgs.push(...passthrough);
-  // A version-check prompt inside a modal popup is a failure mode.
+  // A version-check prompt interrupts the review.
   tuicrArgs.push("--no-update-check");
 
   const description = pathFilter === null

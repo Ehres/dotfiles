@@ -50,7 +50,7 @@ export function readComments(sessionPath: string): Comment[] | null {
   }
 }
 
-/** The tmux binding's path: the human owns the terminal, so tuicr runs in place. */
+/** A manual launch runs tuicr in the current terminal. */
 export function execInPlace(tuicrArgs: string[]): void {
   execFileSync("tuicr", tuicrArgs, { stdio: "inherit" });
 }

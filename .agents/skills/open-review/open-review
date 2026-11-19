@@ -2,9 +2,8 @@
 # Entry point for the open-review skill. The logic lives in src/main.ts; this
 # only finds a node to run it with.
 #
-# `#!/usr/bin/env node` would not do: mise publishes its PATH from .zshrc, and
-# ~/scripts/tmux-popup deliberately skips the login shell, so a popup gets a
-# PATH with no node in it. The mise shim works with no activation.
+# Shortcuts can launch this without reading .zshrc. The mise shim finds Node
+# even when mise activation has not added it to PATH.
 #
 # Agent contract:
 #   1. run this in the background — it blocks until the review is finished and

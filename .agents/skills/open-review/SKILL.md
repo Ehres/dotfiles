@@ -1,9 +1,9 @@
 ---
 name: open-review
-description: Launch tuicr, the local code-review TUI, in a focused, non-modal, 60%-width right-side tmux pane so the user can review a diff and keep talking to the agent. Use when the user asks to open or start a review, to review a branch, a diff or a pull request, or says things like "lance une review", "je veux relire", "ouvre tuicr", "review en pane", or "review en popup".
+description: Open tuicr in a focused right-side Rex pane so the user can review a branch, diff, or pull request while keeping the agent visible. Use for requests like "open review", "lance une review", or "ouvre tuicr".
 ---
 
-# Open a tuicr review in a tmux side pane
+# Open a tuicr review in a Rex side pane
 
 ## Launch it — one Bash call, `run_in_background: true`
 
@@ -11,9 +11,11 @@ description: Launch tuicr, the local code-review TUI, in a focused, non-modal, 6
 ~/.agents/skills/open-review/open-review
 ```
 
-The script resolves the base, refuses to open an empty diff, opens the side
-pane, waits for the review to actually finish, and **prints the comments when
-it does**. Do not run git commands first to work any of that out.
+The script resolves the target, skips empty diffs, and opens a focused pane
+taking 60% of the split beside the invoking Rex block. Rex waits for tuicr to
+exit; the script then **prints the comments**. Run it from a terminal with
+`REX_SESSION` and `REX_BLOCK`. `--exec` runs tuicr in the current terminal
+without automatic comment retrieval.
 
 Pass a target only when the user named one:
 
@@ -41,23 +43,17 @@ Second call, foreground:
 Prints the resolved base and the rule that found it, the commit count, the argv,
 the diffstat and the ten files with the most churn. Relay the target and the
 size to the user, and use the churn list to say which files deserve their
-attention most. The plan is written before the pane launches, so this cannot
-race the launch.
+attention most. A plan describes the requested target, not proof that Rex
+opened it. If the background command reports a launch failure, relay it.
 
 If the base looks wrong, override it with `-r` rather than arguing with it — and
 write it up (see below).
 
 ## While it is open
 
-The side pane receives focus at launch but is not modal: OpenCode remains
-visible, and the user can move back to it while tuicr stays open. Escape goes to
-tuicr. `C-q` finishes the review, closes the persistent session, and lets the
-side pane close automatically.
-
-Closing the side pane without `C-q` only detaches its client. The review
-survives, and `prefix + R` resumes it in the existing manual popup. **The
-background task completing is the signal that the review is finished** — do not
-poll, and do not ask the user to announce it.
+The side pane receives focus without hiding OpenCode. Finish with `:wq` in
+tuicr (`:q` to quit) rather than closing the Rex block, which can interrupt it. Use the
+background task's completion to read the result; do not poll.
 
 ## What the task returns
 
@@ -66,12 +62,12 @@ poll, and do not ask the user to announce it.
 | 0 | comments printed — an index, then the JSON | invoke `superpowers:receiving-code-review` and work through them |
 | 2 | nothing to review, no pane opened | say so; do not retry with a different target unless the user asks |
 | 3 | review closed with no comments | say so plainly; do not guess what they meant |
-| 4 | a review is already open | tell the user to close it with `C-q` or reattach with `prefix + R` |
+| 4 | a review is already open in the Rex session | ask the user to finish it with `:wq` |
 | 1 | error — the message says which | relay it |
 
 There is no session to go looking for: the script elected it and printed its
-comments. The `tuicr` skill is only for the case where the user opened the popup
-themselves.
+comments. Use the `tuicr` skill when reading comments from a review the user
+opened themselves.
 
 ## When the target was wrong
 

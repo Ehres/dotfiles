@@ -89,7 +89,7 @@ export type Target = {
   stat: StatSpec;
   /** Fallbacks and widenings to print, never applied silently. */
   notes: string[];
-  /** Set when there is nothing to review; no popup is opened. */
+  /** Set when there is nothing to review; no pane is opened. */
   emptyReason: string | null;
 };
 
