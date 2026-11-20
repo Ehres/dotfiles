@@ -93,8 +93,7 @@ if [[ -z "${matches// /}" ]]; then
 fi
 
 # Only the head: list goes to the clipboard: it is appended to the filter the
-# gh-dash search bar is prefilled with, which already carries is:open, the repo,
-# -author:@me and -is:draft. Leading space so it does not glue to the last
+# gh-dash search bar is prefilled with. Leading space so it does not glue to the last
 # qualifier already in the bar.
 heads=""
 while IFS=$'\t' read -r number branch title; do
@@ -106,4 +105,4 @@ done < <(sort -t$'\t' -k1,1rn <<<"$matches")
 printf '%s' "$heads" | pbcopy
 
 printf '\n%s branches copied to the clipboard.\n' "$(grep -c . <<<"$matches")" >&2
-printf 'In gh-dash, press / on the Front section and paste at the end.\n' >&2
+printf 'In gh-dash, press / in a PR section and paste into the search.\n' >&2

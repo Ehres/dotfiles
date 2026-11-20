@@ -1,0 +1,26 @@
+#!/bin/bash
+set -eu
+
+action=$1 repo=$2 number=$3
+case "$action" in
+  review)
+    cd "$HOME/projects/orus-monorepo"
+    title="Review #$number"
+    command=(tuicr pr "$repo#$number")
+    ;;
+  enhance)
+    title="Enhance #$number"
+    command=(gh enhance -R "$repo" "$number")
+    ;;
+  *) exit 2 ;;
+esac
+
+if [[ -n "${REX_SESSION:-}" ]]; then
+  window=$(rex window new --json -s "$REX_SESSION" -c "$PWD" "$title" -- "${command[@]}")
+  window_id=$(jq -er '.window_id' <<< "$window")
+  exec rex 'do' session.select "session_id=$REX_SESSION" "window_id=$window_id"
+elif [[ -n "${TMUX:-}" ]]; then
+  exec tmux new-window -c "$PWD" -n "$title" "${command[@]}"
+else
+  exec "${command[@]}"
+fi

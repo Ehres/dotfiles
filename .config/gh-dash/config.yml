@@ -1,11 +1,6 @@
 prSections:
   - title: My Pull Requests
     filters: -head:chore-pharaoh-adoption-method is:open repo:orus-tech/orus-monorepo author:@me
-  - title: Front
-    # Paste the gh-prs-by-path output here at runtime with / to narrow this
-    # down to the PRs touching the front-end paths: gh-dash filters cannot
-    # match changed paths.
-    filters: is:open repo:orus-tech/orus-monorepo -author:@me -is:draft
   - title: Needs My Review
     filters: is:open review-requested:@me
   - title: Involved
@@ -86,22 +81,14 @@ keybindings:
     - key: d
       name: review (tuicr)
       command: >-
-        tmux new-window -n "Review - {{.HeadRefName}}" '
-          cd "$HOME/projects/orus-monorepo" 2>/dev/null;
-          tuicr pr {{.RepoName}}#{{.PrNumber}}
-        '
+        "$HOME/scripts/gh-dash-tab" review "{{.RepoName}}" "{{.PrNumber}}"
     - key: T
       command: >-
-        tmux new-window -n "Enhance - {{.HeadRefName}}" '
-          gh enhance -R {{.RepoName}} {{.PrNumber}}
-        '
+        "$HOME/scripts/gh-dash-tab" enhance "{{.RepoName}}" "{{.PrNumber}}"
     - key: F
       name: copy front PR filter
       command: >-
-        tmux run-shell -b '
-          "$HOME/scripts/gh-prs-by-path" >/dev/null 2>&1 &&
-          tmux display-message "front PR filter copied, paste it with /"
-        '
+        "$HOME/scripts/gh-prs-by-path"
     - key: R
       name: request review
       command: >
