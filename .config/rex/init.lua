@@ -1,5 +1,6 @@
 require("dash")
 require("lazygit")
+require("pane-links")
 require("pane-navigation")
 
 -- Match Ghostty: OpenCode uses F6 to cycle favorite models.
@@ -13,6 +14,7 @@ rex.bind("leader/ctrl+b", "pane.send_key", { key = "ctrl+b" })
 rex.bind("leader/[", "pane.copy_mode.enter")
 rex.bind("leader/s", "session.switch")
 rex.bind("leader/d", "toggle_dash")
+rex.bind("leader/f", "open_pane_link")
 rex.bind("leader/g", "open_lazygit")
 rex.bind("leader/-", "pane.split.down")
 rex.bind("leader/\\", "pane.split.right")
