@@ -88,7 +88,7 @@ move < escape ; default
 # App: focus the MRU usable window, or launch the app; each action exits
 default < ctrl + shift - a ; app
 app < s : "$HOME/scripts/yabai-focus-app" Slack; skhd -k escape
-app < t : "$HOME/scripts/yabai-focus-app" Ghostty; skhd -k escape
+app < t : "$HOME/scripts/yabai-focus-app" Rex; skhd -k escape
 app < b : "$HOME/scripts/yabai-focus-app" Dia; skhd -k escape
 app < e : "$HOME/scripts/yabai-focus-app" Mail; skhd -k escape
 app < m : "$HOME/scripts/yabai-focus-app" Messages; skhd -k escape
