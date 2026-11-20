@@ -1,8 +1,7 @@
 local nav_panes = { left = "L", down = "D", up = "U", right = "R" }
 
 -- The explorer's list/input are floats, so `wincmd h/j/k/l` always just leaves
--- the float instead of honouring the direction. vim-tmux-navigator therefore
--- never sees a tab-page edge and never forwards to tmux. Do it by hand.
+-- the float instead of honouring the direction. Route to the editor or pane explicitly.
 local function nav(dir)
   return function(picker)
     local pos = picker.layout.root.opts.position or "left"
@@ -15,6 +14,8 @@ local function nav(dir)
     if vim.env.TMUX then
       local socket = vim.split(vim.env.TMUX, ",")[1]
       vim.system({ "tmux", "-S", socket, "select-pane", "-" .. nav_panes[dir] })
+    elseif vim.env.REX_SESSION then
+      require("config.rex-navigator").focus_pane(dir)
     end
   end
 end

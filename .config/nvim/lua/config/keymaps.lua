@@ -2,6 +2,10 @@
 -- Default keymaps that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua
 -- Add any additional keymaps here
 
+if vim.env.REX_SESSION and not vim.env.TMUX then
+  require("config.rex-navigator").setup()
+end
+
 -- ~/.config/nvim/lua/config/keymaps.lua
 -- Copy current file path helpers using <leader>fC*
 
