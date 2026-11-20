@@ -34,17 +34,52 @@
         "url": "https://mcp.notion.com/mcp",
         "disabled": true,
       },
+      "browse": {
+        "type": "local",
+        "command": [
+          "/Users/maxime.grebauval/.local/bin/browse",
+          "mcp"
+        ],
+        "environment": {
+          "OPENCODE_BROWSER_RUNTIME": "auto-update"
+        }
+      },
+      "grafana": {
+        "type": "local",
+        "disabled": false,
+        "command": [
+          "/Users/maxime.grebauval/.local/share/mise/shims/uvx",
+          "mcp-grafana==2.2.0",
+          "-t",
+          "stdio",
+          "--enabled-tools",
+          "search,datasource,dashboard,prometheus",
+          "--usage-stats=disabled"
+        ],
+        "environment": {
+          "GRAFANA_URL": "https://orus.grafana.net",
+          "GRAFANA_SERVICE_ACCOUNT_TOKEN_FILE": "/Users/maxime.grebauval/.local/share/opencode/secrets/grafana-token"
+        }
+      },
+      "posthog": {
+        "type": "remote",
+        "url": "https://mcp.posthog.com/mcp"
+      },
     },
   },
   "permissions": [
     { "action": "question", "resource": "*", "effect": "allow" },
     { "action": "external_directory", "resource": "*", "effect": "ask" },
-    { "action": "external_directory", "resource": "~/Library/Application Support/rtk/tee/**", "effect": "allow" },
+    {
+      "action": "external_directory",
+      "resource": "~/Library/Application Support/rtk/tee/**",
+      "effect": "allow",
+    },
     { "action": "shell", "resource": "*", "effect": "allow" },
     { "action": "shell", "resource": "rm -rf *", "effect": "ask" },
     { "action": "shell", "resource": "kubectl * delete *", "effect": "ask" },
     { "action": "shell", "resource": "security *", "effect": "ask" },
   ],
-  "plugins": ["@slkiser/opencode-quota@latest", "oh-my-opencode-slim"],
+  "plugins": ["@slkiser/opencode-quota@latest"],
   "username": "Ehres",
 }
