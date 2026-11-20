@@ -1,3 +1,4 @@
 diff_view = "side-by-side"
+wrap = true
 appearance = "dark"
 editor = "nvim"
