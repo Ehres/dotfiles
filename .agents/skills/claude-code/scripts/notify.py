@@ -18,7 +18,7 @@ def notify(event, env):
     if not isinstance(reply, str) or not reply.strip():
         return
 
-    pane = env.get("TMUX_PANE", "unknown")
+    pane = env.get("REX_BLOCK", "unknown")
     payload = {
         "text": (
             f"[Claude Code reply]\nPane: {pane}\n"

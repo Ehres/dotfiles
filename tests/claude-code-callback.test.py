@@ -21,7 +21,7 @@ class CallbackTests(unittest.TestCase):
         self.env = {
             "OC_CALLBACK_SESSION_ID": "ses_origin",
             "OC_CALLBACK_DIRECTORY": "/project with spaces",
-            "TMUX_PANE": "%123",
+            "REX_BLOCK": "block:claude",
         }
         self.event = {
             "hook_event_name": "Stop", "session_id": "claude-session",
@@ -39,7 +39,8 @@ class CallbackTests(unittest.TestCase):
         self.assertTrue(payload["resume"])
         self.assertEqual(payload["delivery"], "queue")
         self.assertIn(self.event["last_assistant_message"], payload["text"])
-        self.assertEqual(payload["metadata"]["pane"], "%123")
+        self.assertIn("Pane: block:claude", payload["text"])
+        self.assertEqual(payload["metadata"]["pane"], "block:claude")
         self.assertEqual(kwargs["cwd"], "/project with spaces")
         self.assertNotIn("shell", kwargs)
 
