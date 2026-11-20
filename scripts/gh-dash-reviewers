@@ -6,7 +6,7 @@ CACHE_ROOT="${XDG_CACHE_HOME:-$HOME/.cache}/gh-dash/reviewers"
 SCORES_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/gh-dash/reviewer-scores"
 
 usage() {
-  printf 'usage: %s request <owner/repo> <pr-number>\n' "$0" >&2
+  printf 'usage: %s {request|re-request} <owner/repo> <pr-number>\n' "$0" >&2
   exit 2
 }
 
@@ -133,7 +133,33 @@ request_review() {
   gh pr edit "$pr" --repo "$repo" --add-reviewer "$reviewers"
 }
 
+re_request_review() {
+  local repo=$1 pr=$2 candidates login status
+  # The variables in the filter belong to jq.
+  # shellcheck disable=SC2016
+  candidates=$(gh pr view "$pr" --repo "$repo" --json author,latestReviews,reviewRequests --jq '
+    .author.login as $author | [.reviewRequests[].login] as $pending |
+    [.latestReviews[].author.login | select(. != null and . != $author and (endswith("[bot]") | not)) |
+      select(. as $login | $pending | index($login) == null)] | unique[]') || return 1
+  if [ -z "$candidates" ]; then
+    printf 'No previous reviewer to re-request on %s#%s.\n' "$repo" "$pr"
+    return 0
+  fi
+  login=$(fzf --header='enter: re-request review | esc: cancel' <<< "$candidates")
+  status=$?
+  case "$status" in
+    0) gh api --method POST "repos/$repo/pulls/$pr/requested_reviewers" -f "reviewers[]=$login" --silent ;;
+    1|130) return 0 ;;
+    *) return "$status" ;;
+  esac
+}
+
 case "${1:-}" in
+  re-request)
+    [ "$#" -eq 3 ] || usage
+    validate_repo "$2" && [[ "$3" =~ ^[0-9]+$ ]] || usage
+    re_request_review "$2" "$3"
+    ;;
   request)
     [ "$#" -eq 3 ] || usage
     request_review "$2" "$3"

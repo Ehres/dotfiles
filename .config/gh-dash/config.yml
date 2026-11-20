@@ -93,6 +93,10 @@ keybindings:
       name: request review
       command: >
         "$HOME/scripts/gh-dash-reviewers" request {{.RepoName}} {{.PrNumber}}
+    - key: V
+      name: re-request review
+      command: >-
+        "$HOME/scripts/gh-dash-reviewers" re-request "{{.RepoName}}" "{{.PrNumber}}"
 
 repoPaths: {}
 theme:
