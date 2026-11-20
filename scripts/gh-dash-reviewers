@@ -143,6 +143,9 @@ re_request_review() {
       select(. as $login | $pending | index($login) == null)] | unique[]') || return 1
   if [ -z "$candidates" ]; then
     printf 'No previous reviewer to re-request on %s#%s.\n' "$repo" "$pr"
+    if [[ $in_popup == true ]]; then
+      read -rp 'Press Enter to close… ' _
+    fi
     return 0
   fi
   login=$(fzf --header='enter: re-request review | esc: cancel' <<< "$candidates")
@@ -154,15 +157,29 @@ re_request_review() {
   esac
 }
 
+in_popup=false
+if [[ "${1:-}" == --in-popup ]]; then
+  in_popup=true
+  shift
+fi
+
 case "${1:-}" in
-  re-request)
+  request|re-request)
     [ "$#" -eq 3 ] || usage
     validate_repo "$2" && [[ "$3" =~ ^[0-9]+$ ]] || usage
-    re_request_review "$2" "$3"
-    ;;
-  request)
-    [ "$#" -eq 3 ] || usage
-    request_review "$2" "$3"
+    if [[ $in_popup == false && -n ${REX_SESSION:-} && -n ${REX_BLOCK:-} ]]; then
+      exec rex 'do' -s "$REX_SESSION" -b "$REX_BLOCK" dash_reviewer_picker "mode=$1" "repo=$2" "pr=$3"
+    fi
+    if [[ $1 == request ]]; then
+      request_review "$2" "$3"
+    else
+      re_request_review "$2" "$3"
+    fi
+    status=$?
+    if [[ $in_popup == true && $status != 0 ]]; then
+      read -rp 'Press Enter to close… ' _
+    fi
+    exit "$status"
     ;;
   candidates)
     if [ "$#" -eq 2 ]; then

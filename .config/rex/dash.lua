@@ -1,5 +1,26 @@
 local previous_session = {}
 
+rex.action({
+  name = "dash_reviewer_picker",
+  title = "Choose a PR reviewer",
+  args = { mode = "string", repo = "string", pr = "number" },
+  run = function(ctx, args)
+    return assert(rex.call("session.new_layer", {
+      session_id = ctx.session_id,
+      window_id = ctx.window_id,
+      bounds = { 0.2, 0.2, 0.6, 0.6 },
+      focus = true,
+      layout = rex.layout.block({
+        flavor = "com.superlogical.terminal.shell",
+        label = args.repo .. "#" .. args.pr,
+        options = { command = {
+          os.getenv("HOME") .. "/scripts/gh-dash-reviewers", "--in-popup", args.mode, args.repo, tostring(args.pr),
+        } },
+      }),
+    }))
+  end,
+})
+
 local function create_dash()
   local session = assert(rex.call("session.create", {
     label = "dash",
