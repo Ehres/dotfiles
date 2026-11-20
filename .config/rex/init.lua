@@ -1,0 +1,11 @@
+rex.mode("leader", { exclusive = true })
+rex.bind("ctrl+b", "client.mode.enter", { name = "leader", once = true })
+rex.bind("leader/ctrl+b", "pane.send_key", { key = "ctrl+b" })
+rex.bind("leader/m", "client.mode.enter", { name = "move" })
+
+rex.mode("move", { exclusive = true })
+rex.bind("move/h", "pane.move", { direction = "left" })
+rex.bind("move/j", "pane.move", { direction = "down" })
+rex.bind("move/k", "pane.move", { direction = "up" })
+rex.bind("move/l", "pane.move", { direction = "right" })
+rex.bind("move/escape", "client.mode.exit")
