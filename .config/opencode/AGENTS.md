@@ -26,6 +26,10 @@ My GitHub username is `Ehres`.
 
 Use the GitHub CLI (`gh`) for GitHub-related tasks whenever possible.
 
+Always add the `🧪 ready` label when creating a pull request.
+
+Include screenshots in pull request descriptions whenever possible, especially for visible UI changes. Use the `add-attachments-to-pr` skill to upload and embed them; explain any capture blocker.
+
 ## Project conventions
 
 When designing changes or reviewing code, check and apply the project's documented coding rules, guidelines, and standards.
@@ -54,6 +58,8 @@ Never commit specifications or implementation plans created by Superpowers skill
 - Verify plans, assumptions, and external information against the current source of truth before presenting them as fact.
 - Surface nearby inconsistencies, risks, and suspicious behavior discovered during work.
 - When the user says "Rappelle-toi de ...", persist the requested instruction in this global `AGENTS.md` file unless they specify another scope.
+- When sending a follow-up to Claude Code in Rex, a visible prompt suggestion is not a draft and can be ignored. If the user is actually composing input, leave it to them.
+- After delegated work, handle requested Git follow-ups and integration changes directly; delegate them only when the user explicitly asks.
 
 ## TODO comments
 
@@ -73,3 +79,5 @@ Never commit specifications or implementation plans created by Superpowers skill
 - Always write specifications in French.
 - When speaking French, retain established English technical terms (for example, use `Chip` rather than `puce`) unless a French translation is clearly the industry standard.
 - Avoid em dashes in generated prose.
+
+When working on the Orus subscription tunnel migration strategy, consult the [personal strategy note](/Users/maxime.grebauval/projects/orus-notes/strategie-migration-tunnel-pharaoh-next.md). Keep personal notes out of project commits.
