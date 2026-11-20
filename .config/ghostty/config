@@ -9,6 +9,9 @@ macos-option-as-alt = false
 # Send distinct extended Tab sequences; unbind alone does not forward these keys.
 keybind = ctrl+tab=text:\x1b[27;5;9~
 keybind = ctrl+shift+tab=text:\x1b[27;6;9~
+# Send F6 for Ctrl+M: tmux's Ext 1 mode otherwise converts Ctrl+M to Enter.
+# OpenCode binds F6 to cycle favorite models.
+keybind = ctrl+m=text:\x1b[17~
 background = #1b1d2a
 window-padding-y = 4,0
 window-padding-color = background
