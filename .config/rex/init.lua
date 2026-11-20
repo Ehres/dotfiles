@@ -18,6 +18,7 @@ rex.bind("leader/-", "pane.split.down")
 rex.bind("leader/\\", "pane.split.right")
 rex.bind("leader/z", "pane.zoom")
 rex.bind("leader/r", "client.mode.enter", { name = "resize" })
+rex.bind("leader/m", "client.mode.enter", { name = "move" })
 rex.unbind("cmd+shift+p")
 rex.bind("leader/shift+;", "client.palette.toggle") -- : on the ABC layout
 
@@ -27,3 +28,10 @@ rex.bind("resize/j", "pane.resize", { direction = "down" })
 rex.bind("resize/k", "pane.resize", { direction = "up" })
 rex.bind("resize/l", "pane.resize", { direction = "right" })
 rex.bind("resize/=", "pane.balance")
+
+rex.mode("move", { exclusive = true })
+rex.bind("move/h", "pane.move", { direction = "left" })
+rex.bind("move/j", "pane.move", { direction = "down" })
+rex.bind("move/k", "pane.move", { direction = "up" })
+rex.bind("move/l", "pane.move", { direction = "right" })
+rex.bind("move/escape", "client.mode.exit")
