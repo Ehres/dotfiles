@@ -148,3 +148,9 @@ buried here where nothing reads it.
   go green.
 - **Status:** open, second occurrence. The fix is no longer a toss-up — auto
   should detect `mergesFromBase > 0` and synthesize the net-result commit.
+
+- `open-review`, `omn-2377-pharaoh-next-avatar`: auto chose `control-item-jsx-order`
+  (nearest ancestor branch), `17211f1be8588285cf2c49d830e825d86aeb11b1..HEAD`,
+  clean, 108 commits, 242 files (+4788/-2721). Expected the one avatar commit,
+  `5a6c3f77e80..HEAD`, 23 files (+731/-139). Creation recorded `HEAD`;
+  the ancestor heuristic ignored the closer fork point of the advancing `origin/main`.

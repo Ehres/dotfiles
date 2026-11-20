@@ -199,3 +199,11 @@ test("nothing usable at all yields null", () => {
   assert.equal(chooseBase(facts({ candidates: [] })), null);
   assert.equal(chooseBase(facts({ candidates: [ref("main", { sha: null, mergeBase: null })] })), null);
 });
+
+test("a branch created from HEAD prefers a closer trunk fork to a stale ancestor", () => {
+  const chosen = chooseBase(facts({ reflogName: "HEAD", candidates: [
+    ref("control-item-jsx-order", { distance: 108 }),
+    ref("origin/main", { mergeBase: "fork", distance: 1 }),
+  ] }));
+  assert.equal(chosen?.mergeBase, "fork");
+});

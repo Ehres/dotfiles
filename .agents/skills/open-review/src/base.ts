@@ -20,6 +20,14 @@ export function chooseBase(facts: RepoFacts): BaseChoice | null {
   if (seeded) return choice(seeded, "created-from reflog");
 
   const nearest = nearestAncestor(usable, facts.branch);
+  if (facts.refs.reflogName === "HEAD" && nearest?.distance != null) {
+    const trunk = DEFAULT_BRANCHES.map((name) => byRef.get(name)).find(
+      (candidate) => candidate && candidate.ref !== `origin/${facts.branch}`,
+    );
+    if (trunk?.distance != null && trunk.distance < nearest.distance) {
+      return choice(trunk, "fallback default branch");
+    }
+  }
   if (nearest) return choice(nearest, "nearest ancestor branch");
 
   for (const name of DEFAULT_BRANCHES) {
