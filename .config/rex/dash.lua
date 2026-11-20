@@ -1,4 +1,61 @@
-local previous_session = {}
+-- Remember work sessions per client, so a visit to Dash does not replace either one.
+local history = {}
+
+local function remember_work(ctx, sessions)
+  for _, session in ipairs(sessions) do
+    if session.session_id == ctx.session_id and session.label ~= "dash" then
+      local recent = history[ctx.client_id] or {}
+      for i, id in ipairs(recent) do
+        if id == ctx.session_id then table.remove(recent, i); break end
+      end
+      table.insert(recent, 1, ctx.session_id)
+      history[ctx.client_id] = recent
+      break
+    end
+  end
+end
+
+local function previous_work(ctx, sessions)
+  for _, id in ipairs(history[ctx.client_id] or {}) do
+    for _, session in ipairs(sessions) do
+      if id ~= ctx.session_id and session.session_id == id and session.label ~= "dash" then
+        return id
+      end
+    end
+  end
+end
+
+rex.action({
+  name = "switch_work_session",
+  title = "Change session",
+  run = function(ctx)
+    remember_work(ctx, assert(rex.call("session.list")).sessions)
+    rex.client.queue("session.switch")
+  end,
+})
+
+rex.action({
+  name = "previous_work_session",
+  title = "Return to previous work session",
+  run = function(ctx)
+    local sessions = assert(rex.call("session.list")).sessions
+    remember_work(ctx, sessions)
+    local previous = previous_work(ctx, sessions)
+    if previous then
+      rex.client.queue("session.select", { session_id = previous })
+    else
+      -- No recorded visit yet. Only jump if the destination is unambiguous.
+      local candidate
+      for _, session in ipairs(sessions) do
+        if session.label ~= "dash" and session.session_id ~= ctx.session_id then
+          if candidate then return rex.client.queue("session.switch") end
+          candidate = session.session_id
+        end
+      end
+      if candidate then rex.client.queue("session.select", { session_id = candidate }) end
+    end
+  end,
+})
 
 rex.action({
   name = "dash_reviewer_picker",
@@ -43,17 +100,17 @@ rex.action({
     local dash, previous
     for _, session in ipairs(sessions.sessions) do
       if session.label == "dash" then dash = session.session_id end
-      if session.session_id == previous_session[ctx.client_id] then previous = session.session_id end
     end
 
     if dash and ctx.session_id == dash then
+      previous = previous_work(ctx, sessions.sessions)
       if previous then
         rex.client.queue("session.select", { session_id = previous })
       else
         rex.client.queue("session.switch")
       end
     else
-      previous_session[ctx.client_id] = ctx.session_id
+      remember_work(ctx, sessions.sessions)
       rex.client.queue("session.select", { session_id = dash or create_dash() })
     end
   end,
