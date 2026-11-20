@@ -44,3 +44,5 @@ yabai -m rule --add app="^(Software Update|Dictionary|VLC|System Preferences|Sys
 yabai -m rule --add label="Finder" app="^Finder$" title="(Co(py|nnect)|Move|Info|Pref)" manage=off
 yabai -m rule --add label="About This Mac" app="System Information" title="About This Mac" manage=off
 
+# Keep the pointer in place when Rex windows gain focus.
+yabai -m rule --add label="rex-no-mouse-warp" app="^Rex$" mouse_follows_focus=off
