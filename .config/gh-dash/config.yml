@@ -90,7 +90,7 @@ keybindings:
       command: >-
         "$HOME/scripts/gh-prs-by-path"
     - key: R
-      name: request review
+      name: toggle review requests
       command: >
         "$HOME/scripts/gh-dash-reviewers" request {{.RepoName}} {{.PrNumber}}
     - key: V

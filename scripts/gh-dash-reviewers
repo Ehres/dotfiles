@@ -50,17 +50,24 @@ print_candidates() {
   [ -f "$scores_source" ] || scores_source=/dev/null
 
   awk -v FS='\t' -v OFS='\t' '
+    BEGIN {
+      count = split(ENVIRON["pending_reviewers"], requests, "\n")
+      for (i = 1; i <= count; i++) {
+        if (requests[i] == "") continue
+        key = tolower(requests[i])
+        requested[key] = 1
+        candidates[key] = requests[i]
+      }
+    }
     FILENAME == ARGV[1] {
       if ($1 != "" && $2 ~ /^[0-9]+$/) score[$1] = $2
       next
     }
-    $0 != "" && !collaborator_seen[$0]++ {
-      collaborators[++collaborator_count] = $0
-    }
+    $0 != "" { candidates[tolower($0)] = $0 }
     END {
-      for (i = 1; i <= collaborator_count; i++) {
-        login = collaborators[i]
-        print (login in score ? score[login] : 0), login, login
+      for (key in candidates) {
+        login = candidates[key]
+        print (login in score ? score[login] : 0), login, login (key in requested ? " (remove request)" : "")
       }
     }
   ' "$scores_source" "$file" \
@@ -94,7 +101,9 @@ increment_scores() {
 }
 
 request_review() {
-  local repo=$1 pr=$2 file script_path reload_command selection fzf_status reviewers login
+  local repo=$1 pr=$2 file script_path reload_command selection fzf_status login
+  local pending_reviewers add="" remove="" additions=""
+  local -a flags=()
   validate_repo "$repo" || return 1
   [[ "$pr" =~ ^[0-9]+$ ]] || {
     printf 'invalid pull request number: %s\n' "$pr" >&2
@@ -103,6 +112,10 @@ request_review() {
 
   file=$(cache_file "$repo")
   [ -f "$file" ] || refresh_cache "$repo" || return 1
+  pending_reviewers=$(gh pr view "$pr" --repo "$repo" --json reviewRequests \
+    --jq '.reviewRequests[].login // empty') || return 1
+  # Keep the same pending state when ctrl-r reloads candidates in a child process.
+  export pending_reviewers
 
   script_path=$(cd "$(dirname "$0")" && pwd)/$(basename "$0")
   printf -v reload_command '%q candidates %q --refresh' "$script_path" "$repo"
@@ -113,7 +126,7 @@ request_review() {
     --delimiter=$'\t' \
     --with-nth=2 \
     --accept-nth=1 \
-    --header='tab: select | enter: request | ctrl-r: refresh' \
+    --header='tab: select | enter: toggle requests | ctrl-r: refresh' \
     --bind="ctrl-r:reload($reload_command)")
   fzf_status=$?
 
@@ -122,15 +135,23 @@ request_review() {
   fi
   [ "$fzf_status" -eq 0 ] || return "$fzf_status"
 
-  reviewers=""
   while IFS= read -r login; do
     [ -n "$login" ] || continue
-    reviewers="${reviewers:+${reviewers},}${login}"
+    if grep -Fixq -- "$login" <<< "$pending_reviewers"; then
+      remove="${remove:+${remove},}${login}"
+    else
+      add="${add:+${add},}${login}"
+      additions="${additions:+${additions}$'\n'}${login}"
+    fi
   done <<< "$selection"
 
-  [ -n "$reviewers" ] || return 0
-  increment_scores "$selection" || return 1
-  gh pr edit "$pr" --repo "$repo" --add-reviewer "$reviewers"
+  if [ -n "$add" ]; then
+    increment_scores "$additions" || return 1
+    flags+=(--add-reviewer "$add")
+  fi
+  [ -z "$remove" ] || flags+=(--remove-reviewer "$remove")
+  [ -n "$add$remove" ] || return 0
+  gh pr edit "$pr" --repo "$repo" "${flags[@]}"
 }
 
 re_request_review() {

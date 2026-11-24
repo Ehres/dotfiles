@@ -27,6 +27,11 @@ if [ "$1" = api ]; then
   printf '%s\n' "${GH_API_OUTPUT:-}"
   exit 0
 fi
+if [[ "$1 $2" == "pr view" ]]; then
+  [ "${GH_VIEW_FAIL:-0}" = 1 ] && exit 1
+  printf '%s\n' "${GH_PENDING:-}"
+  exit 0
+fi
 printf '%s\n' "$*" >> "$GH_CALLS"
 if [ "${GH_PR_EDIT_FAIL:-0}" = 1 ]; then
   exit 1
@@ -60,7 +65,7 @@ reset_state() {
   : > "$FZF_ARGS"
   : > "$FZF_INPUT"
   : > "$XDG_CONFIG_HOME/gh-dash/reviewer-scores"
-  unset GH_API_FAIL GH_PR_EDIT_FAIL FZF_EXIT
+  unset GH_API_FAIL GH_PR_EDIT_FAIL FZF_EXIT GH_PENDING GH_VIEW_FAIL
   export GH_API_OUTPUT=""
   export FZF_SELECTION=""
 }
@@ -120,10 +125,44 @@ test_selection_increments_scores_when_request_fails() {
 test_cancel_is_a_no_op() {
   reset_state
   export GH_API_OUTPUT="alice"
+  export GH_PENDING="alice"
   export FZF_EXIT=130
 
   "$SUBJECT" request acme/app 7
 
+  assert_eq "$(cat "$GH_CALLS")" ""
+}
+
+test_toggle_mixed_selection() {
+  reset_state
+  export GH_API_OUTPUT=$'alice\nbob\ncarol'
+  export GH_PENDING=$'Alice\ncarol\ndana'
+  export FZF_SELECTION=$'alice\nbob\ndana'
+
+  "$SUBJECT" request acme/app 7
+
+  grep -Fx $'alice\talice (remove request)' "$FZF_INPUT" >/dev/null || fail "pending reviewer not marked"
+  grep -Fx $'dana\tdana (remove request)' "$FZF_INPUT" >/dev/null || fail "pending non-collaborator missing"
+  assert_eq "$(cat "$GH_CALLS")" "pr edit 7 --repo acme/app --add-reviewer bob --remove-reviewer alice,dana"
+  assert_eq "$(cat "$XDG_CONFIG_HOME/gh-dash/reviewer-scores")" $'bob\t1'
+}
+
+test_toggle_single_pending_reviewer() {
+  reset_state
+  export GH_API_OUTPUT=alice GH_PENDING=alice FZF_SELECTION=alice
+
+  "$SUBJECT" request acme/app 7
+
+  assert_eq "$(cat "$GH_CALLS")" "pr edit 7 --repo acme/app --remove-reviewer alice"
+}
+
+test_failed_pending_lookup() {
+  reset_state
+  export GH_VIEW_FAIL=1
+  if "$SUBJECT" request acme/app 7; then
+    fail "failed pending lookup returned success"
+  fi
+  assert_eq "$(cat "$FZF_ARGS")" ""
   assert_eq "$(cat "$GH_CALLS")" ""
 }
 
@@ -156,6 +195,9 @@ test_highest_scored_reviewers_are_first
 test_selection_increments_scores
 test_selection_increments_scores_when_request_fails
 test_cancel_is_a_no_op
+test_toggle_mixed_selection
+test_toggle_single_pending_reviewer
+test_failed_pending_lookup
 test_failed_refresh_preserves_cache
 test_failed_initial_refresh_does_not_open_picker
 printf 'PASS: gh-dash reviewers\n'
